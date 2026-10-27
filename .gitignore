@@ -1,0 +1,9 @@
+.DS_Store
+build/
+*.hex
+*.elf
+*.bin
+# Raw videos stay out of git: upload compressed clips to the README on github.com
+*.mov
+*.MOV
+*.mp4
