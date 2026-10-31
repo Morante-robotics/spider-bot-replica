@@ -7,3 +7,7 @@ build/
 *.mov
 *.MOV
 *.mp4
+
+# Claude Code config and skills are personal: never commit them
+.claude/
+CLAUDE.md
