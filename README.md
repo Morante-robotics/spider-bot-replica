@@ -1,6 +1,6 @@
 # Spider-Bot
 
-Faithful replica of the Spider-Bot from Avengers Campus: 8 legs moved by a single motor, LED eyes, and it walks as soon
+Replica of the Spider-Bot from Avengers Campus: 8 legs moved by a single motor, LED eyes, and it walks as soon
 as it is switched on (no remote control).
 
 **Hardware plan:** no microcontroller. A gear motor drives the leg mechanism and the LED eyes (on their own perfboard)
@@ -19,4 +19,7 @@ light up, both powered by 4×AA NiMH batteries in a holder with a built-in switc
 
 Bambu Lab P2S running its automatic calibration.
 
-_Video pending._
+
+
+https://github.com/user-attachments/assets/948dd098-af7a-4972-a0bd-290c17e0126f
+
