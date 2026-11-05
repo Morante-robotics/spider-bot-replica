@@ -19,7 +19,4 @@ light up, both powered by 4×AA NiMH batteries in a holder with a built-in switc
 
 Bambu Lab P2S running its automatic calibration.
 
-
-
 https://github.com/user-attachments/assets/948dd098-af7a-4972-a0bd-290c17e0126f
-
