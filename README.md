@@ -10,6 +10,13 @@ light up, both powered by 4×AA NiMH batteries in a holder with a built-in switc
 
 | Phase | Status |
 |---|---|
+| Workshop | In progress |
 | Electronics | Pending |
 | Mechanics | Pending |
 | Assembly and tests | Pending |
+
+## Workshop
+
+Bambu Lab P2S running its automatic calibration.
+
+_Video pending._
