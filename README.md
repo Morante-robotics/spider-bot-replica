@@ -1,4 +1,4 @@
-# Spider-Bot
+# Capstone 1 · Spider-Bot
 
 Replica of the Spider-Bot from Avengers Campus: 8 legs moved by a single motor, LED eyes, and it walks as soon
 as it is switched on (no remote control).
