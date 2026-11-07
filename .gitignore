@@ -11,3 +11,6 @@ build/
 # Claude Code config and skills are personal: never commit them
 .claude/
 CLAUDE.md
+
+# Python bytecode
+__pycache__/

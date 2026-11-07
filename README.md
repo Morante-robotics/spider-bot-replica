@@ -25,7 +25,7 @@ designed with AI help and how it was checked.
 | Folder | What |
 |---|---|
 | [cad/carcass-jenscolt/](cad/carcass-jenscolt/) | Carcass base model by jenscolt, unmodified (CC BY-NC-SA) |
-| [tools/](tools/) | Helper scripts: [`stl_preview.py`](tools/stl_preview.py) renders and measures STL files, [`stl_turntable.py`](tools/stl_turntable.py) makes turntable GIFs |
+| [tools/](tools/) | Helper scripts: [`stl_preview.py`](tools/stl_preview.py) renders and measures STL files, [`stl_turntable.py`](tools/stl_turntable.py) makes turntable GIFs, [`assemble_jenscolt.py`](tools/assemble_jenscolt.py) joins the carcass parts into one assembled STL |
 
 ## License
 
