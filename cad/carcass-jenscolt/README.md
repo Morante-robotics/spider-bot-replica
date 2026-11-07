@@ -8,7 +8,10 @@ for the carcass; my modified versions will live in their own folder.
 see [LICENSE.txt](LICENSE.txt). Unlike the rest of the repo, these files and anything derived from them are
 non-commercial and must keep this license.
 
-![Body turntable](images/body-turntable.gif)
+![Assembled turntable](images/assembled-turntable.gif)
+
+Assembled with [`assemble_jenscolt.py`](../../tools/assemble_jenscolt.py): 224 × 154 × 118 mm. Body, base, sensor and
+front legs are where the author placed them; eyes moved into their sockets; the other 6 legs placed approximately.
 
 ![All parts](images/parts.png)
 
@@ -22,7 +25,7 @@ non-commercial and must keep this license.
 | `spideybot_small_eye.stl` | 7.3 × 4.8 × 7.4 | 3692 | Small eye dome |
 | `spideybot_sensor.stl` | 7.6 × 4.8 × 7.6 | 3692 | Front sensor dome |
 
-Sizes at 100 % scale. The parts are laid out on a print plate, not in assembled position.
+Sizes at 100 % scale. For the full robot print 4 of each leg file (L and R) and 2 of each eye.
 
 ![Body and base from below](images/underside.png)
 
@@ -36,4 +39,4 @@ Sizes at 100 % scale. The parts are laid out on a print plate, not in assembled 
 - Thingiverse rejects scripted downloads (HTTP 403). Download by hand with **Download all files** on the thing page.
 - Images regenerated with [`../../tools/stl_preview.py`](../../tools/stl_preview.py):
   `python3 stl_preview.py images/parts.png *.stl` and `--elev -70` for the underside; turntable with
-  [`stl_turntable.py`](../../tools/stl_turntable.py) `images/body-turntable.gif spideybot_body.stl`.
+  [`stl_turntable.py`](../../tools/stl_turntable.py) `images/assembled-turntable.gif spideybot_assembled.stl`.

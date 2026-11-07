@@ -33,17 +33,22 @@ can be published; reference only) and the MyMiniFactory «Spider BOT» (an unrel
    HTTP 403.
 2. Check every STL is valid and measure it: [`tools/stl_preview.py`](tools/stl_preview.py) prints the size of each part
    and renders the previews.
-3. Open all 9 STLs at once in Bambu Studio to check they import.
-4. Files, sizes and previews: [cad/carcass-jenscolt/](cad/carcass-jenscolt/).
+3. The files place body, base, sensor and only the front leg pair; the eyes are off to the side. Join everything into
+   one assembled STL: `python3 tools/assemble_jenscolt.py cad/carcass-jenscolt spideybot_assembled.stl`. It moves the
+   4 eye domes into their sockets and adds the other 3 legs per side (rear mirrored, middle two rotated). The leg
+   layout is approximate, read off the author's photos: fine for pictures, not for fitting parts.
+4. Open the assembled STL in Bambu Studio to check it imports.
+5. Files, sizes and previews: [cad/carcass-jenscolt/](cad/carcass-jenscolt/).
 
 **Result:** 9 binary STLs. The body is a hollow shell 96 × 110 × 66 mm. The base has posts and mounts inside. The
-legs are static display parts.
+legs are static display parts. Print 4 of each leg file per side (8 legs) and 2 of each eye. Assembled, the robot
+measures 224 × 154 × 118 mm.
 
-![Carcass turntable](cad/carcass-jenscolt/images/body-turntable.gif)
+![Assembled carcass turntable](cad/carcass-jenscolt/images/assembled-turntable.gif)
 
 ![Carcass parts](cad/carcass-jenscolt/images/parts.png)
 
-Bambu Studio imports them, but reports mesh errors (non-manifold edges and reversed faces); every file has some.
+Bambu Studio imports the assembly, but reports mesh errors (non-manifold edges and reversed faces); every file has some.
 
 ![Bambu Studio import](cad/carcass-jenscolt/images/bambu-studio-import.png)
 
