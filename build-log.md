@@ -9,6 +9,7 @@ went wrong. Newest entries at the bottom.
 | 2026-11-08 | 2 · CAD | [Carcass base model](#carcass-base-model) |
 | 2026-11-09 | 2 · CAD | [Motor, battery holder and print scale](#motor-battery-holder-and-print-scale) |
 | 2026-11-09 | 2 · CAD | [Mesh repair](#mesh-repair) |
+| 2026-11-09 | 3 · Mechanisms | [Leg simulator and comparison](#leg-simulator-and-comparison) |
 
 ## Printer calibration
 
@@ -168,3 +169,78 @@ Imported in the Bambu Studio window, the body shows no errors (compare the red e
 **Open:**
 
 - Cuts in Bambu Studio: battery hatch in the base, motor and shaft openings (after the mechanism layout).
+
+## Leg simulator and comparison
+
+**Phase 3 · Mechanisms · 2026-11-09**
+
+**Goal:** simulate the foot path of three candidate legs driven by one crank and choose one with numbers: toy
+(crank + sliding leg), Klann and Jansen.
+
+**Steps:**
+
+1. Bar lengths: Klann from his patent as redrawn by [DIY Walkers](https://www.diywalkers.com/klann-linkage-optimizer.html)
+   (crank = 3, frame pivots at (7.4, 16.9) and (3.4, 8.03) with the crank at (10, 10), knee bent 30°, upper bar
+   bent 12.8°); Jansen's "holy numbers" (crank = 15); the toy leg from a random search (4000 tries) for the longest
+   stride with less than 3 mm of body bob, so it is compared at its best.
+2. Run the simulator: `python3 sim/legs.py --png sim/images/foot-paths.png --gif sim/images/legs.gif`.
+   [`sim/legs.py`](sim/legs.py) turns the crank in 0.5° steps, solves each joint as the crossing of two circles
+   (keeping the linkage on the same branch), and scales every leg so the crank axle is 55 mm above the ground
+   (the body bottom is about 46 mm up at 120 %).
+3. Measure over the half turn each leg carries the body. The gait is two groups of four legs with cranks 180°
+   apart, so every leg must hold the body for half a turn, starting from its lowest point.
+
+**Result:**
+
+| Leg | Stride per half turn (mm) | Body bob while walking (mm) | Step height (mm) | Foot slips back on the ground | Foot speed peak / median | Crank radius (mm) | Leg size W × H (mm) | Moving parts per leg | Pin joints per leg |
+|---|---|---|---|---|---|---|---|---|---|
+| toy (crank + sliding leg) | 29 | 2.5 | 5 | yes | 1.4 | 7.7 | 55 × 63 | 1 | 2 |
+| Klann | 60 | 3.7 | 28 | yes | 1.3 | 14.4 | 100 × 114 | 4 | 6 |
+| Jansen | 38 | 1.1 | 13 | no | 1.2 | 9.0 | 73 × 75 | 7 | 10 |
+
+Klann's driving four-bar (frame O-P2, crank, bar A-M, rocker M-P2): s + l = 9.88774, p + q = 10.19: crank-rocker — its crank turns fully.
+
+![Foot paths](sim/images/foot-paths.png)
+
+![Legs animated](sim/images/legs.gif)
+
+- **Toy:** one part per leg, but in a flat (2D) linkage the foot barely lifts (5 mm) and drags back. Real toy
+  spiders lift the leg sideways in 3D, which this simulator does not model.
+- **Klann:** longest stride (60 mm) and highest step (28 mm). The leg arches above the body like a spider's.
+  4 parts per leg, a bigger crank (14 mm), the body bobs 3.7 mm, and the foot slows at both ends of the step.
+- **Jansen:** the smoothest (1.1 mm bob, even speed) but 7 parts and 10 pins per leg (56 parts for 8 legs), and it
+  does not look like a spider leg.
+
+**Decision: Klann.** It looks like a spider leg (arched above the body), it has the longest stride and highest
+step, and it needs 4 parts per leg (32 for 8 legs, against 56 with Jansen). The bob and the uneven foot speed are
+accepted; feet that slide are the known fix if the gait is jerky.
+
+**Klann leg at real size** (crank axle 55 mm above the ground, at (0, 0); the foot is on the −x side as in the figure,
+y up). To model in Onshape:
+
+| Bar | Joints | Length (mm) |
+|---|---|---|
+| Crank | O–A | 14.4 |
+| Upper bar, part 1 | A–M | 31.7 |
+| Upper bar, part 2 (same part, bent 12.8° at M) | M–K | 28.0 |
+| Lower rocker | P2–M | 17.2 |
+| Leg, upper part | U–K | 48.1 |
+| Leg, lower part (same part, bent 30° at the knee K) | K–F (foot) | 48.1 |
+| Upper rocker | P1–U | 27.8 |
+
+| Frame pivot | x (mm) | y (mm) |
+|---|---|---|
+| O (crank axle) | 0 | 0 |
+| P1 (upper rocker) | −12.5 | 33.1 |
+| P2 (lower rocker) | −31.7 | −9.4 |
+
+Rounded to 0.1 mm the foot path does not change (stride 60.5 mm, bob 3.7 mm). Rounded to 0.5 mm it changes a lot
+(stride 69 mm, step 36 mm, crank and ground height off): the linkage is sensitive, mostly because its driving
+four-bar is close to the Grashof limit (9.9 against 10.2). Keep the pivot holes accurate: use the clearance test
+from phase 2 before printing the legs.
+
+**Open:**
+
+- Model the leg in Onshape and animate it (Santi); check the animated foot path against `sim/images/foot-paths.png`.
+- Print one leg and turn it by hand.
+- 8 legs: how the 4 legs per side share cranks (two groups at 180°) and where the frame pivots go inside the body.

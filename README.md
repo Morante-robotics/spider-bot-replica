@@ -17,7 +17,7 @@ designed with AI help and how it was checked.
 | 0 | Workshop | In progress |
 | 1 | Soldering and measuring | Pending |
 | 2 | CAD and 3D printing | In progress |
-| 3 | Mechanisms and legs | Pending |
+| 3 | Mechanisms and legs | In progress |
 | 4 | Motors, power and lights | Pending |
 | 5 | Final build | Pending |
 
@@ -28,6 +28,7 @@ designed with AI help and how it was checked.
 | [cad/carcass-jenscolt/](cad/carcass-jenscolt/) | Carcass base model by jenscolt, unmodified (CC BY-NC-SA) |
 | [cad/carcass-120/](cad/carcass-120/) | Carcass parts repaired (watertight) and scaled to 120 %: the base for cuts and holes (CC BY-NC-SA) |
 | [cad/layout/](cad/layout/) | What fits inside the body: battery holder and motor, print scale |
+| [sim/](sim/) | Leg simulator: foot paths of the toy, Klann and Jansen legs, and the numbers to compare them |
 | [tools/](tools/) | Helper scripts: [`stl_preview.py`](tools/stl_preview.py) renders and measures STL files, [`stl_turntable.py`](tools/stl_turntable.py) makes turntable GIFs, [`assemble_jenscolt.py`](tools/assemble_jenscolt.py) joins the carcass parts into one assembled STL, [`fit_check.py`](tools/fit_check.py) checks what fits inside the body and at what scale, [`repair_stl.py`](tools/repair_stl.py) makes meshes watertight without changing their shape |
 
 ## License
