@@ -3,8 +3,9 @@
 Replica of the Spider-Bot from Avengers Campus: 8 legs moved by a single motor, LED eyes, and it walks as soon
 as it is switched on (no remote control).
 
-**Hardware plan:** no microcontroller. A gear motor drives the leg mechanism and the LED eyes (on their own perfboard)
-light up, both powered by 4×AA NiMH batteries in a holder with a built-in switch. 3D-printed in PLA.
+**Hardware plan:** no microcontroller. An N20 gear motor drives the leg mechanism and the LED eyes (on their own
+perfboard) light up, both powered by 4×AAA NiMH batteries in a holder with a built-in switch. 3D-printed in PLA at
+120 % of the base model's size.
 
 **To replicate it:** follow the [build log](build-log.md) step by step. The [AI log](ai-log.md) records what was
 designed with AI help and how it was checked.
@@ -25,7 +26,8 @@ designed with AI help and how it was checked.
 | Folder | What |
 |---|---|
 | [cad/carcass-jenscolt/](cad/carcass-jenscolt/) | Carcass base model by jenscolt, unmodified (CC BY-NC-SA) |
-| [tools/](tools/) | Helper scripts: [`stl_preview.py`](tools/stl_preview.py) renders and measures STL files, [`stl_turntable.py`](tools/stl_turntable.py) makes turntable GIFs, [`assemble_jenscolt.py`](tools/assemble_jenscolt.py) joins the carcass parts into one assembled STL |
+| [cad/layout/](cad/layout/) | What fits inside the body: battery holder and motor, print scale |
+| [tools/](tools/) | Helper scripts: [`stl_preview.py`](tools/stl_preview.py) renders and measures STL files, [`stl_turntable.py`](tools/stl_turntable.py) makes turntable GIFs, [`assemble_jenscolt.py`](tools/assemble_jenscolt.py) joins the carcass parts into one assembled STL, [`fit_check.py`](tools/fit_check.py) checks what fits inside the body and at what scale |
 
 ## License
 
