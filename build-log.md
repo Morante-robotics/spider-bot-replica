@@ -204,43 +204,46 @@ Klann's driving four-bar (frame O-P2, crank, bar A-M, rocker M-P2): s + l = 9.88
 
 ![Legs animated](sim/images/legs.gif)
 
-- **Toy:** one part per leg, but in a flat (2D) linkage the foot barely lifts (5 mm) and drags back. Real toy
-  spiders lift the leg sideways in 3D, which this simulator does not model.
+- **Toy:** one part per leg, but in this flat (2D) model the foot barely lifts (5 mm) and drags back. Real toy
+  spiders work in 3D (the foot also swings sideways and up), which this simulator does not model, so these numbers
+  under-rate it.
 - **Klann:** longest stride (60 mm) and highest step (28 mm). The leg arches above the body like a spider's.
   4 parts per leg, a bigger crank (14 mm), the body bobs 3.7 mm, and the foot slows at both ends of the step.
+  Sensitive to dimensions: rounding the bars to 0.5 mm changes the foot path a lot.
 - **Jansen:** the smoothest (1.1 mm bob, even speed) but 7 parts and 10 pins per leg (56 parts for 8 legs), and it
   does not look like a spider leg.
 
-**Decision: Klann.** It looks like a spider leg (arched above the body), it has the longest stride and highest
-step, and it needs 4 parts per leg (32 for 8 legs, against 56 with Jansen). The bob and the uneven foot speed are
-accepted; feet that slide are the known fix if the gait is jerky.
+**Decision: toy leg** (crank + one bent leg that slides and swivels in a pivot on the body edge). Simplest for a
+first robot: 1 part per leg (8 legs + cranks, against 32 parts for Klann), not sensitive to small dimension
+errors, a small crank (about 7 mm, so less torque), and probably how the original toy walks.
 
-**Klann leg at real size** (crank axle 55 mm above the ground, at (0, 0); the foot is on the −x side as in the figure,
-y up). To model in Onshape:
+How this was decided: Klann was picked first from the table above, then dropped the same day. The toy leg had been
+ruled out on the 2D model only, which does not represent it; it was not offered as an option. Klann's real-size
+bars can be regenerated with `sim/legs.py` if needed.
 
-| Bar | Joints | Length (mm) |
-|---|---|---|
-| Crank | O–A | 14.4 |
-| Upper bar, part 1 | A–M | 31.7 |
-| Upper bar, part 2 (same part, bent 12.8° at M) | M–K | 28.0 |
-| Lower rocker | P2–M | 17.2 |
-| Leg, upper part | U–K | 48.1 |
-| Leg, lower part (same part, bent 30° at the knee K) | K–F (foot) | 48.1 |
-| Upper rocker | P1–U | 27.8 |
+**How the toy leg works:** each leg is one rigid bent part. Its inner end sits on a crank pin that turns in a
+circle; further out it passes through a pivot on the body edge that lets it slide and swivel (a sleeve on a swivel,
+or a ball joint). When the crank pin goes up, the foot goes down (lever), and when the pin goes in, the leg slides
+in: the foot traces a loop. Gait as planned: two groups of four legs (left 1 and 3 + right 2 and 4, against the
+other four) on crank pins 180° apart.
 
-| Frame pivot | x (mm) | y (mm) |
-|---|---|---|
-| O (crank axle) | 0 | 0 |
-| P1 (upper rocker) | −12.5 | 33.1 |
-| P2 (lower rocker) | −31.7 | −9.4 |
+**Open (next session):**
 
-Rounded to 0.1 mm the foot path does not change (stride 60.5 mm, bob 3.7 mm). Rounded to 0.5 mm it changes a lot
-(stride 69 mm, step 36 mm, crank and ground height off): the linkage is sensitive, mostly because its driving
-four-bar is close to the Grashof limit (9.9 against 10.2). Keep the pivot holes accurate: use the clearance test
-from phase 2 before printing the legs.
-
-**Open:**
-
-- Model the leg in Onshape and animate it (Santi); check the animated foot path against `sim/images/foot-paths.png`.
-- Print one leg and turn it by hand.
-- 8 legs: how the 4 legs per side share cranks (two groups at 180°) and where the frame pivots go inside the body.
+1. **3D model of the toy leg** (new `sim/toy_leg_3d.py`, or extend `sim/legs.py`). Inputs: crank pin radius and
+   the plane it turns in, pivot position on the body edge (start from the 8 notches in the base rim of
+   [cad/carcass-120/](cad/carcass-120/), at z ≈ 60 mm in the original files, 72 mm at 120 %), the leg's inner arm
+   length, bend and outer length. Measure the same numbers as above: stride per half turn, body bob, step height,
+   crank radius, footprint. Suggested targets (to confirm): step height ≥ 10 mm, stride ≥ 25 mm, bob ≤ 3 mm, crank
+   axle about 55 mm above the ground, robot footprint within about 270 × 185 mm (the 120 % carcass with legs).
+   Re-tick «Tengo la trayectoria del pie simulada y la pata elegida con datos» in Plan and Seguimiento when done.
+2. **How 8 legs share one motor:** watch 2–3 «walking spider toy teardown» videos (phase 3 study item) and choose
+   the crank layout (one crankshaft per side, or a central disc with pins), with the N20 and the 4×AAA holder
+   inside the body ([cad/layout/](cad/layout/)).
+3. **CAD, by Claude in code** (Python + build123d, agreed 2026-11-09 and written in the Plan): leg, crank pins /
+   crankshaft, pivot and a test frame, parametric from the simulator's numbers; check in Python that nothing
+   collides over a full crank turn; export STEP (for Onshape) and STL (for Bambu Studio) to `cad/toy-leg/` with a
+   README. Shafts 3 mm; hole clearance as a parameter (+0.2 mm by default until the phase 2 clearance test).
+4. **Onshape, by Santi:** import the STEP files, assemble and animate. Suggested mates: revolute for the crank,
+   cylindrical (slides and turns) for the leg in its pivot sleeve, ball or revolute where the leg sits on the crank
+   pin. Check the animated foot path against the simulator.
+5. Print one leg with its pivot and turn it by hand.
