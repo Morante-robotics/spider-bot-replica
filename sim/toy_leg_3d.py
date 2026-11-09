@@ -55,7 +55,20 @@ RANGES = dict(r=(3, 12), D=(8, 40), H=(-20, 8), L1=(5, 70), bend=(30, 150), swee
 # from XIN to XIN + 3·PITCH mm from the body axis, in one of the 24 orders (ORDER); left side mirrored.
 SHAFT_RANGES = dict(r=(3, 12), Y0=(-25, 15), H=(-22, 0), XIN=(6, 25), PITCH=(8, 14), ORDER=(0, 23.999),
                     L1=(5, 70), bend=(30, 150), sweep=(-45, 45), L2=(30, 120))
-AXLES = ("lateral", "vertical", "longitudinal", "shaft")
+# "sides": two longitudinal crankshafts (along Y), one per side, XS mm from the body axis at z = NOTCH_Z + H; each
+# leg's crank sits on its side's shaft level with its notch, shifted DY mm along the shaft. The two shafts turn
+# opposite ways (a spur gear pair), so the left side is the mirror image of the right.
+SIDES_RANGES = dict(r=(3, 12), XS=(10, 50), H=(-22, 0), DY=(-10, 10),
+                    L1=(5, 70), bend=(30, 150), sweep=(-45, 45), L2=(30, 120))
+# "rows": four lateral crankshafts (along X), one per pair of legs, each level with its pair of notches (shifted DY
+# mm along Y) at z = NOTCH_Z + H, with the left and right cranks XC mm either side of the body axis. Idler gears
+# between neighbouring shafts make all four turn the same way.
+# Buildable limits (CAD, 2026-11-09): XC >= 12 leaves room between a shaft's two cranks for a gear and two bearing
+# walls; H <= -8 puts the shafts 8 mm under the rim so a module-1 gear fits under the battery holder (z 73).
+ROWS_RANGES = dict(r=(3, 12), XC=(12, 45), H=(-22, -8), DY=(-10, 10),
+                   L1=(5, 70), bend=(30, 150), sweep=(-45, 45), L2=(30, 120))
+AXLES = ("lateral", "vertical", "longitudinal", "shaft", "sides", "rows")
+SHAFTS = ("shaft", "sides", "rows")
 SLIDES = ("crank", "body")
 
 
@@ -78,15 +91,19 @@ def pivots():
 def axle_basis(axle):
     """Axle direction and two in-plane unit vectors (the crank turns from e1 towards e2)."""
     X, Y, Z = np.eye(3)
-    return {"lateral": (X, -Y, Z), "vertical": (Z, X, -Y), "longitudinal": (Y, X, Z), "shaft": (X, -Y, Z)}[axle]
+    return {"lateral": (X, -Y, Z), "vertical": (Z, X, -Y), "longitudinal": (Y, X, Z), "shaft": (X, -Y, Z), "sides": (Y, X, Z), "rows": (X, -Y, Z)}[axle]
 
 
 def ranges(axle):
-    return SHAFT_RANGES if axle == "shaft" else RANGES
+    return {"shaft": SHAFT_RANGES, "sides": SIDES_RANGES, "rows": ROWS_RANGES}.get(axle, RANGES)
 
 
 def crank_centre(p, axle, i, P, rhat):
     """Crank centre of right-side leg i (front to rear)."""
+    if axle == "rows":
+        return np.array([CENTER[0] + p["XC"], P[1] + p["DY"], NOTCH_Z + p["H"]])
+    if axle == "sides":
+        return np.array([CENTER[0] + p["XS"], P[1] + p["DY"], NOTCH_Z + p["H"]])
     if axle != "shaft":
         return P - p["D"] * rhat + np.array([0, 0, p["H"]])
     import itertools
@@ -176,17 +193,61 @@ def shaft_fit(p, legs):
     R = p["r"] + 2
     for l in legs:
         O = l["O"][0]
+        e = np.abs(l["a"])
+        e1 = np.array([0, 1.0, 0]) if e[0] > 0.5 else np.array([1.0, 0, 0])    # horizontal, across the shaft
         for t in np.linspace(0, 2 * np.pi, 12, endpoint=False):
-            y, z = O[1] + R * np.cos(t), O[2] + R * np.sin(t)
+            q = O + R * (np.cos(t) * e1 + np.sin(t) * np.array([0, 0, 1.0]))
+            z = q[2]
             out += max(0, z - 73)
             zi = int(round(z))
             if zi not in sl:
                 out += abs(z - np.clip(z, 47, 74)) + 2
                 continue
-            pt = Point(O[0], y)
+            pt = Point(q[0], q[1])
             if not sl[zi].contains(pt):
                 out += sl[zi].exterior.distance(pt)
     return out
+
+
+LEG_HALF = 2.5      # half the leg thickness (5 mm legs)
+PLAY = 1.0          # free space wanted between a leg and the crankshaft parts
+SHAFT_R = 1.5       # 3 mm shaft
+WEB = 4.0           # half width (along X) of one crank: web + pin head
+
+
+def crank_clear(p, legs):
+    """Smallest free space (mm) between any leg's inner arm E-P and the crankshaft parts it does not ride on: the
+    other 7 cranks (discs of radius r + 2, WEB mm either side of their centre) and the bare 3 mm shaft. Negative =
+    the arm cuts through them."""
+    t = np.linspace(0, 1, 25)
+    worst = np.inf
+    if "XS" in p:
+        shafts = [[l for l in legs if l["side"] == sd] for sd in "RL"]
+    elif "XC" in p:
+        shafts = [[l for l in legs if l["i"] == i] for i in range(4)]
+    else:
+        shafts = [legs]
+    for shaft in shafts:                               # cranks on one shaft: centres on one line along axis a
+        a = np.abs(shaft[0]["a"])
+        O = np.array([l["O"][0] for l in shaft])
+        o0 = O[0]
+        cs = (O - o0) @ a                              # crank positions along the shaft
+        lo, hi = cs.min() - WEB, cs.max() + WEB
+        for l in legs:
+            mine = [k for k, q in enumerate(shaft) if q is l]
+            pts = l["E"][:, None, :] + (l["P"] - l["E"])[:, None, :] * t[None, :, None]   # (N, 25, 3)
+            v = pts - o0
+            x = v @ a
+            d = np.linalg.norm(v - x[..., None] * a, axis=-1)
+            own = np.abs(x - cs[mine[0]]) <= WEB if mine else np.zeros_like(x, bool)
+            need = np.where((x >= lo) & (x <= hi) & ~own, SHAFT_R, -np.inf)
+            for k in range(len(shaft)):
+                if not mine or k != mine[0]:
+                    need = np.where(np.abs(x - cs[k]) <= WEB, p["r"] + 2, need)
+            free = d - need - LEG_HALF
+            if np.isfinite(need).any():
+                worst = min(worst, free[np.isfinite(need)].min())
+    return worst
 
 
 def measure(p, axle, slide, steps=STEPS, full=False, strict=False):
@@ -234,7 +295,8 @@ def measure(p, axle, slide, steps=STEPS, full=False, strict=False):
     m = dict(stride=stride, bob=bob, reach=reach, lift=lift, slip=slip, sideways=sideways, margin=margin, gap=gap,
              clearance=BASE_BOTTOM - ground, width=width, length=length, crank=p["r"],
              crank_axle_height=NOTCH_Z + p["H"] - ground, strict=strict,
-             shaft_out=shaft_fit(p, legs) if axle == "shaft" else 0.0)
+             shaft_out=shaft_fit(p, legs) if axle in SHAFTS else 0.0,
+             crank_clear=crank_clear(p, legs) if axle in SHAFTS else np.inf)
     if full:
         l0 = legs[1]                                      # right middle-front leg
         AP = np.linalg.norm(l0["P"] - l0["A"], axis=1)
@@ -246,7 +308,8 @@ def measure(p, axle, slide, steps=STEPS, full=False, strict=False):
         m.update(slide_travel=slide_travel, pivot_yaw=np.ptp(yaw), pivot_pitch=np.ptp(pitch),
                  pin_angle=(tilt.min(), tilt.max()), A_to_P=(AP.min(), AP.max()),
                  inner=[l["inner"] for l in legs[:4]], crank_x=[l["O"][0, 0] for l in legs[:4]],
-                 left_turns_other_way=axle not in ("lateral", "shaft"))
+                 crank_y=[l["O"][0, 1] for l in legs[:4]],
+                 left_turns_other_way=axle not in ("lateral", "shaft", "rows"))
         return m, theta, legs, ground, support
     return m
 
@@ -271,7 +334,7 @@ def score(m):
            + max(0, t["clearance"] - m["clearance"]) + max(0, m["clearance"] - t["clearance_max"]) + max(0, t["gap"] - m["gap"]) * 10 + max(0, 5 - m["reach"]) * 3
            + max(0, m["width"] - t["width"]) + max(0, m["length"] - t["length"])
            + max(0, 5 - m["margin"]) * 3 + m["slip"] * 0.5 + m["sideways"]
-           + m["shaft_out"] * 3 + max(0, t.get("width_min", 0) - m["width"]) * 0.5
+           + m["shaft_out"] * 3 + (max(0, PLAY - m["crank_clear"]) * 10 if m["strict"] else 0) + max(0, t.get("width_min", 0) - m["width"]) * 0.5
            + max(0, t.get("length_min", 0) - m["length"]) * 0.5)
     return m["stride"] - pen
 
@@ -375,8 +438,9 @@ def main():
     ap.add_argument("--search", type=int, help="random tries per axle × slide combination")
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--params", help="JSON from --json: measure these instead of searching")
-    ap.add_argument("--strict", action="store_true", help="6 mm between legs (all pairs, inner arms too) and a "
-                    "footprint of at least 240 × 165 mm")
+    ap.add_argument("--strict", action="store_true", help="6 mm between legs (all pairs, inner arms too), a "
+                    "footprint of at least 240 × 165 mm and, on a crankshaft, 1 mm between every inner arm and the "
+                    "cranks and shaft it does not ride on")
     ap.add_argument("--only", help="search one combination, e.g. vertical/crank")
     ap.add_argument("--json", help="write the best geometry of every combination here")
     ap.add_argument("--png")
@@ -414,8 +478,10 @@ def main():
               f"{m['pin_angle'][1]:.0f}°, body drifts sideways {m['sideways']:.1f} mm/turn"
               + (", left cranks turn the other way" if m["left_turns_other_way"] else "")
               + f", inner arm past P (R1-R4) {' / '.join(f'{l:.0f}' for l in m['inner'])} mm"
-              + (f", cranks stick out of the base {m['shaft_out']:.1f} mm, crank centres x "
-                 f"{' / '.join(f'{x:.1f}' for x in m['crank_x'])}" if s["axle"] == "shaft" else ""))
+              + (f", cranks stick out of the base {m['shaft_out']:.1f} mm, free space arm to crankshaft "
+                 f"{m['crank_clear']:.1f} mm, crank centres x "
+                 f"{' / '.join(f'{x:.1f}' for x in m['crank_x'])} y {' / '.join(f'{y:.1f}' for y in m['crank_y'])}"
+                 if s["axle"] in SHAFTS else ""))
     if args.png or args.gif:
         draw([(f"{s['axle']} axle, slides at {s['slide']}\nstride {m['stride']:.0f} · step {m['lift']:.0f} · "
                f"bob {m['bob']:.1f} mm", m, th, lg, gr, sp) for s, m, th, lg, gr, sp in results],
