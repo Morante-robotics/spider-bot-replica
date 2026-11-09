@@ -7,6 +7,7 @@ went wrong. Newest entries at the bottom.
 |---|---|---|
 | 2026-10 | 0 · Workshop | [Printer calibration](#printer-calibration) |
 | 2026-11-08 | 2 · CAD | [Carcass base model](#carcass-base-model) |
+| 2026-11-09 | 2 · CAD | [Motor, battery holder and print scale](#motor-battery-holder-and-print-scale) |
 
 ## Printer calibration
 
@@ -61,5 +62,55 @@ Bambu Studio imports the assembly, but reports mesh errors (non-manifold edges a
 **Open:**
 
 - Repair the meshes before cutting or drilling them (booleans fail on non-manifold meshes).
-- Print scale. The motor, gearbox and 4×AA holder have to fit inside body + base; checked when the mechanism is
-laid out in Onshape.
+- ~~Print scale.~~ Decided in the next step: 120 %.
+
+## Motor, battery holder and print scale
+
+**Phase 2 · CAD · 2026-11-09**
+
+**Goal:** choose the motor and the battery holder, and find the print scale at which both fit inside the carcass.
+
+**Steps:**
+
+1. Collect the outer sizes from shop data sheets (largest listed value, rounded up):
+
+   | Part | Size (mm) | Notes |
+   |---|---|---|
+   | N20 gear motor | 37 × 12 × 10 | 12 × 10 cross-section for every gear ratio; length includes the 10 mm shaft |
+   | 4×AA holder, switch + cover (flat) | 70.5 × 68 × 20 | Parts Express, The Pi Hut, Abra, DFRobot listings |
+   | 4×AAA holder, switch + cover | 64 × 49 × 16 | Typical listing; check the drawing of the one bought |
+   | 3×AA / 2×AA holder, switch | ~62 × 50 × 18 / ~60 × 34 × 18 | Typical listings |
+   | 4×AA holder, 2×2 stacked | 58 × 32 × 31 | No switch or cover |
+
+2. Measure the free space inside the body and try each part in it:
+   ```
+   python3 tools/fit_check.py cad/carcass-jenscolt --scale 1.0 --min-scale \
+       --box "4×AA flat, switch + cover" 70.5 68 20 --box "4×AAA holder, switch + cover" 64 49 16 ...
+   ```
+   [`tools/fit_check.py`](tools/fit_check.py) slices the body every 1 mm from the top of the base upwards, keeps the
+   inside of the wall behind the eye block, and looks for a spot where the box lies flat (0° or 90°). The author's
+   screw bosses and base posts are ignored: the inside is redesigned. The base is a near-solid bowl; hollowing it
+   does not help, it is too shallow at the edges.
+3. Repeat at the chosen scale with 2 mm clearance per side (holder sizes vary about ±0.5 mm between makers, and the
+   wires need room): `--scale 1.2 --clearance 2`.
+
+**Result:** at 100 % the free space is a horseshoe about 71 × 62 mm. The N20 fits with room to spare. The 4×AA flat
+holder needs 137 %. With 2 mm clearance the 4×AAA holder needs 118 %; at 120 % it fits.
+
+![What fits at 100 %](cad/layout/images/fit-100.png)
+
+![4×AAA holder and N20 at 120 %](cad/layout/images/fit-120.png)
+
+**Decisions:**
+
+- **Motor: N20 gear motor.** The ratio is picked in phase 4 from the measured load; all ratios have the same size.
+- **Batteries: 4×AAA NiMH** in a holder with switch and cover. Same 4.8 V as 4×AA, so motor and eyes behave the same;
+  less capacity (about 800–1000 mAh against 2000–2500 mAh). 2×AA was ruled out: 2.4 V (about 2.2 V under load)
+  gives a 6 V N20 about 40 % of its speed and torque, and blue or white LEDs (about 3 V) do not light.
+- **Print scale: 120 %.** Robot about 269 × 185 × 142 mm. 110 % fits the holder with no clearance at all.
+
+**Open:**
+
+- Check the drawing of the holder actually bought against 64 × 49 × 16 mm (+2 mm).
+- Battery life on 4×AAA: measured in phase 4.
+- Room for the leg mechanism next to the holder: laid out in Onshape (phase 3).
