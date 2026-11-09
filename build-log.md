@@ -12,6 +12,10 @@ went wrong. Newest entries at the bottom.
 | 2026-11-09 | 3 · Mechanisms | [Leg simulator and comparison](#leg-simulator-and-comparison) |
 | 2026-11-09 | 3 · Mechanisms | [Toy leg in 3D](#toy-leg-in-3d) |
 | 2026-11-09 | 3 · Mechanisms | [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft) |
+| 2026-11-09 | 3 · Mechanisms | [Crankshaft against real parts](#crankshaft-against-real-parts) |
+| 2026-11-09 | 3 · Mechanisms | [Two side crankshafts](#two-side-crankshafts) |
+| 2026-11-09 | 3 · Mechanisms | [Four lateral crankshafts](#four-lateral-crankshafts) |
+| 2026-11-10 | 3 · Mechanisms | [Legs and drive in CAD](#legs-and-drive-in-cad) |
 
 ## Printer calibration
 
@@ -395,7 +399,7 @@ off the leg's axis. The crank discs fit inside the base.
   probably costs stride too. Left and right legs are not checked against each other, and the inner arms of the two
   sides come close in the middle.
 
-**Decision: lateral toy leg on one crankshaft, sliding at the crank** (best geometry above, in
+**Decision (reversed in [Crankshaft against real parts](#crankshaft-against-real-parts)): lateral toy leg on one crankshaft, sliding at the crank** (best geometry above, in
 [`sim/toy_leg_3d_strict.json`](sim/toy_leg_3d_strict.json)). It accepts 14 mm per half turn and 4.2 mm of bob: a
 slower walk, but the simplest drive. One shaft across the body turns both sides the same way, and the N20 drives it
 with spur gears. Pivots at different heights were offered and not picked.
@@ -407,3 +411,264 @@ with spur gears. Pivots at different heights were offered and not picked.
   this geometry. Real leg thickness, the inner arms (2.2 mm between centre lines here) and left against right legs
   are checked there, in the collision check over a full turn.
 - Hollow the base for the crankshaft, and cut the pivot windows: 15° of swing each way.
+
+## Crankshaft against real parts
+
+**Phase 3 · Mechanisms · 2026-11-09**
+
+**Goal:** before drawing the CAD, check that the chosen crankshaft geometry still works once the cranks are solid
+parts. The simulator had checked legs against legs, but not legs against the crankshaft.
+
+**Steps:**
+
+1. Measure the chosen geometry ([`sim/toy_leg_3d_strict.json`](sim/toy_leg_3d_strict.json)): every inner arm runs
+   from its notch on the rim to its crank, and, on the way, passes over the cranks of the legs further out.
+   Distance from the arm to the shaft axis where it crosses another leg's crank (right side):
+
+   | Leg | Crosses the crank at (mm from the body axis) | Distance to shaft axis (mm) |
+   |---|---|---|
+   | front | 16 / 26 / 36 | 1–9 / 7–12 / 13–16 |
+   | middle front | 26 / 36 | 2–5 / 1–6 |
+   | middle rear | 36 | 3–9 |
+   | rear | — | — |
+
+   A crank disc reaches 7.1 mm from the axis (radius r + 2 for the pin head), plus 2.5 mm of half leg thickness, so
+   the arm needs about 10 mm. The middle front arm runs almost along the shaft.
+2. Add the rule to `--strict` in [`sim/toy_leg_3d.py`](sim/toy_leg_3d.py) (`crank_clear`): every inner arm keeps
+   1 mm of free space from the cranks it does not ride on (4 mm either side of their centre, radius r + 2) and from
+   the bare 3 mm shaft, with 5 mm thick legs. The geometry from the previous entry fails by 9.5 mm (sliding at
+   body: 7.4 mm).
+3. Search again with the same settings as last time, 3 seeds sliding at the crank and 2 sliding at the body
+   (3000 tries + 750 refinement steps each, in parallel, about 15 minutes):
+   ```
+   python3 sim/toy_leg_3d.py --strict --search 3000 --seed 1 --only shaft/crank --json crank-1.json
+   python3 sim/toy_leg_3d.py --params sim/toy_leg_3d_shaft_check.json --png sim/images/toy-3d-shaft-check.png
+   ```
+   The five results are in [`sim/toy_leg_3d_shaft_check.json`](sim/toy_leg_3d_shaft_check.json).
+
+**Result:**
+
+| Slides at | Seed | Stride per half turn (mm) | Body bob (mm) | Step height (mm) | Gap between legs (mm, need 6) | Free space arm to crankshaft (mm, need 1) |
+|---|---|---|---|---|---|---|
+| crank | 2 | 8 | 2.6 | 6 | 2.1 | −7.3 |
+| crank | 1 | 7 | 3.8 | 9 | 2.4 | −4.0 |
+| crank | 3 | 2 | 0.7 | 2 | 1.7 | −3.9 |
+| body | 1 | 3 | 1.8 | 4 | 2.1 | −4.2 |
+| body | 2 | 0 | 0.5 | 2 | 4.6 | −1.8 |
+
+![Crankshaft searches with the arm-to-crankshaft rule](sim/images/toy-3d-shaft-check.png)
+
+- **No layout passes.** Every one still has arms cutting through cranks (−1.8 to −7.3 mm) and legs 1.7–4.6 mm apart,
+  and the search gives up stride to get there (0–8 mm against 14 before).
+- The cause is the layout itself. 8 legs come in from the rim to one line across the body, so the outer cranks always
+  sit in the way of the inner legs' arms.
+
+**Decision:** one lateral crankshaft for all 8 legs is ruled out. The drive mechanism is reopened.
+
+**Open:**
+
+- Choose another way for one motor to drive the 8 legs, and model it in the simulator before the CAD.
+
+## Two side crankshafts
+
+**Phase 3 · Mechanisms · 2026-11-09**
+
+**Goal:** try the drive Santi picked after one lateral crankshaft was ruled out. There are two crankshafts running
+front to back, one per side, so each leg's crank sits level with its own notch and no arm crosses another leg's
+crank.
+
+**Steps:**
+
+1. Add a **sides** mode to [`sim/toy_leg_3d.py`](sim/toy_leg_3d.py): one longitudinal shaft (along Y) per side, XS mm
+   from the body axis at z = 72 + H. Each leg's crank sits on it level with its notch, shifted DY mm along the shaft.
+   The two shafts turn opposite ways (a spur gear pair, the N20 between them), so the left side is the mirror image
+   of the right. Ranges: r 3–12, XS 10–50, H −22 to 0, DY ±10 mm, leg as before.
+2. Same `--strict` rules as [Crankshaft against real parts](#crankshaft-against-real-parts), with the arm-to-crankshaft
+   check worked out per shaft. 5 searches in parallel, about 15 minutes:
+   ```
+   python3 sim/toy_leg_3d.py --strict --search 3000 --seed 1 --only sides/crank --json crank-1.json
+   python3 sim/toy_leg_3d.py --params sim/toy_leg_3d_sides.json --png sim/images/toy-3d-sides.png --gif sim/images/toy-3d-sides.gif
+   ```
+   The best three are in [`sim/toy_leg_3d_sides.json`](sim/toy_leg_3d_sides.json).
+
+**Result:**
+
+| Slides at | Seed | Stride per half turn (mm) | Body bob (mm) | Step height (mm) | Gap between legs (mm, need 6) | Free space arm to crankshaft (mm, need 1) | Pivot swing yaw / pitch |
+|---|---|---|---|---|---|---|---|
+| crank | 2 | 2 | 4.8 | 10 | 13.0 | 9.2 | 2° / 8° |
+| crank | 3 | 2 | 4.6 | 10 | 13.1 | 6.4 | 2° / 8° |
+| crank | 1 | 1 | 4.8 | 10 | 13.2 | 11.1 | 2° / 11° |
+| body | 1 | 1 | 4.4 | 9 | 14.8 | 13.1 | 0° / 8° |
+| body | 2 | 1 | 4.2 | 9 | 14.1 | 9.5 | 1° / 8° |
+
+![Two side crankshafts](sim/images/toy-3d-sides.png)
+
+![Two side crankshafts, animated](sim/images/toy-3d-sides.gif)
+
+- **The parts fit:** 13–15 mm between legs and 6–13 mm of free space to the cranks, the first layout to pass both.
+- **The robot barely walks: 1–2 mm per half turn.** A crank on a front-to-back shaft moves the leg's inner end in and
+  out and up and down, so the foot loop lies sideways (side view: the loops are thin vertical lines). The leg
+  hardly swings forward (yaw 0–2°). Forward stride needs the crank pin to move forward and back, so the crank has to
+  turn on a **lateral** axis (left to right), as in [Toy leg in 3D](#toy-leg-in-3d).
+- Bob 4.2–4.8 mm, above the 3 mm target too.
+
+**Decision:** two side crankshafts are ruled out for this leg (they fit, but the foot moves sideways).
+
+**Open:**
+
+- Choose another drive. The cranks must turn on a lateral axis without lining all 8 up on one shaft.
+
+## Four lateral crankshafts
+
+**Phase 3 · Mechanisms · 2026-11-09**
+
+**Goal:** keep the cranks on a lateral axis (they move the foot forward, see
+[Two side crankshafts](#two-side-crankshafts)) without lining all 8 up on one shaft. There is one lateral shaft per
+pair of legs, so each arm only reaches its own shaft.
+
+**Steps:**
+
+1. Add a **rows** mode to [`sim/toy_leg_3d.py`](sim/toy_leg_3d.py): 4 lateral shafts, each level with its pair of
+   notches (shifted DY mm front or back) at z = 72 + H. The left and right cranks sit XC mm either side of the body
+   axis, 180° apart (the two gait groups). Idler gears between neighbouring shafts make all four turn the same way
+   (not modelled; about 7 spur gears in a row, the N20 on one of them). Ranges: r 3–12, XC 6–45, H −22 to 0,
+   DY ±10 mm, leg as before.
+2. Same `--strict` rules, with the arm-to-crankshaft check worked out per shaft. 5 searches in parallel, about
+   15 minutes:
+   ```
+   python3 sim/toy_leg_3d.py --strict --search 3000 --seed 1 --only rows/crank --json crank-1.json
+   python3 sim/toy_leg_3d.py --params sim/toy_leg_3d_rows.json --png sim/images/toy-3d-rows.png --gif sim/images/toy-3d-rows.gif
+   ```
+   The best three are in [`sim/toy_leg_3d_rows.json`](sim/toy_leg_3d_rows.json).
+3. Take the best geometry (sliding at crank, seed 2) and change the crank radius r, its height H and its distance
+   from the body axis XC by hand, to see which target holds the stride back.
+
+**Result:**
+
+| Slides at | Seed | Stride per half turn (mm) | Body bob (mm) | Step height (mm) | Gap between legs (mm, need 6) | Free space arm to crankshaft (mm, need 1) | Crank radius (mm) |
+|---|---|---|---|---|---|---|---|
+| crank | 2 | 9 | 4.2 | 9 | 6.9 | 4.3 | 3.1 |
+| crank | 1 | 8 | 3.8 | 8 | 7.5 | 4.6 | 3.0 |
+| crank | 3 | 8 | 3.8 | 8 | 6.8 | 4.6 | 3.0 |
+| body | 1 | 8 | 3.9 | 8 | 7.7 | 4.7 | 3.0 |
+| body | 2 | 8 | 3.8 | 8 | 7.8 | 4.5 | 3.0 |
+
+![Four lateral crankshafts](sim/images/toy-3d-rows.png)
+
+![Four lateral crankshafts, animated](sim/images/toy-3d-rows.gif)
+
+Changing the best geometry by hand (sliding at crank):
+
+| r (mm) | H (mm) | XC (mm) | Stride (mm) | Bob (mm) | Step height (mm) | Gap between legs (mm) |
+|---|---|---|---|---|---|---|
+| 3.1 | −4.3 | 6 | 9 | 4.2 | 9 | 6.9 |
+| 5 | −8 | 6 | 15 | 6.9 | 14 | 1.7 |
+| 5 | −8 | 15 | 18 | 8.6 | 18 | 0.5 |
+| 5 | −8 | 25 | 25 | 11.6 | 24 | 2.2 |
+| 8 | −10 | 6 | 24 | 11.0 | 23 | 0.7 |
+
+- **The parts fit and the feet loop forward**, the first layout to pass every check: 7–8 mm between legs, 4–5 mm of
+  free space to the cranks, crank discs inside the base.
+- **Stride is 8–9 mm per half turn**, short of 25. Every search ends at the smallest crank (r 3 mm) and with the
+  cranks next to the body axis.
+- **The bob target holds it back.** Body bob grows with stride (about 0.45 mm per mm of stride): a longer stride
+  only comes with more bob. A larger crank also brings the shins closer (the gaps above are shin to shin, which a
+  different leg shape can fix) and a higher crank disc, which runs into the battery holder.
+
+**Decision: four lateral crankshafts, sliding at the crank, keeping the 3 mm bob limit** (Santi, 2026-11-09):
+the best geometry above (seed 2, the first entry in [`sim/toy_leg_3d_rows.json`](sim/toy_leg_3d_rows.json)), with
+9 mm per half turn and 4.2 mm of bob. Three options were compared before choosing:
+
+| | Four shafts, 3 mm bob (chosen) | Four shafts, 6 mm bob | Cam toy |
+|---|---|---|---|
+| Walk | Short, smooth steps, slow | Steps almost twice as long; the body rocks visibly | Feet scrape; works on carpet, may slip on smooth floors |
+| Like the original | Yes (the feet step) | Yes | Less (walks like a wind-up toy) |
+| Parts | ~45: 8 legs, 4 shafts with 8 cranks, 8 pivots, ~8 gears | Same | ~15: 8 legs, 1 shaft, 2 cams, 2 gears |
+| Printing | Small, precise parts: fine gears, 3 mm pins, tight clearances | Same | Thick, tolerant parts |
+| Fragile | Medium-high: a 3 mm PLA pin can snap; one jammed leg stops all | A bit more (harder hits, more motor torque) | Low |
+| N20 | Plenty of torque | About 1.7 × the torque | Plenty of torque |
+| Next | CAD, Onshape assembly, 2–3 rounds of prints | 15 more minutes of search, then the same | A printed prototype (2 legs + 1 cam) |
+
+The cam toy (one lateral shaft, cams lift hinged legs, the feet push by leaning back) stays as a fallback. The
+simulator cannot represent it (the feet slide), so it would be tested with a printed pair of legs.
+
+**Open:**
+
+- CAD in build123d from this geometry: leg, the 4 crankshafts, pivot, gear train with idlers, test frame; collision
+  check over a full turn.
+
+## Legs and drive in CAD
+
+**Phase 3 · Mechanisms · 2026-11-10**
+
+**Goal:** model the legs and the four-crankshaft drive in code (build123d), parametric from the simulator, check
+that nothing collides over a full crank turn, and export STEP (Onshape) and STL (Bambu Studio), plus a test frame
+to try one leg by hand. Parts and how they fit: [cad/drive/](cad/drive/).
+
+**Steps:**
+
+1. Install build123d in a virtual environment at the repo root (`.venv/`, ignored by git; Python 3.12, because
+   3.14 has no CAD wheels yet):
+   ```
+   uv venv --python python3.12 .venv
+   uv pip install --python .venv/bin/python build123d numpy scipy matplotlib pillow trimesh shapely networkx manifold3d rtree
+   ```
+2. **Buildable limits first.** The chosen geometry put a shaft's two cranks 12 mm apart (XC 6), with no room for a
+   gear and two bearing walls between them, and the shafts at z 67.7, where a gear could only be 4 mm in radius
+   under the battery holder (z 73). Add the limits to the `rows` search (XC ≥ 12, H ≤ −8) and search again,
+   4 seeds:
+   ```
+   python3 sim/toy_leg_3d.py --strict --search 3000 --seed 2 --only rows/crank --json crank-2.json
+   ```
+   Result: 10 mm per half turn, 4.6 mm of bob, 9 mm step, legs 5.9 mm apart, 30 mm under the base (seed 2; seed 1
+   is the same with 20 mm). Seed 2 in [`sim/toy_leg_3d_rows_cad.json`](sim/toy_leg_3d_rows_cad.json).
+   ![Geometry used for the CAD](sim/images/toy-3d-rows-cad.png)
+3. **Model** ([`cad/drive/build.py`](cad/drive/build.py)): leg (3 lengths × 2 sides), pivot fork, one-piece
+   crankshaft (gear, journals, cranks, balls; printed at its phase), idlers, spine and test frame. The gears are
+   involute, module 1, written in the script.
+4. **Check** ([`cad/drive/check.py`](cad/drive/check.py)): place every part with the simulator's kinematics every
+   30° and measure the overlap volume of every pair (manifold3d) and the gap between neighbours. Fix and repeat. The
+   check found, in this order:
+
+   | Found | Fix |
+   |---|---|
+   | Ball not where the simulator puts it | Crankshaft rotated the wrong way in the assembly (a placement bug) |
+   | Leg tube hitting the fork | The leg tilts up 6–23° (the crank is lower than the rim): fork window sized for 28°, tube ends 8 mm before the pivot |
+   | Test frame upright in the leg's path | Upright moved beside the leg |
+   | Middle legs' tubes touching near the cranks | Smaller ball (Ø3.6), tube with flat sides 5.6 mm wide |
+   | Rear tube mouth on its crank web; gear teeth on the spine's end blocks | Mouth 0.4 mm closer to the ball; end blocks 2 mm further out |
+   | Middle legs' feet and shins touching | Shin and foot 4.5 mm wide (legs 5 mm) |
+
+5. Make the STLs watertight (OpenCascade leaves a hairline gap where a sphere meets a box; closed in `build.py`) and
+   check them with Bambu Studio: `manifold = yes` for all 17.
+
+**Result:**
+
+![Parts](cad/drive/images/parts.png)
+
+![Assembly](cad/drive/images/assembly.gif)
+
+- **No overlaps over a full turn.** The closest pairs are the designed clearances (0.1 mm a side for the balls and
+  journals, 0.2 mm for the legs in their forks). The closest parts that do not touch on purpose are the middle legs'
+  shins (0.7 mm) and a rear leg against its crank (0.6 mm).
+- 25 printed parts for the robot (8 legs, 8 forks, 4 crankshafts, 3 idlers, spine), plus hardware: 8 × M3×12 + nuts,
+  16 × M3×6, 3 × 3 mm pins.
+- Clearances are a guess (+0.2 mm on the diameter) until the phase 2 clearance test is printed.
+
+**Decisions:**
+
+- One-piece printed crankshafts (no steel shaft): the phase between the cranks is printed in, so it cannot slip.
+- Swivel axes are M3 screws: the leg turns on one, and the fork turns on two driven into it.
+- The geometry for the CAD is the `rows` search with buildable limits (10 mm stride, 4.6 mm bob) instead of the
+  unbuildable one picked in [Four lateral crankshafts](#four-lateral-crankshafts) (9 mm, 4.2 mm).
+
+**Open:**
+
+- **Santi:** import the STEP files into Onshape, assemble with mates (revolute for the crankshaft and the fork's
+  vertical screws, revolute for the leg on its screw, ball-and-slider for the ball in the bore) and animate. Compare
+  the foot path with the simulator.
+- Print the test frame, one middle leg, a fork and crankshaft 2; turn it by hand. Before that, ideally, the phase 2
+  clearance test.
+- The base: fork seats in the rim notches, hollow bowl for the spine and idlers, spine mounting, a cap over the
+  journal slots. The N20 drive (phase 4).
+
