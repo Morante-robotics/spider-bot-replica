@@ -2,7 +2,7 @@
 
 Unmodified files of [Spidey-Bot](https://www.thingiverse.com/thing:5196618) by **jenscolt** (Thingiverse, January 2022), a
 static display model of the Avengers Campus Spider-Bot with room inside the body for lights. It is the starting point
-for the carcass; my modified versions will live in their own folder.
+for the carcass. Repaired and scaled versions: [../carcass-120/](../carcass-120/).
 
 **License:** Creative Commons Attribution-NonCommercial-ShareAlike ([CC BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/4.0/)),
 see [LICENSE.txt](LICENSE.txt). Unlike the rest of the repo, these files and anything derived from them are
@@ -31,8 +31,8 @@ Sizes at 100 % scale. For the full robot print 4 of each leg file (L and R) and 
 
 ## Notes
 
-- Every file has some mesh errors (non-manifold edges, reversed faces); Bambu Studio flags them on import. Repair
-  them before cutting or drilling.
+- Every file has some mesh errors (non-manifold edges, reversed faces); Bambu Studio flags them on import. Repaired
+  versions (body, base, eyes, sensor) are in [../carcass-120/](../carcass-120/); the legs are not repaired.
 - The legs are static: no joints to move. They are a reference for the outer shape of the walking legs.
 - STL files are meshes: Onshape can import them as a reference but not edit them. Cuts and holes go in Bambu Studio
   (cut tool and negative parts); new parametric parts (chassis, crank, linkages) are designed in Onshape.
