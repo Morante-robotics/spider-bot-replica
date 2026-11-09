@@ -28,7 +28,7 @@ designed with AI help and how it was checked.
 | [cad/carcass-jenscolt/](cad/carcass-jenscolt/) | Carcass base model by jenscolt, unmodified (CC BY-NC-SA) |
 | [cad/carcass-120/](cad/carcass-120/) | Carcass parts repaired (watertight) and scaled to 120 %: the base for cuts and holes (CC BY-NC-SA) |
 | [cad/layout/](cad/layout/) | What fits inside the body: battery holder and motor, print scale |
-| [sim/](sim/) | Leg simulator: foot paths of the toy, Klann and Jansen legs, and the numbers to compare them |
+| [sim/](sim/) | Leg simulator (2D): foot paths of the toy, Klann and Jansen legs, and the numbers to compare them. Chosen: toy leg |
 | [tools/](tools/) | Helper scripts: [`stl_preview.py`](tools/stl_preview.py) renders and measures STL files, [`stl_turntable.py`](tools/stl_turntable.py) makes turntable GIFs, [`assemble_jenscolt.py`](tools/assemble_jenscolt.py) joins the carcass parts into one assembled STL, [`fit_check.py`](tools/fit_check.py) checks what fits inside the body and at what scale, [`repair_stl.py`](tools/repair_stl.py) makes meshes watertight without changing their shape |
 
 ## License
