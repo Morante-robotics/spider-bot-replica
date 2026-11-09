@@ -10,6 +10,8 @@ went wrong. Newest entries at the bottom.
 | 2026-11-09 | 2 · CAD | [Motor, battery holder and print scale](#motor-battery-holder-and-print-scale) |
 | 2026-11-09 | 2 · CAD | [Mesh repair](#mesh-repair) |
 | 2026-11-09 | 3 · Mechanisms | [Leg simulator and comparison](#leg-simulator-and-comparison) |
+| 2026-11-09 | 3 · Mechanisms | [Toy leg in 3D](#toy-leg-in-3d) |
+| 2026-11-09 | 3 · Mechanisms | [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft) |
 
 ## Printer calibration
 
@@ -229,16 +231,17 @@ other four) on crank pins 180° apart.
 
 **Open (next session):**
 
-1. **3D model of the toy leg** (new `sim/toy_leg_3d.py`, or extend `sim/legs.py`). Inputs: crank pin radius and
+1. ~~**3D model of the toy leg**~~ Done in [Toy leg in 3D](#toy-leg-in-3d). (new `sim/toy_leg_3d.py`, or extend `sim/legs.py`). Inputs: crank pin radius and
    the plane it turns in, pivot position on the body edge (start from the 8 notches in the base rim of
    [cad/carcass-120/](cad/carcass-120/), at z ≈ 60 mm in the original files, 72 mm at 120 %), the leg's inner arm
    length, bend and outer length. Measure the same numbers as above: stride per half turn, body bob, step height,
    crank radius, footprint. Suggested targets (to confirm): step height ≥ 10 mm, stride ≥ 25 mm, bob ≤ 3 mm, crank
    axle about 55 mm above the ground, robot footprint within about 270 × 185 mm (the 120 % carcass with legs).
    Re-tick «Tengo la trayectoria del pie simulada y la pata elegida con datos» in Plan and Seguimiento when done.
-2. **How 8 legs share one motor:** watch 2–3 «walking spider toy teardown» videos (phase 3 study item) and choose
+2. ~~**How 8 legs share one motor:** watch 2–3 «walking spider toy teardown» videos (phase 3 study item) and choose
    the crank layout (one crankshaft per side, or a central disc with pins), with the N20 and the 4×AAA holder
-   inside the body ([cad/layout/](cad/layout/)).
+   inside the body ([cad/layout/](cad/layout/)).~~ Decided: one lateral crankshaft, see
+   [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft). The teardown videos are still on the study list.
 3. **CAD, by Claude in code** (Python + build123d, agreed 2026-11-09 and written in the Plan): leg, crank pins /
    crankshaft, pivot and a test frame, parametric from the simulator's numbers; check in Python that nothing
    collides over a full crank turn; export STEP (for Onshape) and STL (for Bambu Studio) to `cad/toy-leg/` with a
@@ -247,3 +250,160 @@ other four) on crank pins 180° apart.
    cylindrical (slides and turns) for the leg in its pivot sleeve, ball or revolute where the leg sits on the crank
    pin. Check the animated foot path against the simulator.
 5. Print one leg with its pivot and turn it by hand.
+
+## Toy leg in 3D
+
+**Phase 3 · Mechanisms · 2026-11-09**
+
+**Goal:** model the chosen toy leg in 3D on the whole robot (8 legs in the base notches, two gait groups) and get the
+same numbers as the 2D comparison, for every way of building it, each at its best.
+
+**Steps:**
+
+1. Find the leg pivots: the base rim has 8 notches, 4 per side, about 10 × 5 mm, at z 70–74 mm
+   ([cad/carcass-120/](cad/carcass-120/) coordinates: z = height above the ground of jenscolt's assembly, forward =
+   −Y). Right-side centres, front to rear: (89.5, −32.2), (95.9, −12.6), (96.1, 2.9), (82.6, 31.1); the left ones are
+   their mirror about x = 42.7 (the body axis). Measured by slicing `spideybot_base.stl` at z = 71 and 73 and
+   subtracting the slice from its convex hull.
+2. Model one leg ([`sim/toy_leg_3d.py`](sim/toy_leg_3d.py)): crank pin A turns about a crank centre O placed D mm
+   inward from the pivot P and H mm above it; the inner arm runs along the line A → P; past the knee the shin bends
+   down (bend angle) and leans forward or back (sweep). The leg keeps its sideways axis horizontal (a gimbal at P).
+   Two joint types:
+   - **slides at crank:** the leg turns about a fixed point at P, and the crank pin slides in a bore or slot at the
+     leg's inner end;
+   - **slides at body:** the leg sits on the crank pin and slides through a sleeve at P (the 2D model).
+
+   Three crank axle directions: **lateral** (X, across the body), **vertical** (Z) and **longitudinal** (Y, the
+   walking direction). Same leg part on all 8 notches (mirrored on the left); cranks 180° apart for the two groups
+   (left 1 and 3 + right 2 and 4, against the other four). How one motor drives the 8 cranks is not modelled (next step).
+3. Walk the robot over one crank turn: the body stays level and stands on its lowest feet (those within 2 mm of the
+   lowest, as it tilts onto them) and moves by what the lowest foot moves.
+4. For each of the 6 combinations, search the geometry (3000 random tries + 750 refinement steps, crank radius
+   3–12 mm, D 8–40 mm, H −20 to +8 mm, arm 5–70 mm, bend 30–150°, sweep ±45°, shin 30–120 mm) for the longest
+   stride within the targets: step height ≥ 10 mm, bob ≤ 3 mm, ground clearance under the base 20–60 mm, ≥ 3 mm
+   between neighbouring legs, knee and foot ≥ 5 mm outside the body, body centre inside the supporting feet, footprint
+   ≤ 270 × 185 mm, little foot slip:
+   ```
+   python3 sim/toy_leg_3d.py --search 3000 --only lateral/crank --json lateral-crank.json   # one per combination
+   python3 sim/toy_leg_3d.py --params sim/toy_leg_3d.json --png sim/images/toy-3d-comparison.png --gif sim/images/toy-3d.gif
+   ```
+   The 6 best geometries are in [`sim/toy_leg_3d.json`](sim/toy_leg_3d.json). The 6 searches ran in parallel, about
+   10 minutes in all.
+
+**Result:**
+
+| Crank axle | Slides at | Stride per half turn (mm) | Body bob (mm) | Step height (mm) | Feet slip (mm per leg per turn) | Stable all turn (margin mm) | Gap between legs (mm) | Clearance under base (mm) | Footprint X × Y (mm) | Crank radius (mm) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| lateral | crank | 26 | 3.1 | 12 | 39 | yes (15) | 8.0 | 49 | 190 × 133 | 10.0 |
+| lateral | body | 11 | 3.8 | 10 | 15 | yes (21) | 15.5 | 48 | 222 × 133 | 3.3 |
+| vertical | crank | 39 | 0.7 | 7 | 29 | yes (13) | 2.9 | 24 | 268 × 184 | 10.1 |
+| vertical | body | 34 | 0.7 | 6 | 22 | yes (12) | 4.0 | 20 | 265 × 176 | 4.1 |
+| longitudinal | crank | 13 | 3.1 | 10 | 39 | yes (6) | 15.5 | 21 | 171 × 133 | 9.1 |
+| longitudinal | body | 8 | 4.5 | 10 | 16 | yes (14) | 15.5 | 29 | 249 × 150 | 3.0 |
+
+Knee and foot stay outside the body in all six. Feet slip = how far, on average, each foot slides on the ground per
+turn against the foot carrying the body (it includes touching down and lifting off).
+
+| Crank axle / slides at | Geometry (mm, °) | Crank axle above ground (mm) | Slide travel (mm) | Pivot swing yaw / pitch | Leg to crank pin angle |
+|---|---|---|---|---|---|
+| lateral / crank | r 10.0, D 34.8, H −12.9, arm 23.1, bend 107, sweep 4, shin 79.3 | 62 | 13.9 | 32° / 29° | 7–35° |
+| lateral / body | r 3.3, D 30.5, H −7.2, arm 58.7, bend 85, sweep 4, shin 79.7 | 67 | 4.4 | 12° / 12° | 10–22° |
+| vertical / crank | r 10.1, D 38.2, H −6.0, arm 45.5, bend 71, sweep 21, shin 66.8 | 44 | 20.0 | 31° / 5° | 78–83° |
+| vertical / body | r 4.1, D 17.6, H −2.6, arm 62.4, bend 72, sweep 22, shin 61.4 | 44 | 8.1 | 27° / 4° | 79–83° |
+| longitudinal / crank | r 9.1, D 30.8, H −9.3, arm 17.2, bend 104, sweep 22, shin 52.6 | 38 | 18.1 | 6° / 33° | 77–83° |
+| longitudinal / body | r 3.0, D 37.0, H −7.7, arm 52.6, bend 63, sweep 27, shin 78.8 | 48 | 6.0 | 2° / 9° | 80–81° |
+
+![Toy leg in 3D, best geometry of each combination](sim/images/toy-3d-comparison.png)
+
+![Toy leg in 3D, animated](sim/images/toy-3d.gif)
+
+- **Lateral axle, slides at crank** is the only one close to every target (bob 3.1 against 3). The crank pin points
+  along the leg (7–35°), so it can slide straight into a bore in the leg's inner end: probably the classic toy. The
+  feet slip the most (39 mm per leg per turn), and the 8 cranks sit near the body centre, where the battery holder
+  goes.
+- **Vertical axle** gives the longest, smoothest stride (34–39 mm, 0.7 mm bob) but a low step (6–7 mm): it only
+  lifts the feet by tilting the leg. Its legs come within 2.9 mm of each other (slides at crank), and the left cranks
+  must turn the other way (a gear pair).
+- **Longitudinal axle** is the weakest: the crank moves the inner end sideways, which hardly makes a stride.
+- **Slides at body** gives shorter strides with a lateral axle (11 mm) but less slip.
+- Limits of the model: the body stays level (a real one tilts onto 3 feet), legs are lines (no thickness, so 3 mm
+  gaps are tight), and nothing is checked against the carcass interior, the battery holder or the motor yet.
+
+**Decision:** taken in [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft): lateral axle sliding at the crank. Before that it was pending (Santi), together with the crank layout: lateral axle sliding at the crank (meets the targets,
+the classic toy) or vertical axle (longer stride, low step).
+
+**Open:**
+
+- ~~Choose the variant above~~ Lateral, on one crankshaft: [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft). Then steps 2–5 of [Leg simulator and comparison](#leg-simulator-and-comparison) → Open:
+  crank layout for 8 legs with the N20 and the 4×AAA holder, CAD in build123d, Onshape, print one leg.
+- Check that the notches (10 × 5 mm) let the leg swing as far as the table says, or widen them in the base.
+
+## Toy leg on one crankshaft
+
+**Phase 3 · Mechanisms · 2026-11-09**
+
+**Goal:** check whether the lateral toy leg keeps its numbers when one motor drives it. In
+[Toy leg in 3D](#toy-leg-in-3d) every leg had its own crank, and the 4 crank centres of each side ended up 5–9 mm
+apart with 10 mm cranks, so they would hit each other.
+
+**Steps:**
+
+1. Add a **shaft** mode to [`sim/toy_leg_3d.py`](sim/toy_leg_3d.py): one lateral crankshaft for all 8 legs at
+   y = Y0, z = 72 + H. The 4 cranks of each side sit along it from XIN to XIN + 3 × PITCH mm from the body axis
+   (PITCH ≥ 8 mm: crank web plus leg end), in any of the 24 orders, and mirrored on the left. The two gait groups
+   are pins 180° apart on the same shaft, and both sides turn the same way.
+2. Keep the crankshaft below the battery holder and inside the base. The holder (64 × 49 × 16 mm) sits above the
+   rim and fills almost the whole body ([cad/layout/](cad/layout/)), so the crank discs (radius r + 2 mm for the pin
+   head) must stay below z 73 and inside the base's outer outline shrunk by a 2 mm wall, checked on slices of
+   `spideybot_base.stl` every 1 mm. The base bowl is near solid, so it will need hollowing there.
+3. `--strict` rules, used for this step: legs are 5 mm thick, so 6 mm between centre lines for **every pair** of
+   legs on a side, including the inner arms inside the body (before, only neighbours and only outside the body).
+   Footprint at least 240 × 165 mm, close to the original's look (jenscolt's assembly at 120 %: 269 × 185).
+4. Search 3000 random tries + 750 refinement steps: shaft sliding at crank (3 seeds), shaft sliding at body, and,
+   as a reference, the per-leg lateral cranks under the same rules:
+   ```
+   python3 sim/toy_leg_3d.py --strict --search 3000 --seed 3 --only shaft/crank --json shaft-crank.json
+   python3 sim/toy_leg_3d.py --params sim/toy_leg_3d_strict.json --png sim/images/toy-3d-strict.png --gif sim/images/toy-3d-strict.gif
+   ```
+   The best results are in [`sim/toy_leg_3d_strict.json`](sim/toy_leg_3d_strict.json). The 5 searches ran in
+   parallel, about 15 minutes in all.
+
+**Result:**
+
+| Cranks | Slides at | Stride per half turn (mm) | Body bob (mm) | Step height (mm) | Feet slip (mm per leg per turn) | Stable all turn (margin mm) | Gap between legs (mm) | Clearance under base (mm) | Footprint X × Y (mm) | Crank radius (mm) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| one per leg (lateral), reference | crank | 15 | 5.3 | 12 | 18 | yes (7) | 1.0 | 49 | 261 × 166 | 3.0 |
+| one crankshaft | crank | 14 | 4.2 | 10 | 17 | yes (5) | 2.2 | 40 | 241 × 165 | 5.1 |
+| one crankshaft | body | 6 | 2.9 | 6 | 6 | yes (15) | 1.4 | 24 | 243 × 175 | 3.1 |
+
+The other two crankshaft seeds gave strides of 9 and 7 mm. Best crankshaft geometry (sliding at crank): r 5.1,
+Y0 −12.9, H −6.4 (crank axle 60 mm above the ground), cranks at 6, 16, 26 and 36 mm from the body axis (front leg
+innermost), arm 67.4, bend 114°, sweep −15°, shin 77.1 mm. Slide 10 mm, pivot swing 15° each way, crank pin 2–17°
+off the leg's axis. The crank discs fit inside the base.
+
+![Toy leg on one crankshaft](sim/images/toy-3d-strict.png)
+
+![Toy leg on one crankshaft, animated](sim/images/toy-3d-strict.gif)
+
+- With realistic clearance between legs, **no layout meets the targets**, not even one crank per leg. Stride halves
+  (26 → 14–15 mm) and bob rises to 4–5 mm.
+- The cause, measured: every closest pair is two **inner arms inside the body**. Coming in from notches 10–15 mm
+  apart toward the cranks, almost in the same plane, they meet. No variant gets the 6 mm.
+- The one crankshaft costs almost nothing against one crank per leg (14 against 15 mm). The inner arms are the
+  limit, not the shaft.
+- Limits: the footprint minimum twisted the legs (rear legs stretched about 100 mm back, see the top view), so it
+  probably costs stride too. Left and right legs are not checked against each other, and the inner arms of the two
+  sides come close in the middle.
+
+**Decision: lateral toy leg on one crankshaft, sliding at the crank** (best geometry above, in
+[`sim/toy_leg_3d_strict.json`](sim/toy_leg_3d_strict.json)). It accepts 14 mm per half turn and 4.2 mm of bob: a
+slower walk, but the simplest drive. One shaft across the body turns both sides the same way, and the N20 drives it
+with spur gears. Pivots at different heights were offered and not picked.
+
+**Open:**
+
+- How the N20 drives the shaft: gear ratio and where the motor sits (phase 4 picks the ratio).
+- CAD in build123d (step 3 of [Leg simulator and comparison](#leg-simulator-and-comparison) → Open), starting from
+  this geometry. Real leg thickness, the inner arms (2.2 mm between centre lines here) and left against right legs
+  are checked there, in the collision check over a full turn.
+- Hollow the base for the crankshaft, and cut the pivot windows: 15° of swing each way.
