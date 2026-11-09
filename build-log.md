@@ -8,6 +8,7 @@ went wrong. Newest entries at the bottom.
 | 2026-10 | 0 · Workshop | [Printer calibration](#printer-calibration) |
 | 2026-11-08 | 2 · CAD | [Carcass base model](#carcass-base-model) |
 | 2026-11-09 | 2 · CAD | [Motor, battery holder and print scale](#motor-battery-holder-and-print-scale) |
+| 2026-11-09 | 2 · CAD | [Mesh repair](#mesh-repair) |
 
 ## Printer calibration
 
@@ -61,7 +62,7 @@ Bambu Studio imports the assembly, but reports mesh errors (non-manifold edges a
 
 **Open:**
 
-- Repair the meshes before cutting or drilling them (booleans fail on non-manifold meshes).
+- ~~Repair the meshes before cutting or drilling them.~~ Done in [Mesh repair](#mesh-repair).
 - ~~Print scale.~~ Decided in the next step: 120 %.
 
 ## Motor, battery holder and print scale
@@ -114,3 +115,56 @@ holder needs 137 %. With 2 mm clearance the 4×AAA holder needs 118 %; at 120 % 
 - Check the drawing of the holder actually bought against 64 × 49 × 16 mm (+2 mm).
 - Battery life on 4×AAA: measured in phase 4.
 - Room for the leg mechanism next to the holder: laid out in Onshape (phase 3).
+
+## Mesh repair
+
+**Phase 2 · CAD · 2026-11-09**
+
+**Goal:** make the carcass meshes watertight (closed, no non-manifold edges) without changing their shape, so that
+cuts and holes in Bambu Studio work, and scale them to the chosen 120 %.
+
+**What was wrong:** every file has duplicate triangles (zero-thickness walls), zero-area triangles, tiny gaps
+between triangles, and in the body 10 edges where two surfaces touch ("pinched" edges). Bambu Studio's CLI
+(`BambuStudio --info part.stl`) reports `manifold = no` for body, eyes and sensor.
+
+**Steps:**
+
+1. Repair and scale the 5 carcass parts:
+   ```
+   python3 tools/repair_stl.py cad/carcass-120 --scale 1.2 cad/carcass-jenscolt/spideybot_{body,base,eye,small_eye,sensor}.stl
+   ```
+   [`tools/repair_stl.py`](tools/repair_stl.py) merges vertices closer than 0.1 µm, drops zero-area and duplicate
+   triangles, closes small holes, and at pinched edges splits the vertices and moves each copy 0.01 mm into its own
+   side. It then reads every file back, as a slicer would, and measures the largest distance to the original.
+2. Check with Bambu Studio's own mesh check: `/Applications/BambuStudio.app/Contents/MacOS/BambuStudio --info
+   cad/carcass-120/spideybot_body.stl` → `manifold = yes` for all 5 files.
+
+**Result** (deviation measured at 100 %, before scaling):
+
+| File | Before: open / non-manifold edges | Fixed | After: open / non-manifold edges | Watertight | Max deviation (mm, at 100 %) |
+|---|---|---|---|---|---|
+| `spideybot_body.stl` | 0 / 55 | 228 degenerate, 7 duplicate triangles, 10 pinched edges split (surface moved 0.01 mm) | 0 / 0 | yes | 0.010 |
+| `spideybot_base.stl` | 0 / 4 | 6 degenerate, 0 duplicate triangles | 0 / 0 | yes | 0.000 |
+| `spideybot_eye.stl` | 0 / 3 | 0 degenerate, 3 duplicate triangles | 0 / 0 | yes | 0.000 |
+| `spideybot_small_eye.stl` | 0 / 3 | 5 degenerate, 3 duplicate triangles, 3 open edges closed | 0 / 0 | yes | 0.000 |
+| `spideybot_sensor.stl` | 0 / 3 | 2 degenerate, 3 duplicate triangles | 0 / 0 | yes | 0.000 |
+
+Bambu Studio: `manifold = yes` for all 5 (before: body 9 non-manifold edges, eye, small eye and sensor 3 each).
+Imported in the Bambu Studio window, the body shows no errors (compare the red errors in
+[Carcass base model](#carcass-base-model)):
+
+![Repaired body in Bambu Studio](cad/carcass-120/images/bambu-studio-import.png)
+
+![Repaired parts at 120 %](cad/carcass-120/images/parts.png)
+
+**Decisions:**
+
+- **No automatic rebuild (MeshFix).** Tried first: it closes everything, but on a leg it cut off a 1.5 mm relief.
+  Only fixes that keep the surface within 0.01 mm are used.
+- **Legs not repaired.** Their pinched edges need the shape changed to close. They are not printed (the walking
+  legs are designed new) and stay as a reference in [cad/carcass-jenscolt/](cad/carcass-jenscolt/).
+- Repaired files live at 120 %, the print scale, so measurements taken from them are the real ones.
+
+**Open:**
+
+- Cuts in Bambu Studio: battery hatch in the base, motor and shaft openings (after the mechanism layout).
