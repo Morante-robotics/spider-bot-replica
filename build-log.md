@@ -725,7 +725,7 @@ Document (public): [Spider-Bot drive](https://cad.onshape.com/documents/07632681
 
 **Result:**
 
-![Assembly in Onshape](cad/drive/images/onshape-assembly.png)
+![The assembly animated in Onshape: Animate mate on the crankshaft's revolute, 0–360°, Loop](cad/drive/images/onshape-animation.gif)
 
 - The leg has one degree of freedom: turning the crankshaft moves the fork, the leg and the ball together. The
   animation runs through the full turn and looked right (Morante).
