@@ -30,7 +30,7 @@ designed with AI help and how it was checked.
 | [cad/layout/](cad/layout/) | What fits inside the body: battery holder and motor, print scale |
 | [cad/drive/](cad/drive/) | Legs, pivot forks, four crankshafts with gears, spine and a test frame, modelled in code (build123d) with a collision check over a full turn |
 | [sim/](sim/) | Leg simulators: 2D foot paths of the toy, Klann and Jansen legs (chosen: toy leg), and the toy leg in 3D on the whole robot |
-| [tools/](tools/) | Helper scripts: [`stl_preview.py`](tools/stl_preview.py) renders and measures STL files, [`stl_turntable.py`](tools/stl_turntable.py) makes turntable GIFs, [`assemble_jenscolt.py`](tools/assemble_jenscolt.py) joins the carcass parts into one assembled STL, [`fit_check.py`](tools/fit_check.py) checks what fits inside the body and at what scale, [`repair_stl.py`](tools/repair_stl.py) makes meshes watertight without changing their shape |
+| [tools/](tools/) | Helper scripts: [`stl_preview.py`](tools/stl_preview.py) renders and measures STL files, [`stl_turntable.py`](tools/stl_turntable.py) makes turntable GIFs, [`assemble_jenscolt.py`](tools/assemble_jenscolt.py) joins the carcass parts into one assembled STL, [`fit_check.py`](tools/fit_check.py) checks what fits inside the body and at what scale, [`repair_stl.py`](tools/repair_stl.py) makes meshes watertight without changing their shape, [`drive_options_gif.py`](tools/drive_options_gif.py) animates the drive options compared before choosing |
 
 ## License
 
