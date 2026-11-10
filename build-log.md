@@ -250,7 +250,7 @@ other four) on crank pins 180° apart.
    crankshaft, pivot and a test frame, parametric from the simulator's numbers; check in Python that nothing
    collides over a full crank turn; export STEP (for Onshape) and STL (for Bambu Studio) to `cad/toy-leg/` with a
    README. Shafts 3 mm; hole clearance as a parameter (+0.2 mm by default until the phase 2 clearance test).
-4. **Onshape, by Santi:** import the STEP files, assemble and animate. Suggested mates: revolute for the crank,
+4. **Onshape, by Morante:** import the STEP files, assemble and animate. Suggested mates: revolute for the crank,
    cylindrical (slides and turns) for the leg in its pivot sleeve, ball or revolute where the leg sits on the crank
    pin. Check the animated foot path against the simulator.
 5. Print one leg with its pivot and turn it by hand.
@@ -333,7 +333,7 @@ turn against the foot carrying the body (it includes touching down and lifting o
 - Limits of the model: the body stays level (a real one tilts onto 3 feet), legs are lines (no thickness, so 3 mm
   gaps are tight), and nothing is checked against the carcass interior, the battery holder or the motor yet.
 
-**Decision:** taken in [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft): lateral axle sliding at the crank. Before that it was pending (Santi), together with the crank layout: lateral axle sliding at the crank (meets the targets,
+**Decision:** taken in [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft): lateral axle sliding at the crank. Before that it was pending (Morante), together with the crank layout: lateral axle sliding at the crank (meets the targets,
 the classic toy) or vertical axle (longer stride, low step).
 
 **Open:**
@@ -473,7 +473,7 @@ parts. The simulator had checked legs against legs, but not legs against the cra
 
 **Phase 3 · Mechanisms · 2026-11-09**
 
-**Goal:** try the drive Santi picked after one lateral crankshaft was ruled out. There are two crankshafts running
+**Goal:** try the drive Morante picked after one lateral crankshaft was ruled out. There are two crankshafts running
 front to back, one per side, so each leg's crank sits level with its own notch and no arm crosses another leg's
 crank.
 
@@ -575,9 +575,15 @@ Changing the best geometry by hand (sliding at crank):
   only comes with more bob. A larger crank also brings the shins closer (the gaps above are shin to shin, which a
   different leg shape can fix) and a higher crank disc, which runs into the battery holder.
 
-**Decision: four lateral crankshafts, sliding at the crank, keeping the 3 mm bob limit** (Santi, 2026-11-09):
+**Decision: four lateral crankshafts, sliding at the crank, keeping the 3 mm bob limit** (Morante, 2026-11-09):
 the best geometry above (seed 2, the first entry in [`sim/toy_leg_3d_rows.json`](sim/toy_leg_3d_rows.json)), with
 9 mm per half turn and 4.2 mm of bob. Three options were compared before choosing:
+
+![The three options compared: side view of one leg and the parts each needs](sim/images/drive-options.gif)
+
+A and B are simulated (on the geometry later used for the CAD, see [Legs and drive in CAD](#legs-and-drive-in-cad));
+C is a sketch, because the simulator cannot represent it. Made with
+[`tools/drive_options_gif.py`](tools/drive_options_gif.py).
 
 | | Four shafts, 3 mm bob (chosen) | Four shafts, 6 mm bob | Cam toy |
 |---|---|---|---|
@@ -664,7 +670,7 @@ to try one leg by hand. Parts and how they fit: [cad/drive/](cad/drive/).
 
 **Open:**
 
-- **Santi:** import the STEP files into Onshape, assemble with mates (revolute for the crankshaft and the fork's
+- **Morante:** import the STEP files into Onshape, assemble with mates (revolute for the crankshaft and the fork's
   vertical screws, revolute for the leg on its screw, ball-and-slider for the ball in the bore) and animate. Compare
   the foot path with the simulator.
 - Print the test frame, one middle leg, a fork and crankshaft 2; turn it by hand. Before that, ideally, the phase 2
