@@ -48,7 +48,12 @@ expected after calibration.
 
 ![Purge waste bin](images/purge-waste-box-1.jpg)
 
-_Video pending._
+
+
+https://github.com/user-attachments/assets/969db1d2-f4c8-4ad6-a642-058941c77ebe
+
+
+
 <!-- Video: 1-spiderbot-purge-waste-box-1.mp4 -->
 
 ## Carcass base model
