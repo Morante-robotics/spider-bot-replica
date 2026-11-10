@@ -19,9 +19,9 @@ Needs Python 3.12 with build123d, numpy, trimesh and manifold3d. All sizes come 
 
 | File | What | X × Y × Z (mm) | Print |
 |---|---|---|---|
-| `leg-front-right.stl` / `-left` | Front leg | 93.6 × 8.2 × 67.6 | 1 + 1 |
-| `leg-middle-right.stl` / `-left` | Middle legs (2nd and 3rd) | 99.7 × 8.2 × 67.6 | 2 + 2 |
-| `leg-rear-right.stl` / `-left` | Rear leg | 87.3 × 8.2 × 67.6 | 1 + 1 |
+| `leg-front-right.stl` / `-left` | Front leg | 93.6 × 7.6 × 67.6 | 1 + 1 |
+| `leg-middle-right.stl` / `-left` | Middle legs (2nd and 3rd) | 99.7 × 7.6 × 67.6 | 2 + 2 |
+| `leg-rear-right.stl` / `-left` | Rear leg | 87.3 × 7.6 × 67.6 | 1 + 1 |
 | `pivot.stl` | Fork that holds a leg at the rim | 10.6 × 9.4 × 22.0 | 8 |
 | `crankshaft-1.stl` … `-4.stl` | One piece: 12-tooth gear, two journals, two cranks with balls (front to rear) | 27.6 × 14.0 × 14.0 | 1 each |
 | `idler-1.stl`, `-2`, `-3` | Idler gears, 11, 10 and 20 teeth | up to 22.0 × 22.0 × 2.6 | 1 each |
@@ -50,7 +50,7 @@ pins 9 mm long (idlers). For the test frame: 1 × M3×12 + nut, 2 × M3×6.
 
 | Part | Lay it | Supports |
 |---|---|---|
-| Legs | On a flat side of the tube (the leg lies flat; the shin leans 3 mm, so it rises off the bed a little) | Tree, under the shin |
+| Legs | On their −Y face (rotate 90° about X): arm, boss, knee and shin are offset so their −Y face is flush with the tube's, and the leg lies flat (the shin rises 3 mm towards the foot) | Tree, on the build plate only, under the shin |
 | Crankshafts | Axis horizontal, so the ball stubs are not split by layer lines | Tree |
 | Pivot, spine | As modelled (Z up) | None |
 | Idlers | Flat | None |
@@ -63,7 +63,7 @@ spine, raise `CLR` and run `build.py` again.
 **Check over a full turn** ([`check.py`](check.py), every 30°): no overlaps between any two parts. The closest pairs
 are the designed clearances: 0.1 mm a side for the balls in their bores and the journals in the spine, 0.2 mm a side
 for each leg in its fork. Between parts that do not touch on purpose, the closest are the middle legs' shins
-(0.7 mm) and a rear leg against its crank (0.6 mm). Result: [`check-result.txt`](check-result.txt).
+(0.74 mm) and a rear leg against its crank (0.53 mm). Result: [`check-result.txt`](check-result.txt).
 
 **Not done yet:**
 

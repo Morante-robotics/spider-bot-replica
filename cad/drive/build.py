@@ -46,7 +46,9 @@ STUB = 2.2          # crank pin stub that carries the ball
 TUBE = 7.6          # height of the leg's inner tube (round top and bottom)
 TUBE_W = 5.6        # its width across: flat sides, so the middle legs' tubes clear each other
 LEG_W, LEG_H = 5.0, 6.0     # leg bar: width (across, the print height) × height
+ARM_DY = -(TUBE_W - LEG_W) / 2    # arm, boss and knee flush with the tube's -Y face (on the bed when printed)
 SHIN_W = 4.5        # shin and foot a little thinner: the middle legs' shins pass 0.8 mm apart
+SHIN_DY = -(TUBE_W - SHIN_W) / 2   # shin flush with the leg's -Y face (the face on the bed when printed)
 BOSS = 9.0          # leg boss around the pivot pin
 JOURNAL = 4.0       # crankshaft journal diameter
 GEAR_T = 3.0        # gear face width
@@ -136,17 +138,19 @@ def leg(i):
     t_end = yoke_size()[0] / 2 + 3.0                                           # tube stays out of the fork at 23° tilt
     part = cyl([-(mouth + t_end) / 2, 0, 0], [1, 0, 0], TUBE / 2, mouth - t_end) \
         & Pos(-(mouth + t_end) / 2, 0, 0) * Box(mouth - t_end, TUBE_W, TUBE)     # inner tube, flat sides
-    part += bar([-t_end - 1, 0, 0], [0, 0, 0], LEG_W, LEG_H, [0, 1, 0])          # through the fork to the boss
-    part += cyl([0, 0, 0], [0, 1, 0], BOSS / 2, LEG_W)                          # boss at the pivot
-    part += bar([0, 0, 0], K, LEG_W, LEG_H, [0, 1, 0])                          # outer arm
-    part += cyl(K, [0, 1, 0], LEG_H / 2, LEG_W)                                 # knee
-    part += bar(K, F, SHIN_W, LEG_H, [0, 1, 0])                                 # shin
-    part += Pos(*F) * Sphere(SHIN_W / 2)                                         # foot, as wide as the shin
+    a = np.array([0, ARM_DY, 0])
+    part += bar([-t_end - 1, ARM_DY, 0], a, LEG_W, LEG_H, [0, 1, 0])            # through the fork to the boss
+    part += cyl(a, [0, 1, 0], BOSS / 2, LEG_W)                                  # boss at the pivot
+    part += bar(a, K + a, LEG_W, LEG_H, [0, 1, 0])                              # outer arm
+    part += cyl(K + a, [0, 1, 0], LEG_H / 2, LEG_W)                             # knee
+    sh = np.array([0, SHIN_DY, 0])
+    part += bar(K + sh, F + sh, SHIN_W, LEG_H, [0, 1, 0])                       # shin
+    part += Pos(*(F + sh)) * Sphere(SHIN_W / 2)                                  # foot, as wide as the shin
     bore_len = mouth - bottom
     part -= cyl([-(mouth + bottom) / 2, 0, 0], [1, 0, 0], (BALL + CLR) / 2, bore_len)
     part -= Plane(origin=(-mouth, 0, 0), x_dir=(0, 1, 0), z_dir=(1, 0, 0)).location * \
         Cone(TUBE / 2 - 0.6, (BALL + CLR) / 2, 2.5, align=None)                # flared mouth for the tilting stub
-    part -= cyl([0, 0, 0], [0, 1, 0], (SCREW + CLR) / 2, LEG_W + 2)              # pivot screw hole
+    part -= cyl(a, [0, 1, 0], (SCREW + CLR) / 2, LEG_W + 2)                      # pivot screw hole
     return part, dict(mouth=mouth, bottom=bottom, apmin=apmin, apmax=apmax, F=F)
 
 
@@ -162,7 +166,7 @@ def yoke():
     driven up and down into blind holes in its top and bottom (they turn in the rim, or the test frame)."""
     win_x, win_y, win_z, h = yoke_size()
     out = Box(win_x, win_y + 2 * YOKE_WALL, h)
-    out -= Box(win_x + 1, win_y, win_z)
+    out -= Pos(0, ARM_DY, 0) * Box(win_x + 1, win_y, win_z)                    # window follows the leg's offset
     out -= cyl([0, 0, 0], [0, 1, 0], (SCREW + CLR) / 2, 30)
     for sz in (1, -1):
         out -= Pos(0, 0, sz * (h / 2 - 1.75)) * Cylinder(TAP / 2, 3.6)
