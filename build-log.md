@@ -670,7 +670,7 @@ to try one leg by hand. Parts and how they fit: [cad/drive/](cad/drive/).
 
 **Open:**
 
-- **Morante:** import the STEP files into Onshape, assemble with mates (revolute for the crankshaft and the fork's
+- **Morante:** follow [cad/drive/onshape.md](cad/drive/onshape.md): import the STEP files into Onshape, assemble with mates (revolute for the crankshaft and the fork's
   vertical screws, revolute for the leg on its screw, ball-and-slider for the ball in the bore) and animate. Compare
   the foot path with the simulator.
 - Print the test frame, one middle leg, a fork and crankshaft 2; turn it by hand. Before that, ideally, the phase 2
