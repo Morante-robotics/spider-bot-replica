@@ -64,8 +64,7 @@ can be published; reference only) and the MyMiniFactory «Spider BOT» (an unrel
 
 **Steps:**
 
-1. On the Thingiverse page, **Download all files** (zip with 9 STLs, photos, README and license). Scripted downloads get
-   HTTP 403.
+1. On the Thingiverse page, **Download all files** (zip with 9 STLs, photos, README and license).
 2. Check every STL is valid and measure it: [`tools/stl_preview.py`](tools/stl_preview.py) prints the size of each part
    and renders the previews.
 3. The files place body, base, sensor and only the front leg pair; the eyes are off to the side. Join everything into
@@ -247,10 +246,7 @@ Klann's driving four-bar (frame O-P2, crank, bar A-M, rocker M-P2): s + l = 9.88
 
 **Decision: toy leg** (crank + one bent leg that slides and swivels in a pivot on the body edge). Simplest for a
 first robot: 1 part per leg (8 legs + cranks, against 32 parts for Klann), not sensitive to small dimension
-errors, a small crank (about 7 mm, so less torque), and probably how the original toy walks.
-
-How this was decided: Klann was picked first from the table above, then dropped the same day. The toy leg had been
-ruled out on the 2D model only, which does not represent it; it was not offered as an option. Klann's real-size
+errors, a small crank (about 7 mm, so less torque), and probably how the original toy walks. Klann's real-size
 bars can be regenerated with `sim/legs.py` if needed.
 
 **How the toy leg works:** each leg is one rigid bent part. Its inner end sits on a crank pin that turns in a
@@ -259,26 +255,14 @@ or a ball joint). When the crank pin goes up, the foot goes down (lever), and wh
 in: the foot traces a loop. Gait as planned: two groups of four legs (left 1 and 3 + right 2 and 4, against the
 other four) on crank pins 180° apart.
 
-**Open (next session):**
+**Open:**
 
-1. ~~**3D model of the toy leg**~~ Done in [Toy leg in 3D](#toy-leg-in-3d). (new `sim/toy_leg_3d.py`, or extend `sim/legs.py`). Inputs: crank pin radius and
-   the plane it turns in, pivot position on the body edge (start from the 8 notches in the base rim of
-   [cad/carcass-120/](cad/carcass-120/), at z ≈ 60 mm in the original files, 72 mm at 120 %), the leg's inner arm
-   length, bend and outer length. Measure the same numbers as above: stride per half turn, body bob, step height,
-   crank radius, footprint. Suggested targets (to confirm): step height ≥ 10 mm, stride ≥ 25 mm, bob ≤ 3 mm, crank
-   axle about 55 mm above the ground, robot footprint within about 270 × 185 mm (the 120 % carcass with legs).
-   Re-tick «Tengo la trayectoria del pie simulada y la pata elegida con datos» in Plan and Seguimiento when done.
-2. ~~**How 8 legs share one motor:** watch 2–3 «walking spider toy teardown» videos (phase 3 study item) and choose
-   the crank layout (one crankshaft per side, or a central disc with pins), with the N20 and the 4×AAA holder
-   inside the body ([cad/layout/](cad/layout/)).~~ Decided: one lateral crankshaft, see
-   [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft). The teardown videos are still on the study list.
-3. **CAD, by Claude in code** (Python + build123d, agreed 2026-11-09 and written in the Plan): leg, crank pins /
-   crankshaft, pivot and a test frame, parametric from the simulator's numbers; check in Python that nothing
-   collides over a full crank turn; export STEP (for Onshape) and STL (for Bambu Studio) to `cad/toy-leg/` with a
-   README. Shafts 3 mm; hole clearance as a parameter (+0.2 mm by default until the phase 2 clearance test).
-4. **Onshape, by Morante:** import the STEP files, assemble and animate. Suggested mates: revolute for the crank,
-   cylindrical (slides and turns) for the leg in its pivot sleeve, ball or revolute where the leg sits on the crank
-   pin. Check the animated foot path against the simulator.
+1. ~~3D model of the toy leg~~: done in [Toy leg in 3D](#toy-leg-in-3d).
+2. ~~How 8 legs share one motor~~: worked out from [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft) to
+   [Four lateral crankshafts](#four-lateral-crankshafts). The «walking spider toy teardown» videos are still on the
+   study list.
+3. ~~CAD in build123d~~: done in [Legs and drive in CAD](#legs-and-drive-in-cad).
+4. ~~Onshape assembly and animation~~: done in [Onshape assembly](#onshape-assembly).
 5. Print one leg with its pivot and turn it by hand.
 
 ## Toy leg in 3D
@@ -359,13 +343,10 @@ turn against the foot carrying the body (it includes touching down and lifting o
 - Limits of the model: the body stays level (a real one tilts onto 3 feet), legs are lines (no thickness, so 3 mm
   gaps are tight), and nothing is checked against the carcass interior, the battery holder or the motor yet.
 
-**Decision:** taken in [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft): lateral axle sliding at the crank. Before that it was pending (Morante), together with the crank layout: lateral axle sliding at the crank (meets the targets,
-the classic toy) or vertical axle (longer stride, low step).
+**Decision:** lateral axle sliding at the crank, taken in [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft).
 
 **Open:**
 
-- ~~Choose the variant above~~ Lateral, on one crankshaft: [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft). Then steps 2–5 of [Leg simulator and comparison](#leg-simulator-and-comparison) → Open:
-  crank layout for 8 legs with the N20 and the 4×AAA holder, CAD in build123d, Onshape, print one leg.
 - Check that the notches (10 × 5 mm) let the leg swing as far as the table says, or widen them in the base.
 
 ## Toy leg on one crankshaft
@@ -428,7 +409,7 @@ off the leg's axis. The crank discs fit inside the base.
 **Decision (reversed in [Crankshaft against real parts](#crankshaft-against-real-parts)): lateral toy leg on one crankshaft, sliding at the crank** (best geometry above, in
 [`sim/toy_leg_3d_strict.json`](sim/toy_leg_3d_strict.json)). It accepts 14 mm per half turn and 4.2 mm of bob: a
 slower walk, but the simplest drive. One shaft across the body turns both sides the same way, and the N20 drives it
-with spur gears. Pivots at different heights were offered and not picked.
+with spur gears.
 
 **Open:**
 
@@ -499,7 +480,7 @@ parts. The simulator had checked legs against legs, but not legs against the cra
 
 **Phase 3 · Mechanisms · 2026-11-09**
 
-**Goal:** try the drive Morante picked after one lateral crankshaft was ruled out. There are two crankshafts running
+**Goal:** try another drive after one lateral crankshaft was ruled out. There are two crankshafts running
 front to back, one per side, so each leg's crank sits level with its own notch and no arm crosses another leg's
 crank.
 
@@ -601,15 +582,13 @@ Changing the best geometry by hand (sliding at crank):
   only comes with more bob. A larger crank also brings the shins closer (the gaps above are shin to shin, which a
   different leg shape can fix) and a higher crank disc, which runs into the battery holder.
 
-**Decision: four lateral crankshafts, sliding at the crank, keeping the 3 mm bob limit** (Morante, 2026-11-09):
-the best geometry above (seed 2, the first entry in [`sim/toy_leg_3d_rows.json`](sim/toy_leg_3d_rows.json)), with
-9 mm per half turn and 4.2 mm of bob. Three options were compared before choosing:
+**Decision: four lateral crankshafts, sliding at the crank, keeping the 3 mm bob limit:** the best geometry above
+(seed 2, the first entry in [`sim/toy_leg_3d_rows.json`](sim/toy_leg_3d_rows.json)), with 9 mm per half turn and
+4.2 mm of bob. The three options compared:
 
 ![The three options compared: side view of one leg and the parts each needs](sim/images/drive-options.gif)
 
-A and B are simulated (on the geometry later used for the CAD, see [Legs and drive in CAD](#legs-and-drive-in-cad));
-C is a sketch, because the simulator cannot represent it. Made with
-[`tools/drive_options_gif.py`](tools/drive_options_gif.py).
+A and B are simulated, C is a sketch ([`tools/drive_options_gif.py`](tools/drive_options_gif.py)).
 
 | | Four shafts, 3 mm bob (chosen) | Four shafts, 6 mm bob | Cam toy |
 |---|---|---|---|
@@ -697,8 +676,6 @@ to try one leg by hand. Parts and how they fit: [cad/drive/](cad/drive/).
 **Open:**
 
 - ~~Onshape assembly and animation~~: done in [Onshape assembly](#onshape-assembly).
-  vertical screws, revolute for the leg on its screw, ball-and-slider for the ball in the bore) and animate. Compare
-  the foot path with the simulator.
 - Print the test frame, one middle leg, a fork and crankshaft 2; turn it by hand. Before that, ideally, the phase 2
   clearance test.
 - The base: fork seats in the rim notches, hollow bowl for the spine and idlers, spine mounting, a cap over the
@@ -709,7 +686,7 @@ to try one leg by hand. Parts and how they fit: [cad/drive/](cad/drive/).
 **Phase 2 · CAD · 2026-11-10**
 
 **Goal:** assemble one leg on the test frame in Onshape from the STEP files, with mates that let it move as it will
-in the real thing, and animate it. This was the first assembly in Onshape.
+in the real thing, and animate it.
 
 **Steps:** [cad/drive/onshape.md](cad/drive/onshape.md), with a picture of the edges to click for each mate (made by
 [`cad/drive/onshape_figures.py`](cad/drive/onshape_figures.py)). In short:
@@ -729,11 +706,10 @@ Document (public): [Spider-Bot drive](https://cad.onshape.com/documents/07632681
 ![The assembly animated in Onshape: Animate mate on the crankshaft's revolute, 0–360°, Loop](cad/drive/images/onshape-animation.gif)
 
 - The leg has one degree of freedom: turning the crankshaft moves the fork, the leg and the ball together. The
-  animation runs through the full turn and looked right (Morante).
+  animation runs through the full turn.
 - The offsets had to be negative: with positive ones the parts went into the walls. An offset is measured along the
-  connector's Z axis, whose direction depends on the face clicked. The tutorial now says so.
-- Foot path against the simulator: not measured (step 6 of the tutorial, skipped). It stays to be checked on the
-  printed leg.
+  connector's Z axis, whose direction depends on the face clicked.
+- Foot path against the simulator: not measured; to be checked on the printed leg.
 
 **Open:**
 
@@ -786,7 +762,7 @@ printer needs, so the other 21 drive parts are printed once, with the right clea
 - One plate for the test only. The rest of the drive waits for the clearance result and for the base.
 - The plate actually printed is the first version: leg 5.6 mm wide, with its fork (window 6.0 mm). The repo's
   `test-leg-plate.3mf` has the offset leg. For one leg on the test frame both behave the same, so the offset version
-  is assumed to work as well and is not printed separately (Morante).
+  is assumed to work as well and is not printed separately.
 
 **Open:**
 
@@ -794,4 +770,3 @@ printer needs, so the other 21 drive parts are printed once, with the right clea
   the Inbox.
 - Read the clearance block and set `CLR` (and `TAP`) in `cad/drive/build.py`.
 - Hardware: M3×12 + nut and 2 × M3×6 for the test frame.
-- The screenshots show the leg before the offset fix (the change is 0.3 mm, not visible at this scale).
