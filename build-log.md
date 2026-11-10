@@ -17,6 +17,7 @@ went wrong. Newest entries at the bottom.
 | 2026-11-09 | 3 · Mechanisms | [Two side crankshafts](#two-side-crankshafts) |
 | 2026-11-09 | 3 · Mechanisms | [Four lateral crankshafts](#four-lateral-crankshafts) |
 | 2026-11-10 | 3 · Mechanisms | [Legs and drive in CAD](#legs-and-drive-in-cad) |
+| 2026-11-10 | 2 · CAD | [Onshape assembly](#onshape-assembly) |
 
 ## Printer calibration
 
@@ -694,7 +695,7 @@ to try one leg by hand. Parts and how they fit: [cad/drive/](cad/drive/).
 
 **Open:**
 
-- **Morante:** follow [cad/drive/onshape.md](cad/drive/onshape.md): import the STEP files into Onshape, assemble with mates (revolute for the crankshaft and the fork's
+- ~~Onshape assembly and animation~~: done in [Onshape assembly](#onshape-assembly).
   vertical screws, revolute for the leg on its screw, ball-and-slider for the ball in the bore) and animate. Compare
   the foot path with the simulator.
 - Print the test frame, one middle leg, a fork and crankshaft 2; turn it by hand. Before that, ideally, the phase 2
@@ -702,3 +703,43 @@ to try one leg by hand. Parts and how they fit: [cad/drive/](cad/drive/).
 - The base: fork seats in the rim notches, hollow bowl for the spine and idlers, spine mounting, a cap over the
   journal slots. The N20 drive (phase 4).
 
+## Onshape assembly
+
+**Phase 2 · CAD · 2026-11-10**
+
+**Goal:** assemble one leg on the test frame in Onshape from the STEP files, with mates that let it move as it will
+in the real thing, and animate it. This was the first assembly in Onshape.
+
+**Steps:** [cad/drive/onshape.md](cad/drive/onshape.md), with a picture of the edges to click for each mate (made by
+[`cad/drive/onshape_figures.py`](cad/drive/onshape_figures.py)). In short:
+
+1. Import `test-frame`, `crankshaft-2`, `leg-middle-right` and `pivot` (STEP) into one document. Insert the test frame
+   at the origin and **Fix** it, so the assembly is in robot coordinates.
+2. Make a helper part, the slider (Ø3 × 4 mm cylinder). Onshape has no mate for a ball that slides in a tube and
+   tilts, so it is built as crankshaft → **Ball** → slider → **Slider** → leg.
+3. Five mates: three **Revolute** (crankshaft in the frame, fork in the frame, leg in the fork, with offsets of 0.25,
+   0.4 and 0.2 mm, the designed clearances), **Ball** and **Slider**.
+4. **Animate** the crankshaft's revolute, 0–360°.
+
+Document (public): [Spider-Bot drive](https://cad.onshape.com/documents/07632681db3e0a6b5b785746/w/6c5d5bb7bfec5781a6827599/e/c59459f0a1ed69675318d6bb).
+
+**Result:**
+
+![Assembly in Onshape](cad/drive/images/onshape-assembly.png)
+
+- The leg has one degree of freedom: turning the crankshaft moves the fork, the leg and the ball together. The
+  animation runs through the full turn and looked right (Morante).
+- The offsets had to be negative: with positive ones the parts went into the walls. An offset is measured along the
+  connector's Z axis, whose direction depends on the face clicked. The tutorial now says so.
+- Foot path against the simulator: not measured (step 6 of the tutorial, skipped). It stays to be checked on the
+  printed leg.
+
+**Decisions:**
+
+- The tutorial was first written in Spanish for Morante, because the English mechanical terms were the hard part,
+  and then translated into English for the repo. It has a table of terms.
+
+**Open:**
+
+- Part 2 of the tutorial (the gear train with **Gear relation**s), optional.
+- Print the test frame, a middle leg, a fork and crankshaft 2, and turn them by hand.
