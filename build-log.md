@@ -734,11 +734,6 @@ Document (public): [Spider-Bot drive](https://cad.onshape.com/documents/07632681
 - Foot path against the simulator: not measured (step 6 of the tutorial, skipped). It stays to be checked on the
   printed leg.
 
-**Decisions:**
-
-- The tutorial was first written in Spanish for Morante, because the English mechanical terms were the hard part,
-  and then translated into English for the repo. It has a table of terms.
-
 **Open:**
 
 - Part 2 of the tutorial (the gear train with **Gear relation**s), optional.
