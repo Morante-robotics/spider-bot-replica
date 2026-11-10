@@ -6,6 +6,7 @@ went wrong. Newest entries at the bottom.
 | Date | Phase | Step |
 |---|---|---|
 | 2026-10 | 0 · Workshop | [Printer calibration](#printer-calibration) |
+| 2026-11-09 | 0 · Workshop | [First print: purge waste bin](#first-print-purge-waste-bin) |
 | 2026-11-08 | 2 · CAD | [Carcass base model](#carcass-base-model) |
 | 2026-11-09 | 2 · CAD | [Motor, battery holder and print scale](#motor-battery-holder-and-print-scale) |
 | 2026-11-09 | 2 · CAD | [Mesh repair](#mesh-repair) |
@@ -25,6 +26,30 @@ Bambu Lab P2S Combo (with AMS) running its automatic calibration before the firs
 printed in PLA.
 
 https://github.com/user-attachments/assets/948dd098-af7a-4972-a0bd-290c17e0126f
+
+## First print: purge waste bin
+
+**Phase 0 · Workshop · 2026-11-09**
+
+**Goal:** first real print on the P2S, to check the printer works before printing robot parts. The part is a bin
+that catches the filament the printer purges out of the chute at the back (on every filament change). Recommended
+as one of the first prints: it keeps the work table clean.
+
+**Steps:**
+
+1. Model: [P1S, P2S, X2D Poop Bin by Pichler](https://makerworld.com/models/1603348) on MakerWorld. Pick the print
+   profile **«P2S (10 mm higher) / without Purge Line Corner / with Logo»**: the P1S profile is 10 mm too low for
+   the P2S. For a P2S with the exhaust fan, use the X2D / P2S profile instead.
+2. Filament: Bambu PLA Basic, black.
+3. Print, then slide the bin's foot tab under the printer, below the purge chute.
+
+**Result:** the first print came out right: smooth walls, no visible defects. The printer works as
+expected after calibration.
+
+![Purge waste bin](images/purge-waste-box-1.jpg)
+
+_Video pending._
+<!-- Video: 1-spiderbot-purge-waste-box-1.mp4 -->
 
 ## Carcass base model
 
