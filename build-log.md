@@ -18,6 +18,7 @@ went wrong. Newest entries at the bottom.
 | 2026-11-09 | 3 · Mechanisms | [Four lateral crankshafts](#four-lateral-crankshafts) |
 | 2026-11-10 | 3 · Mechanisms | [Legs and drive in CAD](#legs-and-drive-in-cad) |
 | 2026-11-10 | 2 · CAD | [Onshape assembly](#onshape-assembly) |
+| 2026-11-10 | 2 · CAD | [Clearance test and test leg print plate](#clearance-test-and-test-leg-print-plate) |
 
 ## Printer calibration
 
@@ -738,3 +739,59 @@ Document (public): [Spider-Bot drive](https://cad.onshape.com/documents/07632681
 
 - Part 2 of the tutorial (the gear train with **Gear relation**s), optional.
 - Print the test frame, a middle leg, a fork and crankshaft 2, and turn them by hand.
+
+## Clearance test and test leg print plate
+
+**Phase 2 · CAD · 2026-11-10**
+
+**Goal:** one print run with everything needed to turn one leg by hand, plus a test of the hole clearance this
+printer needs, so the other 21 drive parts are printed once, with the right clearance.
+
+**Steps:**
+
+1. **Clearance test** ([`cad/clearance-test/`](cad/clearance-test/), `build.py`): a block with horizontal holes for
+   the journal (Ø4.0), the ball (Ø3.6) and an M3 screw (Ø3.0), each at +0.1 / +0.2 / +0.3 / +0.4 mm, plus 3 tap
+   holes for M3 (Ø2.3 / 2.5 / 2.7), and a pin with a Ø4.0 journal and a Ø3.6 ball printed lying down like a
+   crankshaft.
+   ![Clearance test](cad/clearance-test/images/parts.png)
+2. **Lay the leg flat.** Rotated onto its side for printing, only the tube touched the bed (190 mm²): the tube is
+   5.6 mm wide and the rest of the leg 5.0 mm, so the arm hung 0.3 mm in the air, too little for supports.
+   - Making the whole leg 5.6 mm wide brought the middle legs' knees to 0.09–0.21 mm from each other
+     (`check.py`, was 0.71 mm).
+   - Kept the leg 5.0 mm wide instead, and moved the arm, boss and knee 0.3 mm (and the shin 0.55 mm) towards the
+     face that goes on the bed, so that face is flush with the tube's. The fork's window moves with it. Bed contact
+     is now 567 mm².
+3. **Plate** ([`tools/bambu_plate.py`](tools/bambu_plate.py)): orient the parts, then let Bambu Studio's CLI arrange
+   and slice them with the system presets (P2S 0.4, 0.20 mm Standard, PLA Basic, Textured PEI). Supports are tree,
+   on the build plate only, so none go into the holes or the leg's bore. Then open it in Bambu Studio, check the
+   support settings, slice and save. Command and details: [print/README.md](print/README.md).
+
+**Result:**
+
+![Plate in Bambu Studio](print/images/prepare.png)
+
+![Sliced, with supports](print/images/preview-supports.png)
+
+- [`print/test-leg-plate.3mf`](print/test-leg-plate.3mf): test frame, middle leg (right), fork, crankshaft 2,
+  clearance block and pin. 1 h 28 min, 29.6 g of PLA (2.5 g of it support).
+- Bambu Studio warns about 2 regions of the leg it cannot support. Both are the top of the 3.8 mm bore and its
+  flared mouth inside the tube (9.8 mm², found by casting rays down from every overhang). They print as bridges.
+- Collision check of the whole robot with the moved leg (`check.py --gaps --step 30`): no overlaps over a full turn.
+  Middle legs 0.74–0.77 mm apart (were 0.72–0.75); the left rear leg 0.53 mm from its crank (was 0.61).
+- The CLI's support settings were dropped when the GUI opened the project. The tool now marks them as changed
+  settings in the .3mf. Not yet confirmed in the GUI.
+
+**Decisions:**
+
+- One plate for the test only. The rest of the drive waits for the clearance result and for the base.
+- The plate actually printed is the first version: leg 5.6 mm wide, with its fork (window 6.0 mm). The repo's
+  `test-leg-plate.3mf` has the offset leg. For one leg on the test frame both behave the same, so the offset version
+  is assumed to work as well and is not printed separately (Morante).
+
+**Open:**
+
+- Print it. **Morante:** shoot the timelapse, the parts off the bed and the mechanism turning by hand; drop them in
+  the Inbox.
+- Read the clearance block and set `CLR` (and `TAP`) in `cad/drive/build.py`.
+- Hardware: M3×12 + nut and 2 × M3×6 for the test frame.
+- The screenshots show the leg before the offset fix (the change is 0.3 mm, not visible at this scale).
