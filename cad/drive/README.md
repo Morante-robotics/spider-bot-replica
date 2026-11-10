@@ -29,7 +29,7 @@ Needs Python 3.12 with build123d, numpy, trimesh and manifold3d. All sizes come 
 | `test-frame.stl` | Desk stand for one middle leg, its pivot and crankshaft 2, turned by hand | 75.4 × 35.5 × 77.7 | 1 |
 | `assembly-0.stl` | Whole drive at crank angle 0°, for reference only | 218.0 × 87.5 × 71.3 | — |
 
-STEP files with the same names are for Onshape (how to assemble and animate them: [onshape.md](onshape.md)). Bambu Studio `--info` reports `manifold = yes` for all of them.
+STEP files with the same names are for Onshape (how to assemble and animate them: [onshape.md](onshape.md); the test-frame assembly: [Onshape](https://cad.onshape.com/documents/07632681db3e0a6b5b785746/w/6c5d5bb7bfec5781a6827599/e/c59459f0a1ed69675318d6bb)). Bambu Studio `--info` reports `manifold = yes` for all of them.
 
 **How it fits together:**
 
