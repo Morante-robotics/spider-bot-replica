@@ -6,7 +6,7 @@ Basic, 0.20 mm Standard). Open one in Bambu Studio, check it and send it: **Slic
 | Plate | Parts | Time | PLA |
 |---|---|---|---|
 | [`test-leg-plate.3mf`](test-leg-plate.3mf) | [Test frame](../cad/drive/), middle leg (right), fork, crankshaft 2, [clearance block and pin](../cad/clearance-test/) | 1 h 28 min | 29.6 g |
-| [`test-frame-v2.3mf`](test-frame-v2.3mf) | Test frame with the arms fixed and a keeper for the crankshaft, fork on M3 pins, and the leg, all with the clearances from the block (2026-11-11) | about 71 min | 25.7 g |
+| [`test-frame-v2.3mf`](test-frame-v2.3mf) | Test frame with the arms fixed and a keeper for the crankshaft, fork on M3 pins, and the leg, all with the clearances from the block (2026-11-11) | 1 h 18 min | 25.6 g |
 
 ## Test leg plate
 
@@ -34,7 +34,8 @@ the top of the bore and the flared mouth inside the tube. Both are short bridges
    The tool lists the `--set` overrides in the project as changed settings. Without that, the GUI opens the project
    with the plain system preset and drops them.
 2. Open the .3mf in Bambu Studio and check **Process → Support**: **Enable support** ticked, **tree(auto)**, **On
-   build plate only** ticked. If they are not ticked, tick them. **Slice plate**, check the preview, and save (⌘S).
+   build plate only** ticked (checked on `test-frame-v2.3mf`: the GUI keeps them). **Slice plate**, check the preview,
+   and save (⌘S).
 
 **Hardware for the test:** 1 × M3×16 screw + nut (leg in the fork), 2 × M3×10 screws + 2 nuts (fork in the frame, from v2), 2 × M3×12 + 2 nuts (keeper, v2), and a few
 spare M3 screws for the clearance block's bottom row and its 3 tap holes.
