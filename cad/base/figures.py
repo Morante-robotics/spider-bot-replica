@@ -46,12 +46,14 @@ def load(n, folder=HERE):
 def draw3d(ax, items, elev, azim, lim=None):
     light = np.array([0.4, -0.6, 0.7])
     light /= np.linalg.norm(light)
-    allb = []
+    allb, tris, cols = [], [], []
     for m, col in items:
         sh = 0.35 + 0.65 * np.abs(m.face_normals @ light)
-        f = np.array(matplotlib.colors.to_rgb(col))[None] * sh[:, None]
-        ax.add_collection3d(Poly3DCollection(m.triangles, facecolors=f, edgecolors="none"))
+        cols.append(np.array(matplotlib.colors.to_rgb(col))[None] * sh[:, None])
+        tris.append(m.triangles)
         allb.append(m.bounds)
+    # one collection, so matplotlib sorts every face by depth instead of each part as a whole
+    ax.add_collection3d(Poly3DCollection(np.vstack(tris), facecolors=np.vstack(cols), edgecolors="none"))
     b = np.array(allb)
     lo, hi = b[:, 0].min(0), b[:, 1].max(0)
     mid, r = (lo + hi) / 2, (hi - lo).max() / 2
@@ -174,7 +176,7 @@ def fig_band():
     """Side view before and after (silhouettes from the side)."""
     old = [load("spideybot_base", os.path.join(HERE, "..", "carcass-120")),
            load("spideybot_body", os.path.join(HERE, "..", "carcass-120"))]
-    new = [load("base-v1"), load("body-lifted")]
+    new = [trimesh.util.concatenate([load("base-v1"), load("front-block")]), load("body-lifted")]   # front block: own part
     fig = plt.figure(figsize=(14, 6.5), dpi=100)
     for k, (items, title) in enumerate(((old, "Carcass as downloaded (120 %)"),
                                         (new, f"Base v1 and the body {BB.LIFT:g} mm higher"))):
