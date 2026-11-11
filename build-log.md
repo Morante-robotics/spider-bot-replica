@@ -42,7 +42,8 @@ The robot's story in three parts, then what is left to do and a glossary.
    - [Test leg: first assembly and clearance result](#test-leg-first-assembly-and-clearance-result) · 2026-11-11 · ✅ v2 designed
    - [Test leg v2: turning by hand](#test-leg-v2-turning-by-hand) · 2026-11-11 · ✅ the leg turns
    - [Base v1 in CAD](#base-v1-in-cad) · 2026-11-11 · 🔄 designed, not printed
-   - [Gear train test](#gear-train-test) · 2026-11-11 · 🔄 the gears jam; redesign pending
+   - [Gear train test](#gear-train-test) · 2026-11-11 · ✅ faults found
+   - [Gear train v2 in CAD](#gear-train-v2-in-cad) · 2026-11-11 · 🔄 designed, not printed
 4. **[Open items](#open-items)**: everything still to do.
 5. **[Glossary](#glossary)**: the terms used in the entries.
 
@@ -328,7 +329,9 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
    the gears; it is modelled and checked over a full turn.
 5. **The gears.** Printed on their own, the four crankshafts jammed and lifted out of their slots. A new check that
    turns the gears found that two of the idlers cannot mesh with both of their crankshafts at the designed crank
-   angles, and that the gears have no backlash. The gear train is being redesigned before the base is printed.
+   angles, and that the gears have no backlash. In the redesign each crankshaft's gear is turned on its shaft so
+   that every idler meshes with both neighbours, the gears have backlash, and a cap holds the shafts in the test.
+   It passes the new check; the test is printed again before the base.
 
 <img src="sim/images/drive-attempts.png" alt="The three drives tried, from above and from the side">
 
@@ -1177,7 +1180,7 @@ The window now has 0.5 mm a side: [Base v1 in CAD](#base-v1-in-cad).
 > into the carcass then showed a bigger problem: the forks are 22 mm tall, and the body sits on the base right above
 > the leg notches, so the top half of every fork went into the body. The body now sits 18.7 mm higher, on a **band**
 > that is part of the new base. Base v1 is modelled, nothing collides over a full turn, and its print plate is ready
-> (7 h 55 min).
+> (about 8 h).
 
 **What the base has to do.** It holds the eight forks at the leg notches, carries the four crankshafts and the
 idler gears, leaves room for every leg to swing, and still looks like the carcass from outside. It is made from
@@ -1270,7 +1273,7 @@ body's outline, and the screws and fork bosses show.*
 |---|---|
 | Overlaps over a full turn (every 10°) | None |
 | Closest pairs | Journals in their slots 0.25 mm a side, idlers 0.45 mm, legs 0.65 mm or more: the designed clearances |
-| [`print/base-v1.3mf`](print/base-v1.3mf) | 7 h 55 min, 139.9 g of PLA |
+| [`print/base-v1.3mf`](print/base-v1.3mf) | 7 h 59 min, 140.8 g of PLA (keel rebuilt for [gear train v2](#gear-train-v2-in-cad)) |
 | Hardware | 16 × M3×10 + nuts (fork swivels), 3 × M3×10 + nuts (cap) |
 
 Full list: [`cad/base/check-result.txt`](cad/base/check-result.txt).
@@ -1293,7 +1296,7 @@ base. The foot-path comparison was dropped.
 
 ### Gear train test
 
-**Phase 3 · Mechanisms · 2026-11-11** · Status: 🔄 the gears jam; redesign pending
+**Phase 3 · Mechanisms · 2026-11-11** · Status: ✅ faults found; fixed in [Gear train v2 in CAD](#gear-train-v2-in-cad)
 
 > **In short.** Before printing the base, the four crankshafts and the three gears between them (the **idlers**)
 > were printed on a loose spine and turned by hand. They turn in jerks and jam, and the crankshafts lift out of
@@ -1349,8 +1352,9 @@ real angle and pushes every moving part in 26 directions to see what stops it. I
 
 <img src="cad/drive/images/gear-phase.png" alt="Each idler at its best angle between its two crankshafts">
 
-*Fig. 3 · Each idler (yellow) turned to the angle that fits best between its two crankshafts (blue), with the cranks
-at their designed angles. Red: tooth inside tooth. Idlers 1 and 2 cannot fit both neighbours; idler 3 can. Made by
+*Fig. 3 · Top row: each idler (yellow) turned to the angle that fits best between its two crankshafts (blue), with
+the cranks at their designed angles. Red: tooth inside tooth. Idlers 1 and 2 cannot fit both neighbours; idler 3
+can. The bottom row is the fix, in [Gear train v2 in CAD](#gear-train-v2-in-cad). Made by
 [`cad/drive/gear_phase_figure.py`](cad/drive/gear_phase_figure.py).*
 
 **Why the earlier check missed it.** [`cad/drive/check.py`](cad/drive/check.py) skipped every pair of gears, as
@@ -1381,13 +1385,96 @@ The spec places the idlers at the angle that fits their two crankshafts best, th
 - **A test rig holds its parts as the robot will.** The gear train is tested again with a cap over the slots.
 - **Base v1 waits.** It has the same idlers and the same gear spacing, so it is not printed until the gear train
   turns.
+- **Redesigned** in [Gear train v2 in CAD](#gear-train-v2-in-cad).
+
+[↑ Contents](#contents)
+
+### Gear train v2 in CAD
+
+**Phase 3 · Mechanisms · 2026-11-11** · Status: 🔄 designed, not printed
+
+> **In short.** The gear train was redesigned to fix the three faults of the [first test](#gear-train-test). Each
+> crankshaft's gear is now turned on its shaft by its own angle, so every idler meshes with both of its
+> crankshafts while the cranks keep their gait angles. The gears are set a little further apart for backlash, and
+> a cap holds the crankshafts down, as the base's cap will. It passes the new check over a full turn; the test is
+> printed again before the base.
+
+**The idea.** A crankshaft is printed in one piece, so the angle between its gear's teeth and its cranks can be
+anything. Before, it was the same on all four, and two idlers could not find an angle that fitted both neighbours.
+Now each crankshaft gets its own **gear offset**, worked out from where the shafts and idlers sit, so that the teeth
+of both neighbours line up with the idler's gaps.
+
+#### Steps
+
+1. Gear offsets: 0°, 28.1°, 21.5° and 1.3° for crankshafts 1 to 4, computed in `gear_offsets()` in
+   [`cad/drive/build.py`](cad/drive/build.py).
+2. Idlers: 12, 12 and 20 teeth (were 11, 10 and 20). Fewer than 12 teeth would need a modified tooth shape.
+   Idlers 1 and 2 are now the same part.
+3. Backlash: every pair of gears 0.275 mm further apart than in theory (`BACKLASH` = 0.2 mm). The crankshaft gears
+   print lying down, so their teeth are rougher than the idlers'.
+4. A **test cap** over the spine, with one tongue down each journal slot, like the base's cap. It is held by
+   2 × M3×12 into nuts slid into the spine's end blocks. The spine got a foot so it stands on the desk.
+5. Marks: with the offsets, each crankshaft fits in one place and one way round only. A shaft turned end for end
+   would mesh with its cranks 2.5–13° off, which is hard to see. So each crankshaft has 1 to 4 small dots on its +X
+   crank web (the side of the right legs), and the spine and the cap have the same dots by each slot.
+6. The idlers' first layer is 0.2 mm smaller and their bore is chamfered at the bed, against the squashed first
+   layer.
+7. Base v1 was rebuilt: its keel follows the new idlers (0.57 mm deeper). Its plate was sliced again.
+8. Check with [`tools/cad_verify.py`](../tools/cad_verify.py) every 5°, and a 2D gear check every 1°, then the
+   whole drive against base v1, its cap and the body every 10°.
+
+<img src="cad/drive/images/gear-train-test-v2-parts.png" alt="The parts of the gear train test v2">
+
+*Fig. 1 · The parts of the test. The spine has a foot and an M3 nut slot at each end; the cap's tongues go down the
+journal slots. Each crankshaft is different: look at where its cranks point compared with its gear teeth. Made by
+[`tools/stl_preview.py`](tools/stl_preview.py).*
+
+#### Result
+
+The bottom row of Fig. 3 in [Gear train test](#gear-train-test) shows every idler meshing with both neighbours.
+
+| Check | Result |
+|---|---|
+| [`verify-gear-train.txt`](cad/drive/verify-gear-train.txt): integrity, motion, gears, what holds each part, assembly order | PASS, 0 failures, 0 warnings |
+| [`check-gear-train.txt`](cad/drive/check-gear-train.txt): every mesh, every 1° | No tooth in tooth; backlash 0.21–0.22 mm |
+| Crankshafts and idlers held | Only spin is free; at most 0.25 mm play (journals), 0.45 mm (idlers along their axle) |
+| [Base v1](cad/base/check-result.txt) and [whole drive](cad/drive/check-result.txt) over a full turn | No overlaps; closest pairs are the designed clearances |
+| [`print/gear-train-test-v2.3mf`](print/gear-train-test-v2.3mf) | 1 h 20 min, 33.7 g of PLA |
+
+<details>
+<summary>How to reproduce</summary>
+
+```
+python3 cad/drive/build.py
+cd cad/drive
+python3 ../../../tools/cad_verify.py verify_gear_train.py --out verify-gear-train.txt --render images/verify
+python3 check_gear_train.py
+python3 gear_phase_figure.py
+python3 check.py --gaps
+cd ../base && python3 build.py && python3 check.py --step 10
+```
+
+The spec places each idler at the angle its formula gives (not the best fit), so a crankshaft a tooth off would show
+as an overlap.
+
+</details>
+
+#### Decisions
+
+- **Gear offsets, not new positions.** The shafts stay where the simulator put them; only the gear turns on its
+  shaft.
+- **About 0.2 mm of backlash** instead of 0.15: the check wants at least 0.08 mm free on each side of a tooth, and
+  the crankshaft gears' teeth print stepped.
 
 #### Next
 
-Redesign the gear train in [`cad/drive/build.py`](cad/drive/build.py): tooth counts and positions that let every idler
-mesh with both neighbours at the designed crank angles (or a crank angle set at assembly), about 0.15 mm of
-backlash, and a cap that holds the crankshafts in the test. Then reprint the test and turn it by hand, and only then
-print [`print/base-v1.3mf`](print/base-v1.3mf).
+Print [`print/gear-train-test-v2.3mf`](print/gear-train-test-v2.3mf) and assemble it as in
+[print/README](print/README.md#gear-train-test-v2): 5 × M3×12 and 5 M3 nuts. Turn crankshaft 1 ten times. It passes
+if the four shafts turn together without jerks, lifting or skipping, all cranks come back level together every turn,
+each idler spins freely on its screw, and the cap's tongues go into the slots without force. If it catches at the
+same angle every turn, turn each shaft with one idler at a time to find which mesh, and clean those teeth. If you
+have 3 mm steel pins, use them as idler axles instead of the screws (the robot uses pins). Then print
+[`print/base-v1.3mf`](print/base-v1.3mf).
 
 [↑ Contents](#contents)
 
@@ -1399,7 +1486,7 @@ outside the repo.
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| Gear train v2: idlers that mesh both neighbours at the designed crank angles, backlash, a cap in the test; reprint and turn by hand | [Gear train test](#gear-train-test) | 3 |
+| Print the gear train test v2 and turn it by hand | [Gear train v2 in CAD](#gear-train-v2-in-cad) | 3 |
 | Then print base v1 (with the gear train v2), the 8 legs and 8 forks, assemble the drive in the base and turn it by hand | [Base v1 in CAD](#base-v1-in-cad) | 3 |
 | Fix the front block (it stands loose on the deck and the cap) and the body on the band | [Base v1 in CAD](#base-v1-in-cad) | 2 |
 | Base for looks, once v1 works: band following the body's outline, screws and fork bosses hidden, no gap under the body's rear, side lips back | [Base v1 in CAD](#base-v1-in-cad) | 5 |
@@ -1439,5 +1526,6 @@ Terms used in the entries, in the order they first appear, with a link to that e
 | **Backlash** | The small play between meshing teeth. Without it, printed gears bind. | [Gear train test](#gear-train-test) |
 | **Keel** | A narrow ridge under the bowl that covers the gears where they go lower than the bowl. | [Base v1 in CAD](#base-v1-in-cad) |
 | **Keeper** | A cover that holds the crankshaft down in its slots. | [Test leg…](#test-leg-first-assembly-and-clearance-result) |
+| **Gear offset** | The angle a gear is turned on its own shaft, relative to the cranks. | [Gear train v2 in CAD](#gear-train-v2-in-cad) |
 
 [↑ Contents](#contents)

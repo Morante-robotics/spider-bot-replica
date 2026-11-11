@@ -42,6 +42,7 @@ import importlib.util
 import itertools
 import os
 import sys
+import time
 
 import numpy as np
 import trimesh
@@ -451,11 +452,16 @@ def main():
     for name, p in spec.PARTS.items():
         meshes[name] = p["mesh"] if "mesh" in p else trimesh.load(os.path.join(base, p["stl"]), force="mesh")
     rep = Report()
-    check_integrity(spec, meshes, rep, args.quick)
-    check_motion(spec, meshes, rep)
-    check_retention(spec, meshes, rep, args.quick)
-    check_assembly(spec, meshes, rep)
-    check_print(spec, meshes, rep)
+    timing = []
+    for label, fn in (("integrity", lambda: check_integrity(spec, meshes, rep, args.quick)),
+                      ("motion", lambda: check_motion(spec, meshes, rep)),
+                      ("retention", lambda: check_retention(spec, meshes, rep, args.quick)),
+                      ("assembly", lambda: check_assembly(spec, meshes, rep)),
+                      ("print", lambda: check_print(spec, meshes, rep))):
+        t0 = time.perf_counter()
+        fn()
+        timing.append(f"{label} {time.perf_counter() - t0:.0f} s")
+        print(f"[{timing[-1]}]", file=sys.stderr, flush=True)
     txt = rep.text()
     print(txt)
     if args.out:

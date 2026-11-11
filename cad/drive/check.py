@@ -50,7 +50,8 @@ def poses(theta):
         out.append((f"crankshaft{i}", f"crankshaft-{i + 1}", tmat(B.rot_x(-theta), [B.CX, *sh[i]])))
     out.append(("spine", "spine", np.eye(4)))
     for k, (y, z, n) in enumerate(B.idlers()):
-        out.append((f"idler{k}", f"idler-{k + 1}", tmat(YZ, [B.CX - (B.GEAR_T - 0.4) / 2, y, z])))
+        a = B.idler_phase(k) + theta * B.SHAFT_TEETH / n        # its real angle, meshing both crankshafts
+        out.append((f"idler{k}", f"idler-{k + 1}", tmat(B.rot_x(a) @ YZ, [B.CX - (B.GEAR_T - 0.4) / 2, y, z])))
     return out
 
 

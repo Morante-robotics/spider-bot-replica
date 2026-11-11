@@ -7,8 +7,9 @@ Basic, 0.20 mm Standard). Open one in Bambu Studio, check it and send it: **Slic
 |---|---|---|---|
 | [`test-leg-plate.3mf`](test-leg-plate.3mf) | [Test frame](../cad/drive/), middle leg (right), fork, crankshaft 2, [clearance block and pin](../cad/clearance-test/) | 1 h 28 min | 29.6 g |
 | [`test-frame-v2.3mf`](test-frame-v2.3mf) | Test frame v2 with a keeper for the crankshaft, the fork on M3 pins, and the leg, with the clearances from the block | 1 h 18 min | 25.6 g |
-| [`gear-train-test.3mf`](gear-train-test.3mf) | [Spine](../cad/drive/) on its own, the 4 crankshafts and the 3 idlers, to turn the gear train by hand | 47 min | 16.5 g |
-| [`base-v1.3mf`](base-v1.3mf) | [Base v1](../cad/base/), its cap (upside down) and the front block | 7 h 55 min | 139.9 g |
+| [`gear-train-test.3mf`](gear-train-test.3mf) | First gear train test: [spine](../cad/drive/) on its own, the 4 crankshafts and the 3 idlers (made with the earlier parts; the STLs it was built from have changed) | 47 min | 16.5 g |
+| [`gear-train-test-v2.3mf`](gear-train-test-v2.3mf) | Gear train test v2: spine on a foot, test cap, the 4 crankshafts and the 3 idlers | 1 h 20 min | 33.7 g |
+| [`base-v1.3mf`](base-v1.3mf) | [Base v1](../cad/base/), its cap (upside down) and the front block | 7 h 59 min | 140.8 g |
 
 ## Test leg plate
 
@@ -62,6 +63,35 @@ are open at the top, so hold the shafts down with a finger while turning cranksh
 python3 tools/bambu_plate.py print/gear-train-test.3mf cad/drive/spine.stl cad/drive/crankshaft-1.stl \
     cad/drive/crankshaft-2.stl cad/drive/crankshaft-3.stl cad/drive/crankshaft-4.stl cad/drive/idler-1.stl \
     cad/drive/idler-2.stl cad/drive/idler-3.stl \
+    --set enable_support=1 "support_type=tree(auto)" support_on_build_plate_only=1 "curr_bed_type=Textured PEI Plate"
+```
+
+## Gear train test v2
+
+The four crankshafts and three idlers in the test spine, closed by a cap, to check by hand that all four shafts turn
+together before printing [base v1](#base-v1). Same settings as the other plates; the crankshafts get tree supports,
+the cap prints upside down.
+
+**Hardware:** 5 × M3×12 socket head screws and 5 M3 nuts (3 as idler axles, 2 for the cap). 3 mm steel pins work
+better than screws as idler axles, if you have them.
+
+**Assembly:**
+
+1. Slide an M3 nut into the slot at each end of the spine, flats along the slot, until it stops over the hole.
+2. Drop the idlers between the walls from above: the two 12-tooth ones at the front, the 20-tooth one at the rear.
+3. Each idler: an M3×12 from the +X side (the wall with dots) through the wall, the idler and the other wall, nut
+   on the −X side. Tighten only until the screw stops wobbling: the idler must still spin.
+4. Crankshafts front to rear (1 to 4 dots), dots on the side of the spine's dots. Hold every crank level; on the +X
+   side they point front, rear, front, rear. Lower each into its slots, turning it a little until the teeth drop
+   in. If it only drops in with its cranks tilted (30°: one tooth off), lift it and try again.
+5. Check that all eight cranks are level at the same time.
+6. Cap on, dotted edge on +X, tongues down the slots, and 2 × M3×12 into the nuts.
+7. Turn crankshaft 1 by its crank, ten full turns.
+
+```
+python3 tools/bambu_plate.py print/gear-train-test-v2.3mf cad/drive/spine.stl cad/drive/test-cap.stl@180,0,0 \
+    cad/drive/crankshaft-1.stl cad/drive/crankshaft-2.stl cad/drive/crankshaft-3.stl cad/drive/crankshaft-4.stl \
+    cad/drive/idler-1.stl cad/drive/idler-2.stl cad/drive/idler-3.stl \
     --set enable_support=1 "support_type=tree(auto)" support_on_build_plate_only=1 "curr_bed_type=Textured PEI Plate"
 ```
 

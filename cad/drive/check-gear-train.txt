@@ -1,0 +1,19 @@
+crankshaft gear offsets: 0.00°, 28.09°, 21.49°, 1.27°
+centre distance + 0.275 mm per mesh, design backlash 0.2 mm
+
+idler 1: 12 teeth at y -27.22, z 56.51; phase at crank 0: 0.95°; centre distances 12.275, 12.275 mm (theory 12.0)
+  with crankshaft 1: overlap 0.0000 mm²; backlash 0.217–0.219 mm (at the pitch circle); off-centre in its play 0.001 mm  ok
+  with crankshaft 2: overlap 0.0000 mm²; backlash 0.217–0.219 mm (at the pitch circle); off-centre in its play 0.001 mm  ok
+  both neighbours at once: free play 0.217–0.218 mm  ok
+
+idler 2: 12 teeth at y -9.67, z 54.38; phase at crank 0: 5.21°; centre distances 12.275, 12.275 mm (theory 12.0)
+  with crankshaft 2: overlap 0.0000 mm²; backlash 0.217–0.219 mm (at the pitch circle); off-centre in its play 0.001 mm  ok
+  with crankshaft 3: overlap 0.0000 mm²; backlash 0.217–0.220 mm (at the pitch circle); off-centre in its play 0.001 mm  ok
+  both neighbours at once: free play 0.217–0.219 mm  ok
+
+idler 3: 20 teeth at y 12.18, z 55.77; phase at crank 0: 2.17°; centre distances 16.275, 16.275 mm (theory 16.0)
+  with crankshaft 3: overlap 0.0000 mm²; backlash 0.213–0.215 mm (at the pitch circle); off-centre in its play 0.001 mm  ok
+  with crankshaft 4: overlap 0.0000 mm²; backlash 0.213–0.215 mm (at the pitch circle); off-centre in its play 0.001 mm  ok
+  both neighbours at once: free play 0.213–0.214 mm  ok
+
+check_gear_train: PASS

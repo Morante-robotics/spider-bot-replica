@@ -23,9 +23,10 @@ Needs Python 3.12 with build123d, numpy, trimesh and manifold3d. All sizes come 
 | `leg-middle-right.stl` / `-left` | Middle legs (2nd and 3rd) | 99.7 × 7.6 × 67.6 | 2 + 2 |
 | `leg-rear-right.stl` / `-left` | Rear leg | 87.3 × 7.6 × 67.6 | 1 + 1 |
 | `pivot.stl` | Fork that holds a leg at the rim | 10.6 × 10.0 × 22.0 | 8 |
-| `crankshaft-1.stl` … `-4.stl` | One piece: 12-tooth gear, two journals, two cranks with balls (front to rear). Crankshaft 4's crank webs are 1.5 mm thick instead of 2, to keep them clear of the rear legs | 27.6 × 14.0 × 14.0 | 1 each |
-| `idler-1.stl`, `-2`, `-3` | Idler gears, 11, 10 and 20 teeth | up to 22.0 × 22.0 × 2.6 | 1 each |
-| `spine.stl` | Two walls that carry the 4 crankshafts (slots open at the top) and the idler pins. Reference only: the robot's spine is built into [base v1](../base/) | 8.5 × 87.3 × 26.1 | — |
+| `crankshaft-1.stl` … `-4.stl` | One piece: 12-tooth gear, two journals, two cranks with balls (front to rear). Each is different: its gear is turned on the shaft by its own offset, and 1–4 dots on the +X web say which it is. Crankshaft 4's crank webs are 1.5 mm thick instead of 2, to keep them clear of the rear legs | 27.6 × 14.0 × 14.0 | 1 each |
+| `idler-1.stl`, `-2`, `-3` | Idler gears, 12, 12 and 20 teeth | up to 22.0 × 22.0 × 2.6 | 1 each |
+| `spine.stl` | Gear train test: two walls on a foot that carry the 4 crankshafts and the idler axles, an M3 nut slot at each end, dots by each slot. The robot's spine is built into [base v1](../base/) | 30.0 × 97.3 × 32.5 | 1 |
+| `test-cap.stl` | Gear train test: cap whose tongues hold the crankshafts down in their slots, as base v1's cap does (print upside down) | 20.0 × 97.3 × 11.7 | 1 |
 | `test-frame.stl` | Desk stand for one middle leg, its pivot and crankshaft 2, turned by hand | 75.4 × 35.5 × 80.1 | 1 |
 | `test-frame-keeper.stl` | Cap that holds crankshaft 2 in the test frame (print upside down) | 8.5 × 28.0 × 9.0 | 1 |
 | `assembly-0.stl` | Whole drive at crank angle 0°, for reference only | 218.0 × 87.5 × 71.3 | — |
@@ -39,9 +40,12 @@ STEP files with the same names are for Onshape (how to assemble and animate them
   so it can tilt up and down (6–23°). The fork swings left and right (±6°) on two M3 screws driven into its top and
   bottom, which turn in the rim (or the test frame). The leg does not roll about its own axis.
 - **Gait:** the two cranks on a crankshaft sit 180° apart. Neighbouring crankshafts are printed 180° apart too, so
-  left legs 1 and 3 + right legs 2 and 4 move against the other four. Assemble with the cranks as printed.
+  left legs 1 and 3 + right legs 2 and 4 move against the other four. Assemble with every crank level (crank
+  angle 0°) and the dots on +X, the side of the right legs: a shaft one tooth off has its cranks 30° from level.
 - **Gears:** module 1, 20° pressure angle, 3 mm wide (idlers 2.6 mm). The crankshaft gears all have 12 teeth, so the
-  four turn at the same speed. The idlers sit below the line of shafts. The motor's drive is designed in phase 4.
+  four turn at the same speed. The idlers sit below the line of shafts, each 0.275 mm further from its crankshafts
+  than in theory, for about 0.2 mm of backlash (`BACKLASH`). Each crankshaft's gear offset (`gear_offsets()`) lets
+  every idler mesh with both of its neighbours. The motor's drive is designed in phase 4.
 
 **Hardware:** for the whole robot, 8 × M3×16 screws + nylon lock nuts (leg pivots; the fork is 10.0 mm across, so M3×12
 leaves no room for the nut), 16 × M3×10 screws + nuts (forks, as pins: they go in [base v1](../base/)), 3 × 3 mm steel pins 9 mm long (idlers). For the test frame:
@@ -72,6 +76,7 @@ Figure: [`screws_figure.py`](screws_figure.py).
 | Legs | On their −Y face (rotate 90° about X): arm, boss, knee and shin are offset so their −Y face is flush with the tube's, and the leg lies flat (the shin rises 3 mm towards the foot) | Tree, on the build plate only, under the shin |
 | Crankshafts | Axis horizontal, so the ball stubs are not split by layer lines | Tree |
 | Pivot, spine | As modelled (Z up) | None |
+| Test cap | Upside down, tongues up | None |
 | Idlers | Flat | None |
 | Test frame | Plate on the bed | Tree, under the pivot arms |
 
@@ -85,6 +90,7 @@ closer than 1 mm. Latest result: [`check-result.txt`](check-result.txt).
 **Gear train check** ([`verify_gear_train.py`](verify_gear_train.py), a spec for the shared
 [`tools/cad_verify.py`](../../../tools/cad_verify.py)): the gear train test with every gear turning at its real
 angle, and what holds each part. Latest result: [`verify-gear-train.txt`](verify-gear-train.txt); pictures in
-`images/verify/`. [`gear_phase_figure.py`](gear_phase_figure.py) draws each idler between its two crankshafts.
+`images/verify/`. [`check_gear_train.py`](check_gear_train.py) checks every mesh in 2D every 1° ([`check-gear-train.txt`](check-gear-train.txt)).
+[`gear_phase_figure.py`](gear_phase_figure.py) draws each idler between its two crankshafts, v1 and v2.
 
 What is still to do on the drive: [Open items](../../build-log.md#open-items) in the build log.

@@ -8,8 +8,12 @@ Parts (all PLA):
                                          up and down) and two printed trunnions on top and bottom let it swing.
   crankshaft-{1..4}                      one piece: gear in the middle, a journal and a crank either side, a ball on
                                          each crank pin. Front to rear; the cranks are printed at their phase.
+                                         Each gear is turned by its own offset to the cranks (gear_offsets()), so
+                                         every idler meshes both neighbours; dots on the +X web give its number.
   idler-{1..3}                           idler gears between the crankshafts, so all four turn the same way.
-  spine                                  two walls holding the crankshafts (slots open at the top) and the idler pins.
+  spine                                  gear train test: two walls on a foot, holding the crankshafts (slots open at
+                                         the top) and the idler axles; the robot's spine is built into base v1.
+  test-cap                               closes the test spine's slots as base v1's cap does (tongues), 2 × M3×12.
   test-frame                             desk stand for one middle leg, its pivot and crankshaft 2, turned by hand.
 
 Coordinates as in ../carcass-120 and ../../sim (mm, z up, forward = -Y). Geometry from
@@ -69,6 +73,22 @@ NUT_AF = 5.5         # M3 nut across flats
 KEEP_Y = 14.0        # test frame: the shaft's walls reach this far either side of the shaft (end blocks beyond KEEP_GAP)
 KEEP_GAP = 8.5       # end blocks start here, clear of the gear's tips (radius 7)
 KEEP_SCREW_Y = 11.25 # keeper screws, either side of the shaft
+# gear train v2 (the v1 test jammed: idlers 1-2 could not mesh both neighbours, zero backlash, shafts lifted out)
+PRESSURE = 20.0      # pressure angle (deg), as in gear_profile()
+IDLER_MIN_TEETH = 12 # fewest idler teeth: under 12 the involute is undercut without profile shift (v1 had 11 and 10)
+BACKLASH = 0.20      # circumferential backlash per mesh at the pitch circle (brief: 0.1-0.25). 0.20, not 0.15: the
+                     # crank gears print axis-horizontal (rougher flanks), and cad_verify wants >= 0.08 mm a side
+CD_EXTRA = BACKLASH / (2 * np.tan(np.radians(PRESSURE)))   # centre distance added per mesh for that backlash (0.27)
+TEST_TOP = 72.8      # test spine's top = base v1 deck underside (../base/build.py SEAM - WALL): tongues as long as there
+CAP_CLR = 0.3        # tongue in its journal slot (../base/build.py CAP_CLR)
+TEST_CAP_T = 5.0     # test cap plate: thick and wide (2 screws only, at the ends) so it does not bow up between them
+TEST_CAP_W = 20.0
+END_IN, END_OUT = KEEP_GAP, 17.0   # test spine end blocks, |y| from the end shafts (clear of the gear tips, radius 7)
+END_SCREW = END_IN + 4.25          # cap screw in each end block (the nut's inner corner stays 0.9 mm off the gear side)
+CAP_SCREW_L = 12.0   # M3×12 cap screws (as v1's axles and the test frame keeper)
+HEAD_D, HEAD_H = 5.5, 3.0          # M3 socket head
+FOOT_T, FOOT_W = 3.0, 30.0         # test spine foot plate: stands on the desk, and the thin walls print on it
+MARK_D, MARK_DEPTH = 1.2, 0.5      # index dots: crankshaft number, on the +X (right legs') side
 
 GEO = json.load(open(os.path.join(HERE, "..", "..", "sim", "toy_leg_3d_rows_cad.json")))[0]
 P_ = {k: GEO[k] for k in sim.ranges("rows")}
@@ -208,15 +228,33 @@ def gear(teeth, t=GEAR_T):
     return extrude(Polygon(*gear_profile(teeth), align=None), amount=t)
 
 
+def dice(n, pitch=1.3):
+    """Dot positions (u, v) of a dice face showing n (1-4)."""
+    c = {1: [(0, 0)], 2: [(-1, -1), (1, 1)], 3: [(-1, -1), (0, 0), (1, 1)], 4: [(-1, -1), (-1, 1), (1, -1), (1, 1)]}
+    return [(pitch * u, pitch * v) for u, v in c[n]]
+
+
+def marks(n, x, yc, zc, sx=1):
+    """Index dots (dice face n) sunk into a face at x whose outward normal is sx·X, centred on (yc, zc)."""
+    out = None
+    for u, v in dice(n):
+        s = Pos(x, yc + u, zc + v) * Sphere(MARK_D / 2 + 0.1)
+        s = s.translate((sx * (MARK_D / 2 + 0.1 - MARK_DEPTH), 0, 0))
+        out = s if out is None else out + s
+    return out
+
+
 def shaft_phases(i):
     return np.pi * sim.GROUP["R"][i], np.pi * sim.GROUP["L"][i]
 
 
 def crankshaft(i):
-    """Crankshaft of leg pair i, along X, centred on the body axis (x = 0 here), at crank angle 0."""
+    """Crankshaft of leg pair i, along X, centred on the body axis (x = 0 here), at crank angle 0. Its gear is turned by
+    gear_offsets()[i] relative to the cranks, so every idler meshes with both neighbours at the designed crank phases;
+    i + 1 dots on the +X web's outer face tell the shafts apart and which end goes to the right (+X) legs."""
     r, xc = P_["r"], P_["XC"]
     web_out = WEB_OUT_REAR if i == 3 else WEB_OUT
-    part = Plane.YZ.location * gear(SHAFT_TEETH)
+    part = Rot(np.degrees(gear_offsets()[i]), 0, 0) * (Plane.YZ.location * gear(SHAFT_TEETH))
     part = Pos(-GEAR_T / 2, 0, 0) * part
     part += cyl([0, 0, 0], [1, 0, 0], JOURNAL / 2, 2 * WEB_IN + 0.01)
     for sx, ph in zip((1, -1), shaft_phases(i)):
@@ -229,6 +267,7 @@ def crankshaft(i):
         x0, x1 = sx * web_out, sx * xc
         part += cyl([(x0 + x1) / 2, off[1], off[2]], [1, 0, 0], STUB / 2, abs(x1 - x0))
         part += Pos(x1, off[1], off[2]) * Sphere(BALL / 2)
+    part -= marks(i + 1, web_out, 0, 0)          # on the hub of the +X web, round the axis (hub radius 3.2)
     return part
 
 
@@ -238,44 +277,140 @@ def shaft_yz():
 
 
 def idlers():
-    """(y, z, teeth) of the idler between each pair of neighbouring shafts, below the line of shafts."""
+    """(y, z, teeth) of the idler between each pair of neighbouring shafts, below the line of shafts. At least
+    IDLER_MIN_TEETH teeth, and CD_EXTRA further from both shafts than the theoretical centre distance (backlash)."""
     sh = shaft_yz()
     rs = MOD * SHAFT_TEETH / 2
     out = []
     for (y1, z), (y2, _) in zip(sh, sh[1:]):
         half = (y2 - y1) / 2
-        n = 10
+        n = IDLER_MIN_TEETH
         while rs + MOD * n / 2 < half + 1.5:
             n += 1
-        cd = rs + MOD * n / 2
+        cd = rs + MOD * n / 2 + CD_EXTRA
         out.append(((y1 + y2) / 2, z - np.sqrt(cd ** 2 - half ** 2), n))
     return out
 
 
+def _mesh_angles(k):
+    """Directions (rad, in the YZ plane from +Y towards +Z) from shaft k and from shaft k + 1 to idler k."""
+    (ya, za), (yb, zb) = shaft_yz()[k], shaft_yz()[k + 1]
+    y, z, _ = idlers()[k]
+    return np.arctan2(z - za, y - ya), np.arctan2(z - zb, y - yb)
+
+
+def gear_offsets():
+    """Angle (rad, about +X) of each crankshaft's gear relative to its cranks, so that every idler meshes with both
+    neighbours while the cranks keep their designed phases (sim.GROUP).
+
+    Along the line from a gear's centre towards its partner, u = N (β - φ) / 2π (mod 1) says where the teeth are
+    (0: a tooth points at the partner; φ = angle of tooth 0). Two gears mesh, centred in their backlash, when
+    u_gear + u_partner = 1/2 (mod 1), and that sum stays the same while they turn. Writing it for idler k against
+    shaft k and against shaft k + 1 and subtracting gives the offset of shaft k + 1 from that of shaft k. Shaft 1
+    keeps its gear as in v1 (offset 0); the others follow, each printed with its own offset."""
+    out = [0.0]
+    pitch = 2 * np.pi / SHAFT_TEETH
+    for k, (_, _, n) in enumerate(idlers()):
+        ba, bb = _mesh_angles(k)
+        out.append((out[-1] - (SHAFT_TEETH + n) * (ba - bb) / SHAFT_TEETH) % pitch)
+    return out
+
+
+def idler_phase(k):
+    """Angle (rad, about +X) of idler k's tooth 0 at crank angle 0, meshing both its shafts. At crank angle θ the shafts
+    turn by -θ and the idler by +θ·SHAFT_TEETH/n."""
+    n = idlers()[k][2]
+    ba, _ = _mesh_angles(k)
+    da = gear_offsets()[k]
+    return (ba + np.pi - (np.pi - SHAFT_TEETH * (ba - da)) / n) % (2 * np.pi / n)
+
+
+def hexagon(af, h, corner_dir):
+    """Hexagonal prism (nut pocket) across flats af, height h (z from 0), with a corner pointing along corner_dir (2D)."""
+    a0 = np.arctan2(corner_dir[1], corner_dir[0])
+    r = af / np.sqrt(3)
+    pts = [(r * np.cos(a0 + j * np.pi / 3), r * np.sin(a0 + j * np.pi / 3)) for j in range(6)]
+    return extrude(Polygon(*pts, align=None), amount=h)
+
+
+def spine_box():
+    sh = shaft_yz()
+    z_bot = min(z - MOD * (n / 2 + 1) for _, z, n in idlers()) - 1.5
+    return sh[0][0] - END_OUT, sh[-1][0] + END_OUT, z_bot, TEST_TOP
+
+
+def cap_screws():
+    """(y, outward ±1) of the test cap's two screws, in the end blocks."""
+    sh = shaft_yz()
+    return [(sh[0][0] - END_SCREW, -1), (sh[-1][0] + END_SCREW, 1)]
+
+
+def cap_nut_z():
+    """Bottom of the cap screws' nut pockets: the M3×12's tip comes 0.5 mm out under the nut."""
+    return TEST_TOP + TEST_CAP_T - CAP_SCREW_L + 0.5
+
+
 def spine():
-    """Two walls along Y at |x| = WALL_IN..WALL_OUT, joined by end blocks; journal slots open at the top."""
+    """Gear train test spine (v2): two walls along Y at |x| = WALL_IN..WALL_OUT on a foot plate, joined by end blocks;
+    journal slots open at the top up to TEST_TOP (as in base v1), closed by test_cap(). Each end block takes a captive
+    M3 nut for a cap screw, slid in from the end. Index dots for each crankshaft on the +X wall, under its slot."""
     sh, idl = shaft_yz(), idlers()
-    z_top = sh[0][1] + 6
-    z_bot = min(z - MOD * (n / 2 + 1) for _, z, n in idl) - 1.5
-    y0, y1 = sh[0][0] - 12, sh[-1][0] + 12              # end blocks clear of the gear teeth (tip radius 7)
+    y0, y1, z_bot, z_top = spine_box()
     t = WALL_OUT - WALL_IN
-    part = None
+    part = Pos(0, (y0 + y1) / 2, z_bot - FOOT_T / 2) * Box(FOOT_W, y1 - y0, FOOT_T)
     for sx in (1, -1):
-        w = Pos(sx * (WALL_IN + WALL_OUT) / 2, (y0 + y1) / 2, (z_top + z_bot) / 2) * Box(t, y1 - y0, z_top - z_bot)
-        part = w if part is None else part + w
-    for y in (y0 + 1.5, y1 - 1.5):
-        part += Pos(0, y, (z_top + z_bot) / 2) * Box(2 * WALL_OUT, 3, z_top - z_bot)
+        part += Pos(sx * (WALL_IN + WALL_OUT) / 2, (y0 + y1) / 2, (z_top + z_bot) / 2) * Box(t, y1 - y0, z_top - z_bot)
+    for ya, yb in ((y0, sh[0][0] - END_IN), (sh[-1][0] + END_IN, y1)):
+        part += Pos(0, (ya + yb) / 2, (z_top + z_bot) / 2) * Box(2 * WALL_IN + 0.02, yb - ya, z_top - z_bot)
     for y, z in sh:
         part -= cyl([0, y, z], [1, 0, 0], (JOURNAL + CLR) / 2, 20)
         part -= Pos(0, y, (z + z_top) / 2 + 1) * Box(20, JOURNAL + CLR, z_top - z + 2)
     for y, z, n in idl:
         part -= cyl([0, y, z], [1, 0, 0], (PIN + CLR_STEEL) / 2, 20)
+    zn = cap_nut_z()
+    for y, out in cap_screws():
+        part -= Pos(0, y, (zn - 1 + z_top + 1) / 2) * Cylinder((SCREW + CLR_STEEL) / 2, z_top - zn + 2)
+        part -= Pos(0, y, zn) * hexagon(NUT_AF + 0.3, NUT_T + 0.3, (0, 1))
+        part -= Pos(0, (y + y + out * 20) / 2, zn + (NUT_T + 0.3) / 2) * Box(NUT_AF + 0.3, 20, NUT_T + 0.3)
+    for i, (y, z) in enumerate(sh):                      # below the cranks' sweep (radius 6) and the axle heads
+        part -= marks(i + 1, WALL_OUT, y, z_bot + 7)
     return Pos(CX, 0, 0) * part, (y0, y1, z_bot, z_top)
 
 
+def test_cap():
+    """Cap of the gear train test, in robot coordinates (print it upside down): a plate on the spine's top with a tongue
+    down every journal slot to the top of the journal hole, as base v1's cap does. Two M3×12 down
+    through it into the nuts in the end blocks."""
+    sh = shaft_yz()
+    y0, y1, _, z_top = spine_box()
+    part = Pos(0, (y0 + y1) / 2, z_top + TEST_CAP_T / 2) * Box(TEST_CAP_W, y1 - y0, TEST_CAP_T)
+    tw = JOURNAL + CLR - CAP_CLR
+    for y, z in sh:
+        # the tongue ends flat at the top of the journal hole: a round end (as on base v1's cap) is wider than the
+        # tongue and leaves knife edges at its tips. The journal can rise 0.25 mm either way
+        zb = z + (JOURNAL + CLR) / 2
+        for sx in (1, -1):
+            part += Pos(sx * (WALL_IN + WALL_OUT) / 2, y, (zb + z_top) / 2 + 0.01) * Box(WALL_OUT - WALL_IN, tw,
+                                                                                           z_top - zb + 0.02)
+    for y, _ in cap_screws():
+        part -= Pos(0, y, z_top + TEST_CAP_T / 2) * Cylinder((SCREW + CLR_STEEL) / 2, TEST_CAP_T + 1)
+    # +X edge marked with a dot over every shaft, so the cap's right side is plain to see (it only fits one way)
+    for y, _ in sh:
+        part -= marks(1, TEST_CAP_W / 2, y, z_top + TEST_CAP_T / 2)
+    return Pos(CX, 0, 0) * part
+
+
 def idler_part(n):
-    g = gear(n, GEAR_T - 0.4)
-    return g - Cylinder((PIN + CLR_STEEL) / 2, 20)
+    """Idler gear, printed flat. The first 0.2 mm layer's outline is 0.2 mm smaller and the bore has a 0.4 mm chamfer
+    at the bed (elephant's foot)."""
+    t = GEAR_T - 0.4
+    import shapely.geometry as sg
+    small = sg.polygon.orient(sg.Polygon(gear_profile(n)).buffer(-0.2, join_style=2), 1.0)   # CCW: extrudes up
+    g = extrude(Polygon(*list(small.exterior.coords)[:-1], align=None), amount=0.2)
+    g += Pos(0, 0, 0.2) * extrude(Polygon(*gear_profile(n), align=None), amount=t - 0.2)
+    g -= Cylinder((PIN + CLR_STEEL) / 2, 20)
+    g -= Pos(0, 0, -0.01) * Cone((PIN + CLR_STEEL) / 2 + 0.4, (PIN + CLR_STEEL) / 2, 0.41, align=None)
+    return g
 
 
 # --- placement ------------------------------------------------------------------------------------------------
@@ -314,7 +449,9 @@ def assembly(theta, parts):
         out.append((f"crankshaft{i}", place(parts[f"crankshaft-{i + 1}"], rot_x(-theta), [CX, *sh[i]])))
     out.append(("spine", parts["spine"]))
     for k, (y, z, n) in enumerate(idlers()):
-        out.append((f"idler{k}", Pos(CX - (GEAR_T - 0.4) / 2, y, z) * (Plane.YZ.location * parts[f"idler-{k + 1}"])))
+        a = np.degrees(idler_phase(k) + theta * SHAFT_TEETH / n)
+        out.append((f"idler{k}", Pos(CX - (GEAR_T - 0.4) / 2, y, z) *
+                    (Rot(a, 0, 0) * (Plane.YZ.location * parts[f"idler-{k + 1}"]))))
     return out
 
 
@@ -423,6 +560,7 @@ def main():
     frame, z_floor = test_frame(parts)
     parts["test-frame"] = frame
     parts["test-frame-keeper"] = keeper(parts)
+    parts["test-cap"] = test_cap()
 
     for name, p in parts.items():
         if name.startswith("_"):
@@ -436,7 +574,10 @@ def main():
     for name, v in info.items():
         print(f"leg {name}: ball travels {v['apmin']:.1f}-{v['apmax']:.1f} mm from the pivot, bore "
               f"{v['bottom']:.1f}-{v['mouth']:.1f} mm")
-    print("idlers (y, z, teeth):", [(round(y, 1), round(z, 1), n) for y, z, n in idlers()])
+    print("idlers (y, z, teeth):", [(round(y, 2), round(z, 2), n) for y, z, n in idlers()])
+    print(f"centre distance + {CD_EXTRA:.3f} mm per mesh (backlash {BACKLASH} mm)")
+    print("crankshaft gear offsets (deg):", [round(np.degrees(a), 2) for a in gear_offsets()])
+    print("idler phases at crank 0 (deg):", [round(np.degrees(idler_phase(k)), 2) for k in range(3)])
     print(f"test frame plate top at z {z_floor:.1f}")
     for a in args.assembly or []:
         asm = assembly(np.radians(a), parts)
