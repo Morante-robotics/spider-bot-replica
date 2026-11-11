@@ -35,6 +35,7 @@ repeated. Its contents show where each step stands, and its **Open items** list 
 | [cad/carcass-120/](cad/carcass-120/) | Carcass parts repaired (watertight) and scaled to 120 %: the base for cuts and holes (CC BY-NC-SA) |
 | [cad/layout/](cad/layout/) | What fits inside the body: battery holder and motor, print scale |
 | [cad/drive/](cad/drive/) | Legs, pivot forks, four crankshafts with gears, spine and a test frame, modelled in code (build123d) with a collision check over a full turn |
+| [cad/base/](cad/base/) | Base v1: the carcass base with a band that lifts the body, the spine built in, fork pockets and a cap over the crankshafts (CC BY-NC-SA) |
 | [cad/clearance-test/](cad/clearance-test/) | Block and pin to find the hole clearance this printer needs for turning and sliding fits |
 | [print/](print/) | Bambu Studio projects ready to print, with time and filament |
 | [sim/](sim/) | Leg simulators: 2D foot paths of three leg types, and the toy leg in 3D on the whole robot |

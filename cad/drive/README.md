@@ -22,10 +22,10 @@ Needs Python 3.12 with build123d, numpy, trimesh and manifold3d. All sizes come 
 | `leg-front-right.stl` / `-left` | Front leg | 93.6 × 7.6 × 67.6 | 1 + 1 |
 | `leg-middle-right.stl` / `-left` | Middle legs (2nd and 3rd) | 99.7 × 7.6 × 67.6 | 2 + 2 |
 | `leg-rear-right.stl` / `-left` | Rear leg | 87.3 × 7.6 × 67.6 | 1 + 1 |
-| `pivot.stl` | Fork that holds a leg at the rim | 10.6 × 9.4 × 22.0 | 8 |
-| `crankshaft-1.stl` … `-4.stl` | One piece: 12-tooth gear, two journals, two cranks with balls (front to rear) | 27.6 × 14.0 × 14.0 | 1 each |
+| `pivot.stl` | Fork that holds a leg at the rim | 10.6 × 10.0 × 22.0 | 8 |
+| `crankshaft-1.stl` … `-4.stl` | One piece: 12-tooth gear, two journals, two cranks with balls (front to rear). Crankshaft 4's crank webs are 1.5 mm thick instead of 2, to keep them clear of the rear legs | 27.6 × 14.0 × 14.0 | 1 each |
 | `idler-1.stl`, `-2`, `-3` | Idler gears, 11, 10 and 20 teeth | up to 22.0 × 22.0 × 2.6 | 1 each |
-| `spine.stl` | Two walls that carry the 4 crankshafts (slots open at the top) and the idler pins | 8.5 × 87.3 × 26.1 | 1 |
+| `spine.stl` | Two walls that carry the 4 crankshafts (slots open at the top) and the idler pins. Reference only: the robot's spine is built into [base v1](../base/) | 8.5 × 87.3 × 26.1 | — |
 | `test-frame.stl` | Desk stand for one middle leg, its pivot and crankshaft 2, turned by hand | 75.4 × 35.5 × 80.1 | 1 |
 | `test-frame-keeper.stl` | Cap that holds crankshaft 2 in the test frame (print upside down) | 8.5 × 28.0 × 9.0 | 1 |
 | `assembly-0.stl` | Whole drive at crank angle 0°, for reference only | 218.0 × 87.5 × 71.3 | — |
@@ -43,8 +43,8 @@ STEP files with the same names are for Onshape (how to assemble and animate them
 - **Gears:** module 1, 20° pressure angle, 3 mm wide (idlers 2.6 mm). The crankshaft gears all have 12 teeth, so the
   four turn at the same speed. The idlers sit below the line of shafts. The motor's drive is designed in phase 4.
 
-**Hardware:** for the whole robot, 8 × M3×16 screws + nuts (leg pivots; the fork is 9.4 mm across, so M3×12
-leaves no room for the nut), 16 × M3×10 screws + nuts (forks, as pins), 3 × 3 mm steel pins 9 mm long (idlers). For the test frame:
+**Hardware:** for the whole robot, 8 × M3×16 screws + nylon lock nuts (leg pivots; the fork is 10.0 mm across, so M3×12
+leaves no room for the nut), 16 × M3×10 screws + nuts (forks, as pins: they go in [base v1](../base/)), 3 × 3 mm steel pins 9 mm long (idlers). For the test frame:
 1 × M3×16 + nylon lock nut, 2 × M3×10 + 2 nuts (fork), 2 × M3×12 + 2 nuts (keeper).
 
 **Assembling the test frame:**
@@ -53,7 +53,8 @@ leaves no room for the nut), 16 × M3×10 screws + nuts (forks, as pins), 3 × 3
 
 1. Leg in the fork: put the leg's boss in the fork's window, and an M3×16 through the fork's side hole, the leg
    and the other side. Nut on the end, snug but not tight: if it squeezes the fork's walls onto the leg, the leg
-   cannot tilt. A nylon lock nut keeps it there.
+   cannot tilt. A nylon lock nut keeps it there. The window is 1 mm wider than the leg: if the leg slides along
+   the screw, put an M3 washer on each side of it where they fit (the middle legs pass 0.7 mm apart).
 2. Fork in the frame: the fork goes between the frame's two arms. An M3×10 down through the upper arm's hole,
    with a nut on it under the arm, tightened against the arm; its tip goes 3 mm into the blind hole on top of the
    fork. The same from below through the lower arm. The two screws are fixed to the frame and the fork turns on
@@ -76,7 +77,7 @@ Figure: [`screws_figure.py`](screws_figure.py).
 
 **Clearances** (on the diameter, from the [clearance test](../clearance-test/)): 0.5 mm for a printed part turning
 or sliding in a printed hole (`CLR`: journals, the ball in the bore), 0.3 mm for a steel screw or pin (`CLR_STEEL`).
-The fork's window is 0.2 mm wider than the leg on each side.
+The fork's window is 1.0 mm wider than the leg (0.5 mm a side; 0.2 mm a side was too tight on one print).
 
 **Check over a full turn** ([`check.py`](check.py), every 30°): it lists any overlap between two parts and every pair
 closer than 1 mm. Latest result: [`check-result.txt`](check-result.txt).

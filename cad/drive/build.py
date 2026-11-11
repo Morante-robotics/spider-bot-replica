@@ -58,6 +58,7 @@ MOD = 1.0           # gear module
 SHAFT_TEETH = 12
 WALL_IN, WALL_OUT = 1.75, 4.25     # spine walls span |x| from WALL_IN to WALL_OUT about the body axis
 WEB_IN, WEB_OUT = 4.5, 6.5         # crank web, |x|
+WEB_OUT_REAR = 6.0  # crankshaft 4's webs are thinner: the rear leg's tube came 0.15 mm from the web's outer face
 YOKE_WALL = 2.0      # fork side walls
 YOKE_CAP = 4.0       # fork top and bottom walls, with a blind hole for the M3 screw it swings on
 PITCH_MAX = 28.0     # the leg tilts 6-23° up (rear leg most) (the crank is lower than the rim): the fork window allows this much
@@ -165,7 +166,7 @@ def yoke_size():
     """Fork window (x along the leg, y across, z up) and outer height."""
     win_x = BOSS + 1.6
     win_z = 2 * (TUBE / 2 + win_x / 2 * np.tan(np.radians(PITCH_MAX))) + 0.8
-    return win_x, LEG_W + 0.4, win_z, win_z + 2 * YOKE_CAP
+    return win_x, LEG_W + 2 * CLR, win_z, win_z + 2 * YOKE_CAP     # CLR a side: 0.2 was too tight on one print (2026-11-11)
 
 
 def yoke():
@@ -214,17 +215,18 @@ def shaft_phases(i):
 def crankshaft(i):
     """Crankshaft of leg pair i, along X, centred on the body axis (x = 0 here), at crank angle 0."""
     r, xc = P_["r"], P_["XC"]
+    web_out = WEB_OUT_REAR if i == 3 else WEB_OUT
     part = Plane.YZ.location * gear(SHAFT_TEETH)
     part = Pos(-GEAR_T / 2, 0, 0) * part
     part += cyl([0, 0, 0], [1, 0, 0], JOURNAL / 2, 2 * WEB_IN + 0.01)
     for sx, ph in zip((1, -1), shaft_phases(i)):
         # pin offset in the crank plane: e1 = -Y, e2 = Z (as in the simulator)
         off = np.array([0, -r * np.cos(ph), r * np.sin(ph)])
-        xw = sx * (WEB_IN + WEB_OUT) / 2
-        part += cyl([xw, 0, 0], [1, 0, 0], JOURNAL / 2 + 1.2, WEB_OUT - WEB_IN)
-        part += cyl([xw + off[0], off[1], off[2]], [1, 0, 0], STUB / 2 + 1.0, WEB_OUT - WEB_IN)
-        part += bar([xw, 0, 0], [xw, off[1], off[2]], WEB_OUT - WEB_IN, STUB + 2, [1, 0, 0])
-        x0, x1 = sx * WEB_OUT, sx * xc
+        xw = sx * (WEB_IN + web_out) / 2
+        part += cyl([xw, 0, 0], [1, 0, 0], JOURNAL / 2 + 1.2, web_out - WEB_IN)
+        part += cyl([xw + off[0], off[1], off[2]], [1, 0, 0], STUB / 2 + 1.0, web_out - WEB_IN)
+        part += bar([xw, 0, 0], [xw, off[1], off[2]], web_out - WEB_IN, STUB + 2, [1, 0, 0])
+        x0, x1 = sx * web_out, sx * xc
         part += cyl([(x0 + x1) / 2, off[1], off[2]], [1, 0, 0], STUB / 2, abs(x1 - x0))
         part += Pos(x1, off[1], off[2]) * Sphere(BALL / 2)
     return part
