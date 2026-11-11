@@ -7,6 +7,8 @@ results with their figures, and the decisions taken. Commands and full data tabl
 
 ## Contents
 
+What is left to do: [Open items](#open-items).
+
 **Workshop:** getting the printer ready.
 
 | Date | Phase | Step | Status |
@@ -38,6 +40,26 @@ results with their figures, and the decisions taken. Commands and full data tabl
 | 2026-11-11 | 3 · Mechanisms | [Test leg: first assembly and clearance result](#test-leg-first-assembly-and-clearance-result) | 🔄 v2 to print |
 
 Status: ✅ done · 🔄 in progress · ❌ ruled out · ↩️ reversed by a later entry.
+
+## Open items
+
+Everything still to do on the build, in one place. Each row links to the entry where it came up; when an item is
+done, its row is removed and the entry that closes it says so. Plan-level tasks (study, purchases) are tracked
+outside the repo.
+
+| Pending | Came up in | Phase |
+|---|---|---|
+| Print the test frame v2 and film the leg turning by hand | [Test leg: first assembly…](#test-leg-first-assembly-and-clearance-result) | 3 |
+| Check the right rear leg, 0.15 mm from its crankshaft, before printing the rear legs | [Test leg: first assembly…](#test-leg-first-assembly-and-clearance-result) | 3 |
+| Compare the printed leg's foot path with the simulator's | [Onshape assembly](#onshape-assembly) | 3 |
+| Check that the rim notches (10 × 5 mm) let the leg swing as far as simulated, or widen them | [Toy leg in 3D](#toy-leg-in-3d) | 3 |
+| Base: fork seats in the rim notches, hollow bowl for the spine and idlers, spine mounting, cap over the journal slots | [Legs and drive in CAD](#legs-and-drive-in-cad) | 3 |
+| Carcass cuts: battery hatch in the base, motor and shaft openings | [Mesh repair](#mesh-repair) | 2 |
+| Confirm that Bambu Studio keeps the support settings saved by `tools/bambu_plate.py` | [Clearance test…](#clearance-test-and-test-leg-print-plate) | 2 |
+| Check the drawing of the battery holder bought against 64 × 49 × 16 mm (+2 mm) | [Motor, battery holder…](#motor-battery-holder-and-print-scale) | 4 |
+| N20 drive: gear ratio and motor position | [Legs and drive in CAD](#legs-and-drive-in-cad) | 4 |
+| Measure battery life on 4×AAA | [Motor, battery holder…](#motor-battery-holder-and-print-scale) | 4 |
+| Optional: the gear train in Onshape with **Gear relation** mates | [Onshape assembly](#onshape-assembly) | 2 |
 
 ## Glossary
 
@@ -240,11 +262,6 @@ stacked 4×AA (no switch) and the 2×AA fit.*
   load) gives a 6 V N20 about 40 % of its speed and torque, and blue or white LEDs (about 3 V) do not light.
 - **Print scale: 120 %.** The robot is about 269 × 185 × 142 mm. At 110 % the holder fits with no clearance at all.
 
-#### Next
-
-- Check the drawing of the holder actually bought against 64 × 49 × 16 mm (+2 mm).
-- Measure battery life on 4×AAA (phase 4).
-
 ### Mesh repair
 
 **Phase 2 · CAD · 2026-11-09** · Status: ✅ done
@@ -324,10 +341,6 @@ Bambu Studio before: body 9 non-manifold edges; eye, small eye and sensor 3 each
 - **Legs not repaired.** Closing their pinched edges would change their shape. They are not printed (the walking
   legs are designed new) and stay as a reference in [cad/carcass-jenscolt/](cad/carcass-jenscolt/).
 - The repaired files are kept at 120 %, the print scale, so measurements taken from them are the real ones.
-
-#### Next
-
-- Cuts in Bambu Studio: battery hatch in the base, motor and shaft openings, once the mechanism is laid out.
 
 ## Legs and drive
 
@@ -429,10 +442,6 @@ real-size bars can be regenerated with `sim/legs.py` if needed.
 a pivot on the body's edge that lets it slide and swivel. When the crank pin goes up, the foot goes down (a lever),
 and when the pin moves in, the leg slides in: the foot traces a loop. The two gait groups of four legs are on crank
 pins half a turn apart.
-
-#### Next
-
-- Watch «walking spider toy teardown» videos (study list).
 
 ### Toy leg in 3D
 
@@ -546,10 +555,6 @@ includes touching down and lifting off).
 #### Decisions
 
 Lateral axle, leg sliding at the crank (taken in the next entry, once one motor drives all the legs).
-
-#### Next
-
-- Check that the notches (10 × 5 mm) let the leg swing as far as the table says, or widen them in the base.
 
 ### Toy leg on one crankshaft
 
@@ -943,11 +948,6 @@ frame, and the whole robot assembled.*
 - The CAD uses the search with buildable limits (10 mm stride, 4.6 mm bob) instead of the unbuildable geometry
   chosen in [Four lateral crankshafts](#four-lateral-crankshafts) (9 mm, 4.2 mm).
 
-#### Next
-
-- The base: fork seats in the rim notches, a hollow bowl for the spine and idlers, spine mounting, a cap over the
-  journal slots. The N20 drive (phase 4).
-
 ### Onshape assembly
 
 **Phase 2 · CAD · 2026-11-10** · Status: ✅ done
@@ -981,10 +981,6 @@ Document (public): [Spider-Bot drive](https://cad.onshape.com/documents/07632681
 - The mate offsets had to be negative: with positive ones the parts went into the walls. An offset is measured along
   the mate connector's Z axis, whose direction depends on the face clicked.
 - The foot path was not compared with the simulator's; to be checked on the printed leg.
-
-#### Next
-
-- Optional: the gear train with **Gear relation** mates (part 2 of the tutorial).
 
 ### Clearance test and test leg print plate
 
@@ -1148,6 +1144,8 @@ than the bore's 0.25 mm a side: to look into before printing the rear legs.
 </details>
 
 #### Next
+
+Also listed in [Open items](#open-items).
 
 - Print [`print/test-frame-v2.3mf`](print/test-frame-v2.3mf): frame, keeper, fork and leg (1 h 18 min, 25.6 g). The
   crankshaft from the first print is kept.
