@@ -7,19 +7,25 @@ as it is switched on (no remote control).
 perfboard) light up, both powered by 4×AAA NiMH batteries in a holder with a built-in switch. 3D-printed in PLA at
 120 % of the base model's size.
 
-**To replicate it:** follow the [build log](build-log.md) step by step. The [AI log](ai-log.md) records what was
-designed with AI help and how it was checked.
+<img src="cad/carcass-jenscolt/images/jenscolt-photo-2.jpg" width="480" alt="Spidey-Bot by jenscolt, the model this replica starts from">
+
+*The starting point: [Spidey-Bot by jenscolt](https://www.thingiverse.com/thing:5196618), a static display model
+(photo: jenscolt, CC BY-NC-SA).*
+
+**Follow the build:** the [build log](build-log.md) tells the story step by step, dead ends included, so it can be
+repeated. Its contents show where each step stands, and its **Open items** list what is left. The
+[AI log](ai-log.md) records what was designed with AI help and how it was checked.
 
 ## Phases
 
-| # | Phase | Status |
+| # | Phase | What it covers |
 |---|---|---|
-| 0 | Workshop | In progress |
-| 1 | Soldering and measuring | Pending |
-| 2 | CAD and 3D printing | In progress |
-| 3 | Mechanisms and legs | In progress |
-| 4 | Motors, power and lights | Pending |
-| 5 | Final build | Pending |
+| 0 | Workshop | Printer and tools ready |
+| 1 | Soldering and measuring | Soldering and multimeter practice |
+| 2 | CAD and 3D printing | The carcass, Onshape, print settings |
+| 3 | Mechanisms and legs | The legs and the drive from one motor |
+| 4 | Motors, power and lights | The N20 motor and its gearing, batteries, LED eyes on perfboard |
+| 5 | Final build | The whole robot walking |
 
 ## Contents
 
@@ -31,8 +37,8 @@ designed with AI help and how it was checked.
 | [cad/drive/](cad/drive/) | Legs, pivot forks, four crankshafts with gears, spine and a test frame, modelled in code (build123d) with a collision check over a full turn |
 | [cad/clearance-test/](cad/clearance-test/) | Block and pin to find the hole clearance this printer needs for turning and sliding fits |
 | [print/](print/) | Bambu Studio projects ready to print, with time and filament |
-| [sim/](sim/) | Leg simulators: 2D foot paths of the toy, Klann and Jansen legs (chosen: toy leg), and the toy leg in 3D on the whole robot |
-| [tools/](tools/) | Helper scripts: [`stl_preview.py`](tools/stl_preview.py) renders and measures STL files, [`stl_turntable.py`](tools/stl_turntable.py) makes turntable GIFs, [`assemble_jenscolt.py`](tools/assemble_jenscolt.py) joins the carcass parts into one assembled STL, [`fit_check.py`](tools/fit_check.py) checks what fits inside the body and at what scale, [`repair_stl.py`](tools/repair_stl.py) makes meshes watertight without changing their shape, [`drive_options_gif.py`](tools/drive_options_gif.py) animates the drive options compared before choosing, [`bambu_plate.py`](tools/bambu_plate.py) lays out and slices a print plate with Bambu Studio's CLI |
+| [sim/](sim/) | Leg simulators: 2D foot paths of three leg types, and the toy leg in 3D on the whole robot |
+| [tools/](tools/) | Helper scripts for meshes, previews, fit checks, figures and print plates; each explains its use in its first lines |
 
 ## License
 
