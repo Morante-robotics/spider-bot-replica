@@ -6,6 +6,18 @@ results with their figures, and the decisions taken. Commands and full data tabl
 **How to reproduce**. Entries are grouped by topic, oldest first; what is left to do and a glossary are at the
 end.
 
+<table>
+<tr>
+<td width="50%"><img src="cad/carcass-jenscolt/images/jenscolt-photo-1.jpg" alt="Spidey-Bot by jenscolt, three-quarter view"></td>
+<td width="50%"><img src="cad/carcass-jenscolt/images/jenscolt-photo-2.jpg" alt="Spidey-Bot by jenscolt, eyes lit"></td>
+</tr>
+<tr>
+<td colspan="2"><em>The goal. <a href="https://www.thingiverse.com/thing:5196618">Spidey-Bot by jenscolt</a>, the static
+display model this replica starts from (photos: jenscolt, CC BY-NC-SA). Ours keeps its look, and adds legs that
+walk, driven by one motor, and lit eyes.</em></td>
+</tr>
+</table>
+
 ## Contents
 
 The robot's story in three parts, then what is left to do and a glossary.
@@ -74,6 +86,8 @@ Smooth walls, no visible defects (Fig. 1).
 *Video · The first print.*
 
 https://github.com/user-attachments/assets/969db1d2-f4c8-4ad6-a642-058941c77ebe
+
+[↑ Contents](#contents)
 
 ## Carcass
 
@@ -289,6 +303,8 @@ Bambu Studio before: body 9 non-manifold edges; eye, small eye and sensor 3 each
   legs are designed new) and stay as a reference in [cad/carcass-jenscolt/](cad/carcass-jenscolt/).
 - The repaired files are kept at 120 %, the print scale, so measurements taken from them are the real ones.
 
+[↑ Contents](#contents)
+
 ## Legs and drive
 
 The Spider-Bot walks on eight legs driven by one motor, so the core problem is the mechanism. The steps so far:
@@ -304,6 +320,14 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
 3. **CAD and first print.** The parts were modelled in code, checked for collisions over a full turn, assembled in
    Onshape, and one leg was printed on a small test frame. It showed that holes need much more clearance than
    expected (0.5 mm), and the frame was redesigned. Next: print the new frame and turn the leg by hand.
+
+<img src="sim/images/drive-attempts.png" alt="The three drives tried, from above and from the side">
+
+*The three drives tried, from above (top) and from the side (bottom). The grey box is the body; the grey stubs are
+the cranks; the loops are the paths of the feet. In 1, the inner arms cross the cranks of the other legs. In 2, the
+loops seen from the side are thin and upright: the feet go up and down but hardly forward. In 3, every arm reaches
+only its own crank and the loops lie along the ground. Made by
+[`tools/drive_attempts_figure.py`](tools/drive_attempts_figure.py).*
 
 ### Leg simulator and comparison
 
@@ -1097,6 +1121,8 @@ Also listed in [Open items](#open-items).
 - Hardware: 2 × M3×10 + 2 nuts for the fork, 2 × M3×12 + 2 nuts for the keeper, and a nylon lock nut for the leg.
 - **Morante:** a video of the leg turning by hand on the new frame.
 
+[↑ Contents](#contents)
+
 ## Open items
 
 Everything still to do on the build, in one place. Each row links to the entry where it came up; when an item is
@@ -1116,6 +1142,8 @@ outside the repo.
 | N20 drive: gear ratio and motor position | [Legs and drive in CAD](#legs-and-drive-in-cad) | 4 |
 | Measure battery life on 4×AAA | [Motor, battery holder…](#motor-battery-holder-and-print-scale) | 4 |
 | Optional: the gear train in Onshape with **Gear relation** mates | [Onshape assembly](#onshape-assembly) | 2 |
+
+[↑ Contents](#contents)
 
 ## Glossary
 
@@ -1140,3 +1168,5 @@ Terms used in the entries, in the order they first appear, with a link to that e
 | **Fork (pivot)** | The small block on the body's edge that the leg passes through. It swivels, and the leg tilts in it. | [Legs and drive in CAD](#legs-and-drive-in-cad) |
 | **Onshape** | CAD in the browser, used to assemble the parts and animate them. | [Onshape assembly](#onshape-assembly) |
 | **Keeper** | A cover that holds the crankshaft down in its slots. | [Test leg…](#test-leg-first-assembly-and-clearance-result) |
+
+[↑ Contents](#contents)

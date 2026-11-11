@@ -8,6 +8,10 @@ for the carcass. Repaired and scaled versions: [../carcass-120/](../carcass-120/
 see [LICENSE.txt](LICENSE.txt). Unlike the rest of the repo, these files and anything derived from them are
 non-commercial and must keep this license.
 
+<img src="images/jenscolt-photo-1.jpg" width="400" alt="Printed by jenscolt"> <img src="images/jenscolt-photo-2.jpg" width="400" alt="Printed by jenscolt, eyes lit">
+
+*The model printed and painted by jenscolt (photos from the download, same license).*
+
 ![Assembled turntable](images/assembled-turntable.gif)
 
 Assembled with [`assemble_jenscolt.py`](../../tools/assemble_jenscolt.py): 224 × 154 × 118 mm. Body, base, sensor and
