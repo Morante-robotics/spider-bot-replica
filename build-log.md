@@ -40,7 +40,7 @@ The robot's story in three parts, then what is left to do and a glossary.
    - [Onshape assembly](#onshape-assembly) · 2026-11-10 · ✅ done
    - [Clearance test and test leg print plate](#clearance-test-and-test-leg-print-plate) · 2026-11-10 · ✅ printed
    - [Test leg: first assembly and clearance result](#test-leg-first-assembly-and-clearance-result) · 2026-11-11 · ✅ v2 designed
-   - [Test leg v2: turning by hand](#test-leg-v2-turning-by-hand) · 2026-11-11 · 🔄 fork to redesign
+   - [Test leg v2: turning by hand](#test-leg-v2-turning-by-hand) · 2026-11-11 · ✅ the leg turns
 4. **[Open items](#open-items)**: everything still to do.
 5. **[Glossary](#glossary)**: the terms used in the entries.
 
@@ -320,8 +320,8 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
      walks forward. Its stride is short (about 10 mm per half turn), because the body must not bob more than 3 mm.
 3. **CAD and first print.** The parts were modelled in code, checked for collisions over a full turn, assembled in
    Onshape, and one leg was printed on a small test frame. It showed that holes need much more clearance than
-   expected (0.5 mm), and the frame was redesigned. On the second print the leg turns by hand; the fork still
-   has to be redesigned so the leg can go into it without forcing.
+   expected (0.5 mm), and the frame was redesigned. On the second print the leg turns by hand. Next: the base
+   that carries all eight legs.
 
 <img src="sim/images/drive-attempts.png" alt="The three drives tried, from above and from the side">
 
@@ -1116,19 +1116,18 @@ than the bore's 0.25 mm a side: to look into before printing the rear legs.
 
 ### Test leg v2: turning by hand
 
-**Phase 3 · Mechanisms · 2026-11-11** · Status: 🔄 turns; the fork needs a redesign
+**Phase 3 · Mechanisms · 2026-11-11** · Status: ✅ the leg turns
 
 > **In short.** The redesigned test frame was printed and the leg now turns by hand: the crank goes round and the
 > leg rises and falls in its fork, with the frame holding every part. The 0.5 mm clearance is enough for the
-> crankshaft and the ball. One fault is left: the leg does not go into the new fork, because neither end of the leg
-> is narrow enough to pass through the fork's window. The fork from the first print, forced on earlier, was used.
+> crankshaft and the ball. The new fork came out too tight for the leg, so the fork from the first print was used.
 
 #### Steps
 
 1. Print [`print/test-frame-v2.3mf`](print/test-frame-v2.3mf): frame, keeper, fork and leg (Fig. 1). The crankshaft
    from the first print is kept.
 2. Assemble following the [diagram](cad/drive/README.md) (Fig. 7 of the [previous entry](#test-leg-first-assembly-and-clearance-result)).
-3. Turn the crankshaft by hand (Fig. 2, video).
+3. Turn the crankshaft by hand (Fig. 2).
 
 <table>
 <tr>
@@ -1143,12 +1142,6 @@ red fork, which swivels between the frame's two M3 pins. The red fork and cranks
 </tr>
 </table>
 
-The whole clip, from both sides:
-
-
-https://github.com/user-attachments/assets/8f44c74e-7638-4ac7-82ce-68f7d349978e
-<!-- Video: 1-spiderbot-test-leg-v2-1.mp4 -->
-
 #### Result
 
 | What | Expected | What happened |
@@ -1156,23 +1149,15 @@ https://github.com/user-attachments/assets/8f44c74e-7638-4ac7-82ce-68f7d349978e
 | Crankshaft in the frame, under the keeper | Turns, stays in its slots | Turns by hand and stays in place |
 | Ball in the leg's tube (0.5 mm clearance) | Slides and tilts | The leg follows the crank all the way round |
 | Fork between the frame's arms (M3×10 pins) | Swivels and stays | Swivels and stays |
-| Leg into the new fork | Goes in | Does not go in; the fork from the first print was used |
+| Leg into the fork | Goes in | Into the red fork (first print) yes; into the blue one (this print) no |
 
-**Why the leg does not go into the fork.** The fork is a closed ring around the leg: its window is 5.4 mm across, the
-leg's arm 5.0. But the leg has to be pushed in from one end, and both ends are wider than the window: the tube is
-5.6 mm and the shin, at the foot, 7.6 mm. The CAD of the fork and the leg did not change between the two prints, so
-the first fork must have been forced over the leg too, flexing its thin wall (1.7 mm). The collision check does not
-catch this: it tests the parts already in place, not how they get there.
+**Why the blue fork is too tight.** The fork's CAD did not change between the two prints. Measured with a caliper,
+the red fork's walls are 2 mm (as modelled) and the blue one's a little thicker (less than 0.5 mm more), so its window
+came out narrower than the leg. The leg goes in from the foot end (the shin is 4.5 mm across), and the window is only
+0.2 mm wider than the leg on each side, so a small print variation is enough to stop it.
 
 **Conclusion:** the 0.5 mm clearance works for a printed part in a printed hole, and the frame now holds the
-mechanism. The fork has to be redesigned so the leg can be put in without forcing it.
-
-#### Next
-
-Also listed in [Open items](#open-items).
-
-- Redesign the fork so it opens (for example, one side wall as a separate plate held by the leg's M3×16), reprint it
-  and assemble it with the leg.
+mechanism. The test leg is done; the fork's window gets more room before the robot's 8 forks are printed.
 
 [↑ Contents](#contents)
 
@@ -1184,7 +1169,7 @@ outside the repo.
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| Redesign the fork so the leg goes in without forcing (both ends of the leg are wider than its window) | [Test leg v2…](#test-leg-v2-turning-by-hand) | 3 |
+| Widen the fork's window (0.2 mm a side; one printed fork came out too tight) before printing the 8 forks | [Test leg v2…](#test-leg-v2-turning-by-hand) | 3 |
 | Check the right rear leg, 0.15 mm from its crankshaft, before printing the rear legs | [Test leg: first assembly…](#test-leg-first-assembly-and-clearance-result) | 3 |
 | Compare the printed leg's foot path with the simulator's | [Onshape assembly](#onshape-assembly) | 3 |
 | Check that the rim notches (10 × 5 mm) let the leg swing as far as simulated, or widen them | [Toy leg in 3D](#toy-leg-in-3d) | 3 |
