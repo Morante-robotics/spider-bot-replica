@@ -1258,7 +1258,9 @@ original bowl, inside the keel. The cap (blue) has a tongue down each journal sl
 
 <img src="cad/base/images/band.png" alt="The robot before and after">
 
-*Fig. 4 · From the side: the carcass as downloaded, and with the body on the band.*
+*Fig. 4 · From the side: the carcass as downloaded, and with the body on the band. The front block (the face
+behind the eyes) sits inside the body in both. Base v1 is not shaped for looks yet: the band does not follow the
+body's outline, and the screws and fork bosses show.*
 
 | What | Result |
 |---|---|
@@ -1271,6 +1273,8 @@ Full list: [`cad/base/check-result.txt`](cad/base/check-result.txt).
 
 #### Decisions
 
+- **Base v1 is a working prototype, not the final look.** It proves that the drive fits and turns; a later version
+  makes it look like the carcass again (Open items).
 - **Band, not a new fork or cuts in the body.** The fork tested on the test frame stays as it is. The robot is
   18.7 mm taller and has a band at the seam, where the legs come out.
 - **Spine built into the base,** not screwed in: the crankshafts and the forks stay where the CAD puts them relative
@@ -1285,8 +1289,10 @@ base. The foot-path comparison was dropped.
 
 #### Next
 
-Print [`print/base-v1.3mf`](print/base-v1.3mf), and the drive's parts for the whole robot (8 legs, 8 forks, 4
-crankshafts, 3 idlers). Then assemble the drive in the base and turn it by hand.
+The gears have never been printed. First, [`print/gear-train-test.3mf`](print/gear-train-test.3mf) (47 min,
+16.5 g): the loose spine, the 4 crankshafts and the 3 idlers, on 3 × M3×12 as axles, turned by hand. Only if the gear
+train turns, print [`print/base-v1.3mf`](print/base-v1.3mf) and the 8 legs and 8 forks, buy the hardware, assemble
+the drive in the base and turn it by hand.
 
 [↑ Contents](#contents)
 
@@ -1298,8 +1304,10 @@ outside the repo.
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| Print base v1 and the drive's parts, assemble the drive in the base and turn it by hand | [Base v1 in CAD](#base-v1-in-cad) | 3 |
+| Gear train test: print the spine, crankshafts and idlers and check that the four shafts turn together by hand | [Base v1 in CAD](#base-v1-in-cad) | 3 |
+| Then print base v1, the 8 legs and 8 forks, assemble the drive in the base and turn it by hand | [Base v1 in CAD](#base-v1-in-cad) | 3 |
 | Fix the front block (it stands loose on the deck and the cap) and the body on the band | [Base v1 in CAD](#base-v1-in-cad) | 2 |
+| Base for looks, once v1 works: band following the body's outline, screws and fork bosses hidden, no gap under the body's rear, side lips back | [Base v1 in CAD](#base-v1-in-cad) | 5 |
 | Carcass cuts: battery hatch in the base, motor and shaft openings | [Mesh repair](#mesh-repair) | 2 |
 | Confirm that Bambu Studio keeps the support settings saved by `tools/bambu_plate.py` | [Clearance test…](#clearance-test-and-test-leg-print-plate) | 2 |
 | Check the drawing of the battery holder bought against 64 × 49 × 16 mm (+2 mm) | [Motor, battery holder…](#motor-battery-holder-and-print-scale) | 4 |

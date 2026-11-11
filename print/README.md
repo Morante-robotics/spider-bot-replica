@@ -7,6 +7,7 @@ Basic, 0.20 mm Standard). Open one in Bambu Studio, check it and send it: **Slic
 |---|---|---|---|
 | [`test-leg-plate.3mf`](test-leg-plate.3mf) | [Test frame](../cad/drive/), middle leg (right), fork, crankshaft 2, [clearance block and pin](../cad/clearance-test/) | 1 h 28 min | 29.6 g |
 | [`test-frame-v2.3mf`](test-frame-v2.3mf) | Test frame v2 with a keeper for the crankshaft, the fork on M3 pins, and the leg, with the clearances from the block | 1 h 18 min | 25.6 g |
+| [`gear-train-test.3mf`](gear-train-test.3mf) | [Spine](../cad/drive/) on its own, the 4 crankshafts and the 3 idlers, to turn the gear train by hand | 47 min | 16.5 g |
 | [`base-v1.3mf`](base-v1.3mf) | [Base v1](../cad/base/), its cap (upside down) and the front block | 7 h 55 min | 139.9 g |
 
 ## Test leg plate
@@ -43,6 +44,26 @@ clearance block's bottom row and its 3 tap holes.
 ball into the middle ones and an M3 screw through the bottom ones. The right clearance is the smallest one that
 turns freely without wobbling; set it as `CLR` / `CLR_STEEL` in [`cad/drive/build.py`](../cad/drive/build.py) and
 rebuild the parts before printing them.
+
+## Gear train test
+
+The four crankshafts and three idler gears in the loose [spine](../cad/drive/), to check by hand that the gears mesh
+and all four shafts turn together, before printing [base v1](#base-v1). Same settings as the other plates; the
+crankshafts get tree supports.
+
+**Hardware:** 3 × M3×12 + 3 nuts as the idlers' axles (in place of the 3 mm steel pins): head on one wall, nut on the
+other, through the idler.
+
+**Assembly:** each idler between the walls on its screw (11 teeth at the front, 20 at the rear), then the
+crankshafts into their slots, front to rear, with the cranks as printed (see [cad/drive/](../cad/drive/)). The slots
+are open at the top, so hold the shafts down with a finger while turning crankshaft 1.
+
+```
+python3 tools/bambu_plate.py print/gear-train-test.3mf cad/drive/spine.stl cad/drive/crankshaft-1.stl \
+    cad/drive/crankshaft-2.stl cad/drive/crankshaft-3.stl cad/drive/crankshaft-4.stl cad/drive/idler-1.stl \
+    cad/drive/idler-2.stl cad/drive/idler-3.stl \
+    --set enable_support=1 "support_type=tree(auto)" support_on_build_plate_only=1 "curr_bed_type=Textured PEI Plate"
+```
 
 ## Base v1
 
