@@ -1,44 +1,92 @@
 # Spider-Bot · Build log
 
-Every step of the build in order, written so that it can be repeated: what was done, with what, the result, and what
-went wrong. Newest entries at the bottom.
+The story of the build, step by step, written so that anyone can follow it and repeat it. Every entry opens with a
+short **In short** box; read only those boxes and you have the whole story. Below each box come the steps, the
+results with their figures, and the decisions taken. Commands and full data tables are folded under
+**How to reproduce**. Entries are grouped by topic, oldest first.
 
-| Date | Phase | Step |
-|---|---|---|
-| 2026-10 | 0 · Workshop | [Printer calibration](#printer-calibration) |
-| 2026-11-09 | 0 · Workshop | [First print: purge waste bin](#first-print-purge-waste-bin) |
-| 2026-11-08 | 2 · CAD | [Carcass base model](#carcass-base-model) |
-| 2026-11-09 | 2 · CAD | [Motor, battery holder and print scale](#motor-battery-holder-and-print-scale) |
-| 2026-11-09 | 2 · CAD | [Mesh repair](#mesh-repair) |
-| 2026-11-09 | 3 · Mechanisms | [Leg simulator and comparison](#leg-simulator-and-comparison) |
-| 2026-11-09 | 3 · Mechanisms | [Toy leg in 3D](#toy-leg-in-3d) |
-| 2026-11-09 | 3 · Mechanisms | [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft) |
-| 2026-11-09 | 3 · Mechanisms | [Crankshaft against real parts](#crankshaft-against-real-parts) |
-| 2026-11-09 | 3 · Mechanisms | [Two side crankshafts](#two-side-crankshafts) |
-| 2026-11-09 | 3 · Mechanisms | [Four lateral crankshafts](#four-lateral-crankshafts) |
-| 2026-11-10 | 3 · Mechanisms | [Legs and drive in CAD](#legs-and-drive-in-cad) |
-| 2026-11-10 | 2 · CAD | [Onshape assembly](#onshape-assembly) |
-| 2026-11-10 | 2 · CAD | [Clearance test and test leg print plate](#clearance-test-and-test-leg-print-plate) |
-| 2026-11-11 | 3 · Mechanisms | [Test leg: first assembly and clearance result](#test-leg-first-assembly-and-clearance-result) |
+## Contents
 
-## Printer calibration
+**Workshop:** getting the printer ready.
 
-**Phase 0 · Workshop · 2026-10**
+| Date | Phase | Step | Status |
+|---|---|---|---|
+| 2026-10 | 0 · Workshop | [Printer calibration](#printer-calibration) | ✅ done |
+| 2026-11-09 | 0 · Workshop | [First print: purge waste bin](#first-print-purge-waste-bin) | ✅ done |
 
-Bambu Lab P2S Combo (with AMS) running its automatic calibration before the first print. All Spider-Bot parts are
-printed in PLA.
+**Carcass:** the robot's outer shell, and what has to fit inside it.
+
+| Date | Phase | Step | Status |
+|---|---|---|---|
+| 2026-11-08 | 2 · CAD | [Carcass base model](#carcass-base-model) | ✅ done |
+| 2026-11-09 | 2 · CAD | [Motor, battery holder and print scale](#motor-battery-holder-and-print-scale) | ✅ 120 % |
+| 2026-11-09 | 2 · CAD | [Mesh repair](#mesh-repair) | ✅ done |
+
+**Legs and drive:** how one motor moves eight legs.
+
+| Date | Phase | Step | Status |
+|---|---|---|---|
+| 2026-11-09 | 3 · Mechanisms | [Leg simulator and comparison](#leg-simulator-and-comparison) | ✅ toy leg chosen |
+| 2026-11-09 | 3 · Mechanisms | [Toy leg in 3D](#toy-leg-in-3d) | ✅ lateral axle |
+| 2026-11-09 | 3 · Mechanisms | [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft) | ↩️ reversed |
+| 2026-11-09 | 3 · Mechanisms | [Crankshaft against real parts](#crankshaft-against-real-parts) | ❌ one crankshaft ruled out |
+| 2026-11-09 | 3 · Mechanisms | [Two side crankshafts](#two-side-crankshafts) | ❌ ruled out |
+| 2026-11-09 | 3 · Mechanisms | [Four lateral crankshafts](#four-lateral-crankshafts) | ✅ chosen |
+| 2026-11-10 | 3 · Mechanisms | [Legs and drive in CAD](#legs-and-drive-in-cad) | ✅ done |
+| 2026-11-10 | 2 · CAD | [Onshape assembly](#onshape-assembly) | ✅ done |
+| 2026-11-10 | 2 · CAD | [Clearance test and test leg print plate](#clearance-test-and-test-leg-print-plate) | ✅ printed |
+| 2026-11-11 | 3 · Mechanisms | [Test leg: first assembly and clearance result](#test-leg-first-assembly-and-clearance-result) | 🔄 v2 to print |
+
+Status: ✅ done · 🔄 in progress · ❌ ruled out · ↩️ reversed by a later entry.
+
+## Glossary
+
+<img src="cad/drive/images/test-frame-screws.png" alt="Test frame with its parts and screws, exploded">
+
+*The test frame, exploded: grey frame, blue crankshaft, red leg, orange fork, green keeper. Most of the terms below
+appear in it.*
+
+| Term | Meaning |
+|---|---|
+| **Crank** | An arm fixed to a turning shaft; its far end goes round in a circle. |
+| **Crank pin** | The pin (here a small ball) at the end of the crank, where the leg is attached. |
+| **Crankshaft** | One shaft with one or more cranks on it, so one motor turns them all. |
+| **Journal** | The round part of a shaft that turns inside a hole (its bearing). |
+| **Fork (pivot)** | The small block on the body's edge that the leg passes through. It swivels, and the leg tilts in it. |
+| **Keeper** | A cover that holds the crankshaft down in its slots. |
+| **Idler** | A gear between two others, so they turn the same way. |
+| **Stride** | How far the robot moves forward per half turn of the crank. |
+| **Bob** | How much the body goes up and down while walking. |
+| **Step height** | How high a foot lifts off the ground. |
+| **Clearance** | How much bigger a hole is than the part in it, so the part can turn. |
+| **Gait groups** | The legs move in two groups of four (left 1 and 3 + right 2 and 4, and the other four), half a turn apart. |
+| **STL / STEP** | 3D file formats: STL is a triangle mesh (for printing), STEP is exact geometry (for CAD). |
+| **Watertight (manifold)** | A mesh with no holes or loose edges, which slicers and CAD tools need. |
+| **build123d · Onshape · Bambu Studio** | CAD in Python code · CAD in the browser · the printer's slicer. |
+
+## Workshop
+
+The printer is a Bambu Lab P2S Combo (with AMS). Before printing robot parts, it was calibrated and given a first,
+useful print. All Spider-Bot parts are printed in PLA.
+
+### Printer calibration
+
+**Phase 0 · Workshop · 2026-10** · Status: ✅ done
+
+> **In short.** The P2S runs its automatic calibration before its first print. Nothing to set by hand.
+
+*Video · The P2S running its automatic calibration.*
 
 https://github.com/user-attachments/assets/948dd098-af7a-4972-a0bd-290c17e0126f
 
-## First print: purge waste bin
+### First print: purge waste bin
 
-**Phase 0 · Workshop · 2026-11-09**
+**Phase 0 · Workshop · 2026-11-09** · Status: ✅ done
 
-**Goal:** first real print on the P2S, to check the printer works before printing robot parts. The part is a bin
-that catches the filament the printer purges out of the chute at the back (on every filament change). Recommended
-as one of the first prints: it keeps the work table clean.
+> **In short.** The first real print is a bin that catches the filament the printer purges at the back on every
+> filament change. It came out right, so the printer is ready for robot parts.
 
-**Steps:**
+#### Steps
 
 1. Model: [P1S, P2S, X2D Poop Bin by Pichler](https://makerworld.com/models/1603348) on MakerWorld. Pick the print
    profile **«P2S (10 mm higher) / without Purge Line Corner / with Logo»**: the P1S profile is 10 mm too low for
@@ -46,278 +94,434 @@ as one of the first prints: it keeps the work table clean.
 2. Filament: Bambu PLA Basic, black.
 3. Print, then slide the bin's foot tab under the printer, below the purge chute.
 
-**Result:** the first print came out right: smooth walls, no visible defects. The printer works as
-expected after calibration.
+#### Result
 
-![Purge waste bin](images/purge-waste-box-1.jpg)
+Smooth walls, no visible defects (Fig. 1).
+
+<img src="images/purge-waste-box-1.jpg" width="360" alt="Purge waste bin">
+
+*Fig. 1 · The bin under the printer's purge chute.*
+
+*Video · The first print.*
 
 https://github.com/user-attachments/assets/969db1d2-f4c8-4ad6-a642-058941c77ebe
 
-## Carcass base model
+## Carcass
 
-**Phase 2 · CAD · 2026-11-08**
+The robot's look comes from an existing fan model, jenscolt's Spidey-Bot. The first job was to check it could hold
+the motor and batteries. At its original size the battery holder does not fit, so it is printed at **120 %**. Its
+meshes also had errors, which were repaired without changing the shape. The cuts and holes for the mechanism come
+later, once the mechanism is designed.
 
-**Goal:** start the carcass from an existing faithful model instead of modelling it from scratch.
+### Carcass base model
 
-**Source:** [Spidey-Bot by jenscolt](https://www.thingiverse.com/thing:5196618), the most faithful replica found
-(CC BY-NC-SA). Others looked at: a stylised low-poly game asset on Sketchfab (CC BY-ND, so no modified versions
-can be published; reference only) and the MyMiniFactory «Spider BOT» (an unrelated sci-fi miniature).
+**Phase 2 · CAD · 2026-11-08** · Status: ✅ done
 
-**Steps:**
+> **In short.** Instead of modelling the shell from scratch, we start from
+> [Spidey-Bot by jenscolt](https://www.thingiverse.com/thing:5196618), the most faithful replica found. Its 9 parts
+> were measured and assembled into one model. It imports into the slicer, but with mesh errors to fix first.
+
+**Why this model.** It is the most faithful replica found (CC BY-NC-SA). Others looked at: a stylised low-poly game
+asset on Sketchfab (CC BY-ND, so no modified versions can be published; reference only) and the MyMiniFactory
+«Spider BOT» (an unrelated sci-fi miniature).
+
+#### Steps
 
 1. On the Thingiverse page, **Download all files** (zip with 9 STLs, photos, README and license).
-2. Check every STL is valid and measure it: [`tools/stl_preview.py`](tools/stl_preview.py) prints the size of each part
-   and renders the previews.
-3. The files place body, base, sensor and only the front leg pair; the eyes are off to the side. Join everything into
-   one assembled STL: `python3 tools/assemble_jenscolt.py cad/carcass-jenscolt spideybot_assembled.stl`. It moves the
-   4 eye domes into their sockets and adds the other 3 legs per side (rear mirrored, middle two rotated). The leg
-   layout is approximate, read off the author's photos: fine for pictures, not for fitting parts.
+2. Check every STL is valid and measure it with [`tools/stl_preview.py`](tools/stl_preview.py), which prints the size
+   of each part and renders the previews.
+3. The files place the body, base, sensor and only the front pair of legs; the eyes are off to the side. Join
+   everything into one assembled model (How to reproduce): the 4 eye domes go into their sockets and the other
+   3 legs per side are added. The leg layout is approximate, read off the author's photos: fine for pictures, not
+   for fitting parts.
 4. Open the assembled STL in Bambu Studio to check it imports.
-5. Files, sizes and previews: [cad/carcass-jenscolt/](cad/carcass-jenscolt/).
 
-**Result:** 9 binary STLs. The body is a hollow shell 96 × 110 × 66 mm. The base has posts and mounts inside. The
-legs are static display parts. Print 4 of each leg file per side (8 legs) and 2 of each eye. Assembled, the robot
-measures 224 × 154 × 118 mm.
+<details>
+<summary>How to reproduce</summary>
 
-![Assembled carcass turntable](cad/carcass-jenscolt/images/assembled-turntable.gif)
+```
+python3 tools/assemble_jenscolt.py cad/carcass-jenscolt spideybot_assembled.stl
+```
 
-![Carcass parts](cad/carcass-jenscolt/images/parts.png)
+Files, sizes and previews: [cad/carcass-jenscolt/](cad/carcass-jenscolt/).
 
-Bambu Studio imports the assembly, but reports mesh errors (non-manifold edges and reversed faces); every file has some.
+</details>
 
-![Bambu Studio import](cad/carcass-jenscolt/images/bambu-studio-import.png)
+#### Result
 
-**Decisions:**
+The body is a hollow shell 96 × 110 × 66 mm; the base has posts and mounts inside. The legs are static display
+parts. Assembled, the robot measures 224 × 154 × 118 mm (Fig. 1). It needs 4 of each leg file per side and 2 of
+each eye (Fig. 2).
 
-- Carcass = jenscolt's meshes, edited in Bambu Studio (cuts, holes). Mechanism = new parametric parts in Onshape, with
-  the body STL imported only as a size reference.
-- The walking legs are designed new; jenscolt's legs give their outer look.
+<table>
+<tr>
+<td width="50%"><img src="cad/carcass-jenscolt/images/assembled-turntable.gif" alt="Assembled carcass turntable"></td>
+<td width="50%"><img src="cad/carcass-jenscolt/images/parts.png" alt="Carcass parts"></td>
+</tr>
+<tr>
+<td><em>Fig. 1 · The assembled model: eyes in their sockets and all eight legs placed.</em></td>
+<td><em>Fig. 2 · The 9 parts as downloaded, with their sizes.</em></td>
+</tr>
+</table>
 
-**Open:**
+Bambu Studio imports the assembly, but reports mesh errors (non-manifold edges and reversed faces) in every file
+(Fig. 3).
 
-- ~~Repair the meshes before cutting or drilling them.~~ Done in [Mesh repair](#mesh-repair).
-- ~~Print scale.~~ Decided in the next step: 120 %.
+<img src="cad/carcass-jenscolt/images/bambu-studio-import.png" width="640" alt="Bambu Studio import">
 
-## Motor, battery holder and print scale
+*Fig. 3 · The model in Bambu Studio. The red panel at the bottom right lists the mesh errors; they must be repaired
+before cutting or drilling the parts.*
 
-**Phase 2 · CAD · 2026-11-09**
+#### Decisions
 
-**Goal:** choose the motor and the battery holder, and find the print scale at which both fit inside the carcass.
+- **Carcass:** jenscolt's meshes, edited in Bambu Studio (cuts, holes). **Mechanism:** new parts designed in CAD,
+  with the body only as a size reference.
+- The walking legs are designed new; jenscolt's legs only give their outer look.
 
-**Steps:**
+### Motor, battery holder and print scale
 
-1. Collect the outer sizes from shop data sheets (largest listed value, rounded up):
+**Phase 2 · CAD · 2026-11-09** · Status: ✅ 120 %
+
+> **In short.** The body must hold the motor and a battery holder. At 100 % the free space inside is about
+> 71 × 62 mm: the small N20 motor fits, but no 4-battery holder with a switch does. At **120 %** a 4×AAA holder fits
+> with 2 mm to spare, so that is the print scale.
+
+#### Steps
+
+1. Collect the outer sizes of the candidate parts from shop data sheets (largest listed value, rounded up):
 
    | Part | Size (mm) | Notes |
    |---|---|---|
-   | N20 gear motor | 37 × 12 × 10 | 12 × 10 cross-section for every gear ratio; length includes the 10 mm shaft |
-   | 4×AA holder, switch + cover (flat) | 70.5 × 68 × 20 | Parts Express, The Pi Hut, Abra, DFRobot listings |
-   | 4×AAA holder, switch + cover | 64 × 49 × 16 | Typical listing; check the drawing of the one bought |
+   | N20 gear motor | 37 × 12 × 10 | Same cross-section for every gear ratio; length includes the 10 mm shaft |
+   | 4×AA holder, switch + cover (flat) | 70.5 × 68 × 20 | Several shop listings |
+   | 4×AAA holder, switch + cover | 64 × 49 × 16 | Typical listing; check the one bought |
    | 3×AA / 2×AA holder, switch | ~62 × 50 × 18 / ~60 × 34 × 18 | Typical listings |
    | 4×AA holder, 2×2 stacked | 58 × 32 × 31 | No switch or cover |
 
-2. Measure the free space inside the body and try each part in it:
-   ```
-   python3 tools/fit_check.py cad/carcass-jenscolt --scale 1.0 --min-scale \
-       --box "4×AA flat, switch + cover" 70.5 68 20 --box "4×AAA holder, switch + cover" 64 49 16 ...
-   ```
-   [`tools/fit_check.py`](tools/fit_check.py) slices the body every 1 mm from the top of the base upwards, keeps the
-   inside of the wall behind the eye block, and looks for a spot where the box lies flat (0° or 90°). The author's
-   screw bosses and base posts are ignored: the inside is redesigned. The base is a near-solid bowl; hollowing it
-   does not help, it is too shallow at the edges.
-3. Repeat at the chosen scale with 2 mm clearance per side (holder sizes vary about ±0.5 mm between makers, and the
-   wires need room): `--scale 1.2 --clearance 2`.
+2. Measure the free space inside the body and try each part in it with
+   [`tools/fit_check.py`](tools/fit_check.py). It slices the body every 1 mm upwards from the top of the base, keeps
+   the inside of the wall behind the eye block, and looks for a spot where the part lies flat. The author's screw
+   posts are ignored, since the inside is redesigned. The base itself is a near-solid bowl, too shallow at the edges
+   to help.
+3. Repeat at the chosen scale with 2 mm clearance per side: holder sizes vary about ±0.5 mm between makers, and the
+   wires need room.
 
-**Result:** at 100 % the free space is a horseshoe about 71 × 62 mm. The N20 fits with room to spare. The 4×AA flat
-holder needs 137 %. With 2 mm clearance the 4×AAA holder needs 118 %; at 120 % it fits.
+<details>
+<summary>How to reproduce</summary>
 
-![What fits at 100 %](cad/layout/images/fit-100.png)
+```
+python3 tools/fit_check.py cad/carcass-jenscolt --scale 1.0 --min-scale \
+    --box "4×AA flat, switch + cover" 70.5 68 20 --box "4×AAA holder, switch + cover" 64 49 16 ...
+python3 tools/fit_check.py cad/carcass-jenscolt --scale 1.2 --clearance 2 --box ...
+```
 
-![4×AAA holder and N20 at 120 %](cad/layout/images/fit-120.png)
+</details>
 
-**Decisions:**
+#### Result
 
-- **Motor: N20 gear motor.** The ratio is picked in phase 4 from the measured load; all ratios have the same size.
-- **Batteries: 4×AAA NiMH** in a holder with switch and cover. Same 4.8 V as 4×AA, so motor and eyes behave the same;
-  less capacity (about 800–1000 mAh against 2000–2500 mAh). 2×AA was ruled out: 2.4 V (about 2.2 V under load)
-  gives a 6 V N20 about 40 % of its speed and torque, and blue or white LEDs (about 3 V) do not light.
-- **Print scale: 120 %.** Robot about 269 × 185 × 142 mm. 110 % fits the holder with no clearance at all.
+At 100 % the N20 fits with room to spare, but the holders with a switch do not (Fig. 1). The flat 4×AA holder
+would need 137 %. With 2 mm clearance the 4×AAA holder needs 118 %, and at 120 % it fits (Fig. 2).
 
-**Open:**
+<img src="cad/layout/images/fit-100.png" alt="What fits at 100 %">
+
+*Fig. 1 · The free space inside the body at 100 % (grey), seen from above, with each holder tried in it. Only the
+stacked 4×AA (no switch) and the 2×AA fit.*
+
+<img src="cad/layout/images/fit-120.png" width="640" alt="4×AAA holder and N20 at 120 %">
+
+*Fig. 2 · At 120 %: the 4×AAA holder and the N20 motor fit, each with 2 mm clearance (dashed).*
+
+#### Decisions
+
+- **Motor: N20 gear motor.** All gear ratios have the same size; the ratio is picked in phase 4 from the measured
+  load.
+- **Batteries: 4×AAA NiMH** in a holder with switch and cover. Same 4.8 V as 4×AA, so motor and eyes behave the
+  same, with less capacity (about 800–1000 mAh against 2000–2500 mAh). 2×AA was ruled out: 2.4 V (about 2.2 V under
+  load) gives a 6 V N20 about 40 % of its speed and torque, and blue or white LEDs (about 3 V) do not light.
+- **Print scale: 120 %.** The robot is about 269 × 185 × 142 mm. At 110 % the holder fits with no clearance at all.
+
+#### Next
 
 - Check the drawing of the holder actually bought against 64 × 49 × 16 mm (+2 mm).
-- Battery life on 4×AAA: measured in phase 4.
-- Room for the leg mechanism next to the holder: laid out in Onshape (phase 3).
+- Measure battery life on 4×AAA (phase 4).
 
-## Mesh repair
+### Mesh repair
 
-**Phase 2 · CAD · 2026-11-09**
+**Phase 2 · CAD · 2026-11-09** · Status: ✅ done
 
-**Goal:** make the carcass meshes watertight (closed, no non-manifold edges) without changing their shape, so that
-cuts and holes in Bambu Studio work, and scale them to the chosen 120 %.
+> **In short.** The downloaded meshes had small errors (duplicate and zero-size triangles, tiny gaps) that stop
+> cuts and holes from working in the slicer. A repair script closed them while moving the surface 0.01 mm at most,
+> and scaled the parts to 120 %. Bambu Studio now reports every part as watertight.
 
-**What was wrong:** every file has duplicate triangles (zero-thickness walls), zero-area triangles, tiny gaps
-between triangles, and in the body 10 edges where two surfaces touch ("pinched" edges). Bambu Studio's CLI
-(`BambuStudio --info part.stl`) reports `manifold = no` for body, eyes and sensor.
+**What was wrong.** Every file has duplicate triangles (zero-thickness walls), zero-area triangles and tiny gaps
+between triangles. The body also has 10 «pinched» edges, where two surfaces touch along a line. Bambu Studio's mesh
+check reports `manifold = no` for body, eyes and sensor.
 
-**Steps:**
+#### Steps
 
-1. Repair and scale the 5 carcass parts:
-   ```
-   python3 tools/repair_stl.py cad/carcass-120 --scale 1.2 cad/carcass-jenscolt/spideybot_{body,base,eye,small_eye,sensor}.stl
-   ```
-   [`tools/repair_stl.py`](tools/repair_stl.py) merges vertices closer than 0.1 µm, drops zero-area and duplicate
-   triangles, closes small holes, and at pinched edges splits the vertices and moves each copy 0.01 mm into its own
-   side. It then reads every file back, as a slicer would, and measures the largest distance to the original.
-2. Check with Bambu Studio's own mesh check: `/Applications/BambuStudio.app/Contents/MacOS/BambuStudio --info
-   cad/carcass-120/spideybot_body.stl` → `manifold = yes` for all 5 files.
+1. Repair and scale the 5 carcass parts with [`tools/repair_stl.py`](tools/repair_stl.py). It merges points that
+   are almost in the same place, drops zero-area and duplicate triangles and closes small holes. At pinched edges it
+   splits the points and moves each copy 0.01 mm into its own side. It then reads every file back, as a slicer
+   would, and measures the largest distance to the original.
+2. Check with Bambu Studio's own mesh check.
 
-**Result** (deviation measured at 100 %, before scaling):
+<details>
+<summary>How to reproduce</summary>
 
-| File | Before: open / non-manifold edges | Fixed | After: open / non-manifold edges | Watertight | Max deviation (mm, at 100 %) |
-|---|---|---|---|---|---|
-| `spideybot_body.stl` | 0 / 55 | 228 degenerate, 7 duplicate triangles, 10 pinched edges split (surface moved 0.01 mm) | 0 / 0 | yes | 0.010 |
-| `spideybot_base.stl` | 0 / 4 | 6 degenerate, 0 duplicate triangles | 0 / 0 | yes | 0.000 |
-| `spideybot_eye.stl` | 0 / 3 | 0 degenerate, 3 duplicate triangles | 0 / 0 | yes | 0.000 |
-| `spideybot_small_eye.stl` | 0 / 3 | 5 degenerate, 3 duplicate triangles, 3 open edges closed | 0 / 0 | yes | 0.000 |
-| `spideybot_sensor.stl` | 0 / 3 | 2 degenerate, 3 duplicate triangles | 0 / 0 | yes | 0.000 |
+```
+python3 tools/repair_stl.py cad/carcass-120 --scale 1.2 cad/carcass-jenscolt/spideybot_{body,base,eye,small_eye,sensor}.stl
+/Applications/BambuStudio.app/Contents/MacOS/BambuStudio --info cad/carcass-120/spideybot_body.stl   # manifold = yes
+```
 
-Bambu Studio: `manifold = yes` for all 5 (before: body 9 non-manifold edges, eye, small eye and sensor 3 each).
-Imported in the Bambu Studio window, the body shows no errors (compare the red errors in
-[Carcass base model](#carcass-base-model)):
+</details>
 
-![Repaired body in Bambu Studio](cad/carcass-120/images/bambu-studio-import.png)
+#### Result
 
-![Repaired parts at 120 %](cad/carcass-120/images/parts.png)
+All 5 parts are watertight, and none moved more than 0.01 mm (measured at 100 %, before scaling).
 
-**Decisions:**
+| File | Bad edges before | Bad edges after | Max change (mm) |
+|---|---|---|---|
+| `spideybot_body.stl` | 55 | 0 | 0.010 |
+| `spideybot_base.stl` | 4 | 0 | 0.000 |
+| `spideybot_eye.stl` | 3 | 0 | 0.000 |
+| `spideybot_small_eye.stl` | 3 | 0 | 0.000 |
+| `spideybot_sensor.stl` | 3 | 0 | 0.000 |
+
+<details>
+<summary>What was fixed in each file</summary>
+
+| File | Fixed |
+|---|---|
+| `spideybot_body.stl` | 228 zero-area, 7 duplicate triangles, 10 pinched edges split (surface moved 0.01 mm) |
+| `spideybot_base.stl` | 6 zero-area triangles |
+| `spideybot_eye.stl` | 3 duplicate triangles |
+| `spideybot_small_eye.stl` | 5 zero-area, 3 duplicate triangles, 3 open edges closed |
+| `spideybot_sensor.stl` | 2 zero-area, 3 duplicate triangles |
+
+Bambu Studio before: body 9 non-manifold edges; eye, small eye and sensor 3 each. After: `manifold = yes` for all 5.
+
+</details>
+
+<table>
+<tr>
+<td width="50%"><img src="cad/carcass-120/images/bambu-studio-import.png" alt="Repaired body in Bambu Studio"></td>
+<td width="50%"><img src="cad/carcass-jenscolt/images/bambu-studio-import.png" alt="Original body in Bambu Studio"></td>
+</tr>
+<tr>
+<td><em>Fig. 1 · The repaired body in Bambu Studio: no errors.</em></td>
+<td><em>Fig. 2 · The original, for comparison: the red panel at the bottom right lists its errors.</em></td>
+</tr>
+</table>
+
+<img src="cad/carcass-120/images/parts.png" alt="Repaired parts at 120 %">
+
+*Fig. 3 · The 5 repaired parts at 120 %, with their print sizes.*
+
+#### Decisions
 
 - **No automatic rebuild (MeshFix).** Tried first: it closes everything, but on a leg it cut off a 1.5 mm relief.
   Only fixes that keep the surface within 0.01 mm are used.
-- **Legs not repaired.** Their pinched edges need the shape changed to close. They are not printed (the walking
+- **Legs not repaired.** Closing their pinched edges would change their shape. They are not printed (the walking
   legs are designed new) and stay as a reference in [cad/carcass-jenscolt/](cad/carcass-jenscolt/).
-- Repaired files live at 120 %, the print scale, so measurements taken from them are the real ones.
+- The repaired files are kept at 120 %, the print scale, so measurements taken from them are the real ones.
 
-**Open:**
+#### Next
 
-- Cuts in Bambu Studio: battery hatch in the base, motor and shaft openings (after the mechanism layout).
+- Cuts in Bambu Studio: battery hatch in the base, motor and shaft openings, once the mechanism is laid out.
 
-## Leg simulator and comparison
+## Legs and drive
 
-**Phase 3 · Mechanisms · 2026-11-09**
+The Spider-Bot walks on eight legs driven by one motor, so the core problem is the mechanism. The steps so far:
 
-**Goal:** simulate the foot path of three candidate legs driven by one crank and choose one with numbers: toy
-(crank + sliding leg), Klann and Jansen.
+1. **Which leg?** A simulator compared three leg mechanisms. We chose the simplest, the **toy leg**: one bent part
+   per leg, pushed by a crank.
+2. **Which drive?** Then came the hard part: how one motor turns eight cranks without the legs hitting each other.
+   - **One crankshaft** across the body for all eight legs looked good until the cranks were given real thickness.
+     The legs' inner arms then cut through the other legs' cranks.
+   - **Two side crankshafts** (front to back) fit, but the feet move sideways and the robot barely walks.
+   - **Four crankshafts** across the body, one per pair of legs, linked by gears, is the first layout that fits and
+     walks forward. Its stride is short (about 10 mm per half turn), because the body must not bob more than 3 mm.
+3. **CAD and first print.** The parts were modelled in code, checked for collisions over a full turn, assembled in
+   Onshape, and one leg was printed on a small test frame. It showed that holes need much more clearance than
+   expected (0.5 mm), and the frame was redesigned. Next: print the new frame and turn the leg by hand.
 
-**Steps:**
+### Leg simulator and comparison
 
-1. Bar lengths: Klann from his patent as redrawn by [DIY Walkers](https://www.diywalkers.com/klann-linkage-optimizer.html)
-   (crank = 3, frame pivots at (7.4, 16.9) and (3.4, 8.03) with the crank at (10, 10), knee bent 30°, upper bar
-   bent 12.8°); Jansen's "holy numbers" (crank = 15); the toy leg from a random search (4000 tries) for the longest
-   stride with less than 3 mm of body bob, so it is compared at its best.
-2. Run the simulator: `python3 sim/legs.py --png sim/images/foot-paths.png --gif sim/images/legs.gif`.
-   [`sim/legs.py`](sim/legs.py) turns the crank in 0.5° steps, solves each joint as the crossing of two circles
-   (keeping the linkage on the same branch), and scales every leg so the crank axle is 55 mm above the ground
-   (the body bottom is about 46 mm up at 120 %).
-3. Measure over the half turn each leg carries the body. The gait is two groups of four legs with cranks 180°
-   apart, so every leg must hold the body for half a turn, starting from its lowest point.
+**Phase 3 · Mechanisms · 2026-11-09** · Status: ✅ toy leg chosen
 
-**Result:**
+> **In short.** A 2D simulator compared three ways to build a leg turned by a crank: the **toy leg** (one part),
+> **Klann** (4 parts) and **Jansen** (7 parts). Klann gives the longest stride and Jansen the smoothest walk, but we
+> chose the toy leg: one part per leg, and forgiving of small printing errors. The simulator under-rates it,
+> because the real toy leg also moves in 3D, which was checked in the next step.
 
-| Leg | Stride per half turn (mm) | Body bob while walking (mm) | Step height (mm) | Foot slips back on the ground | Foot speed peak / median | Crank radius (mm) | Leg size W × H (mm) | Moving parts per leg | Pin joints per leg |
-|---|---|---|---|---|---|---|---|---|---|
-| toy (crank + sliding leg) | 29 | 2.5 | 5 | yes | 1.4 | 7.7 | 55 × 63 | 1 | 2 |
-| Klann | 60 | 3.7 | 28 | yes | 1.3 | 14.4 | 100 × 114 | 4 | 6 |
-| Jansen | 38 | 1.1 | 13 | no | 1.2 | 9.0 | 73 × 75 | 7 | 10 |
+**The three candidates.** In the **toy leg**, one bent part sits on a crank pin at its inner end and slides through
+a pivot on the body's edge. **Klann** and **Jansen** are classic walking linkages with 4 and 7 moving parts per
+leg (Jansen's is the one in the Strandbeest sculptures).
 
-Klann's driving four-bar (frame O-P2, crank, bar A-M, rocker M-P2): s + l = 9.88774, p + q = 10.19: crank-rocker — its crank turns fully.
+#### Steps
 
-![Foot paths](sim/images/foot-paths.png)
+1. Take the bar lengths: Klann from his patent, as redrawn by
+   [DIY Walkers](https://www.diywalkers.com/klann-linkage-optimizer.html); Jansen's published «holy numbers»; and for
+   the toy leg, the best of 4000 random tries (longest stride with less than 3 mm of body bob), so that it is
+   compared at its best.
+2. Run [`sim/legs.py`](sim/legs.py). It turns the crank in 0.5° steps, works out where each joint is, and scales
+   every leg so the crank axle is 55 mm above the ground (the body bottom is about 46 mm up at 120 %).
+3. Measure each leg over the half turn it carries the body: with two gait groups half a turn apart, every leg holds
+   the body for half a turn.
 
-![Legs animated](sim/images/legs.gif)
+<details>
+<summary>How to reproduce</summary>
 
-- **Toy:** one part per leg, but in this flat (2D) model the foot barely lifts (5 mm) and drags back. Real toy
-  spiders work in 3D (the foot also swings sideways and up), which this simulator does not model, so these numbers
+```
+python3 sim/legs.py --png sim/images/foot-paths.png --gif sim/images/legs.gif
+```
+
+Klann: crank = 3, frame pivots at (7.4, 16.9) and (3.4, 8.03) with the crank at (10, 10), knee bent 30°, upper bar
+bent 12.8°. Its driving four-bar (frame O-P2, crank, bar A-M, rocker M-P2): s + l = 9.88774, p + q = 10.19, a
+crank-rocker, so its crank turns fully. Jansen: crank = 15.
+
+</details>
+
+#### Result
+
+<img src="sim/images/foot-paths.png" alt="Foot paths">
+
+*Fig. 1 · The three legs at one crank angle (black squares are the fixed pivots) and the path of each foot over a
+full turn. The flat bottom of each loop is where the foot pushes the robot; the higher the loop, the higher the step.*
+
+<img src="sim/images/legs.gif" alt="Legs animated">
+
+*Fig. 2 · The same three legs turning.*
+
+| Leg | Stride per half turn (mm) | Body bob (mm) | Step height (mm) | Parts per leg |
+|---|---|---|---|---|
+| Toy | 29 | 2.5 | 5 | 1 |
+| Klann | 60 | 3.7 | 28 | 4 |
+| Jansen | 38 | 1.1 | 13 | 7 |
+
+<details>
+<summary>All the numbers</summary>
+
+| Leg | Foot slips back on the ground | Foot speed peak / median | Crank radius (mm) | Leg size W × H (mm) | Pin joints per leg |
+|---|---|---|---|---|---|
+| Toy | yes | 1.4 | 7.7 | 55 × 63 | 2 |
+| Klann | yes | 1.3 | 14.4 | 100 × 114 | 6 |
+| Jansen | no | 1.2 | 9.0 | 73 × 75 | 10 |
+
+</details>
+
+- **Toy:** one part per leg, but in this flat model the foot barely lifts (5 mm) and drags back. Real toy spiders
+  work in 3D (the foot also swings sideways and up), which this simulator does not model, so these numbers
   under-rate it.
-- **Klann:** longest stride (60 mm) and highest step (28 mm). The leg arches above the body like a spider's.
-  4 parts per leg, a bigger crank (14 mm), the body bobs 3.7 mm, and the foot slows at both ends of the step.
-  Sensitive to dimensions: rounding the bars to 0.5 mm changes the foot path a lot.
-- **Jansen:** the smoothest (1.1 mm bob, even speed) but 7 parts and 10 pins per leg (56 parts for 8 legs), and it
-  does not look like a spider leg.
+- **Klann:** longest stride and highest step, and the leg arches above the body like a spider's. But it needs 4
+  parts per leg and a bigger crank, the body bobs 3.7 mm, and small errors in the bar lengths change the foot path
+  a lot.
+- **Jansen:** the smoothest walk, but 7 parts and 10 pins per leg (56 parts for 8 legs), and it does not look like a
+  spider leg.
 
-**Decision: toy leg** (crank + one bent leg that slides and swivels in a pivot on the body edge). Simplest for a
-first robot: 1 part per leg (8 legs + cranks, against 32 parts for Klann), not sensitive to small dimension
-errors, a small crank (about 7 mm, so less torque), and probably how the original toy walks. Klann's real-size
-bars can be regenerated with `sim/legs.py` if needed.
+#### Decisions
 
-**How the toy leg works:** each leg is one rigid bent part. Its inner end sits on a crank pin that turns in a
-circle; further out it passes through a pivot on the body edge that lets it slide and swivel (a sleeve on a swivel,
-or a ball joint). When the crank pin goes up, the foot goes down (lever), and when the pin goes in, the leg slides
-in: the foot traces a loop. Gait as planned: two groups of four legs (left 1 and 3 + right 2 and 4, against the
-other four) on crank pins 180° apart.
+**Toy leg.** It is the simplest for a first robot: 8 leg parts against 32 for Klann, not sensitive to small
+dimension errors, a small crank (about 7 mm, so less torque), and probably how the original toy walks. Klann's
+real-size bars can be regenerated with `sim/legs.py` if needed.
 
-**Open:**
+**How the toy leg works.** Its inner end sits on a crank pin that turns in a circle. Further out, it passes through
+a pivot on the body's edge that lets it slide and swivel. When the crank pin goes up, the foot goes down (a lever),
+and when the pin moves in, the leg slides in: the foot traces a loop. The two gait groups of four legs are on crank
+pins half a turn apart.
 
-1. ~~3D model of the toy leg~~: done in [Toy leg in 3D](#toy-leg-in-3d).
-2. ~~How 8 legs share one motor~~: worked out from [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft) to
-   [Four lateral crankshafts](#four-lateral-crankshafts). The «walking spider toy teardown» videos are still on the
-   study list.
-3. ~~CAD in build123d~~: done in [Legs and drive in CAD](#legs-and-drive-in-cad).
-4. ~~Onshape assembly and animation~~: done in [Onshape assembly](#onshape-assembly).
-5. Print one leg with its pivot and turn it by hand.
+#### Next
 
-## Toy leg in 3D
+- Watch «walking spider toy teardown» videos (study list).
 
-**Phase 3 · Mechanisms · 2026-11-09**
+### Toy leg in 3D
 
-**Goal:** model the chosen toy leg in 3D on the whole robot (8 legs in the base notches, two gait groups) and get the
-same numbers as the 2D comparison, for every way of building it, each at its best.
+**Phase 3 · Mechanisms · 2026-11-09** · Status: ✅ lateral axle
 
-**Steps:**
+> **In short.** The toy leg was simulated in 3D on the whole robot, in its 8 real notches. We tried 6 ways to build
+> it: the crank turning on 3 different axes, and the leg sliding either at the crank or at the body. Only one gets
+> close to every target: **crank axle across the body (lateral), leg sliding at the crank**, with a 26 mm stride and
+> 3.1 mm of bob. Each leg still has its own crank here; how one motor drives them all is the next step.
 
-1. Find the leg pivots: the base rim has 8 notches, 4 per side, about 10 × 5 mm, at z 70–74 mm
-   ([cad/carcass-120/](cad/carcass-120/) coordinates: z = height above the ground of jenscolt's assembly, forward =
-   −Y). Right-side centres, front to rear: (89.5, −32.2), (95.9, −12.6), (96.1, 2.9), (82.6, 31.1); the left ones are
-   their mirror about x = 42.7 (the body axis). Measured by slicing `spideybot_base.stl` at z = 71 and 73 and
-   subtracting the slice from its convex hull.
-2. Model one leg ([`sim/toy_leg_3d.py`](sim/toy_leg_3d.py)): crank pin A turns about a crank centre O placed D mm
-   inward from the pivot P and H mm above it; the inner arm runs along the line A → P; past the knee the shin bends
-   down (bend angle) and leans forward or back (sweep). The leg keeps its sideways axis horizontal (a gimbal at P).
-   Two joint types:
-   - **slides at crank:** the leg turns about a fixed point at P, and the crank pin slides in a bore or slot at the
-     leg's inner end;
-   - **slides at body:** the leg sits on the crank pin and slides through a sleeve at P (the 2D model).
+**Ways to build it.**
+- **Crank axle:** **lateral** (across the body, left to right), **vertical**, or **longitudinal** (front to back).
+- **Where the leg slides:** **at the crank**, where the leg turns about a fixed point on the body and the crank pin
+  slides in a bore in its inner end; or **at the body**, where the leg sits on the crank pin and slides through a
+  sleeve on the body's edge, as in the 2D model.
 
-   Three crank axle directions: **lateral** (X, across the body), **vertical** (Z) and **longitudinal** (Y, the
-   walking direction). Same leg part on all 8 notches (mirrored on the left); cranks 180° apart for the two groups
-   (left 1 and 3 + right 2 and 4, against the other four). How one motor drives the 8 cranks is not modelled (next step).
-3. Walk the robot over one crank turn: the body stays level and stands on its lowest feet (those within 2 mm of the
-   lowest, as it tilts onto them) and moves by what the lowest foot moves.
-4. For each of the 6 combinations, search the geometry (3000 random tries + 750 refinement steps, crank radius
-   3–12 mm, D 8–40 mm, H −20 to +8 mm, arm 5–70 mm, bend 30–150°, sweep ±45°, shin 30–120 mm) for the longest
-   stride within the targets: step height ≥ 10 mm, bob ≤ 3 mm, ground clearance under the base 20–60 mm, ≥ 3 mm
-   between neighbouring legs, knee and foot ≥ 5 mm outside the body, body centre inside the supporting feet, footprint
-   ≤ 270 × 185 mm, little foot slip:
-   ```
-   python3 sim/toy_leg_3d.py --search 3000 --only lateral/crank --json lateral-crank.json   # one per combination
-   python3 sim/toy_leg_3d.py --params sim/toy_leg_3d.json --png sim/images/toy-3d-comparison.png --gif sim/images/toy-3d.gif
-   ```
-   The 6 best geometries are in [`sim/toy_leg_3d.json`](sim/toy_leg_3d.json). The 6 searches ran in parallel, about
-   10 minutes in all.
+#### Steps
 
-**Result:**
+1. **Find the leg pivots.** The base rim has 8 notches, 4 per side, about 10 × 5 mm, 70–74 mm above the ground.
+   Their positions were measured by slicing the base model.
+2. **Model one leg** in [`sim/toy_leg_3d.py`](sim/toy_leg_3d.py): a crank, an inner arm running from the crank pin
+   through the pivot, a knee, and a shin bending down and leaning forward or back. All 8 notches use the same leg,
+   mirrored on the left, and the two gait groups are half a turn apart.
+3. **Walk the robot over one crank turn.** The body stays level, stands on its lowest feet, and moves forward by
+   what the lowest foot moves.
+4. **Search the best geometry** for each of the 6 combinations: the longest stride that meets the targets. Targets:
+   step height ≥ 10 mm, bob ≤ 3 mm, 20–60 mm under the base, ≥ 3 mm between neighbouring legs, knee and foot outside
+   the body, stable, footprint ≤ 270 × 185 mm, little foot slip.
 
-| Crank axle | Slides at | Stride per half turn (mm) | Body bob (mm) | Step height (mm) | Feet slip (mm per leg per turn) | Stable all turn (margin mm) | Gap between legs (mm) | Clearance under base (mm) | Footprint X × Y (mm) | Crank radius (mm) |
-|---|---|---|---|---|---|---|---|---|---|---|
-| lateral | crank | 26 | 3.1 | 12 | 39 | yes (15) | 8.0 | 49 | 190 × 133 | 10.0 |
-| lateral | body | 11 | 3.8 | 10 | 15 | yes (21) | 15.5 | 48 | 222 × 133 | 3.3 |
-| vertical | crank | 39 | 0.7 | 7 | 29 | yes (13) | 2.9 | 24 | 268 × 184 | 10.1 |
-| vertical | body | 34 | 0.7 | 6 | 22 | yes (12) | 4.0 | 20 | 265 × 176 | 4.1 |
-| longitudinal | crank | 13 | 3.1 | 10 | 39 | yes (6) | 15.5 | 21 | 171 × 133 | 9.1 |
-| longitudinal | body | 8 | 4.5 | 10 | 16 | yes (14) | 15.5 | 29 | 249 × 150 | 3.0 |
+<details>
+<summary>How to reproduce</summary>
 
-Knee and foot stay outside the body in all six. Feet slip = how far, on average, each foot slides on the ground per
-turn against the foot carrying the body (it includes touching down and lifting off).
+Pivot centres ([cad/carcass-120/](cad/carcass-120/) coordinates: z = height above the ground, forward = −Y), right
+side, front to rear: (89.5, −32.2), (95.9, −12.6), (96.1, 2.9), (82.6, 31.1). The left ones are their mirror about
+x = 42.7 (the body axis). Measured by slicing `spideybot_base.stl` at z = 71 and 73 and subtracting the slice from
+its convex hull.
+
+Leg parameters: crank radius `r`; crank centre `D` mm inward from the pivot and `H` mm above it; inner `arm`
+length; knee `bend` angle; shin `sweep` (forward/back lean) and length. The leg keeps its sideways axis horizontal
+(a gimbal at the pivot).
+
+Search: 3000 random tries + 750 refinement steps per combination, ranges r 3–12 mm, D 8–40 mm, H −20 to +8 mm,
+arm 5–70 mm, bend 30–150°, sweep ±45°, shin 30–120 mm. The 6 searches ran in parallel, about 10 minutes in all.
+
+```
+python3 sim/toy_leg_3d.py --search 3000 --only lateral/crank --json lateral-crank.json   # one per combination
+python3 sim/toy_leg_3d.py --params sim/toy_leg_3d.json --png sim/images/toy-3d-comparison.png --gif sim/images/toy-3d.gif
+```
+
+The 6 best geometries are in [`sim/toy_leg_3d.json`](sim/toy_leg_3d.json).
+
+</details>
+
+#### Result
+
+<img src="sim/images/toy-3d-comparison.png" alt="Toy leg in 3D, best geometry of each combination">
+
+*Fig. 1 · The best robot for each combination, from above (top row) and from the side (bottom row). The grey box is
+the body and the loops are the foot paths. The two colours are the two sides.*
+
+<img src="sim/images/toy-3d.gif" alt="Toy leg in 3D, animated">
+
+*Fig. 2 · The six combinations walking.*
+
+| Crank axle | Slides at | Stride (mm) | Bob (mm) | Step height (mm) |
+|---|---|---|---|---|
+| **lateral** | **crank** | **26** | **3.1** | **12** |
+| lateral | body | 11 | 3.8 | 10 |
+| vertical | crank | 39 | 0.7 | 7 |
+| vertical | body | 34 | 0.7 | 6 |
+| longitudinal | crank | 13 | 3.1 | 10 |
+| longitudinal | body | 8 | 4.5 | 10 |
+
+Stride is per half turn. Knee and foot stay outside the body in all six.
+
+<details>
+<summary>All the numbers and geometries</summary>
+
+Feet slip = how far, on average, each foot slides on the ground per turn against the foot carrying the body (it
+includes touching down and lifting off).
+
+| Crank axle | Slides at | Feet slip (mm per leg per turn) | Stable all turn (margin mm) | Gap between legs (mm) | Clearance under base (mm) | Footprint X × Y (mm) | Crank radius (mm) |
+|---|---|---|---|---|---|---|---|
+| lateral | crank | 39 | yes (15) | 8.0 | 49 | 190 × 133 | 10.0 |
+| lateral | body | 15 | yes (21) | 15.5 | 48 | 222 × 133 | 3.3 |
+| vertical | crank | 29 | yes (13) | 2.9 | 24 | 268 × 184 | 10.1 |
+| vertical | body | 22 | yes (12) | 4.0 | 20 | 265 × 176 | 4.1 |
+| longitudinal | crank | 39 | yes (6) | 15.5 | 21 | 171 × 133 | 9.1 |
+| longitudinal | body | 16 | yes (14) | 15.5 | 29 | 249 × 150 | 3.0 |
 
 | Crank axle / slides at | Geometry (mm, °) | Crank axle above ground (mm) | Slide travel (mm) | Pivot swing yaw / pitch | Leg to crank pin angle |
 |---|---|---|---|---|---|
@@ -328,512 +532,624 @@ turn against the foot carrying the body (it includes touching down and lifting o
 | longitudinal / crank | r 9.1, D 30.8, H −9.3, arm 17.2, bend 104, sweep 22, shin 52.6 | 38 | 18.1 | 6° / 33° | 77–83° |
 | longitudinal / body | r 3.0, D 37.0, H −7.7, arm 52.6, bend 63, sweep 27, shin 78.8 | 48 | 6.0 | 2° / 9° | 80–81° |
 
-![Toy leg in 3D, best geometry of each combination](sim/images/toy-3d-comparison.png)
+</details>
 
-![Toy leg in 3D, animated](sim/images/toy-3d.gif)
+- **Lateral axle, sliding at the crank** is the only one close to every target (bob 3.1 against 3). The crank pin
+  points along the leg, so it can slide straight into a bore in the leg's inner end: probably the classic toy. Its
+  feet slip the most, and the 8 cranks sit near the body centre, where the battery holder goes.
+- **Vertical axle** gives the longest, smoothest stride but a low step (6–7 mm): it only lifts the feet by tilting
+  the leg. Its legs come within 2.9 mm of each other, and the left cranks must turn the other way.
+- **Longitudinal axle** is the weakest: the crank moves the leg's inner end sideways, which hardly makes a stride.
+- **Limits of the model:** the body stays level (a real one tilts onto 3 feet), the legs are lines with no
+  thickness, and nothing is checked against the inside of the carcass yet.
 
-- **Lateral axle, slides at crank** is the only one close to every target (bob 3.1 against 3). The crank pin points
-  along the leg (7–35°), so it can slide straight into a bore in the leg's inner end: probably the classic toy. The
-  feet slip the most (39 mm per leg per turn), and the 8 cranks sit near the body centre, where the battery holder
-  goes.
-- **Vertical axle** gives the longest, smoothest stride (34–39 mm, 0.7 mm bob) but a low step (6–7 mm): it only
-  lifts the feet by tilting the leg. Its legs come within 2.9 mm of each other (slides at crank), and the left cranks
-  must turn the other way (a gear pair).
-- **Longitudinal axle** is the weakest: the crank moves the inner end sideways, which hardly makes a stride.
-- **Slides at body** gives shorter strides with a lateral axle (11 mm) but less slip.
-- Limits of the model: the body stays level (a real one tilts onto 3 feet), legs are lines (no thickness, so 3 mm
-  gaps are tight), and nothing is checked against the carcass interior, the battery holder or the motor yet.
+#### Decisions
 
-**Decision:** lateral axle sliding at the crank, taken in [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft).
+Lateral axle, leg sliding at the crank (taken in the next entry, once one motor drives all the legs).
 
-**Open:**
+#### Next
 
 - Check that the notches (10 × 5 mm) let the leg swing as far as the table says, or widen them in the base.
 
-## Toy leg on one crankshaft
+### Toy leg on one crankshaft
 
-**Phase 3 · Mechanisms · 2026-11-09**
+**Phase 3 · Mechanisms · 2026-11-09** · Status: ↩️ reversed by [Crankshaft against real parts](#crankshaft-against-real-parts)
 
-**Goal:** check whether the lateral toy leg keeps its numbers when one motor drives it. In
-[Toy leg in 3D](#toy-leg-in-3d) every leg had its own crank, and the 4 crank centres of each side ended up 5–9 mm
-apart with 10 mm cranks, so they would hit each other.
+> **In short.** In the previous step every leg had its own crank, and the cranks of each side ended up so close
+> that they would hit each other. Here all 8 legs share **one crankshaft** across the body, and the legs are given
+> a real 5 mm thickness. Stride halves to 14 mm and bob rises to 4.2 mm. The limit is the legs' inner arms bumping
+> into each other inside the body, not the shaft. We accepted it, but the next step showed the layout fails anyway.
 
-**Steps:**
+#### Steps
 
-1. Add a **shaft** mode to [`sim/toy_leg_3d.py`](sim/toy_leg_3d.py): one lateral crankshaft for all 8 legs at
-   y = Y0, z = 72 + H. The 4 cranks of each side sit along it from XIN to XIN + 3 × PITCH mm from the body axis
-   (PITCH ≥ 8 mm: crank web plus leg end), in any of the 24 orders, and mirrored on the left. The two gait groups
-   are pins 180° apart on the same shaft, and both sides turn the same way.
-2. Keep the crankshaft below the battery holder and inside the base. The holder (64 × 49 × 16 mm) sits above the
-   rim and fills almost the whole body ([cad/layout/](cad/layout/)), so the crank discs (radius r + 2 mm for the pin
-   head) must stay below z 73 and inside the base's outer outline shrunk by a 2 mm wall, checked on slices of
-   `spideybot_base.stl` every 1 mm. The base bowl is near solid, so it will need hollowing there.
-3. `--strict` rules, used for this step: legs are 5 mm thick, so 6 mm between centre lines for **every pair** of
-   legs on a side, including the inner arms inside the body (before, only neighbours and only outside the body).
-   Footprint at least 240 × 165 mm, close to the original's look (jenscolt's assembly at 120 %: 269 × 185).
-4. Search 3000 random tries + 750 refinement steps: shaft sliding at crank (3 seeds), shaft sliding at body, and,
-   as a reference, the per-leg lateral cranks under the same rules:
-   ```
-   python3 sim/toy_leg_3d.py --strict --search 3000 --seed 3 --only shaft/crank --json shaft-crank.json
-   python3 sim/toy_leg_3d.py --params sim/toy_leg_3d_strict.json --png sim/images/toy-3d-strict.png --gif sim/images/toy-3d-strict.gif
-   ```
-   The best results are in [`sim/toy_leg_3d_strict.json`](sim/toy_leg_3d_strict.json). The 5 searches ran in
-   parallel, about 15 minutes in all.
+1. Add a **shaft** mode to [`sim/toy_leg_3d.py`](sim/toy_leg_3d.py): one crankshaft across the body for all 8 legs,
+   its 4 cranks per side in any order, mirrored on the left. The two gait groups are pins half a turn apart on the
+   same shaft.
+2. Keep the crankshaft below the battery holder and inside the base. The holder (64 × 49 × 16 mm) fills almost the
+   whole body ([cad/layout/](cad/layout/)), so the cranks must stay below it, inside the base with a 2 mm wall.
+3. Use stricter rules: legs are 5 mm thick, so every pair of legs on a side keeps 6 mm between centre lines,
+   including inside the body. Footprint at least 240 × 165 mm, close to the original's look.
+4. Search again: the shaft with the leg sliding at the crank (3 seeds) and at the body, plus, for reference, one
+   crank per leg under the same rules.
 
-**Result:**
+<details>
+<summary>How to reproduce</summary>
 
-| Cranks | Slides at | Stride per half turn (mm) | Body bob (mm) | Step height (mm) | Feet slip (mm per leg per turn) | Stable all turn (margin mm) | Gap between legs (mm) | Clearance under base (mm) | Footprint X × Y (mm) | Crank radius (mm) |
-|---|---|---|---|---|---|---|---|---|---|---|
-| one per leg (lateral), reference | crank | 15 | 5.3 | 12 | 18 | yes (7) | 1.0 | 49 | 261 × 166 | 3.0 |
-| one crankshaft | crank | 14 | 4.2 | 10 | 17 | yes (5) | 2.2 | 40 | 241 × 165 | 5.1 |
-| one crankshaft | body | 6 | 2.9 | 6 | 6 | yes (15) | 1.4 | 24 | 243 × 175 | 3.1 |
+Shaft at y = Y0, z = 72 + H. Cranks from XIN to XIN + 3 × PITCH mm from the body axis (PITCH ≥ 8 mm: crank web plus
+leg end), in any of the 24 orders. 3000 random tries + 750 refinement steps; 5 searches in parallel, about 15
+minutes.
 
-The other two crankshaft seeds gave strides of 9 and 7 mm. Best crankshaft geometry (sliding at crank): r 5.1,
-Y0 −12.9, H −6.4 (crank axle 60 mm above the ground), cranks at 6, 16, 26 and 36 mm from the body axis (front leg
-innermost), arm 67.4, bend 114°, sweep −15°, shin 77.1 mm. Slide 10 mm, pivot swing 15° each way, crank pin 2–17°
-off the leg's axis. The crank discs fit inside the base.
+```
+python3 sim/toy_leg_3d.py --strict --search 3000 --seed 3 --only shaft/crank --json shaft-crank.json
+python3 sim/toy_leg_3d.py --params sim/toy_leg_3d_strict.json --png sim/images/toy-3d-strict.png --gif sim/images/toy-3d-strict.gif
+```
 
-![Toy leg on one crankshaft](sim/images/toy-3d-strict.png)
+Best results: [`sim/toy_leg_3d_strict.json`](sim/toy_leg_3d_strict.json). Best crankshaft geometry (sliding at
+crank): r 5.1, Y0 −12.9, H −6.4 (crank axle 60 mm above the ground), cranks at 6, 16, 26 and 36 mm from the body
+axis (front leg innermost), arm 67.4, bend 114°, sweep −15°, shin 77.1 mm. Slide 10 mm, pivot swing 15° each way,
+crank pin 2–17° off the leg's axis. The other two seeds gave strides of 9 and 7 mm.
 
-![Toy leg on one crankshaft, animated](sim/images/toy-3d-strict.gif)
+</details>
 
-- With realistic clearance between legs, **no layout meets the targets**, not even one crank per leg. Stride halves
-  (26 → 14–15 mm) and bob rises to 4–5 mm.
-- The cause, measured: every closest pair is two **inner arms inside the body**. Coming in from notches 10–15 mm
-  apart toward the cranks, almost in the same plane, they meet. No variant gets the 6 mm.
-- The one crankshaft costs almost nothing against one crank per leg (14 against 15 mm). The inner arms are the
-  limit, not the shaft.
-- Limits: the footprint minimum twisted the legs (rear legs stretched about 100 mm back, see the top view), so it
-  probably costs stride too. Left and right legs are not checked against each other, and the inner arms of the two
-  sides come close in the middle.
+#### Result
 
-**Decision (reversed in [Crankshaft against real parts](#crankshaft-against-real-parts)): lateral toy leg on one crankshaft, sliding at the crank** (best geometry above, in
-[`sim/toy_leg_3d_strict.json`](sim/toy_leg_3d_strict.json)). It accepts 14 mm per half turn and 4.2 mm of bob: a
-slower walk, but the simplest drive. One shaft across the body turns both sides the same way, and the N20 drives it
-with spur gears.
+<img src="sim/images/toy-3d-strict.png" alt="Toy leg on one crankshaft">
 
-**Open:**
+*Fig. 1 · The best layouts with real leg thickness, from above and from the side. In the top view, notice how the
+inner arms converge from the notches towards the shaft: that is where they get too close.*
 
-- How the N20 drives the shaft: gear ratio and where the motor sits (phase 4 picks the ratio).
-- CAD in build123d (step 3 of [Leg simulator and comparison](#leg-simulator-and-comparison) → Open), starting from
-  this geometry. Real leg thickness, the inner arms (2.2 mm between centre lines here) and left against right legs
-  are checked there, in the collision check over a full turn.
-- Hollow the base for the crankshaft, and cut the pivot windows: 15° of swing each way.
+<img src="sim/images/toy-3d-strict.gif" alt="Toy leg on one crankshaft, animated">
 
-## Crankshaft against real parts
+*Fig. 2 · The same, walking.*
 
-**Phase 3 · Mechanisms · 2026-11-09**
+| Cranks | Slides at | Stride (mm) | Bob (mm) | Step height (mm) | Gap between legs (mm, need 6) |
+|---|---|---|---|---|---|
+| one per leg (reference) | crank | 15 | 5.3 | 12 | 1.0 |
+| **one crankshaft** | **crank** | **14** | **4.2** | **10** | **2.2** |
+| one crankshaft | body | 6 | 2.9 | 6 | 1.4 |
 
-**Goal:** before drawing the CAD, check that the chosen crankshaft geometry still works once the cranks are solid
-parts. The simulator had checked legs against legs, but not legs against the crankshaft.
+<details>
+<summary>All the numbers</summary>
 
-**Steps:**
-
-1. Measure the chosen geometry ([`sim/toy_leg_3d_strict.json`](sim/toy_leg_3d_strict.json)): every inner arm runs
-   from its notch on the rim to its crank, and, on the way, passes over the cranks of the legs further out.
-   Distance from the arm to the shaft axis where it crosses another leg's crank (right side):
-
-   | Leg | Crosses the crank at (mm from the body axis) | Distance to shaft axis (mm) |
-   |---|---|---|
-   | front | 16 / 26 / 36 | 1–9 / 7–12 / 13–16 |
-   | middle front | 26 / 36 | 2–5 / 1–6 |
-   | middle rear | 36 | 3–9 |
-   | rear | — | — |
-
-   A crank disc reaches 7.1 mm from the axis (radius r + 2 for the pin head), plus 2.5 mm of half leg thickness, so
-   the arm needs about 10 mm. The middle front arm runs almost along the shaft.
-2. Add the rule to `--strict` in [`sim/toy_leg_3d.py`](sim/toy_leg_3d.py) (`crank_clear`): every inner arm keeps
-   1 mm of free space from the cranks it does not ride on (4 mm either side of their centre, radius r + 2) and from
-   the bare 3 mm shaft, with 5 mm thick legs. The geometry from the previous entry fails by 9.5 mm (sliding at
-   body: 7.4 mm).
-3. Search again with the same settings as last time, 3 seeds sliding at the crank and 2 sliding at the body
-   (3000 tries + 750 refinement steps each, in parallel, about 15 minutes):
-   ```
-   python3 sim/toy_leg_3d.py --strict --search 3000 --seed 1 --only shaft/crank --json crank-1.json
-   python3 sim/toy_leg_3d.py --params sim/toy_leg_3d_shaft_check.json --png sim/images/toy-3d-shaft-check.png
-   ```
-   The five results are in [`sim/toy_leg_3d_shaft_check.json`](sim/toy_leg_3d_shaft_check.json).
-
-**Result:**
-
-| Slides at | Seed | Stride per half turn (mm) | Body bob (mm) | Step height (mm) | Gap between legs (mm, need 6) | Free space arm to crankshaft (mm, need 1) |
+| Cranks | Slides at | Feet slip (mm per leg per turn) | Stable all turn (margin mm) | Clearance under base (mm) | Footprint X × Y (mm) | Crank radius (mm) |
 |---|---|---|---|---|---|---|
-| crank | 2 | 8 | 2.6 | 6 | 2.1 | −7.3 |
-| crank | 1 | 7 | 3.8 | 9 | 2.4 | −4.0 |
-| crank | 3 | 2 | 0.7 | 2 | 1.7 | −3.9 |
-| body | 1 | 3 | 1.8 | 4 | 2.1 | −4.2 |
-| body | 2 | 0 | 0.5 | 2 | 4.6 | −1.8 |
+| one per leg, reference | crank | 18 | yes (7) | 49 | 261 × 166 | 3.0 |
+| one crankshaft | crank | 17 | yes (5) | 40 | 241 × 165 | 5.1 |
+| one crankshaft | body | 6 | yes (15) | 24 | 243 × 175 | 3.1 |
 
-![Crankshaft searches with the arm-to-crankshaft rule](sim/images/toy-3d-shaft-check.png)
+</details>
 
-- **No layout passes.** Every one still has arms cutting through cranks (−1.8 to −7.3 mm) and legs 1.7–4.6 mm apart,
-  and the search gives up stride to get there (0–8 mm against 14 before).
-- The cause is the layout itself. 8 legs come in from the rim to one line across the body, so the outer cranks always
-  sit in the way of the inner legs' arms.
+- With realistic room between legs, **no layout meets the targets**, not even one crank per leg. Stride halves
+  (26 → 14–15 mm) and bob rises to 4–5 mm.
+- **The cause:** every closest pair is two **inner arms inside the body**. They come in from notches 10–15 mm apart
+  towards the cranks, almost in the same plane, and meet.
+- One crankshaft costs almost nothing against one crank per leg (14 against 15 mm).
+- **Limits:** the minimum footprint twisted the legs (the rear legs stretch about 100 mm back), and left and right
+  legs were not checked against each other.
 
-**Decision:** one lateral crankshaft for all 8 legs is ruled out. The drive mechanism is reopened.
+#### Decisions
 
-**Open:**
+**One crankshaft, leg sliding at the crank**, accepting 14 mm per half turn and 4.2 mm of bob: a slower walk, but the
+simplest drive. *Reversed in the next entry:* with solid cranks the arms cut through them.
 
-- Choose another way for one motor to drive the 8 legs, and model it in the simulator before the CAD.
+### Crankshaft against real parts
 
-## Two side crankshafts
+**Phase 3 · Mechanisms · 2026-11-09** · Status: ❌ one crankshaft ruled out
 
-**Phase 3 · Mechanisms · 2026-11-09**
+> **In short.** The simulator had checked legs against legs, but not legs against the crankshaft. Once the cranks
+> are solid parts, every leg's inner arm cuts through the cranks of the legs further out, by up to 9.5 mm. A new
+> search with that rule found no layout that passes. **One crankshaft for all 8 legs is ruled out**, and the drive is
+> reopened.
 
-**Goal:** try another drive after one lateral crankshaft was ruled out. There are two crankshafts running
-front to back, one per side, so each leg's crank sits level with its own notch and no arm crosses another leg's
-crank.
+#### Steps
 
-**Steps:**
+1. **Measure the chosen geometry.** Every inner arm runs from its notch to its own crank, and on the way passes over
+   the cranks of the legs further out. A crank reaches 7.1 mm from the shaft axis, and the leg is 5 mm thick, so the
+   arm must stay about 10 mm from the axis. It comes as close as 1 mm (table below).
+2. **Add the rule** to the simulator (`crank_clear`): every inner arm keeps 1 mm of free space from the cranks it
+   does not ride on and from the bare shaft. The geometry of the previous entry fails by 9.5 mm.
+3. **Search again** with the same settings: 3 seeds sliding at the crank and 2 sliding at the body.
 
-1. Add a **sides** mode to [`sim/toy_leg_3d.py`](sim/toy_leg_3d.py): one longitudinal shaft (along Y) per side, XS mm
-   from the body axis at z = 72 + H. Each leg's crank sits on it level with its notch, shifted DY mm along the shaft.
-   The two shafts turn opposite ways (a spur gear pair, the N20 between them), so the left side is the mirror image
-   of the right. Ranges: r 3–12, XS 10–50, H −22 to 0, DY ±10 mm, leg as before.
-2. Same `--strict` rules as [Crankshaft against real parts](#crankshaft-against-real-parts), with the arm-to-crankshaft
-   check worked out per shaft. 5 searches in parallel, about 15 minutes:
-   ```
-   python3 sim/toy_leg_3d.py --strict --search 3000 --seed 1 --only sides/crank --json crank-1.json
-   python3 sim/toy_leg_3d.py --params sim/toy_leg_3d_sides.json --png sim/images/toy-3d-sides.png --gif sim/images/toy-3d-sides.gif
-   ```
-   The best three are in [`sim/toy_leg_3d_sides.json`](sim/toy_leg_3d_sides.json).
+<details>
+<summary>How to reproduce</summary>
 
-**Result:**
+Distance from each arm to the shaft axis where it crosses another leg's crank (right side):
 
-| Slides at | Seed | Stride per half turn (mm) | Body bob (mm) | Step height (mm) | Gap between legs (mm, need 6) | Free space arm to crankshaft (mm, need 1) | Pivot swing yaw / pitch |
-|---|---|---|---|---|---|---|---|
-| crank | 2 | 2 | 4.8 | 10 | 13.0 | 9.2 | 2° / 8° |
-| crank | 3 | 2 | 4.6 | 10 | 13.1 | 6.4 | 2° / 8° |
-| crank | 1 | 1 | 4.8 | 10 | 13.2 | 11.1 | 2° / 11° |
-| body | 1 | 1 | 4.4 | 9 | 14.8 | 13.1 | 0° / 8° |
-| body | 2 | 1 | 4.2 | 9 | 14.1 | 9.5 | 1° / 8° |
+| Leg | Crosses the crank at (mm from the body axis) | Distance to shaft axis (mm) |
+|---|---|---|
+| front | 16 / 26 / 36 | 1–9 / 7–12 / 13–16 |
+| middle front | 26 / 36 | 2–5 / 1–6 |
+| middle rear | 36 | 3–9 |
+| rear | — | — |
 
-![Two side crankshafts](sim/images/toy-3d-sides.png)
+Rule: crank discs 4 mm either side of their centre, radius r + 2 (pin head); bare shaft 3 mm; legs 5 mm thick.
+3000 tries + 750 refinement steps each, in parallel, about 15 minutes.
 
-![Two side crankshafts, animated](sim/images/toy-3d-sides.gif)
+```
+python3 sim/toy_leg_3d.py --strict --search 3000 --seed 1 --only shaft/crank --json crank-1.json
+python3 sim/toy_leg_3d.py --params sim/toy_leg_3d_shaft_check.json --png sim/images/toy-3d-shaft-check.png
+```
+
+Results: [`sim/toy_leg_3d_shaft_check.json`](sim/toy_leg_3d_shaft_check.json).
+
+</details>
+
+#### Result
+
+<img src="sim/images/toy-3d-shaft-check.png" alt="Crankshaft searches with the arm-to-crankshaft rule">
+
+*Fig. 1 · The five searches with the new rule. To avoid the cranks, the search shrinks the stride to almost
+nothing, and still fails.*
+
+| Slides at | Seed | Stride (mm) | Bob (mm) | Gap between legs (mm, need 6) | Arm to crankshaft (mm, need 1) |
+|---|---|---|---|---|---|
+| crank | 2 | 8 | 2.6 | 2.1 | −7.3 |
+| crank | 1 | 7 | 3.8 | 2.4 | −4.0 |
+| crank | 3 | 2 | 0.7 | 1.7 | −3.9 |
+| body | 1 | 3 | 1.8 | 2.1 | −4.2 |
+| body | 2 | 0 | 0.5 | 4.6 | −1.8 |
+
+A negative distance means the arm goes through the crank.
+
+- **No layout passes.** Every one still has arms cutting through cranks and legs too close, and the stride drops to
+  0–8 mm.
+- **The cause is the layout itself.** 8 legs come in from the rim to one line across the body, so the outer cranks
+  are always in the way of the inner legs' arms.
+
+#### Decisions
+
+One crankshaft for all 8 legs is ruled out. The drive has to be designed again, and simulated before any CAD.
+
+### Two side crankshafts
+
+**Phase 3 · Mechanisms · 2026-11-09** · Status: ❌ ruled out
+
+> **In short.** To keep arms away from other legs' cranks, we tried two crankshafts running **front to back**, one
+> per side, each crank level with its own leg. The parts fit, with room to spare, but the robot barely walks
+> (1–2 mm per half turn): a crank turning on a front-to-back axis moves the foot sideways, not forward. The crank must
+> turn on an axis **across** the body.
+
+#### Steps
+
+1. Add a **sides** mode to [`sim/toy_leg_3d.py`](sim/toy_leg_3d.py): one front-to-back shaft per side, each leg's
+   crank on it level with its notch. The two shafts turn opposite ways (a gear pair, with the motor between them),
+   so the left side mirrors the right.
+2. Same strict rules as the previous entry, including the arm-to-crankshaft check. 5 searches.
+
+<details>
+<summary>How to reproduce</summary>
+
+Shaft XS mm from the body axis at z = 72 + H; each crank shifted DY mm along the shaft. Ranges: r 3–12, XS 10–50,
+H −22 to 0, DY ±10 mm, leg as before. 5 searches in parallel, about 15 minutes.
+
+```
+python3 sim/toy_leg_3d.py --strict --search 3000 --seed 1 --only sides/crank --json crank-1.json
+python3 sim/toy_leg_3d.py --params sim/toy_leg_3d_sides.json --png sim/images/toy-3d-sides.png --gif sim/images/toy-3d-sides.gif
+```
+
+The best three: [`sim/toy_leg_3d_sides.json`](sim/toy_leg_3d_sides.json).
+
+</details>
+
+#### Result
+
+<img src="sim/images/toy-3d-sides.png" alt="Two side crankshafts">
+
+*Fig. 1 · Two side crankshafts. In the side view the foot loops are thin vertical lines: the feet go up and down
+but hardly move forward.*
+
+<img src="sim/images/toy-3d-sides.gif" alt="Two side crankshafts, animated">
+
+*Fig. 2 · The same, walking: the legs move in and out instead of forward.*
+
+| Slides at | Seed | Stride (mm) | Bob (mm) | Gap between legs (mm, need 6) | Arm to crankshaft (mm, need 1) |
+|---|---|---|---|---|---|
+| crank | 2 | 2 | 4.8 | 13.0 | 9.2 |
+| crank | 3 | 2 | 4.6 | 13.1 | 6.4 |
+| crank | 1 | 1 | 4.8 | 13.2 | 11.1 |
+| body | 1 | 1 | 4.4 | 14.8 | 13.1 |
+| body | 2 | 1 | 4.2 | 14.1 | 9.5 |
+
+<details>
+<summary>All the numbers</summary>
+
+| Slides at | Seed | Step height (mm) | Pivot swing yaw / pitch |
+|---|---|---|---|
+| crank | 2 | 10 | 2° / 8° |
+| crank | 3 | 10 | 2° / 8° |
+| crank | 1 | 10 | 2° / 11° |
+| body | 1 | 9 | 0° / 8° |
+| body | 2 | 9 | 1° / 8° |
+
+</details>
 
 - **The parts fit:** 13–15 mm between legs and 6–13 mm of free space to the cranks, the first layout to pass both.
-- **The robot barely walks: 1–2 mm per half turn.** A crank on a front-to-back shaft moves the leg's inner end in and
-  out and up and down, so the foot loop lies sideways (side view: the loops are thin vertical lines). The leg
-  hardly swings forward (yaw 0–2°). Forward stride needs the crank pin to move forward and back, so the crank has to
-  turn on a **lateral** axis (left to right), as in [Toy leg in 3D](#toy-leg-in-3d).
-- Bob 4.2–4.8 mm, above the 3 mm target too.
+- **The robot barely walks.** A crank on a front-to-back shaft moves the leg's inner end in and out and up and down,
+  so the leg hardly swings forward. Forward stride needs the crank pin to move forward and back, so the crank has to
+  turn on an axis across the body, as in [Toy leg in 3D](#toy-leg-in-3d).
+- Bob is 4.2–4.8 mm, also above the 3 mm target.
 
-**Decision:** two side crankshafts are ruled out for this leg (they fit, but the foot moves sideways).
+#### Decisions
 
-**Open:**
+Ruled out for this leg: the parts fit, but the feet move sideways. The cranks must turn on an axis across the body
+without lining all 8 up on one shaft.
 
-- Choose another drive. The cranks must turn on a lateral axis without lining all 8 up on one shaft.
+### Four lateral crankshafts
 
-## Four lateral crankshafts
+**Phase 3 · Mechanisms · 2026-11-09** · Status: ✅ chosen
 
-**Phase 3 · Mechanisms · 2026-11-09**
+> **In short.** The cranks turn across the body again, but now on **four short shafts, one per pair of legs**, so
+> each arm only reaches its own shaft. Gears between the shafts make them turn together. It is the first layout that
+> fits and walks forward, but the stride is short: 9 mm per half turn, because a longer stride makes the body bob
+> more than the 3 mm allowed. We chose it, keeping the 3 mm limit.
 
-**Goal:** keep the cranks on a lateral axis (they move the foot forward, see
-[Two side crankshafts](#two-side-crankshafts)) without lining all 8 up on one shaft. There is one lateral shaft per
-pair of legs, so each arm only reaches its own shaft.
+#### Steps
 
-**Steps:**
+1. Add a **rows** mode to [`sim/toy_leg_3d.py`](sim/toy_leg_3d.py): 4 shafts across the body, each level with its
+   pair of notches. The left and right cranks of a shaft are half a turn apart (the two gait groups). Idler gears
+   between neighbouring shafts make all four turn the same way (about 7 gears in a row, the motor on one of them;
+   not simulated).
+2. Same strict rules, with the arm-to-crankshaft check per shaft. 5 searches.
+3. Take the best geometry and change the crank size, its height and its distance from the body axis by hand, to see
+   which target holds the stride back.
 
-1. Add a **rows** mode to [`sim/toy_leg_3d.py`](sim/toy_leg_3d.py): 4 lateral shafts, each level with its pair of
-   notches (shifted DY mm front or back) at z = 72 + H. The left and right cranks sit XC mm either side of the body
-   axis, 180° apart (the two gait groups). Idler gears between neighbouring shafts make all four turn the same way
-   (not modelled; about 7 spur gears in a row, the N20 on one of them). Ranges: r 3–12, XC 6–45, H −22 to 0,
-   DY ±10 mm, leg as before.
-2. Same `--strict` rules, with the arm-to-crankshaft check worked out per shaft. 5 searches in parallel, about
-   15 minutes:
-   ```
-   python3 sim/toy_leg_3d.py --strict --search 3000 --seed 1 --only rows/crank --json crank-1.json
-   python3 sim/toy_leg_3d.py --params sim/toy_leg_3d_rows.json --png sim/images/toy-3d-rows.png --gif sim/images/toy-3d-rows.gif
-   ```
-   The best three are in [`sim/toy_leg_3d_rows.json`](sim/toy_leg_3d_rows.json).
-3. Take the best geometry (sliding at crank, seed 2) and change the crank radius r, its height H and its distance
-   from the body axis XC by hand, to see which target holds the stride back.
+<details>
+<summary>How to reproduce</summary>
 
-**Result:**
+Each shaft shifted DY mm front or back of its notches, at z = 72 + H; cranks XC mm either side of the body axis.
+Ranges: r 3–12, XC 6–45, H −22 to 0, DY ±10 mm, leg as before. 5 searches in parallel, about 15 minutes.
 
-| Slides at | Seed | Stride per half turn (mm) | Body bob (mm) | Step height (mm) | Gap between legs (mm, need 6) | Free space arm to crankshaft (mm, need 1) | Crank radius (mm) |
-|---|---|---|---|---|---|---|---|
-| crank | 2 | 9 | 4.2 | 9 | 6.9 | 4.3 | 3.1 |
-| crank | 1 | 8 | 3.8 | 8 | 7.5 | 4.6 | 3.0 |
-| crank | 3 | 8 | 3.8 | 8 | 6.8 | 4.6 | 3.0 |
-| body | 1 | 8 | 3.9 | 8 | 7.7 | 4.7 | 3.0 |
-| body | 2 | 8 | 3.8 | 8 | 7.8 | 4.5 | 3.0 |
+```
+python3 sim/toy_leg_3d.py --strict --search 3000 --seed 1 --only rows/crank --json crank-1.json
+python3 sim/toy_leg_3d.py --params sim/toy_leg_3d_rows.json --png sim/images/toy-3d-rows.png --gif sim/images/toy-3d-rows.gif
+```
 
-![Four lateral crankshafts](sim/images/toy-3d-rows.png)
+The best three: [`sim/toy_leg_3d_rows.json`](sim/toy_leg_3d_rows.json).
 
-![Four lateral crankshafts, animated](sim/images/toy-3d-rows.gif)
+</details>
 
-Changing the best geometry by hand (sliding at crank):
+#### Result
 
-| r (mm) | H (mm) | XC (mm) | Stride (mm) | Bob (mm) | Step height (mm) | Gap between legs (mm) |
-|---|---|---|---|---|---|---|
-| 3.1 | −4.3 | 6 | 9 | 4.2 | 9 | 6.9 |
-| 5 | −8 | 6 | 15 | 6.9 | 14 | 1.7 |
-| 5 | −8 | 15 | 18 | 8.6 | 18 | 0.5 |
-| 5 | −8 | 25 | 25 | 11.6 | 24 | 2.2 |
-| 8 | −10 | 6 | 24 | 11.0 | 23 | 0.7 |
+<img src="sim/images/toy-3d-rows.png" alt="Four lateral crankshafts">
 
-- **The parts fit and the feet loop forward**, the first layout to pass every check: 7–8 mm between legs, 4–5 mm of
-  free space to the cranks, crank discs inside the base.
-- **Stride is 8–9 mm per half turn**, short of 25. Every search ends at the smallest crank (r 3 mm) and with the
-  cranks next to the body axis.
-- **The bob target holds it back.** Body bob grows with stride (about 0.45 mm per mm of stride): a longer stride
-  only comes with more bob. A larger crank also brings the shins closer (the gaps above are shin to shin, which a
-  different leg shape can fix) and a higher crank disc, which runs into the battery holder.
+*Fig. 1 · Four lateral crankshafts. In the side view the foot loops lie along the ground: the feet move forward.
+The cranks (short stubs near the body axis in the top view) stay clear of the other legs.*
 
-**Decision: four lateral crankshafts, sliding at the crank, keeping the 3 mm bob limit:** the best geometry above
-(seed 2, the first entry in [`sim/toy_leg_3d_rows.json`](sim/toy_leg_3d_rows.json)), with 9 mm per half turn and
-4.2 mm of bob. The three options compared:
+<img src="sim/images/toy-3d-rows.gif" alt="Four lateral crankshafts, animated">
 
-![The three options compared: side view of one leg and the parts each needs](sim/images/drive-options.gif)
+*Fig. 2 · The same, walking.*
 
-A and B are simulated, C is a sketch ([`tools/drive_options_gif.py`](tools/drive_options_gif.py)).
+| Slides at | Seed | Stride (mm) | Bob (mm) | Gap between legs (mm, need 6) | Arm to crankshaft (mm, need 1) |
+|---|---|---|---|---|---|
+| **crank** | **2** | **9** | **4.2** | **6.9** | **4.3** |
+| crank | 1 | 8 | 3.8 | 7.5 | 4.6 |
+| crank | 3 | 8 | 3.8 | 6.8 | 4.6 |
+| body | 1 | 8 | 3.9 | 7.7 | 4.7 |
+| body | 2 | 8 | 3.8 | 7.8 | 4.5 |
 
-| | Four shafts, 3 mm bob (chosen) | Four shafts, 6 mm bob | Cam toy |
+- **The parts fit and the feet loop forward**, the first layout to pass every check, with the cranks inside the base.
+- **Stride is only 8–9 mm per half turn.** Every search ends at the smallest crank (3 mm) with the cranks next to
+  the body axis.
+- **The bob limit holds it back.** Changing the geometry by hand (table below), body bob grows with stride, about
+  0.45 mm per mm. A bigger crank also brings the shins closer together and raises the cranks into the battery holder.
+
+| Crank radius (mm) | Height H (mm) | Distance from axis XC (mm) | Stride (mm) | Bob (mm) | Gap between legs (mm) |
+|---|---|---|---|---|---|
+| 3.1 | −4.3 | 6 | 9 | 4.2 | 6.9 |
+| 5 | −8 | 6 | 15 | 6.9 | 1.7 |
+| 5 | −8 | 15 | 18 | 8.6 | 0.5 |
+| 5 | −8 | 25 | 25 | 11.6 | 2.2 |
+| 8 | −10 | 6 | 24 | 11.0 | 0.7 |
+
+#### Decisions
+
+**Four lateral crankshafts, leg sliding at the crank, keeping the 3 mm bob limit:** the best geometry above (the
+first entry in [`sim/toy_leg_3d_rows.json`](sim/toy_leg_3d_rows.json)). The three options compared:
+
+<img src="sim/images/drive-options.gif" width="640" alt="The three options compared">
+
+*Fig. 3 · Side view of one leg for each option, with the parts each needs. A and B are simulated; C is a sketch
+([`tools/drive_options_gif.py`](tools/drive_options_gif.py)).*
+
+| | A · Four shafts, 3 mm bob (chosen) | B · Four shafts, 6 mm bob | C · Cam toy |
 |---|---|---|---|
 | Walk | Short, smooth steps, slow | Steps almost twice as long; the body rocks visibly | Feet scrape; works on carpet, may slip on smooth floors |
 | Like the original | Yes (the feet step) | Yes | Less (walks like a wind-up toy) |
 | Parts | ~45: 8 legs, 4 shafts with 8 cranks, 8 pivots, ~8 gears | Same | ~15: 8 legs, 1 shaft, 2 cams, 2 gears |
-| Printing | Small, precise parts: fine gears, 3 mm pins, tight clearances | Same | Thick, tolerant parts |
-| Fragile | Medium-high: a 3 mm PLA pin can snap; one jammed leg stops all | A bit more (harder hits, more motor torque) | Low |
-| N20 | Plenty of torque | About 1.7 × the torque | Plenty of torque |
-| Next | CAD, Onshape assembly, 2–3 rounds of prints | 15 more minutes of search, then the same | A printed prototype (2 legs + 1 cam) |
+| Printing | Small, precise parts | Same | Thick, tolerant parts |
+| Fragile | Medium-high: a 3 mm PLA pin can snap; one jammed leg stops all | A bit more | Low |
+| N20 motor | Plenty of torque | About 1.7 × the torque | Plenty of torque |
 
-The cam toy (one lateral shaft, cams lift hinged legs, the feet push by leaning back) stays as a fallback. The
-simulator cannot represent it (the feet slide), so it would be tested with a printed pair of legs.
+The **cam toy** (one shaft across the body, cams lift hinged legs, the feet push by leaning back) stays as a
+fallback. The simulator cannot represent it (its feet slide), so it would be tested by printing a pair of legs.
 
-**Open:**
+### Legs and drive in CAD
 
-- CAD in build123d from this geometry: leg, the 4 crankshafts, pivot, gear train with idlers, test frame; collision
-  check over a full turn.
+**Phase 3 · Mechanisms · 2026-11-10** · Status: ✅ done
 
-## Legs and drive in CAD
+> **In short.** The legs and the four-crankshaft drive were modelled in Python code (build123d), with sizes taken
+> from the simulator. The chosen geometry first had to be adjusted so a gear fits between each shaft's two cranks.
+> A script then moved every part through a full crank turn and fixed each collision it found. The result: 25 printed
+> parts with no collisions, exported for Onshape (STEP) and for printing (STL), plus a test frame for one leg.
 
-**Phase 3 · Mechanisms · 2026-11-10**
+#### Steps
 
-**Goal:** model the legs and the four-crankshaft drive in code (build123d), parametric from the simulator, check
-that nothing collides over a full crank turn, and export STEP (Onshape) and STL (Bambu Studio), plus a test frame
-to try one leg by hand. Parts and how they fit: [cad/drive/](cad/drive/).
+1. **Install build123d** in a Python virtual environment at the repo root (Python 3.12: 3.14 has no CAD packages
+   yet).
+2. **Make the geometry buildable.** In the chosen geometry a shaft's two cranks were 12 mm apart, with no room for a
+   gear and two bearing walls between them. The shafts were also so high that a gear could only be 4 mm in radius
+   under the battery holder. A new search with these limits gives 10 mm per half turn and 4.6 mm of bob (Fig. 1).
+3. **Model the parts** in [`cad/drive/build.py`](cad/drive/build.py): the leg (3 lengths × 2 sides), the pivot fork,
+   one-piece crankshafts (gear, journals, cranks and balls), idler gears, the spine that holds them, and a test
+   frame. The gears are standard involute gears, module 1.
+4. **Check collisions** with [`cad/drive/check.py`](cad/drive/check.py): it places every part as the simulator
+   moves it, every 30°, and measures how much each pair overlaps. Fix and repeat (table below).
+5. **Make the STLs watertight.** The CAD kernel leaves a hairline gap where a sphere meets a box; `build.py` closes
+   it. Bambu Studio: `manifold = yes` for all 17 files.
 
-**Steps:**
+<details>
+<summary>How to reproduce</summary>
 
-1. Install build123d in a virtual environment at the repo root (`.venv/`, ignored by git; Python 3.12, because
-   3.14 has no CAD wheels yet):
-   ```
-   uv venv --python python3.12 .venv
-   uv pip install --python .venv/bin/python build123d numpy scipy matplotlib pillow trimesh shapely networkx manifold3d rtree
-   ```
-2. **Buildable limits first.** The chosen geometry put a shaft's two cranks 12 mm apart (XC 6), with no room for a
-   gear and two bearing walls between them, and the shafts at z 67.7, where a gear could only be 4 mm in radius
-   under the battery holder (z 73). Add the limits to the `rows` search (XC ≥ 12, H ≤ −8) and search again,
-   4 seeds:
-   ```
-   python3 sim/toy_leg_3d.py --strict --search 3000 --seed 2 --only rows/crank --json crank-2.json
-   ```
-   Result: 10 mm per half turn, 4.6 mm of bob, 9 mm step, legs 5.9 mm apart, 30 mm under the base (seed 2; seed 1
-   is the same with 20 mm). Seed 2 in [`sim/toy_leg_3d_rows_cad.json`](sim/toy_leg_3d_rows_cad.json).
-   ![Geometry used for the CAD](sim/images/toy-3d-rows-cad.png)
-3. **Model** ([`cad/drive/build.py`](cad/drive/build.py)): leg (3 lengths × 2 sides), pivot fork, one-piece
-   crankshaft (gear, journals, cranks, balls; printed at its phase), idlers, spine and test frame. The gears are
-   involute, module 1, written in the script.
-4. **Check** ([`cad/drive/check.py`](cad/drive/check.py)): place every part with the simulator's kinematics every
-   30° and measure the overlap volume of every pair (manifold3d) and the gap between neighbours. Fix and repeat. The
-   check found, in this order:
+```
+uv venv --python python3.12 .venv
+uv pip install --python .venv/bin/python build123d numpy scipy matplotlib pillow trimesh shapely networkx manifold3d rtree
+python3 sim/toy_leg_3d.py --strict --search 3000 --seed 2 --only rows/crank --json crank-2.json
+```
 
-   | Found | Fix |
-   |---|---|
-   | Ball not where the simulator puts it | Crankshaft rotated the wrong way in the assembly (a placement bug) |
-   | Leg tube hitting the fork | The leg tilts up 6–23° (the crank is lower than the rim): fork window sized for 28°, tube ends 8 mm before the pivot |
-   | Test frame upright in the leg's path | Upright moved beside the leg |
-   | Middle legs' tubes touching near the cranks | Smaller ball (Ø3.6), tube with flat sides 5.6 mm wide |
-   | Rear tube mouth on its crank web; gear teeth on the spine's end blocks | Mouth 0.4 mm closer to the ball; end blocks 2 mm further out |
-   | Middle legs' feet and shins touching | Shin and foot 4.5 mm wide (legs 5 mm) |
+Limits added to the `rows` search: cranks at least 12 mm from the body axis (XC ≥ 12) and shafts at least 8 mm
+below the pivots (H ≤ −8). 4 seeds; seed 2 (legs 5.9 mm apart, 30 mm under the base) is in
+[`sim/toy_leg_3d_rows_cad.json`](sim/toy_leg_3d_rows_cad.json). Parts and how they fit:
+[cad/drive/](cad/drive/).
 
-5. Make the STLs watertight (OpenCascade leaves a hairline gap where a sphere meets a box; closed in `build.py`) and
-   check them with Bambu Studio: `manifold = yes` for all 17.
+</details>
 
-**Result:**
+<img src="sim/images/toy-3d-rows-cad.png" width="480" alt="Geometry used for the CAD">
 
-![Parts](cad/drive/images/parts.png)
+*Fig. 1 · The geometry used for the CAD, with room for the gears.*
 
-![Assembly](cad/drive/images/assembly.gif)
+What the collision check found, in order:
 
-- **No overlaps over a full turn.** The closest pairs are the designed clearances (0.1 mm a side for the balls and
-  journals, 0.2 mm for the legs in their forks). The closest parts that do not touch on purpose are the middle legs'
-  shins (0.7 mm) and a rear leg against its crank (0.6 mm).
-- 25 printed parts for the robot (8 legs, 8 forks, 4 crankshafts, 3 idlers, spine), plus hardware: 8 × M3×12 + nuts,
-  16 × M3×6, 3 × 3 mm pins.
-- Clearances are a guess (+0.2 mm on the diameter) until the phase 2 clearance test is printed.
+| Found | Fix |
+|---|---|
+| Ball not where the simulator puts it | Crankshaft turned the wrong way in the assembly (a placement bug) |
+| Leg tube hitting the fork | The leg tilts up 6–23°: fork window sized for 28°, tube ends 8 mm before the pivot |
+| Test frame upright in the leg's path | Upright moved beside the leg |
+| Middle legs' tubes touching near the cranks | Smaller ball (Ø3.6), tube with flat sides 5.6 mm wide |
+| Rear tube mouth on its crank; gear teeth on the spine's end blocks | Mouth 0.4 mm closer to the ball; end blocks 2 mm further out |
+| Middle legs' feet and shins touching | Shin and foot 4.5 mm wide (legs 5 mm) |
 
-**Decisions:**
+#### Result
 
-- One-piece printed crankshafts (no steel shaft): the phase between the cranks is printed in, so it cannot slip.
-- Swivel axes are M3 screws: the leg turns on one, and the fork turns on two driven into it.
-- The geometry for the CAD is the `rows` search with buildable limits (10 mm stride, 4.6 mm bob) instead of the
-  unbuildable one picked in [Four lateral crankshafts](#four-lateral-crankshafts) (9 mm, 4.2 mm).
+<img src="cad/drive/images/parts.png" width="560" alt="Parts">
 
-**Open:**
+*Fig. 2 · The drive parts: three leg lengths, the pivot fork, a crankshaft, an idler gear, the spine, the test
+frame, and the whole robot assembled.*
 
-- ~~Onshape assembly and animation~~: done in [Onshape assembly](#onshape-assembly).
-- Print the test frame, one middle leg, a fork and crankshaft 2; turn it by hand. Before that, ideally, the phase 2
-  clearance test.
-- The base: fork seats in the rim notches, hollow bowl for the spine and idlers, spine mounting, a cap over the
+<img src="cad/drive/images/assembly.gif" width="480" alt="Assembly">
+
+*Fig. 3 · All eight legs turning over a full crank turn, with no collisions.*
+
+- **No collisions over a full turn.** The closest pairs are the designed clearances (0.1 mm a side for the balls
+  and journals, 0.2 mm for the legs in their forks). The closest parts not meant to touch are the middle legs' shins
+  (0.7 mm apart) and a rear leg against its crank (0.6 mm).
+- **25 printed parts** (8 legs, 8 forks, 4 crankshafts, 3 idlers, spine), plus 8 × M3×12 screws with nuts,
+  16 × M3×6 and 3 × 3 mm pins.
+- The clearances are a guess (+0.2 mm on the diameter) until a clearance test is printed.
+
+#### Decisions
+
+- **One-piece printed crankshafts** (no steel shaft): the angle between the cranks is printed in, so it cannot slip.
+- **Swivel axes are M3 screws:** the leg turns on one, and the fork turns on two driven into it.
+- The CAD uses the search with buildable limits (10 mm stride, 4.6 mm bob) instead of the unbuildable geometry
+  chosen in [Four lateral crankshafts](#four-lateral-crankshafts) (9 mm, 4.2 mm).
+
+#### Next
+
+- The base: fork seats in the rim notches, a hollow bowl for the spine and idlers, spine mounting, a cap over the
   journal slots. The N20 drive (phase 4).
 
-## Onshape assembly
+### Onshape assembly
 
-**Phase 2 · CAD · 2026-11-10**
+**Phase 2 · CAD · 2026-11-10** · Status: ✅ done
 
-**Goal:** assemble one leg on the test frame in Onshape from the STEP files, with mates that let it move as it will
-in the real thing, and animate it.
+> **In short.** One leg on its test frame was assembled in Onshape from the exported STEP files, with joints
+> («mates») that let it move as the real one will, and animated through a full turn. It moves as expected. A
+> step-by-step tutorial with pictures is in [cad/drive/onshape.md](cad/drive/onshape.md).
 
-**Steps:** [cad/drive/onshape.md](cad/drive/onshape.md), with a picture of the edges to click for each mate (made by
-[`cad/drive/onshape_figures.py`](cad/drive/onshape_figures.py)). In short:
+#### Steps
 
-1. Import `test-frame`, `crankshaft-2`, `leg-middle-right` and `pivot` (STEP) into one document. Insert the test frame
-   at the origin and **Fix** it, so the assembly is in robot coordinates.
-2. Make a helper part, the slider (Ø3 × 4 mm cylinder). Onshape has no mate for a ball that slides in a tube and
-   tilts, so it is built as crankshaft → **Ball** → slider → **Slider** → leg.
-3. Five mates: three **Revolute** (crankshaft in the frame, fork in the frame, leg in the fork, with offsets of 0.25,
-   0.4 and 0.2 mm, the designed clearances), **Ball** and **Slider**.
+Full tutorial, with a picture of the edges to click for each mate: [cad/drive/onshape.md](cad/drive/onshape.md)
+(pictures made by [`cad/drive/onshape_figures.py`](cad/drive/onshape_figures.py)). In short:
+
+1. Import `test-frame`, `crankshaft-2`, `leg-middle-right` and `pivot` (STEP) into one document. Insert the test
+   frame at the origin and **Fix** it, so the assembly uses the robot's coordinates.
+2. Make a helper part, the slider (a Ø3 × 4 mm cylinder). Onshape has no mate for a ball that slides in a tube and
+   tilts, so it is built in two steps: crankshaft → **Ball** → slider → **Slider** → leg.
+3. Add five mates: three **Revolute** (crankshaft in the frame, fork in the frame, leg in the fork, offset by the
+   designed clearances), **Ball** and **Slider**.
 4. **Animate** the crankshaft's revolute, 0–360°.
 
 Document (public): [Spider-Bot drive](https://cad.onshape.com/documents/07632681db3e0a6b5b785746/w/6c5d5bb7bfec5781a6827599/e/c59459f0a1ed69675318d6bb).
 
-**Result:**
+#### Result
 
-![The assembly animated in Onshape: Animate mate on the crankshaft's revolute, 0–360°, Loop](cad/drive/images/onshape-animation.gif)
+<img src="cad/drive/images/onshape-animation.gif" width="640" alt="The assembly animated in Onshape">
 
-- The leg has one degree of freedom: turning the crankshaft moves the fork, the leg and the ball together. The
-  animation runs through the full turn.
-- The offsets had to be negative: with positive ones the parts went into the walls. An offset is measured along the
-  connector's Z axis, whose direction depends on the face clicked.
-- Foot path against the simulator: not measured; to be checked on the printed leg.
+*Fig. 1 · The assembly animated in Onshape: turning the crankshaft moves the fork, the leg and the ball together.*
 
-**Open:**
+- The leg has a single degree of freedom, and the animation runs through the full turn.
+- The mate offsets had to be negative: with positive ones the parts went into the walls. An offset is measured along
+  the mate connector's Z axis, whose direction depends on the face clicked.
+- The foot path was not compared with the simulator's; to be checked on the printed leg.
 
-- Part 2 of the tutorial (the gear train with **Gear relation**s), optional.
-- Print the test frame, a middle leg, a fork and crankshaft 2, and turn them by hand.
+#### Next
 
-## Clearance test and test leg print plate
+- Optional: the gear train with **Gear relation** mates (part 2 of the tutorial).
 
-**Phase 2 · CAD · 2026-11-10**
+### Clearance test and test leg print plate
 
-**Goal:** one print run with everything needed to turn one leg by hand, plus a test of the hole clearance this
-printer needs, so the other 21 drive parts are printed once, with the right clearance.
+**Phase 2 · CAD · 2026-11-10** · Status: ✅ printed
 
-**Steps:**
+> **In short.** Before printing the 25 drive parts, one print plate holds everything needed to turn one leg by
+> hand, plus a block that tests how much bigger the holes must be on this printer. The leg had to be reshaped
+> slightly so it lies flat on the bed. The plate takes 1 h 28 min and 29.6 g of PLA.
 
-1. **Clearance test** ([`cad/clearance-test/`](cad/clearance-test/), `build.py`): a block with horizontal holes for
-   the journal (Ø4.0), the ball (Ø3.6) and an M3 screw (Ø3.0), each at +0.1 / +0.2 / +0.3 / +0.4 mm, plus 3 tap
-   holes for M3 (Ø2.3 / 2.5 / 2.7), and a pin with a Ø4.0 journal and a Ø3.6 ball printed lying down like a
-   crankshaft.
-   ![Clearance test](cad/clearance-test/images/parts.png)
-2. **Lay the leg flat.** Rotated onto its side for printing, only the tube touched the bed (190 mm²): the tube is
-   5.6 mm wide and the rest of the leg 5.0 mm, so the arm hung 0.3 mm in the air, too little for supports.
-   - Making the whole leg 5.6 mm wide brought the middle legs' knees to 0.09–0.21 mm from each other
-     (`check.py`, was 0.71 mm).
-   - Kept the leg 5.0 mm wide instead, and moved the arm, boss and knee 0.3 mm (and the shin 0.55 mm) towards the
-     face that goes on the bed, so that face is flush with the tube's. The fork's window moves with it. Bed contact
-     is now 567 mm².
-3. **Plate** ([`tools/bambu_plate.py`](tools/bambu_plate.py)): orient the parts, then let Bambu Studio's CLI arrange
-   and slice them with the system presets (P2S 0.4, 0.20 mm Standard, PLA Basic, Textured PEI). Supports are tree,
-   on the build plate only, so none go into the holes or the leg's bore. Then open it in Bambu Studio, check the
-   support settings, slice and save. Command and details: [print/README.md](print/README.md).
+#### Steps
 
-**Result:**
+1. **Clearance test** ([`cad/clearance-test/`](cad/clearance-test/), `build.py`): a block with sideways holes for
+   the journal (Ø4.0), the ball (Ø3.6) and an M3 screw (Ø3.0), each 0.1, 0.2, 0.3 and 0.4 mm larger. It also has
+   3 holes for M3 screws to cut their own thread (Ø2.3 / 2.5 / 2.7), and a pin with a Ø4.0 journal and a Ø3.6 ball,
+   printed lying down like a crankshaft (Fig. 1).
+2. **Lay the leg flat.** Turned on its side for printing, only the tube touched the bed: the tube is 5.6 mm wide and
+   the rest of the leg 5.0 mm, so the arm hung 0.3 mm in the air, too little for supports.
+   - Making the whole leg 5.6 mm wide brought the middle legs' knees to 0.09–0.21 mm from each other.
+   - Instead, the leg stays 5.0 mm wide, and the arm, boss and knee move 0.3 mm (the shin 0.55 mm) towards the
+     face on the bed, flush with the tube. The fork's window moves with it. The leg now touches the bed over
+     567 mm² instead of 190 mm².
+3. **Plate** ([`tools/bambu_plate.py`](tools/bambu_plate.py)): orient the parts, then let Bambu Studio arrange and
+   slice them with its standard settings (P2S 0.4 mm nozzle, 0.20 mm Standard, PLA Basic, Textured PEI plate).
+   Supports are tree supports on the build plate only, so none go into the holes or the leg's bore. Then open it in
+   Bambu Studio, check the support settings, slice and save. Details: [print/README.md](print/README.md).
 
-![Plate in Bambu Studio](print/images/prepare.png)
+<img src="cad/clearance-test/images/parts.png" width="560" alt="Clearance test">
 
-![Sliced, with supports](print/images/preview-supports.png)
+*Fig. 1 · The clearance block and its test pin.*
 
-- [`print/test-leg-plate.3mf`](print/test-leg-plate.3mf): test frame, middle leg (right), fork, crankshaft 2,
-  clearance block and pin. 1 h 28 min, 29.6 g of PLA (2.5 g of it support).
-- Bambu Studio warns about 2 regions of the leg it cannot support. Both are the top of the 3.8 mm bore and its
-  flared mouth inside the tube (9.8 mm², found by casting rays down from every overhang). They print as bridges.
-- Collision check of the whole robot with the moved leg (`check.py --gaps --step 30`): no overlaps over a full turn.
-  Middle legs 0.74–0.77 mm apart (were 0.72–0.75); the left rear leg 0.53 mm from its crank (was 0.61).
-- The CLI's support settings were dropped when the GUI opened the project. The tool now marks them as changed
-  settings in the .3mf. Not yet confirmed in the GUI.
+#### Result
 
-**Decisions:**
+<table>
+<tr>
+<td width="50%"><img src="print/images/prepare.png" alt="Plate in Bambu Studio"></td>
+<td width="50%"><img src="print/images/preview-supports.png" alt="Sliced, with supports"></td>
+</tr>
+<tr>
+<td><em>Fig. 2 · The plate in Bambu Studio: test frame, leg, fork, crankshaft, clearance block and pin.</em></td>
+<td><em>Fig. 3 · Sliced, with the tree supports.</em></td>
+</tr>
+</table>
+
+- [`print/test-leg-plate.3mf`](print/test-leg-plate.3mf): 1 h 28 min, 29.6 g of PLA (2.5 g of it support).
+- Bambu Studio warns about 2 areas of the leg it cannot support. Both are the top of the 3.8 mm bore and its flared
+  mouth inside the tube (9.8 mm²). They print as bridges.
+- The collision check of the whole robot with the reshaped leg finds no collisions over a full turn.
+- Bambu Studio dropped the support settings when the project was opened in the app. The tool now saves them as
+  changed settings in the .3mf; not yet confirmed in the app.
+
+#### Decisions
 
 - One plate for the test only. The rest of the drive waits for the clearance result and for the base.
-- The plate actually printed is the first version: leg 5.6 mm wide, with its fork (window 6.0 mm). The repo's
-  `test-leg-plate.3mf` has the offset leg. For one leg on the test frame both behave the same, so the offset version
-  is assumed to work as well and is not printed separately.
+- The plate actually printed is the first version, with the leg 5.6 mm wide. For one leg on the test frame both
+  versions behave the same, so the reshaped one is not printed separately.
 
-**Open:**
+### Test leg: first assembly and clearance result
 
-- Print it. **Morante:** shoot the timelapse, the parts off the bed and the mechanism turning by hand; drop them in
-  the Inbox.
-- Read the clearance block and set `CLR` (and `TAP`) in `cad/drive/build.py`.
-- Hardware: M3×16 + nut and 2 × M3×6 for the test frame (M3×12 is too short for the fork and a nut).
+**Phase 3 · Mechanisms · 2026-11-11** · Status: 🔄 second version designed, not printed yet
 
-## Test leg: first assembly and clearance result
+> **In short.** Before printing all 25 drive parts, we printed just one leg with its own small stand to turn it by
+> hand, and a block to measure how loose holes have to be on this printer. The leg could not be turned yet: the stand
+> did not hold the fork in place, and the holes were too tight. The block showed the clearance needed (0.5 mm instead
+> of 0.2 mm). The CAD now uses it, and the stand is redesigned with screws and nuts that hold every part.
 
-**Phase 3 · Mechanisms · 2026-11-11**
+**What is being tested.** The robot's leg is a single bent part. Its inner end slides over a ball on a crank, and
+halfway along it passes through a **fork** (a small swivelling block) on the body's edge. When the crank turns, the
+foot traces a loop. The **test frame** holds one crankshaft and one fork exactly where the robot's base will, so one
+leg can be tried before the base exists. The **clearance block** has holes of the same sizes as the real ones,
+each 0.1–0.4 mm larger, to find out which one turns freely.
 
-**Goal:** assemble the printed test leg on its frame and turn it by hand, and read the clearance block.
+<img src="images/test-leg-print-timelapse.gif" width="480" alt="Timelapse of the test plate printing">
 
-**Steps:** printed [`print/test-leg-plate.3mf`](print/test-leg-plate.3mf) (first version, with the leg 5.6 mm wide),
-removed the supports, and assembled it following the [diagram](cad/drive/README.md) (the leg in the fork on an
-M3×16 and a nut, the fork between the frame's arms, the crankshaft in its slots).
+*Fig. 1 · Printing [`print/test-leg-plate.3mf`](print/test-leg-plate.3mf) (1 h 28 min, 29.6 g of PLA).*
 
-![Timelapse of the print](images/test-leg-print-timelapse.gif)
+#### Steps
 
-![Printed parts on the bed](images/test-leg-print-1.jpg)
+1. Print [`print/test-leg-plate.3mf`](print/test-leg-plate.3mf). This was the first version, with the leg 5.6 mm wide.
+2. Remove the supports, which are on the crankshaft and on one side of the leg (Fig. 2).
+3. Assemble following the [diagram](cad/drive/README.md): the leg in the fork on an M3×16 and a nut, the fork between
+   the frame's two arms, and the crankshaft in its slots with the ball inside the leg's tube (Fig. 3).
+4. Push the clearance pin into each hole of the block and note how it turns (Fig. 5).
 
-![Printed parts, supports on](images/test-leg-print-2.jpg)
+<table>
+<tr>
+<td width="50%"><img src="images/test-leg-print-1.jpg" alt="Printed parts on the bed"></td>
+<td width="50%"><img src="images/test-leg-print-2.jpg" alt="Printed parts off the bed, supports still on"></td>
+</tr>
+<tr>
+<td><em>Fig. 2a · On the bed: clearance pin, fork, frame, clearance block, crankshaft (in its tree support) and
+the leg lying flat.</em></td>
+<td><em>Fig. 2b · Off the bed, supports still on. On the frame, the two thin walls hold the crankshaft and the tall
+post on the right holds the fork between its arms.</em></td>
+</tr>
+</table>
 
-![First assembly](images/test-leg-print-3.jpg)
+<table>
+<tr>
+<td width="50%"><img src="images/test-leg-print-3.jpg" alt="First assembly"></td>
+<td width="50%"><img src="images/test-leg-print-4.jpg" alt="The fork and the half-open arm"></td>
+</tr>
+<tr>
+<td><em>Fig. 3 · First assembly: the crankshaft (left) with its ball in the leg's tube, the fork on the right post.
+On the left, the clearance pin in its block.</em></td>
+<td><em>Fig. 4 · The fork has to be held by hand. The frame's upper arm (top left) ends in a half-open «C», so the
+screw slides out. The screws in the fork are M2: M3 would not go in.</em></td>
+</tr>
+</table>
 
-**Result:**
+#### Result
 
-- **The fork would not stay in the frame.** The frame's arms ended at the centre of their screw holes, so each hole
-  was half open (a «C» at the arm's tip) and the screw slid out. The frame pushed the fork out.
-  ![The fork and the half-open arm](images/test-leg-print-4.jpg)
-- **M3 would not go into the fork's Ø2.5 blind holes** (meant for the screw to cut its own thread). Morante used M2
-  screws, which only sit in them loosely.
-- The M3×16 through the fork and the leg went in fine.
-- **Clearance block** (clearance on the diameter, from left to right +0.1 / +0.2 / +0.3 / +0.4 mm):
+| What | Expected | What happened | Why |
+|---|---|---|---|
+| Fork in the frame | Swivels on two screws, held by the frame's arms | Falls out; held by hand (Fig. 4) | The arms ended at the centre of their screw holes, leaving a half-open «C» |
+| Screws into the fork (Ø2.5 holes) | M3 cuts its own thread | M3 would not go in; M2 used, loose | The hole is too small for M3 in PLA |
+| Leg on the fork (M3×16) | Turns | Goes in fine | — |
+| Crankshaft and ball | Turn freely with 0.2 mm of clearance | Too tight (see the block below) | 0.2 mm is too little for a printed part in a printed hole |
 
-  | Row | Result (Morante) |
-  |---|---|
-  | Journal Ø4.0 (pin) | Only goes into +0.4, and turns in jerks |
-  | Ball Ø3.6 | Only goes into +0.4, and turns with difficulty |
-  | M3 screw | Grips tight in +0.1, threads more easily in +0.2, wobbles a little in +0.3 |
+<img src="cad/clearance-test/images/result-1.jpg" width="480" alt="Clearance block">
 
-  ![Clearance block](cad/clearance-test/images/result-1.jpg)
+*Fig. 5 · The clearance block. Columns 1–4 add +0.1 / +0.2 / +0.3 / +0.4 mm to the diameter. Rows, top to bottom:
+crankshaft journal (Ø4.0), ball (Ø3.6), M3 screw (Ø3.0). The pin is in the +0.4 journal hole.*
 
-  So the 0.2 mm used for every hole was far too tight for a printed part in a printed hole.
+| Hole | +0.1 | +0.2 | +0.3 | +0.4 |
+|---|---|---|---|---|
+| Journal Ø4.0 (printed pin) | ✗ | ✗ | ✗ | goes in, turns in jerks |
+| Ball Ø3.6 (printed pin) | ✗ | ✗ | ✗ | goes in, turns with difficulty |
+| M3 screw (steel) | grips tight | threads easily | wobbles a little | — |
 
-**Fixes** (in [`cad/drive/build.py`](cad/drive/build.py)):
+Morante's results. ✗ = does not go in.
 
-- Two clearances instead of one: `CLR` = 0.5 mm for a printed part in a printed hole (journals, ball in the bore),
-  `CLR_STEEL` = 0.3 mm for a steel screw or pin turning in a printed hole. 0.5 is one step beyond the block's last
-  hole, chosen because +0.4 turned only roughly; the reprinted leg and frame will show whether it is right.
-- Frame arms now reach 5 mm past their holes.
-- The fork no longer relies on self-tapping: it turns on the tips of two M3×10 screws, each locked to a frame arm
+**Conclusion:** a printed part needs much more room in a printed hole than a steel screw does. The single 0.2 mm
+used for every hole was far too tight for the printed ones.
+
+#### Decisions and fixes
+
+All of these are changes to [`cad/drive/build.py`](cad/drive/build.py):
+
+- **Two clearances instead of one.** `CLR` = 0.5 mm for a printed part in a printed hole (journals, ball in the
+  bore) and `CLR_STEEL` = 0.3 mm for a steel screw or pin in a printed hole. 0.5 is one step past the block's
+  last hole, because +0.4 only turned roughly. The reprint will show whether it is enough.
+- **Frame arms closed.** They now reach 5 mm past their holes.
+- **Fork on screw tips, not self-tapped.** It now turns on the tips of two M3×10 screws, each locked to a frame arm
   by a nut, entering Ø3.3 blind holes in the fork. The arms moved 2.4 mm apart to make room for the nuts.
-- **Keeper for the crankshaft.** The shaft only sat in slots open at the top, so a knock or the leg's push lifted
-  it out. The test frame's walls now run 14 mm either side of the shaft and end in solid blocks clear of the gear;
-  a keeper (green in the diagram) sits on top, a tongue down each slot completes the journal hole, and two M3×12
-  go down through it into nuts slid into the blocks from outside.
-- For the leg's M3×16: a nylon lock nut, so the knocks do not loosen it.
-- Collision check over a full turn with the new parts (`check.py` now includes the keeper): no overlaps. The
-  shaft has 0.25 mm a side in the frame and the keeper; the keeper rests on the walls. The right rear leg comes to
-  0.15 mm from its crankshaft, less than the bore's 0.25 mm a side: to look into before printing the rear legs.
+- **Keeper for the crankshaft.** It only sat in slots open at the top, so a knock or the leg's push lifted it out.
+  A **keeper** (green in Fig. 6) now closes the slots from above and is held by two M3×12 into nuts.
+- **Nylon lock nut** on the leg's M3×16, so the knocks do not loosen it.
 
-![Where every screw goes](cad/drive/images/test-frame-screws.png)
+<img src="cad/drive/images/test-frame-screws.png" alt="Where every screw goes">
 
-Diagram: [`cad/drive/screws_figure.py`](cad/drive/screws_figure.py).
+*Fig. 6 · The redesigned test frame, exploded. Grey: frame. Orange: fork. Red: leg. Blue: crankshaft. Green: the
+new keeper. Made by [`cad/drive/screws_figure.py`](cad/drive/screws_figure.py).*
 
-**Open:**
+<details>
+<summary>Collision check of the new parts</summary>
 
-- Print [`print/test-frame-v2.3mf`](print/test-frame-v2.3mf): frame, keeper, fork and leg (1 h 18 min, 25.6 g).
-  The crankshaft from the first print is kept.
-- Hardware: 2 × M3×10 + 2 nuts for the fork, 2 × M3×12 + 2 nuts for the keeper, a nylon lock nut for the leg.
+`check.py` (which now includes the keeper), over a full turn: no overlaps. The shaft has 0.25 mm a side in the frame
+and the keeper, and the keeper rests on the walls. The right rear leg comes to 0.15 mm from its crankshaft, less
+than the bore's 0.25 mm a side: to look into before printing the rear legs.
+
+</details>
+
+#### Next
+
+- Print [`print/test-frame-v2.3mf`](print/test-frame-v2.3mf): frame, keeper, fork and leg (1 h 18 min, 25.6 g). The
+  crankshaft from the first print is kept.
+- Hardware: 2 × M3×10 + 2 nuts for the fork, 2 × M3×12 + 2 nuts for the keeper, and a nylon lock nut for the leg.
 - **Morante:** a video of the leg turning by hand on the new frame.
