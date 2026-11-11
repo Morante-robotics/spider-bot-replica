@@ -39,7 +39,8 @@ The robot's story in three parts, then what is left to do and a glossary.
    - [Legs and drive in CAD](#legs-and-drive-in-cad) · 2026-11-10 · ✅ done
    - [Onshape assembly](#onshape-assembly) · 2026-11-10 · ✅ done
    - [Clearance test and test leg print plate](#clearance-test-and-test-leg-print-plate) · 2026-11-10 · ✅ printed
-   - [Test leg: first assembly and clearance result](#test-leg-first-assembly-and-clearance-result) · 2026-11-11 · 🔄 v2 to print
+   - [Test leg: first assembly and clearance result](#test-leg-first-assembly-and-clearance-result) · 2026-11-11 · ✅ v2 designed
+   - [Test leg v2: turning by hand](#test-leg-v2-turning-by-hand) · 2026-11-11 · 🔄 fork to redesign
 4. **[Open items](#open-items)**: everything still to do.
 5. **[Glossary](#glossary)**: the terms used in the entries.
 
@@ -319,7 +320,8 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
      walks forward. Its stride is short (about 10 mm per half turn), because the body must not bob more than 3 mm.
 3. **CAD and first print.** The parts were modelled in code, checked for collisions over a full turn, assembled in
    Onshape, and one leg was printed on a small test frame. It showed that holes need much more clearance than
-   expected (0.5 mm), and the frame was redesigned. Next: print the new frame and turn the leg by hand.
+   expected (0.5 mm), and the frame was redesigned. On the second print the leg turns by hand; the fork still
+   has to be redesigned so the leg can go into it without forcing.
 
 <img src="sim/images/drive-attempts.png" alt="The three drives tried, from above and from the side">
 
@@ -1010,7 +1012,7 @@ Document (public): [Spider-Bot drive](https://cad.onshape.com/documents/07632681
 
 ### Test leg: first assembly and clearance result
 
-**Phase 3 · Mechanisms · 2026-11-11** · Status: 🔄 second version designed, not printed yet
+**Phase 3 · Mechanisms · 2026-11-11** · Status: ✅ second version printed: [Test leg v2](#test-leg-v2-turning-by-hand)
 
 > **In short.** Before printing all 25 drive parts, we printed just one leg with its own small stand to turn it by
 > hand, and a block to measure how loose holes have to be on this printer. The leg could not be turned yet: the stand
@@ -1112,14 +1114,64 @@ than the bore's 0.25 mm a side: to look into before printing the rear legs.
 
 </details>
 
+### Test leg v2: turning by hand
+
+**Phase 3 · Mechanisms · 2026-11-11** · Status: 🔄 turns; the fork needs a redesign
+
+> **In short.** The redesigned test frame was printed and the leg now turns by hand: the crank goes round and the
+> leg rises and falls in its fork, with the frame holding every part. The 0.5 mm clearance is enough for the
+> crankshaft and the ball. One fault is left: the leg does not go into the new fork, because neither end of the leg
+> is narrow enough to pass through the fork's window. The fork from the first print, forced on earlier, was used.
+
+#### Steps
+
+1. Print [`print/test-frame-v2.3mf`](print/test-frame-v2.3mf): frame, keeper, fork and leg (Fig. 1). The crankshaft
+   from the first print is kept.
+2. Assemble following the [diagram](cad/drive/README.md) (Fig. 7 of the [previous entry](#test-leg-first-assembly-and-clearance-result)).
+3. Turn the crankshaft by hand (Fig. 2, video).
+
+<table>
+<tr>
+<td width="50%"><img src="images/test-leg-v2-print-timelapse.gif" alt="Timelapse of the v2 plate printing"></td>
+<td width="50%"><img src="images/test-leg-v2-turning.gif" alt="The leg turning by hand on the new frame"></td>
+</tr>
+<tr>
+<td><em>Fig. 1 · Printing <a href="print/test-frame-v2.3mf"><code>print/test-frame-v2.3mf</code></a> (1 h 18 min,
+25.6 g of PLA). The tree support under the frame's fork arms is the tall one at the back.</em></td>
+<td><em>Fig. 2 · Turning the crankshaft by hand (left). The leg slides on the ball and tilts up and down in the
+red fork, which swivels between the frame's two M3 pins. The red fork and crankshaft are from the first print.</em></td>
+</tr>
+</table>
+
+The whole clip, from both sides:
+
+_Video pending._
+<!-- Video: 1-spiderbot-test-leg-v2-1.mp4 -->
+
+#### Result
+
+| What | Expected | What happened |
+|---|---|---|
+| Crankshaft in the frame, under the keeper | Turns, stays in its slots | Turns by hand and stays in place |
+| Ball in the leg's tube (0.5 mm clearance) | Slides and tilts | The leg follows the crank all the way round |
+| Fork between the frame's arms (M3×10 pins) | Swivels and stays | Swivels and stays |
+| Leg into the new fork | Goes in | Does not go in; the fork from the first print was used |
+
+**Why the leg does not go into the fork.** The fork is a closed ring around the leg: its window is 5.4 mm across, the
+leg's arm 5.0. But the leg has to be pushed in from one end, and both ends are wider than the window: the tube is
+5.6 mm and the shin, at the foot, 7.6 mm. The CAD of the fork and the leg did not change between the two prints, so
+the first fork must have been forced over the leg too, flexing its thin wall (1.7 mm). The collision check does not
+catch this: it tests the parts already in place, not how they get there.
+
+**Conclusion:** the 0.5 mm clearance works for a printed part in a printed hole, and the frame now holds the
+mechanism. The fork has to be redesigned so the leg can be put in without forcing it.
+
 #### Next
 
 Also listed in [Open items](#open-items).
 
-- Print [`print/test-frame-v2.3mf`](print/test-frame-v2.3mf): frame, keeper, fork and leg (1 h 18 min, 25.6 g). The
-  crankshaft from the first print is kept.
-- Hardware: 2 × M3×10 + 2 nuts for the fork, 2 × M3×12 + 2 nuts for the keeper, and a nylon lock nut for the leg.
-- **Morante:** a video of the leg turning by hand on the new frame.
+- Redesign the fork so it opens (for example, one side wall as a separate plate held by the leg's M3×16), reprint it
+  and assemble it with the leg.
 
 [↑ Contents](#contents)
 
@@ -1131,7 +1183,7 @@ outside the repo.
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| Print the test frame v2 and film the leg turning by hand | [Test leg: first assembly…](#test-leg-first-assembly-and-clearance-result) | 3 |
+| Redesign the fork so the leg goes in without forcing (both ends of the leg are wider than its window) | [Test leg v2…](#test-leg-v2-turning-by-hand) | 3 |
 | Check the right rear leg, 0.15 mm from its crankshaft, before printing the rear legs | [Test leg: first assembly…](#test-leg-first-assembly-and-clearance-result) | 3 |
 | Compare the printed leg's foot path with the simulator's | [Onshape assembly](#onshape-assembly) | 3 |
 | Check that the rim notches (10 × 5 mm) let the leg swing as far as simulated, or widen them | [Toy leg in 3D](#toy-leg-in-3d) | 3 |
