@@ -21,22 +21,26 @@ TXT = {
                pin="Tornillo M3×16 a través\nde horquilla y pata",
                nut="Tuerca M3", crank="Tapa: dos lengüetas bajan por las ranuras\ny sujetan el eje; 2 × M3×12 a tuercas\nmetidas en los bloques del marco",
                ball="La bola entra en el tubo",
-               arm="Brazos del marco: agujero\npasante Ø3.2", title="Marco de prueba: tornillos (despiece)",
+               arm="Brazos del marco: agujero\npasante Ø{hole}", title="Marco de prueba: tornillos (despiece)",
                fork_title="La horquilla, de cerca", keep_title="La tapa del cigüeñal",
-               knut="La tuerca entra por la ranura\ndel bloque, desde fuera", ftop="Agujero ciego arriba (Ø3.2)",
-               fbot="Agujero ciego abajo (Ø3.2)", fside="Agujero pasante (Ø3.2)"),
+               knut="La tuerca entra por la ranura\ndel bloque, desde fuera", ftop="Agujero ciego arriba (Ø{hole})",
+               fbot="Agujero ciego abajo (Ø{hole})", fside="Agujero pasante (Ø{hole})"),
     "en": dict(top="M3×10 from above + nut under the arm:\nthe nut locks it to the arm, its tip\ngoes 3 mm into the fork and turns there",
                bottom="M3×10 from below + nut on the arm:\nsame as the top one",
                pin="M3×16 screw through\nfork and leg",
                nut="M3 nut", crank="Keeper: two tongues go down the slots\nand hold the shaft; 2 × M3×12 into nuts\npushed into the frame's end blocks",
                ball="The ball goes into the tube",
-               arm="Frame arms: Ø3.2\nthrough hole", title="Test frame: screws (exploded)",
+               arm="Frame arms: Ø{hole}\nthrough hole", title="Test frame: screws (exploded)",
                fork_title="The fork, close up", keep_title="The shaft keeper",
-               knut="The nut slides into the\nblock's slot from outside", ftop="Blind hole on top (Ø3.2)",
-               fbot="Blind hole underneath (Ø3.2)", fside="Through hole (Ø3.2)"),
+               knut="The nut slides into the\nblock's slot from outside", ftop="Blind hole on top (Ø{hole})",
+               fbot="Blind hole underneath (Ø{hole})", fside="Through hole (Ø{hole})"),
 }
 STEEL, NUT = (120, 125, 135), (90, 95, 105)
 
+
+# Hole sizes come from build.py, so the labels follow any change of clearance.
+HOLE = f"{B.SCREW + B.CLR_STEEL:.1f}"
+TXT = {lang: {k: v.replace("{hole}", HOLE) for k, v in t.items()} for lang, t in TXT.items()}
 
 def screw(head_at, into, length):
     """Socket-head M3 screw: head outside at head_at, shank pointing along `into`."""
