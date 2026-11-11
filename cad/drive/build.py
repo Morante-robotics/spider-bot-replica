@@ -39,7 +39,9 @@ sys.path.insert(0, os.path.join(HERE, "..", "..", "sim"))
 import toy_leg_3d as sim  # noqa: E402
 
 # --- parameters (mm) -----------------------------------------------------------------------------------------
-CLR = 0.2           # hole clearance on the diameter for parts that slide or turn (phase 2 clearance test pending)
+CLR = 0.5           # hole clearance on the diameter for a printed part turning or sliding in a printed hole
+                    # (clearance test 2026-11-11: +0.4 was the only one that turned, roughly; 0.2 before)
+CLR_STEEL = 0.3     # the same for a steel screw or pin turning in a printed hole (test: +0.3 turns, +0.2 grips)
 PIN = 3.0           # steel pins: pivot pin (or an M3 screw) and idler pins
 BALL = 3.6          # ball on the crank pin
 STUB = 2.2          # crank pin stub that carries the ball
@@ -60,7 +62,12 @@ YOKE_WALL = 2.0      # fork side walls
 YOKE_CAP = 4.0       # fork top and bottom walls, with a blind hole for the M3 screw it swings on
 PITCH_MAX = 28.0     # the leg tilts 6-23° up (rear leg most) (the crank is lower than the rim): the fork window allows this much
 SCREW = 3.0          # M3 screws: pivot pin across the fork, and the two vertical screws the fork swings on
-TAP = 2.5            # blind hole an M3 screw cuts its own thread in
+TAP = 2.5            # blind hole an M3 screw cuts its own thread in (not used: M3 would not go into it, 2026-11-11)
+NUT_T = 2.4          # M3 nut thickness
+NUT_AF = 5.5         # M3 nut across flats
+KEEP_Y = 14.0        # test frame: the shaft's walls reach this far either side of the shaft (end blocks beyond KEEP_GAP)
+KEEP_GAP = 8.5       # end blocks start here, clear of the gear's tips (radius 7)
+KEEP_SCREW_Y = 11.25 # keeper screws, either side of the shaft
 
 GEO = json.load(open(os.path.join(HERE, "..", "..", "sim", "toy_leg_3d_rows_cad.json")))[0]
 P_ = {k: GEO[k] for k in sim.ranges("rows")}
@@ -150,7 +157,7 @@ def leg(i):
     part -= cyl([-(mouth + bottom) / 2, 0, 0], [1, 0, 0], (BALL + CLR) / 2, bore_len)
     part -= Plane(origin=(-mouth, 0, 0), x_dir=(0, 1, 0), z_dir=(1, 0, 0)).location * \
         Cone(TUBE / 2 - 0.6, (BALL + CLR) / 2, 2.5, align=None)                # flared mouth for the tilting stub
-    part -= cyl(a, [0, 1, 0], (SCREW + CLR) / 2, LEG_W + 2)                      # pivot screw hole
+    part -= cyl(a, [0, 1, 0], (SCREW + CLR_STEEL) / 2, LEG_W + 2)                      # pivot screw hole
     return part, dict(mouth=mouth, bottom=bottom, apmin=apmin, apmax=apmax, F=F)
 
 
@@ -162,14 +169,15 @@ def yoke_size():
 
 
 def yoke():
-    """Pivot fork, in its own frame: P at the origin, leg along X, pivot screw along Y. It swings on two M3 screws
-    driven up and down into blind holes in its top and bottom (they turn in the rim, or the test frame)."""
+    """Pivot fork, in its own frame: P at the origin, leg along X, pivot screw along Y. It swings on two M3 screws used
+    as pins: each is held in the rim (or the test frame) by a nut and its tip turns in a blind hole in the fork's top
+    or bottom."""
     win_x, win_y, win_z, h = yoke_size()
     out = Box(win_x, win_y + 2 * YOKE_WALL, h)
     out -= Pos(0, ARM_DY, 0) * Box(win_x + 1, win_y, win_z)                    # window follows the leg's offset
-    out -= cyl([0, 0, 0], [0, 1, 0], (SCREW + CLR) / 2, 30)
+    out -= cyl([0, 0, 0], [0, 1, 0], (SCREW + CLR_STEEL) / 2, 30)
     for sz in (1, -1):
-        out -= Pos(0, 0, sz * (h / 2 - 1.75)) * Cylinder(TAP / 2, 3.6)
+        out -= Pos(0, 0, sz * (h / 2 - 1.75)) * Cylinder((SCREW + CLR_STEEL) / 2, 3.6)       # pin hole for the M3's tip
     return out
 
 
@@ -259,13 +267,13 @@ def spine():
         part -= cyl([0, y, z], [1, 0, 0], (JOURNAL + CLR) / 2, 20)
         part -= Pos(0, y, (z + z_top) / 2 + 1) * Box(20, JOURNAL + CLR, z_top - z + 2)
     for y, z, n in idl:
-        part -= cyl([0, y, z], [1, 0, 0], (PIN + CLR) / 2, 20)
+        part -= cyl([0, y, z], [1, 0, 0], (PIN + CLR_STEEL) / 2, 20)
     return Pos(CX, 0, 0) * part, (y0, y1, z_bot, z_top)
 
 
 def idler_part(n):
     g = gear(n, GEAR_T - 0.4)
-    return g - Cylinder((PIN + CLR) / 2, 20)
+    return g - Cylinder((PIN + CLR_STEEL) / 2, 20)
 
 
 # --- placement ------------------------------------------------------------------------------------------------
@@ -325,24 +333,54 @@ def test_frame(parts):
     zt = z_sh + 6
     for sx in (1, -1):
         frame += Pos(CX + sx * (WALL_IN + WALL_OUT) / 2, y_sh, (zt + z_floor) / 2) * \
-            Box(WALL_OUT - WALL_IN, 16, zt - z_floor)
+            Box(WALL_OUT - WALL_IN, 2 * KEEP_Y, zt - z_floor)
+    # end blocks between the walls, clear of the gear (tip radius 7), each with a nut pocket for a keeper screw
+    for sy in (1, -1):
+        yc = y_sh + sy * (KEEP_GAP + KEEP_Y) / 2
+        frame += Pos(CX, yc, (zt + z_floor) / 2) * Box(2 * WALL_IN + 0.01, KEEP_Y - KEEP_GAP, zt - z_floor)
+        ys = y_sh + sy * KEEP_SCREW_Y
+        frame -= Pos(CX, ys, zt - 4.5) * Cylinder((SCREW + CLR_STEEL) / 2, 9.2)
+        frame -= Pos(CX, (ys + y_sh + sy * (KEEP_Y + 1)) / 2, zt - 5.5) * \
+            Box(NUT_AF + 0.3, abs(y_sh + sy * (KEEP_Y + 1) - ys) + (NUT_AF + 0.3) / 2, NUT_T + 0.3)
     frame -= cyl([CX, y_sh, z_sh], [1, 0, 0], (JOURNAL + CLR) / 2, 20)
     frame -= Pos(CX, y_sh, (z_sh + zt) / 2 + 1) * Box(20, JOURNAL + CLR, zt - z_sh + 2)
     # the gear must clear the plate: cut a pocket under it
     frame -= Pos(CX, y_sh, z_floor - plate_t / 2) * Box(2 * WALL_IN - 0.5, 2 * (SHAFT_TEETH / 2 + 1.5), plate_t + 1)
-    # pivot bracket: two arms above and below the fork, reaching it from a post beside the leg (+Y, behind it);
-    # an M3 screw through each arm into the fork is the vertical axis it swings on
+    # pivot bracket: two arms above and below the fork, reaching past it from a post beside the leg (+Y, behind it).
+    # An M3×10 through each arm, locked to the arm by a nut on its inner face; the screw's tip goes 3 mm into the
+    # fork and is the vertical axis it swings on
     _, win_y, _, h = yoke_size()
-    arm_t, gap = 3.0, 0.4
+    arm_t, gap = 3.0, NUT_T + 0.4
     post_y = P[1] + (win_y + 2 * YOKE_WALL) / 2 + 7
     z_up, z_dn = P[2] + h / 2 + gap + arm_t / 2, P[2] - h / 2 - gap - arm_t / 2
     for zc in (z_up, z_dn):
-        frame += Pos(P[0], (P[1] + post_y) / 2 + 1.5, zc) * Box(8, post_y - P[1] + 3, arm_t)
-        frame -= Pos(P[0], P[1], zc) * Cylinder((SCREW + CLR) / 2, arm_t + 1)
+        ya, yb_ = P[1] - 5, post_y + 3                                              # the hole is 5 mm from the arm's end
+        frame += Pos(P[0], (ya + yb_) / 2, zc) * Box(8, yb_ - ya, arm_t)
+        frame -= Pos(P[0], P[1], zc) * Cylinder((SCREW + CLR_STEEL) / 2, arm_t + 1)
     frame += Pos(P[0], post_y + 1.5, (z_up + arm_t / 2 + z_floor) / 2) * Box(8, 6, z_up + arm_t / 2 - z_floor)
     # plate reaches the post
     frame += Pos(P[0], (yb + post_y + 4.5) / 2, z_floor - plate_t / 2) * Box(12, post_y + 4.5 - yb + 1, plate_t)
     return frame, z_floor
+
+
+def keeper(parts):
+    """Cap over the test frame's journal slots, in robot coordinates (print it upside down): a bridge on top of the
+    walls and end blocks, a pocket for the gear's tips, and a tongue down each slot whose round end completes the
+    journal hole. Two M3×12 down through it into nuts in the end blocks."""
+    y_sh, z_sh = shaft_yz()[1]
+    zt = z_sh + 6
+    t = 4.0
+    part = Pos(CX, y_sh, zt + t / 2) * Box(2 * WALL_OUT, 2 * KEEP_Y, t)
+    part -= Pos(CX, y_sh, zt) * Box(2 * WALL_IN, 2 * (MOD * (SHAFT_TEETH / 2 + 1) + 0.6), 2 * 1.6 + 0.6)
+    tw = JOURNAL + CLR - CLR                                  # tongue: the slot's width less a sliding clearance
+    for sx in (1, -1):
+        xc = CX + sx * (WALL_IN + WALL_OUT) / 2
+        tongue = Pos(xc, y_sh, (z_sh + zt) / 2 + 0.01) * Box(WALL_OUT - WALL_IN, tw, zt - z_sh + 0.02)
+        part += tongue
+    part -= cyl([CX, y_sh, z_sh], [1, 0, 0], (JOURNAL + CLR) / 2, 20)
+    for sy in (1, -1):
+        part -= Pos(CX, y_sh + sy * KEEP_SCREW_Y, zt + t / 2) * Cylinder((SCREW + CLR_STEEL) / 2, t + 1)
+    return part
 
 
 def watertight(stl):
@@ -382,6 +420,7 @@ def main():
         parts[f"idler-{k + 1}"] = idler_part(n)
     frame, z_floor = test_frame(parts)
     parts["test-frame"] = frame
+    parts["test-frame-keeper"] = keeper(parts)
 
     for name, p in parts.items():
         if name.startswith("_"):

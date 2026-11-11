@@ -29,4 +29,19 @@ journal holes. The clearance on the diameter grows from left to right: +0.1, +0.
 wobbling. For the tap holes, the right one is the smallest in which the screw goes in by hand with a screwdriver
 without splitting the plastic.
 
-Printed on the [test leg plate](../../print/). Result: pending.
+Printed on the [test leg plate](../../print/), 2026-11-11 (Bambu P2S, PLA Basic, 0.20 mm Standard):
+
+| Row | Result |
+|---|---|
+| Journal Ø4.0 | Only +0.4 goes in, turning in jerks |
+| Ball Ø3.6 | Only +0.4 goes in, turning with difficulty |
+| M3 screw | +0.1 grips tight, +0.2 threads more easily, +0.3 wobbles a little |
+
+![Block and pin](images/result-1.jpg)
+
+![Pin in the +0.4 journal hole](images/result-2.jpg)
+
+![Screw in the bottom row](images/result-3.jpg)
+
+Taken into the drive: 0.5 mm for a printed part in a printed hole, 0.3 mm for a steel screw. The block stops at
++0.4, so 0.5 is an extrapolation, to be confirmed on the reprinted test leg.
