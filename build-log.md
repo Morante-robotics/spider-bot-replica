@@ -833,7 +833,7 @@ Diagram: [`cad/drive/screws_figure.py`](cad/drive/screws_figure.py).
 
 **Open:**
 
-- Print [`print/test-frame-v2.3mf`](print/test-frame-v2.3mf): frame, keeper, fork and leg (about 71 min, 25.7 g).
+- Print [`print/test-frame-v2.3mf`](print/test-frame-v2.3mf): frame, keeper, fork and leg (1 h 18 min, 25.6 g).
   The crankshaft from the first print is kept.
 - Hardware: 2 × M3×10 + 2 nuts for the fork, 2 × M3×12 + 2 nuts for the keeper, a nylon lock nut for the leg.
 - **Morante:** a video of the leg turning by hand on the new frame.
