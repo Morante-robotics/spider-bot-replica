@@ -41,6 +41,7 @@ The robot's story in three parts, then what is left to do and a glossary.
    - [Clearance test and test leg print plate](#clearance-test-and-test-leg-print-plate) · 2026-11-10 · ✅ printed
    - [Test leg: first assembly and clearance result](#test-leg-first-assembly-and-clearance-result) · 2026-11-11 · ✅ v2 designed
    - [Test leg v2: turning by hand](#test-leg-v2-turning-by-hand) · 2026-11-11 · ✅ the leg turns
+   - [Base v1 in CAD](#base-v1-in-cad) · 2026-11-11 · 🔄 designed, not printed
 4. **[Open items](#open-items)**: everything still to do.
 5. **[Glossary](#glossary)**: the terms used in the entries.
 
@@ -320,8 +321,10 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
      walks forward. Its stride is short (about 10 mm per half turn), because the body must not bob more than 3 mm.
 3. **CAD and first print.** The parts were modelled in code, checked for collisions over a full turn, assembled in
    Onshape, and one leg was printed on a small test frame. It showed that holes need much more clearance than
-   expected (0.5 mm), and the frame was redesigned. On the second print the leg turns by hand. Next: the base
-   that carries all eight legs.
+   expected (0.5 mm), and the frame was redesigned. On the second print the leg turns by hand.
+4. **The base.** The forks turned out to be too tall for the carcass: their top half went into the body. The body
+   now sits 18.7 mm higher, on a band that is part of the new base. Base v1 carries the forks, the crankshafts and
+   the gears; it is modelled and checked over a full turn, and ready to print.
 
 <img src="sim/images/drive-attempts.png" alt="The three drives tried, from above and from the side">
 
@@ -953,7 +956,7 @@ Document (public): [Spider-Bot drive](https://cad.onshape.com/documents/07632681
 - The leg has a single degree of freedom, and the animation runs through the full turn.
 - The mate offsets had to be negative: with positive ones the parts went into the walls. An offset is measured along
   the mate connector's Z axis, whose direction depends on the face clicked.
-- The foot path was not compared with the simulator's; to be checked on the printed leg.
+- The foot path was not compared with the simulator's. That check was later dropped ([Base v1 in CAD](#base-v1-in-cad)).
 
 ### Clearance test and test leg print plate
 
@@ -1159,6 +1162,132 @@ came out narrower than the leg. The leg goes in from the foot end (the shin is 4
 **Conclusion:** the 0.5 mm clearance works for a printed part in a printed hole, and the frame now holds the
 mechanism. The test leg is done; the fork's window gets more room before the robot's 8 forks are printed.
 
+The window now has 0.5 mm a side: [Base v1 in CAD](#base-v1-in-cad).
+
+### Base v1 in CAD
+
+**Phase 3 · Mechanisms · 2026-11-11** · Status: 🔄 designed, not printed
+
+> **In short.** Before the base, two fixes from the test leg went into the CAD: the fork gets more room for the leg,
+> and the rear crankshaft's crank arms are thinner, because the rear leg came 0.15 mm from them. Fitting the drive
+> into the carcass then showed a bigger problem: the forks are 22 mm tall, and the body sits on the base right above
+> the leg notches, so the top half of every fork went into the body. The body now sits 18.7 mm higher, on a **band**
+> that is part of the new base. Base v1 is modelled, nothing collides over a full turn, and its print plate is ready
+> (7 h 55 min).
+
+**What the base has to do.** It holds the eight forks at the leg notches, carries the four crankshafts and the
+idler gears, leaves room for every leg to swing, and still looks like the carcass from outside. It is made from
+the carcass base's own mesh, by adding and cutting solids in code.
+
+#### Steps
+
+1. **Fork window.** The window the leg goes through is now 1.0 mm wider than the leg (0.5 mm a side, the clearance
+   for printed parts) instead of 0.4 mm. Fork: 10.6 × 10.0 × 22.0 mm. The leg can now slide up to 1 mm along its
+   screw, and the middle legs pass 0.7 mm apart, so an M3 washer on each side takes up the play where it fits.
+2. **Rear crankshaft.** The closest point to the rear leg was the outer face of a crank arm, not the ball. The crank
+   arms of crankshaft 4 are 1.5 mm thick instead of 2.0, so the rear leg is now 1 mm or more away from them. The
+   drive's check over a full turn: no overlaps, the closest pairs are the designed clearances.
+3. **Check the drive against the body.** The forks and legs were placed in the carcass body and moved over a full
+   turn. Every fork overlapped the body (170–330 mm³ each), and the rear legs did too (60 mm³) (Fig. 1, left).
+   Lifting the body clears the legs at 4 mm and the forks at 10 mm, but the fork's upper screw needs room above
+   the fork as well.
+4. **Choose a way out.** Three options were drawn: a new fork open at the top on a single screw from below, with
+   the base 4 mm taller; a taller band that keeps the fork already tested; or eight notches cut into the body's lower
+   edge. Morante chose the band.
+5. **Model base v1** in [`cad/base/build.py`](cad/base/build.py), from the carcass base:
+   - the bowl hollowed to 2 mm walls under a 2 mm deck at the old seam;
+   - the **band**: the base's outline, with a lobe round each fork, up to the body's new height. The body, the front
+     block inside its face and the two pegs that locate it go up 18.7 mm. The side lips (now inside the band) and
+     two posts that stood where the battery holder goes were removed;
+   - the spine's two walls built into the bowl, with a **keel** under the gears where they go lower than the bowl;
+   - a pocket for each fork, open outwards so fork and leg slide in together; a boss under each fork; and the two
+     swivel screws, each locked by a nut in a slot (Fig. 2);
+   - the legs' path cut with 0.8 mm of room;
+   - an opening in the deck over the spine, closed by a **cap** whose tongues hold the crankshafts in their slots
+     (Fig. 3).
+6. **Check over a full turn** with [`cad/base/check.py`](cad/base/check.py): legs, forks, crankshafts and idlers
+   against the base, the cap, the front block and the lifted body, every 10°. Fix and repeat (table below).
+7. **Print plate** with [`tools/bambu_plate.py`](tools/bambu_plate.py): base, cap (upside down) and front block,
+   tree supports on the build plate only.
+
+<details>
+<summary>How to reproduce</summary>
+
+```
+python3 cad/drive/build.py --assembly 0
+python3 cad/drive/check.py --gaps
+python3 cad/base/build.py
+python3 cad/base/check.py --step 10
+python3 cad/base/figures.py
+python3 tools/bambu_plate.py print/base-v1.3mf cad/base/base-v1.stl cad/base/cap.stl@180,0,0 cad/base/front-block.stl \
+    --set enable_support=1 "support_type=tree(auto)" support_on_build_plate_only=1 "curr_bed_type=Textured PEI Plate"
+```
+
+Band height: the upper screw (M3×10) goes 3 mm into the fork and its head (3.2 mm) sits flush with the band's top:
+fork top (z 83.0) − 3 + 10 + 3.2, plus 0.25 mm, is z 93.5, 18.7 mm above the old seam (z 74.8). Parts and assembly:
+[cad/base/](cad/base/).
+
+</details>
+
+What the check found, in order:
+
+| Found | Fix |
+|---|---|
+| Legs touching the underside of the deck, just inside the forks | The legs' path was cut from 15 mm inside the pivot; the tubes rise further in. Now cut from the leg's inner end |
+| Rear legs' tubes 0.2 mm from the bowl's rear wall | Same fix |
+| The band over both ends of the cap, so the cap could not come out | Band left open over the cap |
+| The front block's stems over the opening the first crankshaft goes in through | Front block made a separate part that goes in after the cap |
+
+#### Result
+
+<img src="cad/base/images/section-leg.png" alt="Cut through a middle leg, before and after">
+
+*Fig. 1 · Cut through a middle leg, along it. Left: the carcass as downloaded: the fork (green) goes into the body
+(red). Right: base v1, with the body on the band. The two swivel screws are purple: the upper one comes down through
+the band and the lower one up through the boss. Black: the leg at its highest and lowest.*
+
+<img src="cad/base/images/base-v1.png" alt="Base v1 from above and below">
+
+*Fig. 2 · Base v1. From above: the band with a pocket for each fork, the deck and the cap (blue). From below: the
+bowl, the keel along the middle and the bosses under the forks.*
+
+<img src="cad/base/images/section-spine.png" alt="Cut along the spine">
+
+*Fig. 3 · Cut along the spine. The gears (red) turn in pockets in the bowl. The 20-tooth idler goes 2.4 mm below the
+original bowl, inside the keel. The cap (blue) has a tongue down each journal slot.*
+
+<img src="cad/base/images/band.png" alt="The robot before and after">
+
+*Fig. 4 · From the side: the carcass as downloaded, and with the body on the band.*
+
+| What | Result |
+|---|---|
+| Overlaps over a full turn (every 10°) | None |
+| Closest pairs | Journals in their slots 0.25 mm a side, idlers 0.45 mm, legs 0.65 mm or more: the designed clearances |
+| [`print/base-v1.3mf`](print/base-v1.3mf) | 7 h 55 min, 139.9 g of PLA |
+| Hardware | 16 × M3×10 + nuts (fork swivels), 3 × M3×10 + nuts (cap) |
+
+Full list: [`cad/base/check-result.txt`](cad/base/check-result.txt).
+
+#### Decisions
+
+- **Band, not a new fork or cuts in the body.** The fork tested on the test frame stays as it is. The robot is
+  18.7 mm taller and has a band at the seam, where the legs come out.
+- **Spine built into the base,** not screwed in: the crankshafts and the forks stay where the CAD puts them relative
+  to each other, with no screws to align.
+- **Fork and leg slide in from outside** and are held by the two screws only, as on the test frame.
+- **Front block separate.** It stands on the deck and the cap. How it is fixed is decided with the carcass cuts.
+- **The rim notches** are no longer a separate check: the legs' path is cut into the base with room to spare.
+- **The printed leg's foot path will not be compared with the simulator's.** Morante dropped that check.
+
+This entry closes four open items: the fork's window, the rear leg near its crankshaft, the rim notches and the
+base. The foot-path comparison was dropped.
+
+#### Next
+
+Print [`print/base-v1.3mf`](print/base-v1.3mf), and the drive's parts for the whole robot (8 legs, 8 forks, 4
+crankshafts, 3 idlers). Then assemble the drive in the base and turn it by hand.
+
 [↑ Contents](#contents)
 
 ## Open items
@@ -1169,14 +1298,12 @@ outside the repo.
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| Widen the fork's window (0.2 mm a side; one printed fork came out too tight) before printing the 8 forks | [Test leg v2…](#test-leg-v2-turning-by-hand) | 3 |
-| Check the right rear leg, 0.15 mm from its crankshaft, before printing the rear legs | [Test leg: first assembly…](#test-leg-first-assembly-and-clearance-result) | 3 |
-| Compare the printed leg's foot path with the simulator's | [Onshape assembly](#onshape-assembly) | 3 |
-| Check that the rim notches (10 × 5 mm) let the leg swing as far as simulated, or widen them | [Toy leg in 3D](#toy-leg-in-3d) | 3 |
-| Base: fork seats in the rim notches, hollow bowl for the spine and idlers, spine mounting, cap over the journal slots | [Legs and drive in CAD](#legs-and-drive-in-cad) | 3 |
+| Print base v1 and the drive's parts, assemble the drive in the base and turn it by hand | [Base v1 in CAD](#base-v1-in-cad) | 3 |
+| Fix the front block (it stands loose on the deck and the cap) and the body on the band | [Base v1 in CAD](#base-v1-in-cad) | 2 |
 | Carcass cuts: battery hatch in the base, motor and shaft openings | [Mesh repair](#mesh-repair) | 2 |
 | Confirm that Bambu Studio keeps the support settings saved by `tools/bambu_plate.py` | [Clearance test…](#clearance-test-and-test-leg-print-plate) | 2 |
 | Check the drawing of the battery holder bought against 64 × 49 × 16 mm (+2 mm) | [Motor, battery holder…](#motor-battery-holder-and-print-scale) | 4 |
+| Place the battery holder and the N20 again: the body is 18.7 mm higher and the band's opening is about 70 × 49 mm | [Base v1 in CAD](#base-v1-in-cad) | 4 |
 | N20 drive: gear ratio and motor position | [Legs and drive in CAD](#legs-and-drive-in-cad) | 4 |
 | Measure battery life on 4×AAA | [Motor, battery holder…](#motor-battery-holder-and-print-scale) | 4 |
 | Optional: the gear train in Onshape with **Gear relation** mates | [Onshape assembly](#onshape-assembly) | 2 |
@@ -1205,6 +1332,8 @@ Terms used in the entries, in the order they first appear, with a link to that e
 | **Journal** | The round part of a shaft that turns inside a hole (its bearing). | [Legs and drive in CAD](#legs-and-drive-in-cad) |
 | **Fork (pivot)** | The small block on the body's edge that the leg passes through. It swivels, and the leg tilts in it. | [Legs and drive in CAD](#legs-and-drive-in-cad) |
 | **Onshape** | CAD in the browser, used to assemble the parts and animate them. | [Onshape assembly](#onshape-assembly) |
+| **Band** | The ring added between the base and the body, 18.7 mm tall, that holds the forks' upper screws. | [Base v1 in CAD](#base-v1-in-cad) |
+| **Keel** | A narrow ridge under the bowl that covers the gears where they go lower than the bowl. | [Base v1 in CAD](#base-v1-in-cad) |
 | **Keeper** | A cover that holds the crankshaft down in its slots. | [Test leg…](#test-leg-first-assembly-and-clearance-result) |
 
 [↑ Contents](#contents)

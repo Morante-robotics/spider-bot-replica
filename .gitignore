@@ -15,3 +15,6 @@ CLAUDE.md
 # Python bytecode
 __pycache__/
 .venv/
+
+# Spider-Bot base: the carcass body moved up, written by cad/base/build.py for its check
+1-spiderbot/cad/base/body-lifted.stl

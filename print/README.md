@@ -7,6 +7,7 @@ Basic, 0.20 mm Standard). Open one in Bambu Studio, check it and send it: **Slic
 |---|---|---|---|
 | [`test-leg-plate.3mf`](test-leg-plate.3mf) | [Test frame](../cad/drive/), middle leg (right), fork, crankshaft 2, [clearance block and pin](../cad/clearance-test/) | 1 h 28 min | 29.6 g |
 | [`test-frame-v2.3mf`](test-frame-v2.3mf) | Test frame v2 with a keeper for the crankshaft, the fork on M3 pins, and the leg, with the clearances from the block | 1 h 18 min | 25.6 g |
+| [`base-v1.3mf`](base-v1.3mf) | [Base v1](../cad/base/), its cap (upside down) and the front block | 7 h 55 min | 139.9 g |
 
 ## Test leg plate
 
@@ -42,3 +43,13 @@ clearance block's bottom row and its 3 tap holes.
 ball into the middle ones and an M3 screw through the bottom ones. The right clearance is the smallest one that
 turns freely without wobbling; set it as `CLR` / `CLR_STEEL` in [`cad/drive/build.py`](../cad/drive/build.py) and
 rebuild the parts before printing them.
+
+## Base v1
+
+Base, cap and front block of [base v1](../cad/base/) on one plate, with the same settings as the test leg plate
+(tree supports, on the build plate only).
+
+```
+python3 tools/bambu_plate.py print/base-v1.3mf cad/base/base-v1.stl cad/base/cap.stl@180,0,0 cad/base/front-block.stl \
+    --set enable_support=1 "support_type=tree(auto)" support_on_build_plate_only=1 "curr_bed_type=Textured PEI Plate"
+```
