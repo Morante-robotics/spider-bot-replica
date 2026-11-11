@@ -19,6 +19,7 @@ went wrong. Newest entries at the bottom.
 | 2026-11-10 | 3 · Mechanisms | [Legs and drive in CAD](#legs-and-drive-in-cad) |
 | 2026-11-10 | 2 · CAD | [Onshape assembly](#onshape-assembly) |
 | 2026-11-10 | 2 · CAD | [Clearance test and test leg print plate](#clearance-test-and-test-leg-print-plate) |
+| 2026-11-11 | 3 · Mechanisms | [Test leg: first assembly and clearance result](#test-leg-first-assembly-and-clearance-result) |
 
 ## Printer calibration
 
@@ -769,4 +770,70 @@ printer needs, so the other 21 drive parts are printed once, with the right clea
 - Print it. **Morante:** shoot the timelapse, the parts off the bed and the mechanism turning by hand; drop them in
   the Inbox.
 - Read the clearance block and set `CLR` (and `TAP`) in `cad/drive/build.py`.
-- Hardware: M3×12 + nut and 2 × M3×6 for the test frame.
+- Hardware: M3×16 + nut and 2 × M3×6 for the test frame (M3×12 is too short for the fork and a nut).
+
+## Test leg: first assembly and clearance result
+
+**Phase 3 · Mechanisms · 2026-11-11**
+
+**Goal:** assemble the printed test leg on its frame and turn it by hand, and read the clearance block.
+
+**Steps:** printed [`print/test-leg-plate.3mf`](print/test-leg-plate.3mf) (first version, with the leg 5.6 mm wide),
+removed the supports, and assembled it following the [diagram](cad/drive/README.md) (the leg in the fork on an
+M3×16 and a nut, the fork between the frame's arms, the crankshaft in its slots).
+
+![Timelapse of the print](images/test-leg-print-timelapse.gif)
+
+![Printed parts on the bed](images/test-leg-print-1.jpg)
+
+![Printed parts, supports on](images/test-leg-print-2.jpg)
+
+![First assembly](images/test-leg-print-3.jpg)
+
+**Result:**
+
+- **The fork would not stay in the frame.** The frame's arms ended at the centre of their screw holes, so each hole
+  was half open (a «C» at the arm's tip) and the screw slid out. The frame pushed the fork out.
+  ![The fork and the half-open arm](images/test-leg-print-4.jpg)
+- **M3 would not go into the fork's Ø2.5 blind holes** (meant for the screw to cut its own thread). Morante used M2
+  screws, which only sit in them loosely.
+- The M3×16 through the fork and the leg went in fine.
+- **Clearance block** (clearance on the diameter, from left to right +0.1 / +0.2 / +0.3 / +0.4 mm):
+
+  | Row | Result (Morante) |
+  |---|---|
+  | Journal Ø4.0 (pin) | Only goes into +0.4, and turns in jerks |
+  | Ball Ø3.6 | Only goes into +0.4, and turns with difficulty |
+  | M3 screw | Grips tight in +0.1, threads more easily in +0.2, wobbles a little in +0.3 |
+
+  ![Clearance block](cad/clearance-test/images/result-1.jpg)
+
+  So the 0.2 mm used for every hole was far too tight for a printed part in a printed hole.
+
+**Fixes** (in [`cad/drive/build.py`](cad/drive/build.py)):
+
+- Two clearances instead of one: `CLR` = 0.5 mm for a printed part in a printed hole (journals, ball in the bore),
+  `CLR_STEEL` = 0.3 mm for a steel screw or pin turning in a printed hole. 0.5 is one step beyond the block's last
+  hole, chosen because +0.4 turned only roughly; the reprinted leg and frame will show whether it is right.
+- Frame arms now reach 5 mm past their holes.
+- The fork no longer relies on self-tapping: it turns on the tips of two M3×10 screws, each locked to a frame arm
+  by a nut, entering Ø3.3 blind holes in the fork. The arms moved 2.4 mm apart to make room for the nuts.
+- **Keeper for the crankshaft.** The shaft only sat in slots open at the top, so a knock or the leg's push lifted
+  it out. The test frame's walls now run 14 mm either side of the shaft and end in solid blocks clear of the gear;
+  a keeper (green in the diagram) sits on top, a tongue down each slot completes the journal hole, and two M3×12
+  go down through it into nuts slid into the blocks from outside.
+- For the leg's M3×16: a nylon lock nut, so the knocks do not loosen it.
+- Collision check over a full turn with the new parts (`check.py` now includes the keeper): no overlaps. The
+  shaft has 0.25 mm a side in the frame and the keeper; the keeper rests on the walls. The right rear leg comes to
+  0.15 mm from its crankshaft, less than the bore's 0.25 mm a side: to look into before printing the rear legs.
+
+![Where every screw goes](cad/drive/images/test-frame-screws.png)
+
+Diagram: [`cad/drive/screws_figure.py`](cad/drive/screws_figure.py).
+
+**Open:**
+
+- Print [`print/test-frame-v2.3mf`](print/test-frame-v2.3mf): frame, keeper, fork and leg (about 71 min, 25.7 g).
+  The crankshaft from the first print is kept.
+- Hardware: 2 × M3×10 + 2 nuts for the fork, 2 × M3×12 + 2 nuts for the keeper, a nylon lock nut for the leg.
+- **Morante:** a video of the leg turning by hand on the new frame.

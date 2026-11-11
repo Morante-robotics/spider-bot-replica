@@ -127,11 +127,16 @@ def main():
         # test frame: right middle leg, its pivot, crankshaft 2 and the frame (robot coordinates)
         tf = {n: ms[n] for n in ("leg1R", "pivot1R", "crankshaft1")}
         tf["test-frame"] = mesh("test-frame", np.eye(4))
+        tf["keeper"] = mesh("test-frame-keeper", np.eye(4))
         for n1, n2 in itertools.combinations(tf, 2):
             v = overlap(tf[n1], tf[n2])
             key = ("frame:" + n1, n2)
             if v > args.min and v > worst.get(key, (0, 0))[0]:
                 worst[key] = (v, a)
+            elif args.gaps and v <= args.min and {n1, n2} & {"test-frame", "keeper"}:
+                g = gap(tf[n1], tf[n2])
+                if g < gaps.get(key, (np.inf, 0))[0]:
+                    gaps[key] = (g, a)
     if not worst:
         print(f"no overlaps over a full turn (every {args.step:g}°)")
     if args.gaps:

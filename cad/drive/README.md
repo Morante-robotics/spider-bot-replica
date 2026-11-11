@@ -26,7 +26,8 @@ Needs Python 3.12 with build123d, numpy, trimesh and manifold3d. All sizes come 
 | `crankshaft-1.stl` … `-4.stl` | One piece: 12-tooth gear, two journals, two cranks with balls (front to rear) | 27.6 × 14.0 × 14.0 | 1 each |
 | `idler-1.stl`, `-2`, `-3` | Idler gears, 11, 10 and 20 teeth | up to 22.0 × 22.0 × 2.6 | 1 each |
 | `spine.stl` | Two walls that carry the 4 crankshafts (slots open at the top) and the idler pins | 8.5 × 87.3 × 26.1 | 1 |
-| `test-frame.stl` | Desk stand for one middle leg, its pivot and crankshaft 2, turned by hand | 75.4 × 35.5 × 77.7 | 1 |
+| `test-frame.stl` | Desk stand for one middle leg, its pivot and crankshaft 2, turned by hand | 75.4 × 35.5 × 80.1 | 1 |
+| `test-frame-keeper.stl` | Cap that holds crankshaft 2 in the test frame (print upside down) | 8.5 × 28.0 × 9.0 | 1 |
 | `assembly-0.stl` | Whole drive at crank angle 0°, for reference only | 218.0 × 87.5 × 71.3 | — |
 
 STEP files with the same names are for Onshape (how to assemble and animate them: [onshape.md](onshape.md); the test-frame assembly: [Onshape](https://cad.onshape.com/documents/07632681db3e0a6b5b785746/w/6c5d5bb7bfec5781a6827599/e/c59459f0a1ed69675318d6bb)). Bambu Studio `--info` reports `manifold = yes` for all of them.
@@ -43,8 +44,27 @@ STEP files with the same names are for Onshape (how to assemble and animate them
   four turn at the same speed. The idlers sit below the line of shafts. The motor's drive is not here yet (phase 4
   picks the ratio).
 
-**Hardware:** for the whole robot, 8 × M3×12 screws + nuts (leg pivots), 16 × M3×6 screws (forks), 3 × 3 mm steel
-pins 9 mm long (idlers). For the test frame: 1 × M3×12 + nut, 2 × M3×6.
+**Hardware:** for the whole robot, 8 × M3×16 screws + nuts (leg pivots; the fork is 9.4 mm across, so M3×12
+leaves no room for the nut), 16 × M3×10 screws + nuts (forks, as pins), 3 × 3 mm steel pins 9 mm long (idlers). For the test frame:
+1 × M3×16 + nylon lock nut, 2 × M3×10 + 2 nuts (fork), 2 × M3×12 + 2 nuts (keeper).
+
+**Assembling the test frame:**
+
+![Test frame screws](images/test-frame-screws.png)
+
+1. Leg in the fork: put the leg's boss in the fork's window, and an M3×16 through the fork's side hole, the leg
+   and the other side. Nut on the end, snug but not tight: if it squeezes the fork's walls onto the leg, the leg
+   cannot tilt. A nylon lock nut keeps it there.
+2. Fork in the frame: the fork goes between the frame's two arms. An M3×10 down through the upper arm's hole,
+   with a nut on it under the arm, tightened against the arm; its tip goes 3 mm into the blind hole on top of the
+   fork. The same from below through the lower arm. The two screws are fixed to the frame and the fork turns on
+   their tips. (First version: the arms ended at the middle of their holes, which were half open and let the
+   screws out, and M3 would not go into the Ø2.5 holes meant for self-tapping. Fixed 2026-11-11.)
+3. Crankshaft last: guide the ball into the mouth of the leg's tube while lowering the journals into the slots.
+4. Keeper: slide an M3 nut into each end block's slot from outside, put the keeper on top with its tongues down the
+   slots, and drive two M3×12 down through it into the nuts.
+
+Figure: [`screws_figure.py`](screws_figure.py).
 
 **Print** (PLA, 0.2 mm layers):
 
@@ -56,18 +76,19 @@ pins 9 mm long (idlers). For the test frame: 1 × M3×12 + nut, 2 × M3×6.
 | Idlers | Flat | None |
 | Test frame | Plate on the bed | Tree, under the pivot arms |
 
-**Clearances:** every hole that turns or slides is 0.2 mm larger than its part (parameter `CLR`). The phase 2
-clearance test has not been printed yet, so this is a guess: if the ball binds in the bore, or a journal in the
-spine, raise `CLR` and run `build.py` again.
+**Clearances** (on the diameter, from the [clearance test](../clearance-test/)): 0.5 mm for a printed part turning
+or sliding in a printed hole (`CLR`: journals, the ball in the bore), 0.3 mm for a steel screw or pin (`CLR_STEEL`).
+The fork's window is 0.2 mm wider than the leg on each side.
 
 **Check over a full turn** ([`check.py`](check.py), every 30°): no overlaps between any two parts. The closest pairs
-are the designed clearances: 0.1 mm a side for the balls in their bores and the journals in the spine, 0.2 mm a side
-for each leg in its fork. Between parts that do not touch on purpose, the closest are the middle legs' shins
-(0.74 mm) and a rear leg against its crank (0.53 mm). Result: [`check-result.txt`](check-result.txt).
+are the designed clearances: 0.25 mm a side for the balls in their bores and the journals in the spine, 0.2 mm a
+side for each leg in its fork. The right rear leg comes to 0.18 mm from its crankshaft, less than the bore's
+clearance (not yet looked into; the rear leg is not on the test frame). Between parts that do not touch on purpose,
+the closest are the middle legs' shins (0.71 mm) and the left rear leg against its crank (0.56 mm). Result: [`check-result.txt`](check-result.txt).
 
 **Not done yet:**
 
 - The base: the rim notches must take the forks and their screws, and the bowl must be hollowed for the spine and
   idlers. The spine is not fixed to anything yet.
-- A cap over the spine's journal slots (in the test frame, hold the shaft down with a finger or a rubber band).
+- A keeper over the spine's journal slots, like the test frame's.
 - The N20 drive and its reduction (phase 4).
