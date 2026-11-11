@@ -1,0 +1,64 @@
+cad_verify: FAIL (10 failures, 0 warnings)
+
+== 1 integrity (printed parts)
+  ok    spine: closed solid, 11096 mm³, 8.5 × 87.3 × 26.1 mm; walls ≥ 0.8 mm
+  ok    crankshaft1: closed solid, 649 mm³, 27.6 × 14.0 × 14.0 mm; walls ≥ 0.8 mm
+  ok    crankshaft2: closed solid, 649 mm³, 27.6 × 14.0 × 14.0 mm; walls ≥ 0.8 mm
+  ok    crankshaft3: closed solid, 649 mm³, 27.6 × 14.0 × 14.0 mm; walls ≥ 0.8 mm
+  ok    crankshaft4: closed solid, 610 mm³, 27.6 × 14.0 × 14.0 mm; walls ≥ 0.8 mm
+  ok    idler1: closed solid, 212 mm³, 12.8 × 12.9 × 2.6 mm; walls ≥ 0.8 mm
+  ok    idler2: closed solid, 171 mm³, 12.0 × 11.6 × 2.6 mm; walls ≥ 0.8 mm
+  ok    idler3: closed solid, 774 mm³, 22.0 × 22.0 × 2.6 mm; walls ≥ 0.8 mm
+
+== 2 motion: overlaps and gaps at every step   3 gears: backlash
+  ok    no undeclared overlaps over 36 steps
+        axle1 × idler1: gap 0.15 mm (closest at 240)
+        axle3 × idler3: gap 0.15 mm (closest at 250)
+        axle2 × idler2: gap 0.15 mm (closest at 260)
+        crankshaft1 × spine: gap 0.25 mm (closest at 20)
+        crankshaft4 × spine: gap 0.25 mm (closest at 20)
+        crankshaft3 × spine: gap 0.25 mm (closest at 290)
+        crankshaft2 × spine: gap 0.25 mm (closest at 70)
+        idler1 × spine: gap 0.45 mm (closest at 0)
+        idler2 × spine: gap 0.45 mm (closest at 0)
+        idler3 × spine: gap 0.45 mm (closest at 0)
+        axle1 × spine: contact allowed (screw threads into its hole)
+        axle2 × spine: contact allowed (screw threads into its hole)
+        axle3 × spine: contact allowed (screw threads into its hole)
+  FAIL  gears crankshaft1 × idler1: teeth overlap 5.03 mm³ (worst at 160): they interfere and will jam
+  FAIL  gears crankshaft2 × idler1: teeth overlap 3.15 mm³ (worst at 20): they interfere and will jam
+  FAIL  gears crankshaft3 × idler2: teeth overlap 3.97 mm³ (worst at 210): they interfere and will jam
+  FAIL  gears crankshaft4 × idler3: teeth overlap 0.03 mm³ (worst at 280): they interfere and will jam
+  FAIL  gears crankshaft3 × idler3: teeth overlap 0.03 mm³ (worst at 170): they interfere and will jam
+  FAIL  gears crankshaft2 × idler2: teeth overlap 3.97 mm³ (worst at 60): they interfere and will jam
+
+== 4 retention: can a part fall, lift or tip out?
+  FAIL  crankshaft1 is not held: moves 3.0+ mm towards +Z (at 0); moves 3.0+ mm towards +Z (at 120); moves 3.0+ mm towards +Z (at 240)
+  FAIL  crankshaft2 is not held: moves 3.0+ mm towards +Z (at 0); moves 3.0+ mm towards +Z (at 120); moves 3.0+ mm towards +Z (at 240)
+  FAIL  crankshaft3 is not held: moves 3.0+ mm towards +Z (at 0); moves 3.0+ mm towards +Z (at 120); moves 3.0+ mm towards +Z (at 240)
+  FAIL  crankshaft4 is not held: moves 3.0+ mm towards +Z (at 0); moves 3.0+ mm towards +Z (at 120); moves 3.0+ mm towards +Z (at 240)
+  ok    idler1: held within 1.0 mm / 5.0° (free: spin)
+  ok    idler2: held within 1.0 mm / 5.0° (free: spin)
+  ok    idler3: held within 1.0 mm / 5.0° (free: spin)
+
+== 5 assembly order
+  ok    idler1 goes in from +Z
+  ok    idler2 goes in from +Z
+  ok    idler3 goes in from +Z
+  ok    axle1 goes in from +X
+  ok    axle2 goes in from +X
+  ok    axle3 goes in from +X
+  ok    crankshaft1 goes in from +Z
+  ok    crankshaft2 goes in from +Z
+  ok    crankshaft3 goes in from +Z
+  ok    crankshaft4 goes in from +Z
+
+== 6 print (overhangs over 45°, in print orientation)
+        spine: 40 mm² of overhang needing support
+        crankshaft1: 131 mm² of overhang needing support
+        crankshaft2: 131 mm² of overhang needing support
+        crankshaft3: 131 mm² of overhang needing support
+        crankshaft4: 124 mm² of overhang needing support
+        idler1: no overhangs
+        idler2: no overhangs
+        idler3: no overhangs
