@@ -1145,7 +1145,8 @@ red fork, which swivels between the frame's two M3 pins. The red fork and cranks
 
 The whole clip, from both sides:
 
-_Video pending._
+
+https://github.com/user-attachments/assets/8f44c74e-7638-4ac7-82ce-68f7d349978e
 <!-- Video: 1-spiderbot-test-leg-v2-1.mp4 -->
 
 #### Result
