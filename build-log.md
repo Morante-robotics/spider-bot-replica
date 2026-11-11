@@ -3,88 +3,35 @@
 The story of the build, step by step, written so that anyone can follow it and repeat it. Every entry opens with a
 short **In short** box; read only those boxes and you have the whole story. Below each box come the steps, the
 results with their figures, and the decisions taken. Commands and full data tables are folded under
-**How to reproduce**. Entries are grouped by topic, oldest first.
+**How to reproduce**. Entries are grouped by topic, oldest first; what is left to do and a glossary are at the
+end.
 
 ## Contents
 
-What is left to do: [Open items](#open-items).
+The robot's story in three parts, then what is left to do and a glossary.
 
-**Workshop:** getting the printer ready.
-
-| Date | Phase | Step | Status |
-|---|---|---|---|
-| 2026-10 | 0 · Workshop | [Printer calibration](#printer-calibration) | ✅ done |
-| 2026-11-09 | 0 · Workshop | [First print: purge waste bin](#first-print-purge-waste-bin) | ✅ done |
-
-**Carcass:** the robot's outer shell, and what has to fit inside it.
-
-| Date | Phase | Step | Status |
-|---|---|---|---|
-| 2026-11-08 | 2 · CAD | [Carcass base model](#carcass-base-model) | ✅ done |
-| 2026-11-09 | 2 · CAD | [Motor, battery holder and print scale](#motor-battery-holder-and-print-scale) | ✅ 120 % |
-| 2026-11-09 | 2 · CAD | [Mesh repair](#mesh-repair) | ✅ done |
-
-**Legs and drive:** how one motor moves eight legs.
-
-| Date | Phase | Step | Status |
-|---|---|---|---|
-| 2026-11-09 | 3 · Mechanisms | [Leg simulator and comparison](#leg-simulator-and-comparison) | ✅ toy leg chosen |
-| 2026-11-09 | 3 · Mechanisms | [Toy leg in 3D](#toy-leg-in-3d) | ✅ lateral axle |
-| 2026-11-09 | 3 · Mechanisms | [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft) | ↩️ reversed |
-| 2026-11-09 | 3 · Mechanisms | [Crankshaft against real parts](#crankshaft-against-real-parts) | ❌ one crankshaft ruled out |
-| 2026-11-09 | 3 · Mechanisms | [Two side crankshafts](#two-side-crankshafts) | ❌ ruled out |
-| 2026-11-09 | 3 · Mechanisms | [Four lateral crankshafts](#four-lateral-crankshafts) | ✅ chosen |
-| 2026-11-10 | 3 · Mechanisms | [Legs and drive in CAD](#legs-and-drive-in-cad) | ✅ done |
-| 2026-11-10 | 2 · CAD | [Onshape assembly](#onshape-assembly) | ✅ done |
-| 2026-11-10 | 2 · CAD | [Clearance test and test leg print plate](#clearance-test-and-test-leg-print-plate) | ✅ printed |
-| 2026-11-11 | 3 · Mechanisms | [Test leg: first assembly and clearance result](#test-leg-first-assembly-and-clearance-result) | 🔄 v2 to print |
+1. **[Workshop](#workshop)**: getting the printer ready.
+   - [Printer calibration](#printer-calibration) · 2026-10 · ✅ done
+   - [First print: purge waste bin](#first-print-purge-waste-bin) · 2026-11-09 · ✅ done
+2. **[Carcass](#carcass)**: the robot's outer shell, and what has to fit inside it.
+   - [Carcass base model](#carcass-base-model) · 2026-11-08 · ✅ done
+   - [Motor, battery holder and print scale](#motor-battery-holder-and-print-scale) · 2026-11-09 · ✅ 120 %
+   - [Mesh repair](#mesh-repair) · 2026-11-09 · ✅ done
+3. **[Legs and drive](#legs-and-drive)**: how one motor moves eight legs.
+   - [Leg simulator and comparison](#leg-simulator-and-comparison) · 2026-11-09 · ✅ toy leg chosen
+   - [Toy leg in 3D](#toy-leg-in-3d) · 2026-11-09 · ✅ lateral axle
+   - [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft) · 2026-11-09 · ↩️ reversed
+   - [Crankshaft against real parts](#crankshaft-against-real-parts) · 2026-11-09 · ❌ one crankshaft ruled out
+   - [Two side crankshafts](#two-side-crankshafts) · 2026-11-09 · ❌ ruled out
+   - [Four lateral crankshafts](#four-lateral-crankshafts) · 2026-11-09 · ✅ chosen
+   - [Legs and drive in CAD](#legs-and-drive-in-cad) · 2026-11-10 · ✅ done
+   - [Onshape assembly](#onshape-assembly) · 2026-11-10 · ✅ done
+   - [Clearance test and test leg print plate](#clearance-test-and-test-leg-print-plate) · 2026-11-10 · ✅ printed
+   - [Test leg: first assembly and clearance result](#test-leg-first-assembly-and-clearance-result) · 2026-11-11 · 🔄 v2 to print
+4. **[Open items](#open-items)**: everything still to do.
+5. **[Glossary](#glossary)**: the terms used in the entries.
 
 Status: ✅ done · 🔄 in progress · ❌ ruled out · ↩️ reversed by a later entry.
-
-## Open items
-
-Everything still to do on the build, in one place. Each row links to the entry where it came up; when an item is
-done, its row is removed and the entry that closes it says so. Plan-level tasks (study, purchases) are tracked
-outside the repo.
-
-| Pending | Came up in | Phase |
-|---|---|---|
-| Print the test frame v2 and film the leg turning by hand | [Test leg: first assembly…](#test-leg-first-assembly-and-clearance-result) | 3 |
-| Check the right rear leg, 0.15 mm from its crankshaft, before printing the rear legs | [Test leg: first assembly…](#test-leg-first-assembly-and-clearance-result) | 3 |
-| Compare the printed leg's foot path with the simulator's | [Onshape assembly](#onshape-assembly) | 3 |
-| Check that the rim notches (10 × 5 mm) let the leg swing as far as simulated, or widen them | [Toy leg in 3D](#toy-leg-in-3d) | 3 |
-| Base: fork seats in the rim notches, hollow bowl for the spine and idlers, spine mounting, cap over the journal slots | [Legs and drive in CAD](#legs-and-drive-in-cad) | 3 |
-| Carcass cuts: battery hatch in the base, motor and shaft openings | [Mesh repair](#mesh-repair) | 2 |
-| Confirm that Bambu Studio keeps the support settings saved by `tools/bambu_plate.py` | [Clearance test…](#clearance-test-and-test-leg-print-plate) | 2 |
-| Check the drawing of the battery holder bought against 64 × 49 × 16 mm (+2 mm) | [Motor, battery holder…](#motor-battery-holder-and-print-scale) | 4 |
-| N20 drive: gear ratio and motor position | [Legs and drive in CAD](#legs-and-drive-in-cad) | 4 |
-| Measure battery life on 4×AAA | [Motor, battery holder…](#motor-battery-holder-and-print-scale) | 4 |
-| Optional: the gear train in Onshape with **Gear relation** mates | [Onshape assembly](#onshape-assembly) | 2 |
-
-## Glossary
-
-<img src="cad/drive/images/test-frame-screws.png" alt="Test frame with its parts and screws, exploded">
-
-*The test frame, exploded: grey frame, blue crankshaft, red leg, orange fork, green keeper. Most of the terms below
-appear in it.*
-
-| Term | Meaning |
-|---|---|
-| **Crank** | An arm fixed to a turning shaft; its far end goes round in a circle. |
-| **Crank pin** | The pin (here a small ball) at the end of the crank, where the leg is attached. |
-| **Crankshaft** | One shaft with one or more cranks on it, so one motor turns them all. |
-| **Journal** | The round part of a shaft that turns inside a hole (its bearing). |
-| **Fork (pivot)** | The small block on the body's edge that the leg passes through. It swivels, and the leg tilts in it. |
-| **Keeper** | A cover that holds the crankshaft down in its slots. |
-| **Idler** | A gear between two others, so they turn the same way. |
-| **Stride** | How far the robot moves forward per half turn of the crank. |
-| **Bob** | How much the body goes up and down while walking. |
-| **Step height** | How high a foot lifts off the ground. |
-| **Clearance** | How much bigger a hole is than the part in it, so the part can turn. |
-| **Gait groups** | The legs move in two groups of four (left 1 and 3 + right 2 and 4, and the other four), half a turn apart. |
-| **STL / STEP** | 3D file formats: STL is a triangle mesh (for printing), STEP is exact geometry (for CAD). |
-| **Watertight (manifold)** | A mesh with no holes or loose edges, which slicers and CAD tools need. |
-| **build123d · Onshape · Bambu Studio** | CAD in Python code · CAD in the browser · the printer's slicer. |
 
 ## Workshop
 
@@ -1052,41 +999,44 @@ foot traces a loop. The **test frame** holds one crankshaft and one fork exactly
 leg can be tried before the base exists. The **clearance block** has holes of the same sizes as the real ones,
 each 0.1–0.4 mm larger, to find out which one turns freely.
 
-<img src="images/test-leg-print-timelapse.gif" width="480" alt="Timelapse of the test plate printing">
-
-*Fig. 1 · Printing [`print/test-leg-plate.3mf`](print/test-leg-plate.3mf) (1 h 28 min, 29.6 g of PLA).*
-
 #### Steps
 
 1. Print [`print/test-leg-plate.3mf`](print/test-leg-plate.3mf). This was the first version, with the leg 5.6 mm wide.
-2. Remove the supports, which are on the crankshaft and on one side of the leg (Fig. 2).
+2. Remove the supports, which are on the crankshaft and on one side of the leg (Fig. 2–3).
 3. Assemble following the [diagram](cad/drive/README.md): the leg in the fork on an M3×16 and a nut, the fork between
-   the frame's two arms, and the crankshaft in its slots with the ball inside the leg's tube (Fig. 3).
-4. Push the clearance pin into each hole of the block and note how it turns (Fig. 5).
+   the frame's two arms, and the crankshaft in its slots with the ball inside the leg's tube (Fig. 4).
+4. Push the clearance pin into each hole of the block and note how it turns (Fig. 6).
 
 <table>
 <tr>
+<td width="50%"><img src="images/test-leg-print-timelapse.gif" alt="Timelapse of the test plate printing"></td>
 <td width="50%"><img src="images/test-leg-print-1.jpg" alt="Printed parts on the bed"></td>
+</tr>
+<tr>
+<td><em>Fig. 1 · Printing <a href="print/test-leg-plate.3mf"><code>print/test-leg-plate.3mf</code></a> (1 h 28 min,
+29.6 g of PLA).</em></td>
+<td><em>Fig. 2 · On the bed: clearance pin, fork, frame, clearance block, crankshaft (in its tree support) and the
+leg lying flat.</em></td>
+</tr>
+<tr>
 <td width="50%"><img src="images/test-leg-print-2.jpg" alt="Printed parts off the bed, supports still on"></td>
-</tr>
-<tr>
-<td><em>Fig. 2a · On the bed: clearance pin, fork, frame, clearance block, crankshaft (in its tree support) and
-the leg lying flat.</em></td>
-<td><em>Fig. 2b · Off the bed, supports still on. On the frame, the two thin walls hold the crankshaft and the tall
-post on the right holds the fork between its arms.</em></td>
-</tr>
-</table>
-
-<table>
-<tr>
 <td width="50%"><img src="images/test-leg-print-3.jpg" alt="First assembly"></td>
-<td width="50%"><img src="images/test-leg-print-4.jpg" alt="The fork and the half-open arm"></td>
 </tr>
 <tr>
-<td><em>Fig. 3 · First assembly: the crankshaft (left) with its ball in the leg's tube, the fork on the right post.
+<td><em>Fig. 3 · Off the bed, supports still on. On the frame, the two thin walls hold the crankshaft and the tall
+post on the right holds the fork between its arms.</em></td>
+<td><em>Fig. 4 · First assembly: the crankshaft (left) with its ball in the leg's tube, the fork on the right post.
 On the left, the clearance pin in its block.</em></td>
-<td><em>Fig. 4 · The fork has to be held by hand. The frame's upper arm (top left) ends in a half-open «C», so the
+</tr>
+<tr>
+<td width="50%"><img src="images/test-leg-print-4.jpg" alt="The fork and the half-open arm"></td>
+<td width="50%"><img src="cad/clearance-test/images/result-1.jpg" alt="Clearance block"></td>
+</tr>
+<tr>
+<td><em>Fig. 5 · The fork has to be held by hand. The frame's upper arm (top left) ends in a half-open «C», so the
 screw slides out. The screws in the fork are M2: M3 would not go in.</em></td>
+<td><em>Fig. 6 · The clearance block. Columns 1–4 add +0.1 / +0.2 / +0.3 / +0.4 mm to the diameter. Rows, top to
+bottom: crankshaft journal (Ø4.0), ball (Ø3.6), M3 screw (Ø3.0). The pin is in the +0.4 journal hole.</em></td>
 </tr>
 </table>
 
@@ -1094,15 +1044,10 @@ screw slides out. The screws in the fork are M2: M3 would not go in.</em></td>
 
 | What | Expected | What happened | Why |
 |---|---|---|---|
-| Fork in the frame | Swivels on two screws, held by the frame's arms | Falls out; held by hand (Fig. 4) | The arms ended at the centre of their screw holes, leaving a half-open «C» |
+| Fork in the frame | Swivels on two screws, held by the frame's arms | Falls out; held by hand (Fig. 5) | The arms ended at the centre of their screw holes, leaving a half-open «C» |
 | Screws into the fork (Ø2.5 holes) | M3 cuts its own thread | M3 would not go in; M2 used, loose | The hole is too small for M3 in PLA |
 | Leg on the fork (M3×16) | Turns | Goes in fine | — |
-| Crankshaft and ball | Turn freely with 0.2 mm of clearance | Too tight (see the block below) | 0.2 mm is too little for a printed part in a printed hole |
-
-<img src="cad/clearance-test/images/result-1.jpg" width="480" alt="Clearance block">
-
-*Fig. 5 · The clearance block. Columns 1–4 add +0.1 / +0.2 / +0.3 / +0.4 mm to the diameter. Rows, top to bottom:
-crankshaft journal (Ø4.0), ball (Ø3.6), M3 screw (Ø3.0). The pin is in the +0.4 journal hole.*
+| Crankshaft and ball | Turn freely with 0.2 mm of clearance | Too tight (see the block, Fig. 6) | 0.2 mm is too little for a printed part in a printed hole |
 
 | Hole | +0.1 | +0.2 | +0.3 | +0.4 |
 |---|---|---|---|---|
@@ -1110,7 +1055,7 @@ crankshaft journal (Ø4.0), ball (Ø3.6), M3 screw (Ø3.0). The pin is in the +0
 | Ball Ø3.6 (printed pin) | ✗ | ✗ | ✗ | goes in, turns with difficulty |
 | M3 screw (steel) | grips tight | threads easily | wobbles a little | — |
 
-Morante's results. ✗ = does not go in.
+The clearance block, as tested by Morante (Fig. 6). ✗ = does not go in.
 
 **Conclusion:** a printed part needs much more room in a printed hole than a steel screw does. The single 0.2 mm
 used for every hole was far too tight for the printed ones.
@@ -1126,12 +1071,12 @@ All of these are changes to [`cad/drive/build.py`](cad/drive/build.py):
 - **Fork on screw tips, not self-tapped.** It now turns on the tips of two M3×10 screws, each locked to a frame arm
   by a nut, entering Ø3.3 blind holes in the fork. The arms moved 2.4 mm apart to make room for the nuts.
 - **Keeper for the crankshaft.** It only sat in slots open at the top, so a knock or the leg's push lifted it out.
-  A **keeper** (green in Fig. 6) now closes the slots from above and is held by two M3×12 into nuts.
+  A **keeper** (green in Fig. 7) now closes the slots from above and is held by two M3×12 into nuts.
 - **Nylon lock nut** on the leg's M3×16, so the knocks do not loosen it.
 
 <img src="cad/drive/images/test-frame-screws.png" alt="Where every screw goes">
 
-*Fig. 6 · The redesigned test frame, exploded. Grey: frame. Orange: fork. Red: leg. Blue: crankshaft. Green: the
+*Fig. 7 · The redesigned test frame, exploded. Grey: frame. Orange: fork. Red: leg. Blue: crankshaft. Green: the
 new keeper. Made by [`cad/drive/screws_figure.py`](cad/drive/screws_figure.py).*
 
 <details>
@@ -1151,3 +1096,47 @@ Also listed in [Open items](#open-items).
   crankshaft from the first print is kept.
 - Hardware: 2 × M3×10 + 2 nuts for the fork, 2 × M3×12 + 2 nuts for the keeper, and a nylon lock nut for the leg.
 - **Morante:** a video of the leg turning by hand on the new frame.
+
+## Open items
+
+Everything still to do on the build, in one place. Each row links to the entry where it came up; when an item is
+done, its row is removed and the entry that closes it says so. Plan-level tasks (study, purchases) are tracked
+outside the repo.
+
+| Pending | Came up in | Phase |
+|---|---|---|
+| Print the test frame v2 and film the leg turning by hand | [Test leg: first assembly…](#test-leg-first-assembly-and-clearance-result) | 3 |
+| Check the right rear leg, 0.15 mm from its crankshaft, before printing the rear legs | [Test leg: first assembly…](#test-leg-first-assembly-and-clearance-result) | 3 |
+| Compare the printed leg's foot path with the simulator's | [Onshape assembly](#onshape-assembly) | 3 |
+| Check that the rim notches (10 × 5 mm) let the leg swing as far as simulated, or widen them | [Toy leg in 3D](#toy-leg-in-3d) | 3 |
+| Base: fork seats in the rim notches, hollow bowl for the spine and idlers, spine mounting, cap over the journal slots | [Legs and drive in CAD](#legs-and-drive-in-cad) | 3 |
+| Carcass cuts: battery hatch in the base, motor and shaft openings | [Mesh repair](#mesh-repair) | 2 |
+| Confirm that Bambu Studio keeps the support settings saved by `tools/bambu_plate.py` | [Clearance test…](#clearance-test-and-test-leg-print-plate) | 2 |
+| Check the drawing of the battery holder bought against 64 × 49 × 16 mm (+2 mm) | [Motor, battery holder…](#motor-battery-holder-and-print-scale) | 4 |
+| N20 drive: gear ratio and motor position | [Legs and drive in CAD](#legs-and-drive-in-cad) | 4 |
+| Measure battery life on 4×AAA | [Motor, battery holder…](#motor-battery-holder-and-print-scale) | 4 |
+| Optional: the gear train in Onshape with **Gear relation** mates | [Onshape assembly](#onshape-assembly) | 2 |
+
+## Glossary
+
+Terms used in the entries, in the order they first appear, with a link to that entry.
+
+| Term | Meaning | First in |
+|---|---|---|
+| **STL / STEP** | 3D file formats: STL is a triangle mesh (for printing), STEP is exact geometry (for CAD). | [Carcass base model](#carcass-base-model) |
+| **Bambu Studio** | The printer's slicer: it turns a 3D model into printer instructions. | [Carcass base model](#carcass-base-model) |
+| **Clearance** | Free space left around a part: how much bigger a hole or a space is than the part in it. | [Motor, battery holder…](#motor-battery-holder-and-print-scale) |
+| **Watertight (manifold)** | A mesh with no holes or loose edges, which slicers and CAD tools need. | [Mesh repair](#mesh-repair) |
+| **Crank** | An arm fixed to a turning shaft; its far end goes round in a circle. | [Leg simulator…](#leg-simulator-and-comparison) |
+| **Crank pin** | The pin (here a small ball) at the end of the crank, where the leg is attached. | [Leg simulator…](#leg-simulator-and-comparison) |
+| **Stride** | How far the robot moves forward per half turn of the crank. | [Leg simulator…](#leg-simulator-and-comparison) |
+| **Bob** | How much the body goes up and down while walking. | [Leg simulator…](#leg-simulator-and-comparison) |
+| **Step height** | How high a foot lifts off the ground. | [Leg simulator…](#leg-simulator-and-comparison) |
+| **Gait groups** | The legs move in two groups of four (left 1 and 3 + right 2 and 4, and the other four), half a turn apart. | [Leg simulator…](#leg-simulator-and-comparison) |
+| **Crankshaft** | One shaft with one or more cranks on it, so one motor turns them all. | [Toy leg on one crankshaft](#toy-leg-on-one-crankshaft) |
+| **Idler** | A gear between two others, so they turn the same way. | [Four lateral crankshafts](#four-lateral-crankshafts) |
+| **build123d** | A Python library for CAD: parts are written as code. | [Legs and drive in CAD](#legs-and-drive-in-cad) |
+| **Journal** | The round part of a shaft that turns inside a hole (its bearing). | [Legs and drive in CAD](#legs-and-drive-in-cad) |
+| **Fork (pivot)** | The small block on the body's edge that the leg passes through. It swivels, and the leg tilts in it. | [Legs and drive in CAD](#legs-and-drive-in-cad) |
+| **Onshape** | CAD in the browser, used to assemble the parts and animate them. | [Onshape assembly](#onshape-assembly) |
+| **Keeper** | A cover that holds the crankshaft down in its slots. | [Test leg…](#test-leg-first-assembly-and-clearance-result) |
