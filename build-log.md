@@ -42,6 +42,7 @@ The robot's story in three parts, then what is left to do and a glossary.
    - [Test leg: first assembly and clearance result](#test-leg-first-assembly-and-clearance-result) · 2026-11-11 · ✅ v2 designed
    - [Test leg v2: turning by hand](#test-leg-v2-turning-by-hand) · 2026-11-11 · ✅ the leg turns
    - [Base v1 in CAD](#base-v1-in-cad) · 2026-11-11 · 🔄 designed, not printed
+   - [Gear train test](#gear-train-test) · 2026-11-11 · 🔄 the gears jam; redesign pending
 4. **[Open items](#open-items)**: everything still to do.
 5. **[Glossary](#glossary)**: the terms used in the entries.
 
@@ -324,7 +325,10 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
    expected (0.5 mm), and the frame was redesigned. On the second print the leg turns by hand.
 4. **The base.** The forks turned out to be too tall for the carcass: their top half went into the body. The body
    now sits 18.7 mm higher, on a band that is part of the new base. Base v1 carries the forks, the crankshafts and
-   the gears; it is modelled and checked over a full turn, and ready to print.
+   the gears; it is modelled and checked over a full turn.
+5. **The gears.** Printed on their own, the four crankshafts jammed and lifted out of their slots. A new check that
+   turns the gears found that two of the idlers cannot mesh with both of their crankshafts at the designed crank
+   angles, and that the gears have no backlash. The gear train is being redesigned before the base is printed.
 
 <img src="sim/images/drive-attempts.png" alt="The three drives tried, from above and from the side">
 
@@ -1287,12 +1291,103 @@ Full list: [`cad/base/check-result.txt`](cad/base/check-result.txt).
 This entry closes four open items: the fork's window, the rear leg near its crankshaft, the rim notches and the
 base. The foot-path comparison was dropped.
 
+### Gear train test
+
+**Phase 3 · Mechanisms · 2026-11-11** · Status: 🔄 the gears jam; redesign pending
+
+> **In short.** Before printing the base, the four crankshafts and the three gears between them (the **idlers**)
+> were printed on a loose spine and turned by hand. They turn in jerks and jam, and the crankshafts lift out of
+> their slots. A new check found why: nothing held the crankshafts down, and two of the three idlers cannot mesh
+> with both of their crankshafts at once while the cranks keep their designed angles. The old check had never
+> turned the gears. From now on every design is checked for both before it is printed.
+
+**What is being tested.** The four crankshafts must turn together, at the same speed and in the same direction,
+with their cranks keeping the angles that give the gait (neighbouring crankshafts 180° apart). Each crankshaft has a
+12-tooth gear; an idler sits below and between every two of them. Here the spine is the loose part used only for
+this test, without the base's cap, and the idlers turn on M3 screws used as axles.
+
+#### Steps
+
+1. Print [`print/gear-train-test.3mf`](print/gear-train-test.3mf): spine, 4 crankshafts, 3 idlers (Fig. 1).
+2. Put each idler between the spine's walls and push its screw through both walls and the idler.
+3. Drop the crankshafts into their slots from above, with the cranks as printed.
+4. Turn one crankshaft by hand (Fig. 2).
+
+<table>
+<tr>
+<td width="50%"><img src="images/gear-train-test-print-timelapse.gif" alt="Timelapse of the gear train test printing"></td>
+<td width="50%"><img src="images/gear-train-test-turning.gif" alt="Turning the gear train by hand"></td>
+</tr>
+<tr>
+<td><em>Fig. 1 · Printing <a href="print/gear-train-test.3mf"><code>print/gear-train-test.3mf</code></a>: the spine
+at the back, the crankshafts in their tree supports, the idlers flat.</em></td>
+<td><em>Fig. 2 · Turning it by hand. The shafts move in jerks and stop; watch the crankshafts rise in their slots
+when the teeth push against each other. The three screws sticking up are the idlers' axles.</em></td>
+</tr>
+</table>
+
+#### Result
+
+| What | Expected | What happened |
+|---|---|---|
+| The four crankshafts turn together | Smoothly, by hand | In jerks, and they jam |
+| Crankshafts in their slots | Stay in | Lift out: the slots are open at the top and nothing closes them in this test |
+
+**Why.** A new, general check, [`tools/cad_verify.py`](../tools/cad_verify.py), was run on this exact test
+([spec](cad/drive/verify_gear_train.py), [full report](cad/drive/verify-gear-train.txt)). It turns every gear at its
+real angle and pushes every moving part in 26 directions to see what stops it. It found three faults:
+
+1. **Nothing holds the crankshafts down.** All four can rise 3 mm or more. In the robot the base's cap closes the
+   slots, but this test had no cap, and the teeth pushing apart lift the shafts out.
+2. **Idlers 1 and 2 cannot mesh with both of their crankshafts at once** (Fig. 3). Each crankshaft is printed with
+   its teeth at a fixed angle to its cranks. With the cranks at their designed angles, there is no angle of the
+   11-tooth or the 10-tooth idler at which its teeth fit between the teeth of both neighbours: at the best one,
+   5.8 and 7.9 mm³ of tooth would have to pass through another. Each pair on its own meshes. The 20-tooth idler 3
+   fits both. So the train jams unless a crankshaft is put in a tooth off, which shifts its crank by up to 15°.
+3. **No backlash.** The gears sit exactly at their theoretical distance, so even meshing teeth touch on both sides
+   (0.00 mm gap). Printed teeth are never exact, and teeth without play bind.
+
+<img src="cad/drive/images/gear-phase.png" alt="Each idler at its best angle between its two crankshafts">
+
+*Fig. 3 · Each idler (yellow) turned to the angle that fits best between its two crankshafts (blue), with the cranks
+at their designed angles. Red: tooth inside tooth. Idlers 1 and 2 cannot fit both neighbours; idler 3 can. Made by
+[`cad/drive/gear_phase_figure.py`](cad/drive/gear_phase_figure.py).*
+
+**Why the earlier check missed it.** [`cad/drive/check.py`](cad/drive/check.py) skipped every pair of gears, as
+«touching on purpose», and left the idlers at one angle while the crankshafts turned. It never asked what holds
+each part in place either.
+
+<details>
+<summary>How to reproduce</summary>
+
+```
+python3 cad/drive/build.py
+cd cad/drive
+python3 ../../../tools/cad_verify.py verify_gear_train.py --out verify-gear-train.txt --render images/verify
+python3 gear_phase_figure.py
+```
+
+The spec places the idlers at the angle that fits their two crankshafts best, then turns everything together every
+10°. `images/verify/` holds a view of the assembly and two cuts through it.
+
+</details>
+
+#### Decisions
+
+- **Every design is checked before printing** with [`tools/cad_verify.py`](../tools/cad_verify.py): each part a
+  closed solid with walls of at least 0.8 mm, no collisions over the motion, gears turned at their real angles with
+  some backlash, every moving part held in every direction it should not move, the parts can be assembled in order,
+  and the overhangs to support. A design does not go to the printer until it passes.
+- **A test rig holds its parts as the robot will.** The gear train is tested again with a cap over the slots.
+- **Base v1 waits.** It has the same idlers and the same gear spacing, so it is not printed until the gear train
+  turns.
+
 #### Next
 
-The gears have never been printed. First, [`print/gear-train-test.3mf`](print/gear-train-test.3mf) (47 min,
-16.5 g): the loose spine, the 4 crankshafts and the 3 idlers, on 3 × M3×12 as axles, turned by hand. Only if the gear
-train turns, print [`print/base-v1.3mf`](print/base-v1.3mf) and the 8 legs and 8 forks, buy the hardware, assemble
-the drive in the base and turn it by hand.
+Redesign the gear train in [`cad/drive/build.py`](cad/drive/build.py): tooth counts and positions that let every idler
+mesh with both neighbours at the designed crank angles (or a crank angle set at assembly), about 0.15 mm of
+backlash, and a cap that holds the crankshafts in the test. Then reprint the test and turn it by hand, and only then
+print [`print/base-v1.3mf`](print/base-v1.3mf).
 
 [↑ Contents](#contents)
 
@@ -1304,8 +1399,8 @@ outside the repo.
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| Gear train test: print the spine, crankshafts and idlers and check that the four shafts turn together by hand | [Base v1 in CAD](#base-v1-in-cad) | 3 |
-| Then print base v1, the 8 legs and 8 forks, assemble the drive in the base and turn it by hand | [Base v1 in CAD](#base-v1-in-cad) | 3 |
+| Gear train v2: idlers that mesh both neighbours at the designed crank angles, backlash, a cap in the test; reprint and turn by hand | [Gear train test](#gear-train-test) | 3 |
+| Then print base v1 (with the gear train v2), the 8 legs and 8 forks, assemble the drive in the base and turn it by hand | [Base v1 in CAD](#base-v1-in-cad) | 3 |
 | Fix the front block (it stands loose on the deck and the cap) and the body on the band | [Base v1 in CAD](#base-v1-in-cad) | 2 |
 | Base for looks, once v1 works: band following the body's outline, screws and fork bosses hidden, no gap under the body's rear, side lips back | [Base v1 in CAD](#base-v1-in-cad) | 5 |
 | Carcass cuts: battery hatch in the base, motor and shaft openings | [Mesh repair](#mesh-repair) | 2 |
@@ -1341,6 +1436,7 @@ Terms used in the entries, in the order they first appear, with a link to that e
 | **Fork (pivot)** | The small block on the body's edge that the leg passes through. It swivels, and the leg tilts in it. | [Legs and drive in CAD](#legs-and-drive-in-cad) |
 | **Onshape** | CAD in the browser, used to assemble the parts and animate them. | [Onshape assembly](#onshape-assembly) |
 | **Band** | The ring added between the base and the body, 18.7 mm tall, that holds the forks' upper screws. | [Base v1 in CAD](#base-v1-in-cad) |
+| **Backlash** | The small play between meshing teeth. Without it, printed gears bind. | [Gear train test](#gear-train-test) |
 | **Keel** | A narrow ridge under the bowl that covers the gears where they go lower than the bowl. | [Base v1 in CAD](#base-v1-in-cad) |
 | **Keeper** | A cover that holds the crankshaft down in its slots. | [Test leg…](#test-leg-first-assembly-and-clearance-result) |
 

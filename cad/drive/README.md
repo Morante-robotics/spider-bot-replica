@@ -82,4 +82,9 @@ The fork's window is 1.0 mm wider than the leg (0.5 mm a side; 0.2 mm a side was
 **Check over a full turn** ([`check.py`](check.py), every 30°): it lists any overlap between two parts and every pair
 closer than 1 mm. Latest result: [`check-result.txt`](check-result.txt).
 
+**Gear train check** ([`verify_gear_train.py`](verify_gear_train.py), a spec for the shared
+[`tools/cad_verify.py`](../../../tools/cad_verify.py)): the gear train test with every gear turning at its real
+angle, and what holds each part. Latest result: [`verify-gear-train.txt`](verify-gear-train.txt); pictures in
+`images/verify/`. [`gear_phase_figure.py`](gear_phase_figure.py) draws each idler between its two crankshafts.
+
 What is still to do on the drive: [Open items](../../build-log.md#open-items) in the build log.
