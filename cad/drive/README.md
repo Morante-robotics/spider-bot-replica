@@ -26,7 +26,7 @@ Needs Python 3.12 with build123d, numpy, trimesh and manifold3d. All sizes come 
 | `crankshaft-1.stl` … `-4.stl` | One piece: 12-tooth gear, two journals, two cranks with balls (front to rear). Each is different: its gear is turned on the shaft by its own offset, and 1–4 dots on the +X web say which it is. Crankshaft 4's crank webs are 1.5 mm thick instead of 2, to keep them clear of the rear legs | 27.6 × 14.0 × 14.0 | 1 each |
 | `idler-1.stl`, `-2`, `-3` | Idler gears, 12, 12 and 20 teeth | up to 22.0 × 22.0 × 2.6 | 1 each |
 | `spine.stl` | Gear train test: two walls on a foot that carry the 4 crankshafts and the idler axles, an M3 nut slot at each end, dots by each slot. The robot's spine is built into [base v1](../base/) | 30.0 × 97.3 × 32.5 | 1 |
-| `test-cap.stl` | Gear train test: cap whose tongues hold the crankshafts down in their slots, as base v1's cap does (print upside down) | 20.0 × 97.3 × 11.7 | 1 |
+| `test-cap.stl` | Gear train test: cap whose tongues hold the crankshafts down in their slots, as base v1's cap does; four skirts at the ends centre it on the walls, and the tongues cover only the outer part of each wall, clear of the gears (print upside down) | 20.0 × 97.3 × 11.7 | 1 |
 | `test-frame.stl` | Desk stand for one middle leg, its pivot and crankshaft 2, turned by hand | 75.4 × 35.5 × 80.1 | 1 |
 | `test-frame-keeper.stl` | Cap that holds crankshaft 2 in the test frame (print upside down) | 8.5 × 28.0 × 9.0 | 1 |
 | `assembly-0.stl` | Whole drive at crank angle 0°, for reference only | 218.0 × 87.5 × 71.3 | — |
@@ -89,8 +89,9 @@ closer than 1 mm. Latest result: [`check-result.txt`](check-result.txt).
 
 **Gear train check** ([`verify_gear_train.py`](verify_gear_train.py), a spec for the shared
 [`tools/cad_verify.py`](../../../tools/cad_verify.py)): the gear train test with every gear turning at its real
-angle, and what holds each part. Latest result: [`verify-gear-train.txt`](verify-gear-train.txt); pictures in
+angle, the cap shifted to either side, keep-out zones around the gear faces, and what holds each part. Latest result: [`verify-gear-train.txt`](verify-gear-train.txt); pictures in
 `images/verify/`. [`check_gear_train.py`](check_gear_train.py) checks every mesh in 2D every 1° ([`check-gear-train.txt`](check-gear-train.txt)).
 [`gear_phase_figure.py`](gear_phase_figure.py) draws each idler between its two crankshafts, v1 and v2.
+[`assembly_figure.py`](assembly_figure.py) draws the test's assembly diagram (`--lang es` for Spanish).
 
 What is still to do on the drive: [Open items](../../build-log.md#open-items) in the build log.
