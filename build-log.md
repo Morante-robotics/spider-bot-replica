@@ -1565,7 +1565,7 @@ outside the repo.
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| Print base v1 (with the gear train v2), the 8 legs and 8 forks, assemble the drive in the base and turn it by hand | [Base v1 in CAD](#base-v1-in-cad) | 3 |
+| Print base v1 (with the gear train v2), the 8 legs and 8 forks ([`print/legs-forks-v1.3mf`](print/legs-forks-v1.3mf)), assemble the drive in the base and turn it by hand | [Base v1 in CAD](#base-v1-in-cad) | 3 |
 | Fix the front block (it stands loose on the deck and the cap) and the body on the band | [Base v1 in CAD](#base-v1-in-cad) | 2 |
 | Base for looks, once v1 works: band following the body's outline, screws and fork bosses hidden, no gap under the body's rear, side lips back | [Base v1 in CAD](#base-v1-in-cad) | 5 |
 | Carcass cuts: battery hatch in the base, motor and shaft openings | [Mesh repair](#mesh-repair) | 2 |

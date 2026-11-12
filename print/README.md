@@ -11,6 +11,7 @@ Basic, 0.20 mm Standard). Open one in Bambu Studio, check it and send it: **Slic
 | [`gear-train-test-v2.3mf`](gear-train-test-v2.3mf) | Gear train test v2: spine on a foot, test cap, the 4 crankshafts and the 3 idlers | 1 h 19 min | 33.5 g |
 | [`test-cap-v2.3mf`](test-cap-v2.3mf) | The gear train test's cap on its own (upside down), to reprint just the cap | 13 min | 6.7 g |
 | [`base-v1.3mf`](base-v1.3mf) | [Base v1](../cad/base/), its cap (upside down) and the front block | 7 h 57 min | 140.4 g |
+| [`legs-forks-v1.3mf`](legs-forks-v1.3mf) | The 8 legs (front, middle × 2 and rear, right and left) and the 8 forks for base v1 | 2 h 30 min | 46.9 g |
 
 ## Test leg plate
 
@@ -118,5 +119,29 @@ Base, cap and front block of [base v1](../cad/base/) on one plate, with the same
 
 ```
 python3 tools/bambu_plate.py print/base-v1.3mf cad/base/base-v1.stl cad/base/cap.stl@180,0,0 cad/base/front-block.stl \
+    --set enable_support=1 "support_type=tree(auto)" support_on_build_plate_only=1 "curr_bed_type=Textured PEI Plate"
+```
+
+## Legs and forks v1
+
+The 8 legs and the 8 forks for [base v1](#base-v1), on one plate, with the same settings as the test leg plate (tree
+supports, on the build plate only). The legs lie on their flat side, as on the test leg plate; the forks stand as
+modelled.
+
+<img src="images/legs-forks-v1-top.png" width="400" alt="The legs and forks plate seen from above">
+
+*The plate from above: the L-shaped legs nested into each other, the forks in a row at the back.*
+
+Bambu Studio's arrange fits only three legs on a plate (it keeps a box around each L), so the parts are placed by
+hand: `:x,y` after each part is where its corner goes on the bed, and nothing is arranged.
+
+```
+python3 tools/bambu_plate.py print/legs-forks-v1.3mf cad/drive/leg-front-right.stl@90,0,0:8,68 \
+    cad/drive/leg-middle-right.stl@90,0,90:48,68 cad/drive/leg-middle-right.stl@90,0,0:120,68 \
+    cad/drive/leg-rear-right.stl@90,0,90:166,68 cad/drive/leg-front-left.stl@90,0,90:180,74 \
+    cad/drive/leg-middle-left.stl@90,0,270:8,82 cad/drive/leg-middle-left.stl@90,0,90:62,82 \
+    cad/drive/leg-rear-left.stl@90,0,270:134,82 cad/drive/pivot.stl:24,205 cad/drive/pivot.stl:52,205 \
+    cad/drive/pivot.stl:80,205 cad/drive/pivot.stl:108,205 cad/drive/pivot.stl:136,205 \
+    cad/drive/pivot.stl:164,205 cad/drive/pivot.stl:192,205 cad/drive/pivot.stl:220,205 \
     --set enable_support=1 "support_type=tree(auto)" support_on_build_plate_only=1 "curr_bed_type=Textured PEI Plate"
 ```
