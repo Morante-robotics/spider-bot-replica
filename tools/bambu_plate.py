@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Lay out STL parts on one Bambu Studio plate, slice it, and save a ready-to-print project (.3mf).
 
-Each part is given as  path.stl[@rx,ry,rz][xN]: rotated about X, then Y, then Z (degrees) into its print orientation,
-dropped onto the bed, and repeated N times. Bambu Studio's CLI then arranges the plate and slices it with the
-system presets below, flattened (the CLI does not follow "inherits"), plus the overrides in --set.
+Each part is given as  path.stl[@rx,ry,rz][:x,y][xN]: rotated about X, then Y, then Z (degrees) into its print
+orientation, dropped onto the bed, and repeated N times. Bambu Studio's CLI then arranges the plate and slices it with
+the system presets below, flattened (the CLI does not follow "inherits"), plus the overrides in --set.
+
+With :x,y on every part, nothing is arranged: the corner of each part's bounding box goes to (x, y) mm on the bed.
+Use it when the arrange wastes room, e.g. L-shaped parts that nest into each other.
 
 Usage:
     python3 bambu_plate.py OUT.3mf part1.stl@90,0,0 part2.stl x2 ... [--set enable_support=1 ...]
@@ -41,17 +44,21 @@ def parse(spec):
     if "x" in spec.rsplit(".stl", 1)[-1]:
         spec, n = spec.rsplit("x", 1)
         reps = int(n)
+    spec, _, at = spec.partition(":")
     path, _, rot = spec.partition("@")
     angles = [float(a) for a in rot.split(",")] if rot else [0, 0, 0]
-    return path, angles, reps
+    pos = [float(v) for v in at.split(",")] if at else None
+    return path, angles, reps, pos
 
 
-def orient(path, angles, out):
+def orient(path, angles, out, pos=None):
     m = trimesh.load(path)
     for ax, a in zip(np.eye(3), angles):
         if a:
             m.apply_transform(trimesh.transformations.rotation_matrix(np.radians(a), ax))
     m.apply_translation(-m.bounds[0])                    # corner on the origin, bottom on the bed
+    if pos:
+        m.apply_translation([pos[0], pos[1], 0])
     m.export(out)
     return m.extents
 
@@ -64,14 +71,17 @@ def main():
     a = ap.parse_args()
 
     tmp = tempfile.mkdtemp()
-    stls = []
-    for spec in a.parts:
-        path, angles, reps = parse(spec)
+    stls, placed = [], []
+    for k, spec in enumerate(a.parts):
+        path, angles, reps, pos = parse(spec)
+        placed.append(pos is not None)
         name = os.path.splitext(os.path.basename(path))[0]
-        dst = os.path.join(tmp, f"{name}.stl")
-        ext = orient(path, angles, dst)
-        print(f"{name:20s} × {reps}  {ext[0]:6.1f} × {ext[1]:6.1f} × {ext[2]:6.1f} mm")
+        dst = os.path.join(tmp, f"{name}-{k}.stl" if pos else f"{name}.stl")
+        ext = orient(path, angles, dst, pos)
+        print(f"{name:20s} × {reps}  {ext[0]:6.1f} × {ext[1]:6.1f} × {ext[2]:6.1f} mm" + (f"  at {pos}" if pos else ""))
         stls += [dst] * reps
+    if any(placed) and not all(placed):
+        raise SystemExit("give :x,y to every part or to none")
 
     machine, process, filament = flat("machine", MACHINE), flat("process", PROCESS), flat("filament", FILAMENT)
     for kv in a.set:
@@ -86,7 +96,7 @@ def main():
         files.append(f)
 
     out = os.path.abspath(a.out)
-    cmd = [BAMBU, "--arrange", "1", "--orient", "0", "--load-settings", f"{files[0]};{files[1]}",
+    cmd = [BAMBU, "--arrange", "0" if all(placed) else "1", "--orient", "0", "--load-settings", f"{files[0]};{files[1]}",
            "--load-filaments", files[2], "--slice", "1", "--export-3mf", out, *stls]
     r = subprocess.run(cmd, cwd=tmp, capture_output=True, text=True)
     if r.returncode or not os.path.exists(out):
