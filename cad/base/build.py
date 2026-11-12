@@ -14,7 +14,8 @@ What this script does to ../carcass-120/spideybot_base.stl (all meshes, booleans
   - cuts each fork's pocket (fork swivel + 0.6 mm, open outwards to slide fork and leg in), adds a boss under each
     fork, drills both swivel screws with a pocket for a captive nut, and cuts the path of every leg (+0.8 mm, up to 30 mm out of its pivot)
   - cuts an opening in the deck over the spine, closed by the cap (cap.stl): its tongues go down the journal slots
-    and hold the crankshafts; three M3×10 screws into captive nuts
+    (over the outer part of each wall, clear of the gears) and hold the crankshafts; three M3×10 screws into captive
+    nuts
 
 Writes base-v1.stl, cap.stl, front-block.stl and body-lifted.stl (the carcass body moved up, for the check and the
 pictures). The front block is a separate part now: its stems stood over the opening the first crankshaft goes in
@@ -330,13 +331,19 @@ def opening():
 
 
 def cap():
-    """Plate that fills the deck opening, with a tongue down every journal slot and three screw holes."""
+    """Plate that fills the deck opening, with two tongues down every journal slot and three screw holes.
+
+    The deck opening locates the plate (CAP_CLR a side in X, = D.CAP_X_PLAY); the tongues in the slots locate it in Y.
+    The tongues stand over the outer part of each wall only (|x| D.TONGUE_IN..D.TONGUE_OUT from the spine's axis):
+    D.GEAR_AXIAL_CLR clear of the crankshaft gears' faces with the cap and the shaft at their worst X positions. Over
+    the whole wall they pinched the gears in the gear train test v2 (2026-11-12)."""
+    assert abs(D.CAP_X_PLAY - CAP_CLR) < 1e-9, "tongues are placed for a different X play"
     plate = prism(opening().buffer(-CAP_CLR, join_style=2), DECK_BOT, SEAM)
     parts = [plate]
     tw = D.JOURNAL + D.CLR - CAP_CLR
     for y, z in SH:
         for sx in (1, -1):
-            x0, x1 = sorted((CX + sx * D.WALL_IN, CX + sx * D.WALL_OUT))
+            x0, x1 = sorted((CX + sx * D.TONGUE_IN, CX + sx * D.TONGUE_OUT))
             parts.append(boxb([x0, y - tw / 2, z], [x1, y + tw / 2, DECK_BOT + 0.01]))
     part = U(*parts)
     cut = []
@@ -345,7 +352,7 @@ def cap():
         c.apply_transform(trimesh.transformations.rotation_matrix(np.pi / 2, [0, 1, 0]))
         c.apply_translation([CX, y, z])
         cut.append(c)
-    for y, z, rt in gears():                                  # the crankshaft gears turn between the tongues
+    for y, z, rt in gears():                                  # room round the crankshaft gears (between the walls)
         if z > 60:
             c = trimesh.creation.cylinder(radius=rt + 0.5, height=2 * D.WALL_IN, sections=64)
             c.apply_transform(trimesh.transformations.rotation_matrix(np.pi / 2, [0, 1, 0]))

@@ -2,7 +2,7 @@ cad_verify: PASS (0 failures, 0 warnings)
 
 == 1 integrity (printed parts)
   ok    spine: closed solid, 23493 mm³, 30.0 × 97.3 × 32.5 mm; walls ≥ 0.8 mm
-  ok    cap: closed solid, 10201 mm³, 20.0 × 97.3 × 11.7 mm; walls ≥ 0.8 mm
+  ok    cap: closed solid, 10091 mm³, 20.0 × 97.3 × 11.7 mm; walls ≥ 0.8 mm
   ok    crankshaft1: closed solid, 649 mm³, 27.6 × 14.0 × 14.0 mm; walls ≥ 0.8 mm
   ok    crankshaft2: closed solid, 648 mm³, 27.6 × 14.0 × 14.0 mm; walls ≥ 0.8 mm
   ok    crankshaft3: closed solid, 648 mm³, 27.6 × 13.9 × 13.9 mm; walls ≥ 0.8 mm
@@ -12,23 +12,23 @@ cad_verify: PASS (0 failures, 0 warnings)
   ok    idler3: closed solid, 768 mm³, 22.0 × 22.0 × 2.6 mm; walls ≥ 0.8 mm
 
 == 2 motion: overlaps and gaps at every step   3 gears: backlash
-  ok    no undeclared overlaps over 72 steps
-        axle3 × idler3: gap 0.15 mm (closest at 0)
-        axle2 × idler2: gap 0.15 mm (closest at 170)
-        axle1 × idler1: gap 0.15 mm (closest at 170)
-        capscrew1 × spine: gap 0.15 mm (closest at 0)
-        capscrew2 × spine: gap 0.15 mm (closest at 0)
-        crankshaft1 × spine: gap 0.25 mm (closest at 15)
-        crankshaft4 × spine: gap 0.25 mm (closest at 15)
-        crankshaft2 × spine: gap 0.25 mm (closest at 45)
-        crankshaft3 × spine: gap 0.25 mm (closest at 225)
-        cap × crankshaft1: gap 0.25 mm (closest at 0)
-        cap × crankshaft2: gap 0.25 mm (closest at 0)
-        cap × crankshaft3: gap 0.25 mm (closest at 0)
-        cap × crankshaft4: gap 0.25 mm (closest at 0)
-        idler1 × spine: gap 0.45 mm (closest at 0)
-        idler2 × spine: gap 0.45 mm (closest at 0)
-        idler3 × spine: gap 0.45 mm (closest at 0)
+  ok    no undeclared overlaps over 96 steps
+        axle3 × idler3: gap 0.15 mm (closest at (0, 0.0))
+        axle2 × idler2: gap 0.15 mm (closest at (170, 0.0))
+        axle1 × idler1: gap 0.15 mm (closest at (170, 0.0))
+        capscrew1 × spine: gap 0.15 mm (closest at (0, 0.0))
+        capscrew2 × spine: gap 0.15 mm (closest at (0, 0.0))
+        crankshaft1 × spine: gap 0.25 mm (closest at (15, 0.0))
+        crankshaft4 × spine: gap 0.25 mm (closest at (15, 0.0))
+        crankshaft2 × spine: gap 0.25 mm (closest at (45, 0.0))
+        crankshaft3 × spine: gap 0.25 mm (closest at (225, 0.0))
+        cap × crankshaft1: gap 0.25 mm (closest at (0, 0.0))
+        cap × crankshaft2: gap 0.25 mm (closest at (0, 0.0))
+        cap × crankshaft3: gap 0.25 mm (closest at (0, 0.0))
+        cap × crankshaft4: gap 0.25 mm (closest at (0, 0.0))
+        idler1 × spine: gap 0.45 mm (closest at (0, 0.0))
+        idler2 × spine: gap 0.45 mm (closest at (0, 0.0))
+        idler3 × spine: gap 0.45 mm (closest at (0, 0.0))
         axle1 × spine: contact allowed (screw head tightened on the +X wall (shank in a Ø3.3 hole))
         axle2 × spine: contact allowed (screw head tightened on the +X wall (shank in a Ø3.3 hole))
         axle3 × spine: contact allowed (screw head tightened on the +X wall (shank in a Ø3.3 hole))
@@ -40,20 +40,20 @@ cad_verify: PASS (0 failures, 0 warnings)
         axle3 × axlenut3: contact allowed (nut on its screw)
         cap × capscrew1: contact allowed (screw head clamps the cap (shank in a Ø3.3 hole))
         cap × capscrew2: contact allowed (screw head clamps the cap (shank in a Ø3.3 hole))
-        cap × spine: contact allowed (cap sits on the spine's top, tongues slide in the slots (0.15 mm a side, CAP_CLR))
+        cap × spine: contact allowed (cap sits on the spine's top, tongues slide in the slots (0.15 mm a side, CAP_CLR), skirts 0.2 mm off the walls' outer faces (they touch at the X extremes))
+  ok    gears crankshaft3 × idler2: gap 0.10–0.10 mm over the motion
+  ok    gears crankshaft2 × idler2: gap 0.10–0.10 mm over the motion
   ok    gears crankshaft2 × idler1: gap 0.10–0.10 mm over the motion
   ok    gears crankshaft1 × idler1: gap 0.10–0.10 mm over the motion
-  ok    gears crankshaft2 × idler2: gap 0.10–0.10 mm over the motion
-  ok    gears crankshaft4 × idler3: gap 0.10–0.10 mm over the motion
   ok    gears crankshaft3 × idler3: gap 0.10–0.10 mm over the motion
-  ok    gears crankshaft3 × idler2: gap 0.10–0.10 mm over the motion
+  ok    gears crankshaft4 × idler3: gap 0.10–0.10 mm over the motion
 
 == 4 retention: can a part fall, lift or tip out?
-  ok    cap: held within 1.0 mm / 5.0° (free: )
-  ok    crankshaft1: held within 1.0 mm / 5.0° (free: spin)
-  ok    crankshaft2: held within 1.0 mm / 5.0° (free: spin)
-  ok    crankshaft3: held within 1.0 mm / 5.0° (free: spin)
-  ok    crankshaft4: held within 1.0 mm / 5.0° (free: spin)
+  ok    cap: held within 0.5 mm / 5.0° (free:  slide)
+  ok    crankshaft1: held within 0.5 mm / 5.0° (free: spin)
+  ok    crankshaft2: held within 0.5 mm / 5.0° (free: spin)
+  ok    crankshaft3: held within 0.5 mm / 5.0° (free: spin)
+  ok    crankshaft4: held within 0.5 mm / 5.0° (free: spin)
   ok    idler1: held within 1.0 mm / 5.0° (free: spin)
   ok    idler2: held within 1.0 mm / 5.0° (free: spin)
   ok    idler3: held within 1.0 mm / 5.0° (free: spin)
@@ -86,3 +86,13 @@ cad_verify: PASS (0 failures, 0 warnings)
         idler1: no overhangs
         idler2: no overhangs
         idler3: no overhangs
+
+== 7 keep-out zones (moving with their part, at every step)
+  ok    gear1-axial (gear faces + 0.25 float + 0.8 mm axial): clear over 96 steps; closest cap, 0.10 mm outside it (at (0, -0.2))
+        gear1-axial: not checked against spine, idler1, idler2, idler3 (idlers mesh in the gear plane (GEARS checks them); the spine walls are 0.25 mm off the gear faces (0-0.5 with the float) as in v2, which turned freely without the cap, 2026-11-12)
+  ok    gear2-axial (gear faces + 0.25 float + 0.8 mm axial): clear over 96 steps; closest cap, 0.10 mm outside it (at (0, -0.2))
+        gear2-axial: not checked against spine, idler1, idler2, idler3 (idlers mesh in the gear plane (GEARS checks them); the spine walls are 0.25 mm off the gear faces (0-0.5 with the float) as in v2, which turned freely without the cap, 2026-11-12)
+  ok    gear3-axial (gear faces + 0.25 float + 0.8 mm axial): clear over 96 steps; closest cap, 0.10 mm outside it (at (0, -0.2))
+        gear3-axial: not checked against spine, idler1, idler2, idler3 (idlers mesh in the gear plane (GEARS checks them); the spine walls are 0.25 mm off the gear faces (0-0.5 with the float) as in v2, which turned freely without the cap, 2026-11-12)
+  ok    gear4-axial (gear faces + 0.25 float + 0.8 mm axial): clear over 96 steps; closest cap, 0.10 mm outside it (at (0, -0.2))
+        gear4-axial: not checked against spine, idler1, idler2, idler3 (idlers mesh in the gear plane (GEARS checks them); the spine walls are 0.25 mm off the gear faces (0-0.5 with the float) as in v2, which turned freely without the cap, 2026-11-12)

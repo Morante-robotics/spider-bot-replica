@@ -2,7 +2,7 @@
 """Generic checks for a 3D-printed mechanism before it is printed.
 
 A design is described by a *spec*: a Python file next to the design that tells this tool which parts exist, where each
-one is at every step of the motion, and what is allowed. The tool then runs six checks and writes one report:
+one is at every step of the motion, and what is allowed. The tool then runs seven checks and writes one report:
 
   1. integrity    every printed part is one closed, consistently oriented solid with positive volume, fits the bed,
                   and has no walls thinner than MIN_WALL (sampled by casting rays inwards)
@@ -15,6 +15,8 @@ one is at every step of the motion, and what is allowed. The tool then runs six 
   5. assembly     each part in ASSEMBLY can be moved in along its direction past the parts placed before it
                   (its gear partners are ignored: they can be turned to let it in)
   6. print        overhang area per printed part in its print orientation (information for supports)
+  7. keep-out     optional zones carried by a part (e.g. a spinning gear's faces thickened by the axial clearance it
+                  needs, plus its float): no other part may enter them at any step, except the parts listed
 
 Spec file (all names optional except PARTS and poses):
 
@@ -30,6 +32,8 @@ Spec file (all names optional except PARTS and poses):
     PRINT_ORIENT = {"shaft": 4x4}             # how each part lies on the bed (default: as in its STL)
     SECTIONS = [([0, 0, 0], [1, 0, 0])]       # cut planes (point, normal) for the pictures
     PAIR_GAP = {("pin", "shaft"): 0.1}       # smallest gap for a pair, where MIN_GAP does not fit (a pin in its bore)
+    KEEP_OUT = {"gear-faces": {"part": "shaft", "mesh": m, "except": ["frame"], "why": "0.8 mm axial"}}
+                                              # m in the part's own frame, moves with it; "except": parts allowed in
     MIN_GAP, GEAR_GAP, MIN_WALL, BED = 0.2, (0.08, 0.5), 0.8, (256, 256, 256)
 
 Usage:
@@ -320,6 +324,45 @@ def check_retention(spec, meshes, rep, quick):
                    f"(free: {'spin' if spin is not None else ''}{' slide' if slide is not None else ''})")
 
 
+def check_keep_out(spec, meshes, rep):
+    zones = getattr(spec, "KEEP_OUT", {})
+    if not zones:
+        return
+    rep.head("7 keep-out zones (moving with their part, at every step)")
+    motion = list(getattr(spec, "MOTION", [0]))
+    worst = {z: {} for z in zones}
+    closest = {z: (np.inf, None, None) for z in zones}
+    zm = {z: to_manifold(d["mesh"]) for z, d in zones.items()}
+    for t in motion:
+        pose = spec.poses(t) if hasattr(spec, "poses") else {}
+        ms = placed(spec, meshes, t)
+        for z, d in zones.items():
+            me = zm[z].transform(np.asarray(pose.get(d["part"], np.eye(4)), float)[:3, :])
+            skip = set(d.get("except", [])) | {d["part"]}
+            for n, m in ms.items():
+                if n in skip or not boxes_near(mbox(me), mbox(m), 1.0):
+                    continue
+                v = overlap(me, m)
+                if v > EPS_VOL:
+                    if v > worst[z].get(n, (0, None))[0]:
+                        worst[z][n] = (v, t)
+                else:
+                    g = me.min_gap(m, 2.0)
+                    if g < closest[z][0]:
+                        closest[z] = (g, n, t)
+    for z, d in zones.items():
+        if worst[z]:
+            for n, (v, t) in sorted(worst[z].items(), key=lambda x: -x[1][0]):
+                rep.fail(f"{n} enters {z} ({d.get('why', '')}): {v:.2f} mm³ (worst at {t})")
+        else:
+            g, n, t = closest[z]
+            extra = f"; closest {n}, {g:.2f} mm outside it (at {t})" if n else ""
+            rep.ok(f"{z} ({d.get('why', '')}): clear over {len(motion)} steps{extra}")
+        if d.get("except"):
+            rep.info(f"{z}: not checked against {', '.join(d['except'])}" +
+                     (f" ({d['except_why']})" if d.get("except_why") else ""))
+
+
 def check_assembly(spec, meshes, rep):
     seq = getattr(spec, "ASSEMBLY", None)
     rep.head("5 assembly order")
@@ -457,7 +500,8 @@ def main():
                       ("motion", lambda: check_motion(spec, meshes, rep)),
                       ("retention", lambda: check_retention(spec, meshes, rep, args.quick)),
                       ("assembly", lambda: check_assembly(spec, meshes, rep)),
-                      ("print", lambda: check_print(spec, meshes, rep))):
+                      ("print", lambda: check_print(spec, meshes, rep)),
+                      ("keep-out", lambda: check_keep_out(spec, meshes, rep))):
         t0 = time.perf_counter()
         fn()
         timing.append(f"{label} {time.perf_counter() - t0:.0f} s")

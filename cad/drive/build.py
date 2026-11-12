@@ -83,6 +83,19 @@ TEST_TOP = 72.8      # test spine's top = base v1 deck underside (../base/build.
 CAP_CLR = 0.3        # tongue in its journal slot (../base/build.py CAP_CLR)
 TEST_CAP_T = 5.0     # test cap plate: thick and wide (2 screws only, at the ends) so it does not bow up between them
 TEST_CAP_W = 20.0
+# cap tongues (test cap and base v1 cap). Gear train test v2, 2026-11-12: with tongues over the whole wall
+# (|x| 1.75-4.25) the gears turned 0.25 mm from the tongues' faces, nominal; with the cap free in X, the shaft's float
+# and the print a little fat, the tongues pinched the gears and nothing turned. Now they stand over the outer part of
+# each wall only, GEAR_AXIAL_CLR clear of the gear faces with the cap and the shaft at their worst X positions
+SHAFT_FLOAT = WEB_IN - WALL_OUT    # crankshaft's axial float either way: webs against the walls' outer faces (0.25)
+GEAR_AXIAL_CLR = 0.8 # least axial gap from a spinning gear face to a stationary printed face (cap tongue)
+CAP_X_PLAY = CAP_CLR # worst X play of a cap either way: base v1's cap in its deck opening (../base/build.py:
+                     # opening().buffer(-CAP_CLR)); the test cap's skirts allow less (TEST_SKIRT_CLR)
+TONGUE_IN = GEAR_T / 2 + SHAFT_FLOAT + CAP_X_PLAY + GEAR_AXIAL_CLR   # tongue's inner face, |x| (2.85)
+TONGUE_OUT = WALL_OUT - CAP_X_PLAY # outer face (3.95): never past the walls' outer faces, so the webs only touch the walls
+TEST_SKIRT_CLR = 0.2 # test cap locator: skirts down both walls' outer faces at the end blocks, this much a side
+TEST_SKIRT_T, TEST_SKIRT_H = 1.6, 4.0    # skirt thickness and how far down the walls it reaches
+TEST_SKIRT_GAP = 9.0 # skirts start this far (y) from the end shafts: the cranks sweep a radius of 6.0
 END_IN, END_OUT = KEEP_GAP, 17.0   # test spine end blocks, |y| from the end shafts (clear of the gear tips, radius 7)
 END_SCREW = END_IN + 4.25          # cap screw in each end block (the nut's inner corner stays 0.9 mm off the gear side)
 CAP_SCREW_L = 12.0   # M3×12 cap screws (as v1's axles and the test frame keeper)
@@ -378,9 +391,11 @@ def spine():
 
 
 def test_cap():
-    """Cap of the gear train test, in robot coordinates (print it upside down): a plate on the spine's top with a tongue
-    down every journal slot to the top of the journal hole, as base v1's cap does. Two M3×12 down
-    through it into the nuts in the end blocks."""
+    """Cap of the gear train test (v2.1), in robot coordinates (print it upside down): a plate on the spine's top with
+    two tongues down every journal slot to the top of the journal hole, as base v1's cap has. The tongues stand over
+    the outer part of each wall only (|x| TONGUE_IN..TONGUE_OUT), clear of the gear. Four skirts down the walls' outer
+    faces at the end blocks locate the cap in X (TEST_SKIRT_CLR a side); the tongues in the slots locate it in Y. Two
+    M3×12 down through it into the nuts in the end blocks."""
     sh = shaft_yz()
     y0, y1, _, z_top = spine_box()
     part = Pos(0, (y0 + y1) / 2, z_top + TEST_CAP_T / 2) * Box(TEST_CAP_W, y1 - y0, TEST_CAP_T)
@@ -390,8 +405,18 @@ def test_cap():
         # tongue and leaves knife edges at its tips. The journal can rise 0.25 mm either way
         zb = z + (JOURNAL + CLR) / 2
         for sx in (1, -1):
-            part += Pos(sx * (WALL_IN + WALL_OUT) / 2, y, (zb + z_top) / 2 + 0.01) * Box(WALL_OUT - WALL_IN, tw,
-                                                                                           z_top - zb + 0.02)
+            part += Pos(sx * (TONGUE_IN + TONGUE_OUT) / 2, y, (zb + z_top) / 2 + 0.01) * Box(TONGUE_OUT - TONGUE_IN, tw,
+                                                                                               z_top - zb + 0.02)
+    # X locator: skirts over the end blocks, where nothing turns (the cranks sweep 6.0 from the end shafts), with a
+    # 0.4 mm lead-in on the inner edge of the tip
+    xs = WALL_OUT + TEST_SKIRT_CLR
+    for ya, yb in ((y0, sh[0][0] - TEST_SKIRT_GAP), (sh[-1][0] + TEST_SKIRT_GAP, y1)):
+        for sx in (1, -1):
+            sk = Pos(sx * (xs + TEST_SKIRT_T / 2), (ya + yb) / 2, z_top - TEST_SKIRT_H / 2 + 0.01) * \
+                Box(TEST_SKIRT_T, yb - ya, TEST_SKIRT_H + 0.02)
+            c = 0.4 * np.sqrt(2)
+            sk -= Pos(sx * xs, (ya + yb) / 2, z_top - TEST_SKIRT_H) * Rot(0, 45, 0) * Box(c, yb - ya + 1, c)
+            part += sk
     for y, _ in cap_screws():
         part -= Pos(0, y, z_top + TEST_CAP_T / 2) * Cylinder((SCREW + CLR_STEEL) / 2, TEST_CAP_T + 1)
     # +X edge marked with a dot over every shaft, so the cap's right side is plain to see (it only fits one way)

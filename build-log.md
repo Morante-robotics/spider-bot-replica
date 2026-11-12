@@ -43,7 +43,8 @@ The robot's story in three parts, then what is left to do and a glossary.
    - [Test leg v2: turning by hand](#test-leg-v2-turning-by-hand) · 2026-11-11 · ✅ the leg turns
    - [Base v1 in CAD](#base-v1-in-cad) · 2026-11-11 · 🔄 designed, not printed
    - [Gear train test](#gear-train-test) · 2026-11-11 · ✅ faults found
-   - [Gear train v2 in CAD](#gear-train-v2-in-cad) · 2026-11-11 · 🔄 designed, not printed
+   - [Gear train v2 in CAD](#gear-train-v2-in-cad) · 2026-11-11 · ✅ printed
+   - [Gear train test v2: the cap](#gear-train-test-v2-the-cap) · 2026-11-12 · ✅ the train turns
 4. **[Open items](#open-items)**: everything still to do.
 5. **[Glossary](#glossary)**: the terms used in the entries.
 
@@ -331,7 +332,9 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
    turns the gears found that two of the idlers cannot mesh with both of their crankshafts at the designed crank
    angles, and that the gears have no backlash. In the redesign each crankshaft's gear is turned on its shaft so
    that every idler meshes with both neighbours, the gears have backlash, and a cap holds the shafts in the test.
-   It passes the new check; the test is printed again before the base.
+   Printed, the new train turned by hand without its cap, but the cap jammed it: its tongues ran a quarter of a
+   millimetre from the gear faces. With a new cap, centred by skirts and with its tongues kept clear of the gears,
+   the four shafts turn together. Base v1 is next.
 
 <img src="sim/images/drive-attempts.png" alt="The three drives tried, from above and from the side">
 
@@ -1273,7 +1276,7 @@ body's outline, and the screws and fork bosses show.*
 |---|---|
 | Overlaps over a full turn (every 10°) | None |
 | Closest pairs | Journals in their slots 0.25 mm a side, idlers 0.45 mm, legs 0.65 mm or more: the designed clearances |
-| [`print/base-v1.3mf`](print/base-v1.3mf) | 7 h 59 min, 140.8 g of PLA (keel rebuilt for [gear train v2](#gear-train-v2-in-cad)) |
+| [`print/base-v1.3mf`](print/base-v1.3mf) | 7 h 57 min, 140.4 g of PLA (keel rebuilt for [gear train v2](#gear-train-v2-in-cad), cap for [the test cap fix](#gear-train-test-v2-the-cap)) |
 | Hardware | 16 × M3×10 + nuts (fork swivels), 3 × M3×10 + nuts (cap) |
 
 Full list: [`cad/base/check-result.txt`](cad/base/check-result.txt).
@@ -1391,7 +1394,7 @@ The spec places the idlers at the angle that fits their two crankshafts best, th
 
 ### Gear train v2 in CAD
 
-**Phase 3 · Mechanisms · 2026-11-11** · Status: 🔄 designed, not printed
+**Phase 3 · Mechanisms · 2026-11-11** · Status: ✅ printed; its cap fixed in [Gear train test v2: the cap](#gear-train-test-v2-the-cap)
 
 > **In short.** The gear train was redesigned to fix the three faults of the [first test](#gear-train-test). Each
 > crankshaft's gear is now turned on its shaft by its own angle, so every idler meshes with both of its
@@ -1439,7 +1442,7 @@ The bottom row of Fig. 3 in [Gear train test](#gear-train-test) shows every idle
 | [`check-gear-train.txt`](cad/drive/check-gear-train.txt): every mesh, every 1° | No tooth in tooth; backlash 0.21–0.22 mm |
 | Crankshafts and idlers held | Only spin is free; at most 0.25 mm play (journals), 0.45 mm (idlers along their axle) |
 | [Base v1](cad/base/check-result.txt) and [whole drive](cad/drive/check-result.txt) over a full turn | No overlaps; closest pairs are the designed clearances |
-| [`print/gear-train-test-v2.3mf`](print/gear-train-test-v2.3mf) | 1 h 20 min, 33.7 g of PLA |
+| [`print/gear-train-test-v2.3mf`](print/gear-train-test-v2.3mf) | 1 h 20 min, 33.7 g of PLA (1 h 19 min, 33.5 g with [the new cap](#gear-train-test-v2-the-cap)) |
 
 <details>
 <summary>How to reproduce</summary>
@@ -1465,16 +1468,92 @@ as an overlap.
   shaft.
 - **About 0.2 mm of backlash** instead of 0.15: the check wants at least 0.08 mm free on each side of a tooth, and
   the crankshaft gears' teeth print stepped.
+- **The test cap was redesigned** after the print, in [Gear train test v2: the cap](#gear-train-test-v2-the-cap).
 
-#### Next
+[↑ Contents](#contents)
 
-Print [`print/gear-train-test-v2.3mf`](print/gear-train-test-v2.3mf) and assemble it as in
-[print/README](print/README.md#gear-train-test-v2): 5 × M3×12 and 5 M3 nuts. Turn crankshaft 1 ten times. It passes
-if the four shafts turn together without jerks, lifting or skipping, all cranks come back level together every turn,
-each idler spins freely on its screw, and the cap's tongues go into the slots without force. If it catches at the
-same angle every turn, turn each shaft with one idler at a time to find which mesh, and clean those teeth. If you
-have 3 mm steel pins, use them as idler axles instead of the screws (the robot uses pins). Then print
-[`print/base-v1.3mf`](print/base-v1.3mf).
+### Gear train test v2: the cap
+
+**Phase 3 · Mechanisms · 2026-11-12** · Status: ✅ the train turns
+
+> **In short.** The [gear train v2](#gear-train-v2-in-cad) was printed and assembled. Without its cap the four
+> crankshafts turned together, but with the cap on, even half pushed in, nothing turned. The cap's tongues ran
+> 0.25 mm from the gear faces, and only its screws kept the cap from sliding sideways onto them. A new cap keeps
+> its tongues clear of the gears and is centred by four skirts; with it the train turns by hand. Base v1's cap had
+> the same design and was fixed the same way.
+
+#### Steps
+
+1. Print [`print/gear-train-test-v2.3mf`](print/gear-train-test-v2.3mf) and assemble it as in
+   [print/README](print/README.md#gear-train-test-v2) (Fig. 1).
+2. Turn crankshaft 1 by its crank, first without the cap, then with it.
+3. With the cap jamming the train, measure the printed parts with a caliper. The journals came out 3.9–4.0 mm
+   (designed 4.0), so the slots were not the problem.
+4. Redesign the cap (below) and print it on its own: [`print/test-cap-v2.3mf`](print/test-cap-v2.3mf), 13 min,
+   6.7 g. The full plate now carries the new cap.
+5. Fit the new cap and turn crankshaft 1 by its crank (Fig. 2).
+
+<img src="cad/drive/images/gear-train-test-v2-assembly.png" alt="Exploded view of the gear train test v2 and the view from the +X side">
+
+*Fig. 1 · Left: the parts pulled apart along the way each one goes in, numbered by assembly step. Right: the test
+seen from the +X side (the side with the dots) with every crank level; the arrows show where each +X crank points
+(front, rear, front, rear). Made by [`cad/drive/assembly_figure.py`](cad/drive/assembly_figure.py).*
+
+#### Result
+
+| What | Expected | What happened |
+|---|---|---|
+| Train without the cap | Turns | Turns; the shafts lift a little when the teeth push, as nothing holds them down |
+| Train with the first cap | Turns | Does not turn at all, even with the cap half pushed in or with one tongue broken off |
+| Train with the new cap | Turns | The four shafts turn together, smoothly (Fig. 2) |
+
+<img src="images/gear-train-test-v2-turning.gif" width="440" alt="The gear train test v2 turning with the new cap">
+
+*Fig. 2 · Seen from the +X side with the new cap on: the cranks of the four shafts go round together. The
+three bright washers are the idlers' axle screws.*
+
+**Why the first cap jammed.** Each tongue went down a slot over a journal and covered the whole width of the wall,
+up to 0.25 mm from the gear. Only the cap's two screws, in oversized holes, centred it, so it could sit 0.3 mm to
+one side; the crankshafts can also slide 0.25 mm along their axis. At the worst position a tongue touched the face
+of a turning gear and braked it. The check had placed every part only at its nominal position, saw a quarter of a
+millimetre free and passed.
+
+**The fix** (`test_cap()` in [`cad/drive/build.py`](cad/drive/build.py)):
+
+- **Tongues only over the outer part of each wall**, 1.1 mm wide instead of 2.5. With the cap and the shafts at
+  their worst positions, they stay 0.9 mm from the gear faces.
+- **Four skirts** at the ends of the cap come down outside the walls, 0.2 mm off each side, so the cap sits centred
+  on the spine and cannot slide onto the gears. They are by the end blocks, away from everything that turns.
+- **The check poses loose parts at their extremes now.** [`tools/cad_verify.py`](../tools/cad_verify.py) has a
+  keep-out zone around each gear face (its play plus 0.8 mm), and [the spec](cad/drive/verify_gear_train.py) turns
+  the train with the cap shifted 0.2 mm either way. The first cap fails it in three places; the new one passes
+  ([report](cad/drive/verify-gear-train.txt)).
+- **Base v1's cap** had the same tongues and now has the same narrow ones ([`cad/base/build.py`](cad/base/build.py)).
+
+<details>
+<summary>How to reproduce</summary>
+
+```
+python3 cad/drive/build.py
+cd cad/drive
+python3 ../../../tools/cad_verify.py verify_gear_train.py --out verify-gear-train.txt --render images/verify
+python3 assembly_figure.py
+cd ../base && python3 build.py
+```
+
+`VERIFY_STEP=30` in front of the verifier gives a quick run every 30° instead of every 5°.
+
+</details>
+
+#### Decisions
+
+- **A cover is never located by its screws alone:** a skirt, a lip or the edge of an opening places it, and a
+  spinning gear face keeps at least 0.8 mm from any fixed printed face, counting the play of every loose part.
+- **The gear faces still run 0.25 mm from the spine's walls.** The train turns without the cap, so they were left
+  as they are; they are the first place to look if the drive drags in the base.
+- **Base v1 is printed next**, with the new cap.
+
+This entry closes the open item «Print the gear train test v2 and turn it by hand».
 
 [↑ Contents](#contents)
 
@@ -1486,8 +1565,7 @@ outside the repo.
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| Print the gear train test v2 and turn it by hand | [Gear train v2 in CAD](#gear-train-v2-in-cad) | 3 |
-| Then print base v1 (with the gear train v2), the 8 legs and 8 forks, assemble the drive in the base and turn it by hand | [Base v1 in CAD](#base-v1-in-cad) | 3 |
+| Print base v1 (with the gear train v2), the 8 legs and 8 forks, assemble the drive in the base and turn it by hand | [Base v1 in CAD](#base-v1-in-cad) | 3 |
 | Fix the front block (it stands loose on the deck and the cap) and the body on the band | [Base v1 in CAD](#base-v1-in-cad) | 2 |
 | Base for looks, once v1 works: band following the body's outline, screws and fork bosses hidden, no gap under the body's rear, side lips back | [Base v1 in CAD](#base-v1-in-cad) | 5 |
 | Carcass cuts: battery hatch in the base, motor and shaft openings | [Mesh repair](#mesh-repair) | 2 |
