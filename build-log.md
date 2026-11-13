@@ -58,7 +58,14 @@ outside the repo.
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| Print base v1 (with the gear train v2), the 8 legs and 8 forks ([`print/legs-forks-v1.3mf`](print/legs-forks-v1.3mf)), assemble the drive in the base and turn it by hand | [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) | 3 |
+| Base v1 was printed (2026-11-13) and failed: cap too tight (its tongues broke), front block not fixed (its thin pegs broke the posts), pins unreachable, big gear not fully home, support trapped in recesses, no gear marks. Write its entry with Morante's photos, then design base v2 with the CAD rules below | [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) | 3 |
+| Assemble the drive in the base with the 8 legs and 8 forks ([`print/legs-forks-v1.3mf`](print/legs-forks-v1.3mf)) and turn it by hand | [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) | 3 |
+| Before base v2: move `cad/drive/` and `cad/base/` to the design-folder layout. Split `drive/build.py` into one design per function (legs, crankshafts and idlers, test rigs) and check every moved part's STL comes out identical; `verify.py`, `out/` and `--part` in each; designs import each other as modules instead of `importlib` path tricks | [CAD rules](cad/README.md#a-design-folder) | 3 |
+| Bring `cad/drive/verify_gear_train.py` to the spec standard without touching geometry: `MARKS`, `JOINTS` with fits (the printed test cap went on with tongues at 0.3 mm a side: a measured fit for short tongues, or another kind), hardware labels, `LABELS["es"]`, `PRINT_ORIENT` for every part, `GEAR_MOTION`, `MEASURE`; full check PASS and a workshop kit with no FALTA about the spec | [Gear train test v2: the cap](build-log/3-legs-and-drive.md#gear-train-test-v2-the-cap) | 3 |
+| Robot master model (`cad/robot.py`): datums, the carcass envelope and a table of every interface between designs; each design imports it, and the whole robot is verified at the end of every design | [CAD rules](cad/README.md#conventions) | 3 |
+| Replace `cad/base/check.py` (ad hoc, 2.5–3 min) with a `cad_verify` spec of the whole robot | [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) | 3 |
+| Calibrate X-Y hole and contour compensation with the clearance block, and save the standard settings as a Bambu Studio preset | [Standard settings](print/README.md#standard-settings) | 3 |
+| Count the hardware in the workshop (the **Have** column) | [Hardware](hardware.md) | 3 |
 | Fix the front block (it stands loose on the deck and the cap) and the body on the band | [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) | 2 |
 | Base for looks, once v1 works: band following the body's outline, screws and fork bosses hidden, no gap under the body's rear, side lips back | [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) | 5 |
 | Carcass cuts: battery hatch in the base, motor and shaft openings | [Mesh repair](build-log/2-carcass.md#mesh-repair) | 2 |
