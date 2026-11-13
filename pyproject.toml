@@ -1,7 +1,7 @@
 [project]
-name = "robotics-capstones"
+name = "spider-bot-replica"
 version = "0.1.0"
-description = "Scripts for the robotics capstones: CAD models in code, checks, figures and print plates"
+description = "Spider-Bot replica: CAD models in code, checks, figures and print plates"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 license = "MIT"

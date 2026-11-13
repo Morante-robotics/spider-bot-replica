@@ -12,7 +12,7 @@ Every gear is placed at its real angle: crankshaft i at gear_offsets()[i] - θ (
 idler k at idler_phase(k) + θ·12/n. The idler phases are the designed ones, not a best fit: if a crankshaft were a
 tooth off, the teeth would overlap here.
 
-    python3 ../../../tools/cad_verify.py verify_gear_train.py --out verify-gear-train.txt --render images/verify
+    python3 ../../tools/cad_verify.py verify_gear_train.py --out verify-gear-train.txt --render images/verify
 """
 import importlib.util
 import os
@@ -22,7 +22,7 @@ import numpy as np
 import trimesh
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "..", "..", "tools"))
+sys.path.insert(0, os.path.join(HERE, "..", "..", "tools"))
 import build as B  # noqa: E402
 from cad_verify import rod  # noqa: E402
 

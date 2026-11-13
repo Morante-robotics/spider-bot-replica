@@ -18,7 +18,7 @@ Basic, 0.20 mm Standard). Open one in Bambu Studio, check it and send it: **Slic
 Every plate uses the same settings, so the measured fits in [`../cad/fits.py`](../cad/fits.py) stay valid from one
 print to the next: P2S, 0.4 mm nozzle, Textured PEI plate, Bambu PLA Basic, **0.20 mm Standard**, supports
 **tree(auto)**, **On build plate only**, X-Y hole and contour compensation left at 0.
-[`bambu_plate.py --standard`](../../tools/bambu_plate.py) adds them. A plate that needs something else says so,
+[`bambu_plate.py --standard`](../tools/bambu_plate.py) adds them. A plate that needs something else says so,
 with the reason, in its section below. A plate is committed once, for the version that is printed.
 
 ## Test leg plate

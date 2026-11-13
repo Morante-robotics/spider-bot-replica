@@ -1,5 +1,8 @@
 # Capstone 1 · Spider-Bot
 
+Part of [Robotics Capstones](https://github.com/Morante-robotics/robotics-capstones), my path to learning
+robotics one robot at a time.
+
 Replica of the Spider-Bot from Avengers Campus: 8 legs moved by a single motor, LED eyes, and it walks as soon
 as it is switched on (no remote control).
 
@@ -43,9 +46,16 @@ repeated. Its contents show where each step stands, and its **Open items** list 
 | [measurements.csv](measurements.csv) | Every caliper measurement of a printed part, the source of the fits |
 | [print/](print/) | Bambu Studio projects ready to print, with time and filament |
 | [sim/](sim/) | Leg simulators: 2D foot paths of three leg types, and the toy leg in 3D on the whole robot |
-| [tools/](tools/) | Helper scripts for meshes, previews, fit checks, figures and print plates; each explains its use in its first lines |
+| [tools/](tools/) | Scripts: `cad_verify.py` checks a printed mechanism before it is printed (collisions, fits against the measured clearances, whether every part is held, whether a finger or tool reaches every pin and screw); `figures.py` draws assembly and measuring diagrams; `workshop_kit.py` makes the one-page assembly sheet for the bench; `bambu_plate.py` lays out and slices plates; `print_report.py` measures support per part; previews, mesh repair and figure scripts. Each explains itself in its docstring; `tools/tests/` keeps the checks honest |
+
+## Run the code
+
+Install [uv](https://docs.astral.sh/uv/), then run `uv sync` here: it sets up Python 3.12 and every library at the
+versions in `uv.lock`. Then `uv run python tools/<script>.py --help`, or `uv run python build.py` in a CAD folder.
 
 ## License
 
-Same as the repo (MIT for code, CC BY-SA 4.0 for the rest), except the carcass files based on
-[Spidey-Bot by jenscolt](https://www.thingiverse.com/thing:5196618), which are CC BY-NC-SA like the original.
+Code is licensed under the [MIT License](LICENSE). Texts, photos, videos and designs are licensed under
+[Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/),
+except the carcass files based on [Spidey-Bot by jenscolt](https://www.thingiverse.com/thing:5196618), which are
+CC BY-NC-SA like the original (see the `LICENSE.txt` in their folders).
