@@ -145,3 +145,44 @@ def test_relative_position_cache_key():
     both = cv.rot([0, 0, 1], 30)
     assert cv.rel_key(a, b) == cv.rel_key(both @ a, both @ b)
     assert cv.rel_key(a, b) != cv.rel_key(a, cv.move([1.1, 0, 0]))
+
+
+def test_part_floating_above_its_seat_fails():
+    # base v1, 2026-11-13: the big gear did not go fully into its pocket
+    floor = box([20, 20, 4], (0, 0, -2))
+    for lift, fails in ((0.5, 1), (0.0, 0)):
+        disc = cv.rod(10, 3, [0, 0, lift], [0, 0, 1])
+        parts = {"floor": {"mesh": floor, "fixed": True}, "gear": {"mesh": disc}}
+        rep = run(cv.check_seats, spec(PARTS=parts, SEATS={"gear": {"on": "floor", "dir": [0, 0, -1]}}))
+        assert rep.fails == fails, rep.text()
+
+
+def test_thin_upright_peg_warns():
+    # base v1, 2026-11-13: thin pegs printed upright broke the posts they sat in
+    base = box([20, 20, 2], (0, 0, 1))
+    thin = join(base, cv.rod(3.0, 8, [0, 0, 2], [0, 0, 1]))
+    thick = join(base, cv.rod(5.0, 8, [0, 0, 2], [0, 0, 1]))
+    assert cv.upright_slender(thin) and not cv.upright_slender(thick)
+
+
+def test_gear_motion_checks_gears_on_their_own_steps():
+    g1 = cv.rod(10, 3, [0, 0, 0], [0, 0, 1])
+    g2 = cv.rod(10, 3, [10.3, 0, 0], [0, 0, 1])
+    parts = {"g1": {"mesh": g1, "fixed": True}, "g2": {"mesh": g2}}
+    s = spec(PARTS=parts, GEARS=[("g1", "g2")], MOTION=[0, 1], GEAR_MOTION=[0, 1, 2],
+             poses=lambda t: {"g2": cv.rot([0, 0, 1], 10 * t, [10.3, 0, 0])})
+    rep = run(cv.check_motion, s)
+    assert "3 pair positions computed" in rep.text() and "ok    gears g1 × g2: gap 0.30" in rep.text(), rep.text()
+
+
+def test_disk_cache_reuses_pairs(tmp_path):
+    parts = window(0.5)
+    meshes = {n: p["mesh"] for n, p in parts.items()}
+    f = cv.load_cache(str(tmp_path / "spec.py"), meshes)
+    s = spec(PARTS=parts)
+    rows, n, hits = cv.scan_pairs(s, meshes, [0], None, 0.5)
+    assert hits == 0 and cv.NEW
+    cv.save_cache(f)
+    cv.load_cache(str(tmp_path / "spec.py"), meshes)
+    rows2, n2, hits2 = cv.scan_pairs(s, meshes, [0], None, 0.5)
+    assert hits2 == 1 and rows2 == rows

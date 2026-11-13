@@ -15,3 +15,4 @@ cad/base/body-lifted.stl
 cad/_template/out/
 # BambuStudio --info writes result.json in the working folder
 result.json
+.cad_verify_cache.pkl
