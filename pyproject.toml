@@ -1,0 +1,32 @@
+[project]
+name = "robotics-capstones"
+version = "0.1.0"
+description = "Scripts for the robotics capstones: CAD models in code, checks, figures and print plates"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = "MIT"
+dependencies = [
+    "build123d>=0.13",      # parametric CAD (STEP and STL out)
+    "trimesh>=5.2",         # meshes: sections, rays, stable poses
+    "manifold3d>=3.5",      # fast booleans and gaps for tools/cad_verify.py
+    "rtree>=1.4",           # trimesh's spatial index
+    "numpy>=2.5",
+    "scipy>=1.18",
+    "shapely>=2.2",
+    "networkx>=3.7",
+    "lxml>=6.1",
+    "matplotlib>=3.11",     # every figure (tools/figures.py)
+    "pillow>=13.0",         # photos and GIFs
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+office = ["openpyxl>=3.1", "python-docx>=1.2"]   # private Plan (.docx) and Seguimiento (.xlsx), outside the repo
+mesh-repair = ["pymeshlab>=2023.12"]               # tools/repair_stl.py only: uv sync --group mesh-repair
+
+[tool.uv]
+package = false
+default-groups = ["dev", "office"]
+
+[tool.pytest.ini_options]
+testpaths = ["tools/tests"]

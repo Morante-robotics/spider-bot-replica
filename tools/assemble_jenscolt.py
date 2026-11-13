@@ -16,7 +16,8 @@ import sys
 
 import numpy as np
 
-from stl_preview import load
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "tools"))
+from stl_preview import load  # noqa: E402
 
 CENTER_X, CENTER_Y = 35.6, -3.0          # vertical axis of the body (mm), from the leg sockets
 EYES = [(22.0, 91.0), (49.0, 91.0)]      # big eye socket centers (x, z)

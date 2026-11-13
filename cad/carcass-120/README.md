@@ -1,9 +1,9 @@
 # Carcass at 120 %, repaired
 
 Body, base, eyes and sensor of [Spidey-Bot by jenscolt](https://www.thingiverse.com/thing:5196618), made watertight
-with [`repair_stl.py`](../../tools/repair_stl.py) and scaled to 120 % (the print scale, see
+with [`repair_stl.py`](../../../tools/repair_stl.py) and scaled to 120 % (the print scale, see
 [cad/layout/](../layout/)). Surface within 0.01 mm of the original. Positions as in the original files (eyes off to
-the side). How and why: [build log](../../build-log.md#mesh-repair).
+the side). How and why: [build log](../../build-log/2-carcass.md#mesh-repair).
 
 **License:** CC BY-NC-SA, like the original ([LICENSE.txt](LICENSE.txt)).
 

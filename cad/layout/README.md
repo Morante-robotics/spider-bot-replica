@@ -1,7 +1,7 @@
 # Layout: what fits inside the body
 
 Free space inside the [jenscolt body](../carcass-jenscolt/), checked with [`fit_check.py`](../../tools/fit_check.py).
-Details and decisions in the [build log](../../build-log.md#motor-battery-holder-and-print-scale).
+Details and decisions in the [build log](../../build-log/2-carcass.md#motor-battery-holder-and-print-scale).
 
 **Print scale: 120 %.** At that size a 4×AAA holder with switch and cover (64 × 49 × 16 mm) and the N20 gear motor
 (37 × 12 × 10 mm) fit with 2 mm clearance per side.

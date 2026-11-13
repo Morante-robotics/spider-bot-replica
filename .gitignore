@@ -18,3 +18,10 @@ __pycache__/
 
 # Spider-Bot base: the carcass body moved up, written by cad/base/build.py for its check
 1-spiderbot/cad/base/body-lifted.stl
+
+# Stray outputs: BambuStudio --info writes result.json in the working folder; pytest cache
+result.json
+.pytest_cache/
+
+# the design template builds a demo into out/
+1-spiderbot/cad/_template/out/
