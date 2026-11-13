@@ -1,27 +1,17 @@
 .DS_Store
-build/
-*.hex
-*.elf
-*.bin
-# Raw videos stay out of git: upload compressed clips to the README on github.com
+# Raw videos stay out of git: upload compressed clips to the build log on github.com
 *.mov
 *.MOV
 *.mp4
-
 # Claude Code config and skills are personal: never commit them
 .claude/
 CLAUDE.md
-
-# Python bytecode
+# Python
 __pycache__/
 .venv/
-
-# Base: the carcass body moved up, written by cad/base/build.py for its check
-cad/base/body-lifted.stl
-
-# Stray outputs: BambuStudio --info writes result.json in the working folder; pytest cache
-result.json
 .pytest_cache/
-
-# the design template builds a demo into out/
+# Generated: the carcass body moved up (cad/base/build.py, for its check); the template's demo build
+cad/base/body-lifted.stl
 cad/_template/out/
+# BambuStudio --info writes result.json in the working folder
+result.json
