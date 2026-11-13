@@ -24,7 +24,10 @@ one is at every step of the motion, and what is allowed. The tool then runs eigh
                   at every motion step, measured inside the joint's own region when the parts also touch elsewhere
  10. marks        every gear (GEARS) and every part flagged "phased" has an alignment mark declared in MARKS
   (6. print also reports overhangs whose support would stand on the part itself, in a pocket or under a bridge:
-      support nobody can reach, or, with «On build plate only», an overhang printed over air)
+      support nobody can reach, or, with «On build plate only», an overhang printed over air; and pegs or posts
+      printed upright thinner than Ø4, which break along the layers)
+ 11. seats        every part in SEATS sits fully home on its seat: pushed further along its direction, it is
+                  stopped at once
 
 Spec file (all names optional except PARTS and poses):
 
@@ -52,6 +55,9 @@ Spec file (all names optional except PARTS and poses):
                                               # elsewhere, e.g. a cap resting on its frame); "moves": True to box
                                               # the region with the first part instead
     MARKS = {"shaft": "dot on the tooth that meets the idler's dot", "idler": "dot between two teeth"}
+    SEATS = {"gear": {"on": "frame", "dir": [0, 0, -1], "why": "big gear in its pocket"}}   # tol: 0.05 mm default
+    GEAR_MOTION = [(a, 0) for a in range(0, 31)]   # optional: meshing pairs checked over these steps only (one
+                                              # tooth pitch, finer) instead of MOTION; every other pair over MOTION
     MIN_GAP, GEAR_GAP, MIN_WALL, BED = 0.2, (0.08, 0.5), 0.8, (256, 256, 256)
 
 Usage:
@@ -61,7 +67,9 @@ Usage:
 --quick skips the wall thickness and checks retention at the first motion step only: use it while iterating.
 --only checks only what involves these parts (pairs with them, their retention, joints, marks): after a change to
 one part, run with --only that part, and the full check once at the end.
-Pairs whose relative position repeats (static parts, parts moving together) are computed once and reused.
+Pairs whose relative position repeats (static parts, parts moving together) are computed once and reused, and the
+results are kept between runs in .cad_verify_cache.pkl next to the spec (--no-cache to ignore it): after a change
+to one part, only the pairs with that part cost time again.
 
 --render writes assembly.png (3 views), assembly-steps.png (one panel per ASSEMBLY step: the parts already in place
 in grey, the incoming part lifted out along its direction, the access tools in red) and section-N.png.
@@ -270,10 +278,51 @@ def involves(only, *names):
     return only is None or any(n in only for n in names)
 
 
-def scan_pairs(spec, meshes, steps, only, gmax):
+def mesh_hash(m):
+    """Fingerprint of a mesh's geometry: same hash, same shape (for the cache between runs)."""
+    import hashlib
+    h = hashlib.md5(np.ascontiguousarray(m.vertices, dtype=np.float64).tobytes())
+    h.update(np.ascontiguousarray(m.faces, dtype=np.int64).tobytes())
+    return h.hexdigest()[:16]
+
+
+# Results of pair computations kept between runs, next to the spec (.cad_verify_cache.pkl, not committed): a pair is
+# recomputed only when one of its two meshes or their relative position changes, so after editing one part only the
+# pairs with that part cost time
+DISK, NEW, HASH = {}, {}, {}
+
+
+def load_cache(spec_path, meshes):
+    import pickle
+    DISK.clear(), NEW.clear(), HASH.clear()
+    HASH.update({n: mesh_hash(m) for n, m in meshes.items()})
+    f = os.path.join(os.path.dirname(os.path.abspath(spec_path)), ".cad_verify_cache.pkl")
+    try:
+        with open(f, "rb") as fh:
+            DISK.update(pickle.load(fh))
+    except (OSError, EOFError, pickle.UnpicklingError):
+        pass
+    return f
+
+
+def save_cache(f):
+    import pickle
+    if not NEW:
+        return
+    DISK.update(NEW)
+    if len(DISK) > 200000:                      # keep the file small: drop the oldest half
+        for k in list(DISK)[:len(DISK) // 2]:
+            del DISK[k]
+    with open(f, "wb") as fh:
+        pickle.dump(DISK, fh)
+
+
+def scan_pairs(spec, meshes, steps, only, gmax, which="all"):
     """Overlap volume and gap of every pair of parts that come near each other, at each step:
-    [(t, a, b, overlap, gap)]. A pair whose relative position repeats is computed once."""
+    [(t, a, b, overlap, gap)]. A pair whose relative position repeats is computed once (and, through the disk cache,
+    once across runs). which: "all", "gears" (only GEARS pairs) or "others" (every pair but GEARS)."""
     cache, hits, rows = {}, 0, []
+    gears = {pair_key(*k) for k in getattr(spec, "GEARS", [])}
     # gaps beyond 1 mm are neither reported nor checked: a shorter search is much faster (a gap past it reads as the
     # search length)
     radius = max([1.0, getattr(spec, "MIN_GAP", 0.2), gmax] + list(getattr(spec, "PAIR_GAP", {}).values())) + 0.05
@@ -284,14 +333,24 @@ def scan_pairs(spec, meshes, steps, only, gmax):
         for a, b in itertools.combinations(ms, 2):
             if not involves(only, a, b) or not boxes_near(bx[a], bx[b], max(1.0, gmax)):
                 continue
-            ck = (a, b, rel_key(P[a], P[b]))
+            g_pair = pair_key(a, b) in gears
+            if (which == "gears" and not g_pair) or (which == "others" and g_pair):
+                continue
+            rk = rel_key(P[a], P[b])
+            ck = (a, b, rk)
+            dk = (HASH.get(a), HASH.get(b), rk, round(radius, 3))
             if ck in cache:
                 v, g = cache[ck]
+                hits += 1
+            elif dk[0] and dk in DISK:
+                v, g = cache[ck] = DISK[dk]
                 hits += 1
             else:
                 v = overlap(ms[a], ms[b])
                 g = 0.0 if v > EPS_VOL else ms[a].min_gap(ms[b], radius)
                 cache[ck] = (v, g)
+                if dk[0]:
+                    NEW[dk] = (v, g)
             rows.append((t, a, b, v, g))
     return rows, len(cache), hits
 
@@ -303,23 +362,28 @@ _W = {}
 def _worker_init(path):
     _W["spec"] = load_spec(path)
     _W["meshes"] = load_meshes(_W["spec"], path)
+    load_cache(path, _W["meshes"])
 
 
 def _worker_scan(args):
-    return scan_pairs(_W["spec"], _W["meshes"], *args)
+    NEW.clear()
+    rows, n, hits = scan_pairs(_W["spec"], _W["meshes"], *args)
+    return rows, n, hits, dict(NEW)
 
 
-def scan_pairs_parallel(spec, meshes, steps, only, gmax):
+def scan_pairs_parallel(spec, meshes, steps, only, gmax, which="all"):
     """scan_pairs split over JOBS processes, in contiguous chunks of the motion (so repeats stay in one chunk)."""
     if JOBS <= 1 or SPEC_PATH is None or len(steps) < 60:     # each process spends ~5-10 s loading the spec
-        return scan_pairs(spec, meshes, steps, only, gmax)
+        return scan_pairs(spec, meshes, steps, only, gmax, which)
     import multiprocessing
     from concurrent.futures import ProcessPoolExecutor
     chunks = [list(c) for c in np.array_split(np.arange(len(steps)), JOBS)]
-    args = [([steps[i] for i in c], only, gmax) for c in chunks if len(c)]
+    args = [([steps[i] for i in c], only, gmax, which) for c in chunks if len(c)]
     with ProcessPoolExecutor(JOBS, mp_context=multiprocessing.get_context("spawn"), initializer=_worker_init,
                              initargs=(SPEC_PATH,)) as ex:
         parts = list(ex.map(_worker_scan, args))
+    for p in parts:
+        NEW.update(p[3])
     return [r for p in parts for r in p[0]], sum(p[1] for p in parts), sum(p[2] for p in parts)
 
 
@@ -333,7 +397,14 @@ def check_motion(spec, meshes, rep, only=None):
     pair_gap = {pair_key(*k): v for k, v in getattr(spec, "PAIR_GAP", {}).items()}
     worst_overlap, closest, gear_overlap = {}, {}, {}
     gear_gap = {g: (np.inf, -np.inf, None, None) for g in gears if involves(only, *g)}
-    rows, ncache, hits = scan_pairs_parallel(spec, meshes, motion, only, gmax)
+    gear_motion = getattr(spec, "GEAR_MOTION", None)
+    if gear_motion is not None:
+        # meshing pairs repeat every tooth: they are checked, finer, over GEAR_MOTION only; the rest over MOTION
+        r1, n1, h1 = scan_pairs_parallel(spec, meshes, motion, only, gmax, "others")
+        r2, n2, h2 = scan_pairs_parallel(spec, meshes, list(gear_motion), only, gmax, "gears")
+        rows, ncache, hits = r1 + r2, n1 + n2, h1 + h2
+    else:
+        rows, ncache, hits = scan_pairs_parallel(spec, meshes, motion, only, gmax)
     for t, a, b, v, g in rows:
         k = pair_key(a, b)
         if v > EPS_VOL:
@@ -587,6 +658,11 @@ def check_print(spec, meshes, rep):
         on_part = m.ray.intersects_any(origins, np.tile([0.0, 0.0, -1.0], (len(idx), 1)))
         trapped = m.area_faces[idx[on_part]].sum()
         msg = f"{name}: {a:.0f} mm² of overhang needing support"
+        slender = upright_slender(m)
+        for z0_, z1_, c, a_ in slender[:3]:
+            rep.warn(f"{name}: upright feature thinner than Ø4 ({a_:.1f} mm² section) from z {z0_:.1f} to {z1_:.1f} at "
+                     f"{c} in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a "
+                     f"steel pin")
         if trapped > 5:
             pts = m.triangles_center[idx[on_part]]
             where = [round(float(v), 1) for v in pts[np.argmax(m.area_faces[idx[on_part]])]]
@@ -595,6 +671,38 @@ def check_print(spec, meshes, rep):
                      f"orientation): open it, split the part, or give the reason in the design review")
         else:
             rep.info(f"{msg}, all of it over the bed")
+
+
+def upright_slender(m, min_area=np.pi * 2.0 ** 2, min_height=2.0, dz=0.4):
+    """Pegs, posts and pins printed upright with a section under Ø4 (in print orientation), standing for at least
+    min_height: [(z_from, z_to, [x, y], smallest area)]. They break along the layers (base v1, 2026-11-13)."""
+    z0, z1 = m.bounds[0][2], m.bounds[1][2]
+    zs = np.arange(z0 + dz, z1 - dz / 2, dz)
+    if len(zs) < 2:
+        return []
+    secs = m.section_multiplane(plane_origin=[0, 0, 0], plane_normal=[0, 0, 1], heights=zs)
+    tracks, done = [], []
+    for z, sec in zip(zs, secs):
+        islands = []
+        if sec is not None:
+            for poly in sec.polygons_full:
+                if poly.area < min_area:
+                    islands.append((np.array(poly.centroid.coords[0]), poly.area))
+        nxt = []
+        for c, a_ in islands:
+            for t in tracks:
+                if np.linalg.norm(t["c"] - c) < 1.0:
+                    t.update(c=c, z1=z, a=min(t["a"], a_))
+                    nxt.append(t)
+                    break
+            else:
+                nxt.append({"c": c, "z0": z, "z1": z, "a": a_})
+        done += [t for t in tracks if all(t is not u for u in nxt)]
+        tracks = nxt
+    done += tracks
+    out = [(t["z0"], t["z1"], [round(float(v), 1) for v in t["c"]], t["a"]) for t in done
+           if t["z1"] - t["z0"] >= min_height - 1e-9]
+    return sorted(out, key=lambda x: x[3])
 
 
 def check_joints(spec, meshes, rep, only=None):
@@ -641,6 +749,37 @@ def check_joints(spec, meshes, rep, only=None):
             rep.ok(f"{label}: ≥ {g:.2f} mm a side (fit {need:.2f}{', ' + status if status else ''})")
         if status == "assumed":
             rep.warn(f"{a} × {b}: fit not measured yet ({getattr(fit, 'source', '')}): prove it on a coupon first")
+
+
+def check_seats(spec, meshes, rep, only=None):
+    """A part that must sit fully home (a gear in its pocket, a block on its ledge) touches its seat: pushed further
+    along its direction it is stopped at once. If it can move further, it floats above its seat as designed (base v1,
+    2026-11-13: the big gear did not go fully into its pocket)."""
+    seats = getattr(spec, "SEATS", {})
+    if not seats:
+        return
+    rep.head("11 seats: does each part sit fully home?")
+    motion = list(getattr(spec, "MOTION", [0]))
+    ms = placed(spec, meshes, motion[0])
+    for name, st in seats.items():
+        if not involves(only, name, st["on"]):
+            continue
+        d = np.asarray(st["dir"], float) / np.linalg.norm(st["dir"])
+        tol = st.get("tol", 0.05)
+        me, on = ms[name], ms[st["on"]]
+        v0 = overlap(me, on)
+        free = None
+        for s_ in np.arange(0.02, 2.0 + 1e-9, 0.02):
+            if overlap(me.translate(list(d * s_)), on) > v0 + EPS_VOL:
+                free = s_ - 0.02
+                break
+        label = f"{name} on {st['on']} ({st.get('why', '')})"
+        if free is None:
+            rep.fail(f"{label}: nothing under it along {name_dir(np.sign(d.round(3)))} within 2 mm")
+        elif free > tol:
+            rep.fail(f"{label}: {free:.2f} mm above its seat as designed (more than {tol} mm): it is not home")
+        else:
+            rep.ok(f"{label}: home (≤ {max(free, 0):.2f} mm)")
 
 
 def check_marks(spec, rep, only=None):
@@ -729,12 +868,14 @@ def main():
     ap.add_argument("--jobs", type=int, default=os.cpu_count() or 1,
                     help="processes for the motion check (default: all cores; 1 to run in one process)")
     ap.add_argument("--only", help="comma-separated parts: check only what involves them (while iterating)")
+    ap.add_argument("--no-cache", action="store_true", help="ignore and do not write .cad_verify_cache.pkl")
     args = ap.parse_args()
     only = set(args.only.split(",")) if args.only else None
     global SPEC_PATH, JOBS
     SPEC_PATH, JOBS = os.path.abspath(args.spec), max(1, args.jobs)
     spec = load_spec(args.spec)
     meshes = load_meshes(spec, args.spec)
+    cache_file = None if args.no_cache else load_cache(args.spec, meshes)
     rep = Report()
     timing = []
     if only and only - set(spec.PARTS):
@@ -743,19 +884,11 @@ def main():
         rep.partial = True
         rep.lines.append(f"PARTIAL CHECK: only what involves {', '.join(sorted(only))}. Run the full check before "
                          f"returning")
-    for label, fn in (("integrity", lambda: check_integrity(spec, meshes, rep, args.quick, only)),
-                      ("motion", lambda: check_motion(spec, meshes, rep, only)),
-                      ("retention", lambda: check_retention(spec, meshes, rep, args.quick, only)),
-                      ("assembly", lambda: check_assembly(spec, meshes, rep)),
-                      ("print", lambda: check_print(spec, meshes, rep)),
-                      ("keep-out", lambda: check_keep_out(spec, meshes, rep, only)),
-                      ("access", lambda: check_access(spec, meshes, rep)),
-                      ("joints", lambda: check_joints(spec, meshes, rep, only)),
-                      ("marks", lambda: check_marks(spec, rep, only))):
-        t0 = time.perf_counter()
-        fn()
-        timing.append(f"{label} {time.perf_counter() - t0:.0f} s")
-        print(f"[{timing[-1]}]", file=sys.stderr, flush=True)
+    try:
+        run_checks(spec, meshes, rep, args, only)
+    finally:
+        if cache_file:              # even when a check crashes, keep what was computed
+            save_cache(cache_file)
     txt = rep.text()
     print(txt)
     if args.out:
@@ -764,6 +897,24 @@ def main():
     if args.render:
         render(spec, meshes, args.render)
     sys.exit(1 if rep.fails else 0)
+
+
+def run_checks(spec, meshes, rep, args, only):
+    timing = []
+    for label, fn in (("integrity", lambda: check_integrity(spec, meshes, rep, args.quick, only)),
+                      ("motion", lambda: check_motion(spec, meshes, rep, only)),
+                      ("retention", lambda: check_retention(spec, meshes, rep, args.quick, only)),
+                      ("assembly", lambda: check_assembly(spec, meshes, rep)),
+                      ("print", lambda: check_print(spec, meshes, rep)),
+                      ("keep-out", lambda: check_keep_out(spec, meshes, rep, only)),
+                      ("access", lambda: check_access(spec, meshes, rep)),
+                      ("joints", lambda: check_joints(spec, meshes, rep, only)),
+                      ("seats", lambda: check_seats(spec, meshes, rep, only)),
+                      ("marks", lambda: check_marks(spec, rep, only))):
+        t0 = time.perf_counter()
+        fn()
+        timing.append(f"{label} {time.perf_counter() - t0:.0f} s")
+        print(f"[{timing[-1]}]", file=sys.stderr, flush=True)
 
 
 if __name__ == "__main__":

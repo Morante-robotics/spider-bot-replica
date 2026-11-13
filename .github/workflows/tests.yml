@@ -2,6 +2,7 @@ name: tests
 
 # The shared tools (tools/) must keep catching every failure that once reached a print.
 on:
+  workflow_dispatch:          # run by hand from the Actions tab
   push:
     paths: ["tools/**", "pyproject.toml", "uv.lock", ".github/workflows/tests.yml"]
   pull_request:
