@@ -1,7 +1,7 @@
 # Base v1
 
 The [carcass base](../carcass-120/) made to carry the [legs and drive](../drive/), modelled in code from the mesh
-(trimesh + manifold3d booleans). How and why: [build log](../../build-log.md#base-v1-in-cad).
+(trimesh + manifold3d booleans). How and why: [build log](../../build-log/3-legs-and-drive.md#base-v1-in-cad).
 
 ```
 python3 ../drive/build.py   # the drive's parts first

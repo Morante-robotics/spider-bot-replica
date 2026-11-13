@@ -263,7 +263,7 @@ def poses_at(spec, t):
 
 def rel_key(Ma, Mb):
     """Position of b relative to a, rounded: the same key means the same overlap and gap."""
-    return np.round(np.linalg.solve(Ma, Mb)[:3, :], 5).tobytes()
+    return (np.round(np.linalg.solve(Ma, Mb)[:3, :], 5) + 0.0).tobytes()     # + 0.0 turns -0.0 into 0.0
 
 
 def involves(only, *names):

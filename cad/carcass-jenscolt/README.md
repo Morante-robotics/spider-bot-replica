@@ -41,6 +41,6 @@ Sizes at 100 % scale. For the full robot print 4 of each leg file (L and R) and 
 - STL files are meshes: Onshape can import them as a reference but not edit them. Cuts and holes go in Bambu Studio
   (cut tool and negative parts); new parametric parts (chassis, crank, linkages) are designed in Onshape.
 - Thingiverse rejects scripted downloads (HTTP 403). Download by hand with **Download all files** on the thing page.
-- Images regenerated with [`../../tools/stl_preview.py`](../../tools/stl_preview.py):
+- Images regenerated with [`../../tools/stl_preview.py`](../../../tools/stl_preview.py):
   `python3 stl_preview.py images/parts.png *.stl` and `--elev -70` for the underside; turntable with
-  [`stl_turntable.py`](../../tools/stl_turntable.py) `images/assembled-turntable.gif spideybot_assembled.stl`.
+  [`stl_turntable.py`](../../../tools/stl_turntable.py) `images/assembled-turntable.gif spideybot_assembled.stl`.

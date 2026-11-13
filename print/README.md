@@ -13,6 +13,14 @@ Basic, 0.20 mm Standard). Open one in Bambu Studio, check it and send it: **Slic
 | [`base-v1.3mf`](base-v1.3mf) | [Base v1](../cad/base/), its cap (upside down) and the front block | 7 h 57 min | 140.4 g |
 | [`legs-forks-v1.3mf`](legs-forks-v1.3mf) | The 8 legs (front, middle × 2 and rear, right and left) and the 8 forks for base v1 | 2 h 30 min | 46.9 g |
 
+## Standard settings
+
+Every plate uses the same settings, so the measured fits in [`../cad/fits.py`](../cad/fits.py) stay valid from one
+print to the next: P2S, 0.4 mm nozzle, Textured PEI plate, Bambu PLA Basic, **0.20 mm Standard**, supports
+**tree(auto)**, **On build plate only**, X-Y hole and contour compensation left at 0.
+[`bambu_plate.py --standard`](../../tools/bambu_plate.py) adds them. A plate that needs something else says so,
+with the reason, in its section below. A plate is committed once, for the version that is printed.
+
 ## Test leg plate
 
 One run with everything needed to turn one leg by hand and to learn which hole clearance this printer needs.
@@ -30,7 +38,7 @@ the top of the bore and the flared mouth inside the tube. Both are short bridges
 1. Lay out the parts in their print orientation, arrange them and slice with the CLI. The leg is laid on its flat
    side (rotated 90° about X); everything else stays as modelled:
    ```
-   python3 tools/bambu_plate.py print/test-leg-plate.3mf cad/drive/test-frame.stl cad/drive/leg-middle-right.stl@90,0,0 \
+   python3 ../tools/bambu_plate.py print/test-leg-plate.3mf cad/drive/test-frame.stl cad/drive/leg-middle-right.stl@90,0,0 \
        cad/drive/pivot.stl cad/drive/crankshaft-2.stl cad/clearance-test/clearance-block.stl cad/clearance-test/clearance-pin.stl \
        --set enable_support=1 "support_type=tree(auto)" support_on_build_plate_only=1 "curr_bed_type=Textured PEI Plate"
    ```
@@ -62,7 +70,7 @@ crankshafts into their slots, front to rear, with the cranks as printed (see [ca
 are open at the top, so hold the shafts down with a finger while turning crankshaft 1.
 
 ```
-python3 tools/bambu_plate.py print/gear-train-test.3mf cad/drive/spine.stl cad/drive/crankshaft-1.stl \
+python3 ../tools/bambu_plate.py print/gear-train-test.3mf cad/drive/spine.stl cad/drive/crankshaft-1.stl \
     cad/drive/crankshaft-2.stl cad/drive/crankshaft-3.stl cad/drive/crankshaft-4.stl cad/drive/idler-1.stl \
     cad/drive/idler-2.stl cad/drive/idler-3.stl \
     --set enable_support=1 "support_type=tree(auto)" support_on_build_plate_only=1 "curr_bed_type=Textured PEI Plate"
@@ -99,7 +107,7 @@ arrows show where each +X crank points. Made by
 7. Turn crankshaft 1 by its crank, ten full turns.
 
 ```
-python3 tools/bambu_plate.py print/gear-train-test-v2.3mf cad/drive/spine.stl cad/drive/test-cap.stl@180,0,0 \
+python3 ../tools/bambu_plate.py print/gear-train-test-v2.3mf cad/drive/spine.stl cad/drive/test-cap.stl@180,0,0 \
     cad/drive/crankshaft-1.stl cad/drive/crankshaft-2.stl cad/drive/crankshaft-3.stl cad/drive/crankshaft-4.stl \
     cad/drive/idler-1.stl cad/drive/idler-2.stl cad/drive/idler-3.stl \
     --set enable_support=1 "support_type=tree(auto)" support_on_build_plate_only=1 "curr_bed_type=Textured PEI Plate"
@@ -108,7 +116,7 @@ python3 tools/bambu_plate.py print/gear-train-test-v2.3mf cad/drive/spine.stl ca
 To reprint only the cap:
 
 ```
-python3 tools/bambu_plate.py print/test-cap-v2.3mf cad/drive/test-cap.stl@180,0,0 \
+python3 ../tools/bambu_plate.py print/test-cap-v2.3mf cad/drive/test-cap.stl@180,0,0 \
     --set enable_support=1 "support_type=tree(auto)" support_on_build_plate_only=1 "curr_bed_type=Textured PEI Plate"
 ```
 
@@ -118,7 +126,7 @@ Base, cap and front block of [base v1](../cad/base/) on one plate, with the same
 (tree supports, on the build plate only).
 
 ```
-python3 tools/bambu_plate.py print/base-v1.3mf cad/base/base-v1.stl cad/base/cap.stl@180,0,0 cad/base/front-block.stl \
+python3 ../tools/bambu_plate.py print/base-v1.3mf cad/base/base-v1.stl cad/base/cap.stl@180,0,0 cad/base/front-block.stl \
     --set enable_support=1 "support_type=tree(auto)" support_on_build_plate_only=1 "curr_bed_type=Textured PEI Plate"
 ```
 
@@ -136,7 +144,7 @@ Bambu Studio's arrange fits only three legs on a plate (it keeps a box around ea
 hand: `:x,y` after each part is where its corner goes on the bed, and nothing is arranged.
 
 ```
-python3 tools/bambu_plate.py print/legs-forks-v1.3mf cad/drive/leg-front-right.stl@90,0,0:8,68 \
+python3 ../tools/bambu_plate.py print/legs-forks-v1.3mf cad/drive/leg-front-right.stl@90,0,0:8,68 \
     cad/drive/leg-middle-right.stl@90,0,90:48,68 cad/drive/leg-middle-right.stl@90,0,0:120,68 \
     cad/drive/leg-rear-right.stl@90,0,90:166,68 cad/drive/leg-front-left.stl@90,0,90:180,74 \
     cad/drive/leg-middle-left.stl@90,0,270:8,82 cad/drive/leg-middle-left.stl@90,0,90:62,82 \

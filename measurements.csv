@@ -1,0 +1,7 @@
+date,part,feature,nominal_mm,measured_mm,tool,result,entry
+2026-11-11,clearance block,printed pin in hole +0.1 mm (column 1),,,by hand,does not go in,test-leg-first-assembly-and-clearance-result
+2026-11-11,clearance block,printed pin in hole +0.4 mm (column 4),,,by hand,goes in and turns roughly,test-leg-first-assembly-and-clearance-result
+2026-11-11,clearance block,M3 screw in hole column 1,,,by hand,threads tight,test-leg-first-assembly-and-clearance-result
+2026-11-11,fork (red),side wall,2.0,2.0,caliper,as modelled; leg fits,test-leg-v2-turning-by-hand
+2026-11-11,fork (blue),side wall,2.0,<2.5,caliper,thicker; leg does not fit the window,test-leg-v2-turning-by-hand
+2026-11-12,crankshafts (gear train v2),journal diameter,4.0,3.9-4.0,caliper,as modelled,gear-train-test-v2-the-cap

@@ -17,7 +17,7 @@ removed a 1.5 mm relief from a leg.
 Usage:
     python3 repair_stl.py OUT_DIR part1.stl part2.stl ... [--scale 1.2]
 
-Needs numpy, trimesh, pymeshlab, scipy (pip install numpy trimesh pymeshlab scipy networkx rtree).
+Needs pymeshlab on top of the repo environment: uv sync --group mesh-repair.
 """
 import argparse
 import os

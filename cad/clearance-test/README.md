@@ -29,7 +29,7 @@ journal holes. The clearance on the diameter grows from left to right: +0.1, +0.
 wobbling. For the tap holes, the right one is the smallest in which the screw goes in by hand with a screwdriver
 without splitting the plastic.
 
-Results of the first print and the values taken: [build log](../../build-log.md#test-leg-first-assembly-and-clearance-result).
+Results of the first print and the values taken: [build log](../../build-log/3-legs-and-drive.md#test-leg-first-assembly-and-clearance-result).
 
 ![Block and pin](images/result-1.jpg)
 

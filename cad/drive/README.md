@@ -3,7 +3,7 @@
 The 8 legs, their pivots and the drive that turns them, modelled in code with build123d from the simulator's
 geometry ([`sim/toy_leg_3d_rows_cad.json`](../../sim/toy_leg_3d_rows_cad.json), first entry). Four lateral
 crankshafts drive the legs, one per pair of legs, linked by idler gears so all four turn the same way. Each leg slides
-on its crank pin. How and why: [build log](../../build-log.md#legs-and-drive-in-cad).
+on its crank pin. How and why: [build log](../../build-log/3-legs-and-drive.md#legs-and-drive-in-cad).
 
 ```
 python3 build.py --assembly 0   # every part (STEP + STL) and the assembled drive at crank angle 0°

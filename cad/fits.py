@@ -5,6 +5,7 @@ its joints with these fits (`JOINTS` in `tools/cad_verify.py`), so the verifier 
 what was measured on a real print. Base v1 (2026-11-13) failed because its cap had 0.3 mm a side typed by hand,
 below the measured 0.5: that cannot happen again if the number comes from here.
 
+The measurements behind each fit are in ../measurements.csv (one row per caliper reading or fit trial).
 A fit is measured when a printed part showed it works (or showed the next smaller value fails). A fit marked
 `assumed` has not been printed yet: a design that uses one needs a coupon first (cad-designer agent, «Coupons»).
 When a print gives a new value, change it here, say where it was measured, and rebuild every design that uses it.
