@@ -28,7 +28,7 @@ SYSTEM = os.path.expanduser("~/Library/Application Support/BambuStudio/system/BB
 MACHINE = "Bambu Lab P2S 0.4 nozzle"
 PROCESS = "0.20mm Standard @BBL P2S"
 FILAMENT = "Bambu PLA Basic @BBL P2S"
-# The standard settings every plate uses (--standard): the measured fits in <capstone>/cad/fits.py hold for these.
+# The standard settings every plate uses (--standard): the measured fits in cad/fits.py hold for these.
 # Build-plate-only keeps support out of holes and bores; tree supports come off cleaner.
 STANDARD = ["enable_support=1", "support_type=tree(auto)", "support_on_build_plate_only=1",
             "curr_bed_type=Textured PEI Plate"]

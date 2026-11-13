@@ -27,18 +27,18 @@ what to run and where the result is:
 | `design-plan.md` | Part list, joint table, assembly sequence, alternatives, diagram: written before modelling |
 | `build.py` | The parametric model. Parameters at the top, each with its source; `--part <name>` rebuilds one part |
 | `out/` | STEP (for Onshape) and STL (for printing) of every part, written by `build.py` |
-| `verify.py` | The [`cad_verify`](../../tools/cad_verify.py) spec: every part, motion, joints with their fits, marks, assembly, access, measurements |
+| `verify.py` | The [`cad_verify`](../tools/cad_verify.py) spec: every part, motion, joints with their fits, marks, assembly, access, measurements |
 | `verify-result.txt` | The last full verification (`PASS`, not `PARTIAL`) |
 | `design-review.md` | Fits, strength, retention, assembly, seats, print, marks, carry-over, pre-mortem: each with the number or picture that shows it |
-| `images/` | Figures made by scripts (`verify/` from `cad_verify --render`, others from [`tools/figures.py`](../../tools/figures.py)) |
+| `images/` | Figures made by scripts (`verify/` from `cad_verify --render`, others from [`tools/figures.py`](../tools/figures.py)) |
 
 Commands, from the design folder:
 
 ```bash
-../../../.venv/bin/python build.py                     # every part into out/
-VERIFY_STEP=30 ../../../.venv/bin/python ../../../tools/cad_verify.py verify.py --quick --only <part>   # while iterating
-../../../.venv/bin/python ../../../tools/cad_verify.py verify.py --out verify-result.txt --render images/verify
-../../../.venv/bin/python ../../../tools/figures.py verify.py images --lang es
+../../.venv/bin/python build.py                     # every part into out/
+VERIFY_STEP=30 ../../.venv/bin/python ../../tools/cad_verify.py verify.py --quick --only <part>   # while iterating
+../../.venv/bin/python ../../tools/cad_verify.py verify.py --out verify-result.txt --render images/verify
+../../.venv/bin/python ../../tools/figures.py verify.py images --lang es
 ```
 
 Designs that use another design's parameters import its `build.py` as a module (one source per number), never

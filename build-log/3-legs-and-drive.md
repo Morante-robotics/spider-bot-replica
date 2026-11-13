@@ -680,7 +680,7 @@ Document (public): [Spider-Bot drive](https://cad.onshape.com/documents/07632681
    - Instead, the leg stays 5.0 mm wide, and the arm, boss and knee move 0.3 mm (the shin 0.55 mm) towards the
      face on the bed, flush with the tube. The fork's window moves with it. The leg now touches the bed over
      567 mm² instead of 190 mm².
-3. **Plate** ([`tools/bambu_plate.py`](../../tools/bambu_plate.py)): orient the parts, then let Bambu Studio arrange and
+3. **Plate** ([`tools/bambu_plate.py`](../tools/bambu_plate.py)): orient the parts, then let Bambu Studio arrange and
    slice them with its standard settings (P2S 0.4 mm nozzle, 0.20 mm Standard, PLA Basic, Textured PEI plate).
    Supports are tree supports on the build plate only, so none go into the holes or the leg's bore. Then open it in
    Bambu Studio, check the support settings, slice and save. Details: [print/README.md](../print/README.md).
@@ -909,7 +909,7 @@ the carcass base's own mesh, by adding and cutting solids in code.
      (Fig. 3).
 6. **Check over a full turn** with [`cad/base/check.py`](../cad/base/check.py): legs, forks, crankshafts and idlers
    against the base, the cap, the front block and the lifted body, every 10°. Fix and repeat (table below).
-7. **Print plate** with [`tools/bambu_plate.py`](../../tools/bambu_plate.py): base, cap (upside down) and front block,
+7. **Print plate** with [`tools/bambu_plate.py`](../tools/bambu_plate.py): base, cap (upside down) and front block,
    tree supports on the build plate only.
 
 <details>
@@ -1031,7 +1031,7 @@ when the teeth push against each other. The three screws sticking up are the idl
 | The four crankshafts turn together | Smoothly, by hand | In jerks, and they jam |
 | Crankshafts in their slots | Stay in | Lift out: the slots are open at the top and nothing closes them in this test |
 
-**Why.** A new, general check, [`tools/cad_verify.py`](../../tools/cad_verify.py), was run on this exact test
+**Why.** A new, general check, [`tools/cad_verify.py`](../tools/cad_verify.py), was run on this exact test
 ([spec](../cad/drive/verify_gear_train.py), [full report](../cad/drive/verify-gear-train.txt)). It turns every gear at its
 real angle and pushes every moving part in 26 directions to see what stops it. It found three faults:
 
@@ -1062,7 +1062,7 @@ each part in place either.
 ```
 python3 cad/drive/build.py
 cd cad/drive
-python3 ../../../tools/cad_verify.py verify_gear_train.py --out verify-gear-train.txt --render images/verify
+python3 ../../tools/cad_verify.py verify_gear_train.py --out verify-gear-train.txt --render images/verify
 python3 gear_phase_figure.py
 ```
 
@@ -1073,7 +1073,7 @@ The spec places the idlers at the angle that fits their two crankshafts best, th
 
 #### Decisions
 
-- **Every design is checked before printing** with [`tools/cad_verify.py`](../../tools/cad_verify.py): each part a
+- **Every design is checked before printing** with [`tools/cad_verify.py`](../tools/cad_verify.py): each part a
   closed solid with walls of at least 0.8 mm, no collisions over the motion, gears turned at their real angles with
   some backlash, every moving part held in every direction it should not move, the parts can be assembled in order,
   and the overhangs to support. A design does not go to the printer until it passes.
@@ -1115,14 +1115,14 @@ of both neighbours line up with the idler's gaps.
 6. The idlers' first layer is 0.2 mm smaller and their bore is chamfered at the bed, against the squashed first
    layer.
 7. Base v1 was rebuilt: its keel follows the new idlers (0.57 mm deeper). Its plate was sliced again.
-8. Check with [`tools/cad_verify.py`](../../tools/cad_verify.py) every 5°, and a 2D gear check every 1°, then the
+8. Check with [`tools/cad_verify.py`](../tools/cad_verify.py) every 5°, and a 2D gear check every 1°, then the
    whole drive against base v1, its cap and the body every 10°.
 
 <img src="../cad/drive/images/gear-train-test-v2-parts.png" alt="The parts of the gear train test v2">
 
 *Fig. 1 · The parts of the test. The spine has a foot and an M3 nut slot at each end; the cap's tongues go down the
 journal slots. Each crankshaft is different: look at where its cranks point compared with its gear teeth. Made by
-[`tools/stl_preview.py`](../../tools/stl_preview.py).*
+[`tools/stl_preview.py`](../tools/stl_preview.py).*
 
 #### Result
 
@@ -1142,7 +1142,7 @@ The bottom row of Fig. 3 in [Gear train test](#gear-train-test) shows every idle
 ```
 python3 cad/drive/build.py
 cd cad/drive
-python3 ../../../tools/cad_verify.py verify_gear_train.py --out verify-gear-train.txt --render images/verify
+python3 ../../tools/cad_verify.py verify_gear_train.py --out verify-gear-train.txt --render images/verify
 python3 check_gear_train.py
 python3 gear_phase_figure.py
 python3 check.py --gaps
@@ -1216,7 +1216,7 @@ millimetre free and passed.
   their worst positions, they stay 0.9 mm from the gear faces.
 - **Four skirts** at the ends of the cap come down outside the walls, 0.2 mm off each side, so the cap sits centred
   on the spine and cannot slide onto the gears. They are by the end blocks, away from everything that turns.
-- **The check poses loose parts at their extremes now.** [`tools/cad_verify.py`](../../tools/cad_verify.py) has a
+- **The check poses loose parts at their extremes now.** [`tools/cad_verify.py`](../tools/cad_verify.py) has a
   keep-out zone around each gear face (its play plus 0.8 mm), and [the spec](../cad/drive/verify_gear_train.py) turns
   the train with the cap shifted 0.2 mm either way. The first cap fails it in three places; the new one passes
   ([report](../cad/drive/verify-gear-train.txt)).
@@ -1228,7 +1228,7 @@ millimetre free and passed.
 ```
 python3 cad/drive/build.py
 cd cad/drive
-python3 ../../../tools/cad_verify.py verify_gear_train.py --out verify-gear-train.txt --render images/verify
+python3 ../../tools/cad_verify.py verify_gear_train.py --out verify-gear-train.txt --render images/verify
 python3 assembly_figure.py
 cd ../base && python3 build.py
 ```

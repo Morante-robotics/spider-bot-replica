@@ -24,7 +24,7 @@ asset on Sketchfab (CC BY-ND, so no modified versions can be published; referenc
 #### Steps
 
 1. On the Thingiverse page, **Download all files** (zip with 9 STLs, photos, README and license).
-2. Check every STL is valid and measure it with [`tools/stl_preview.py`](../../tools/stl_preview.py), which prints the size
+2. Check every STL is valid and measure it with [`tools/stl_preview.py`](../tools/stl_preview.py), which prints the size
    of each part and renders the previews.
 3. The files place the body, base, sensor and only the front pair of legs; the eyes are off to the side. Join
    everything into one assembled model (How to reproduce): the 4 eye domes go into their sockets and the other
@@ -150,7 +150,7 @@ check reports `manifold = no` for body, eyes and sensor.
 
 #### Steps
 
-1. Repair and scale the 5 carcass parts with [`tools/repair_stl.py`](../../tools/repair_stl.py). It merges points that
+1. Repair and scale the 5 carcass parts with [`tools/repair_stl.py`](../tools/repair_stl.py). It merges points that
    are almost in the same place, drops zero-area and duplicate triangles and closes small holes. At pinched edges it
    splits the points and moves each copy 0.01 mm into its own side. It then reads every file back, as a slicer
    would, and measures the largest distance to the original.

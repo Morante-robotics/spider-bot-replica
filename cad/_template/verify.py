@@ -3,7 +3,7 @@
 The demo (a block in a window) FAILS retention on purpose: a part that only sits in an opening is not held (base v1
 front block, 2026-11-13). A real design gives it a stop: a cap, a pin, a screw.
 
-    python3 ../../../tools/cad_verify.py verify.py --out verify-result.txt --render images/verify
+    python3 ../../tools/cad_verify.py verify.py --out verify-result.txt --render images/verify
 """
 import os
 import sys
@@ -11,7 +11,7 @@ import sys
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "..", "..", "tools"))
+sys.path.insert(0, os.path.join(HERE, "..", "..", "tools"))
 sys.path.insert(0, os.path.join(HERE, ".."))
 import build as B  # noqa: E402,F401
 import fits  # noqa: E402

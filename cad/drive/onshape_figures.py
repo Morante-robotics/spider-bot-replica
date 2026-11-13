@@ -16,7 +16,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-sys.path.insert(0, os.path.join(HERE, "..", "..", "..", "tools"))
+sys.path.insert(0, os.path.join(HERE, "..", "..", "tools"))
 import build as b  # noqa: E402
 from stl_preview import load  # noqa: E402
 

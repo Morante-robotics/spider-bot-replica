@@ -20,7 +20,7 @@ one is at every step of the motion, and what is allowed. The tool then runs eigh
   8. access       for each pin, screw or snap in ASSEMBLY, the finger or tool that pushes or turns it (a cylinder
                   from tool(), from the fastener out along its approach line) must reach it past every part placed
                   before it. Hardware left out of ASSEMBLY is a failure: a pin nobody can push in is not a design
-  9. joints       every joint in JOINTS keeps at least its measured fit (the capstone's cad/fits.py) on every side,
+  9. joints       every joint in JOINTS keeps at least its measured fit (cad/fits.py) on every side,
                   at every motion step, measured inside the joint's own region when the parts also touch elsewhere
  10. marks        every gear (GEARS) and every part flagged "phased" has an alignment mark declared in MARKS
   (6. print also reports overhangs whose support would stand on the part itself, in a pocket or under a bridge:
