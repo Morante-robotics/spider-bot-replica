@@ -41,10 +41,11 @@ The robot's story in three parts, then what is left to do and a glossary.
    - [Clearance test and test leg print plate](build-log/3-legs-and-drive.md#clearance-test-and-test-leg-print-plate) · 2026-11-10 · ✅ printed
    - [Test leg: first assembly and clearance result](build-log/3-legs-and-drive.md#test-leg-first-assembly-and-clearance-result) · 2026-11-11 · ✅ v2 designed
    - [Test leg v2: turning by hand](build-log/3-legs-and-drive.md#test-leg-v2-turning-by-hand) · 2026-11-11 · ✅ the leg turns
-   - [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) · 2026-11-11 · 🔄 designed, not printed
+   - [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) · 2026-11-11 · ✅ printed, faults found
    - [Gear train test](build-log/3-legs-and-drive.md#gear-train-test) · 2026-11-11 · ✅ faults found
    - [Gear train v2 in CAD](build-log/3-legs-and-drive.md#gear-train-v2-in-cad) · 2026-11-11 · ✅ printed
    - [Gear train test v2: the cap](build-log/3-legs-and-drive.md#gear-train-test-v2-the-cap) · 2026-11-12 · ✅ the train turns
+   - [Base v1: print and first fitting](build-log/3-legs-and-drive.md#base-v1-print-and-first-fitting) · 2026-11-13 · ✅ faults found
 4. **[Open items](#open-items)**: everything still to do.
 5. **[Glossary](#glossary)**: the terms used in the entries.
 
@@ -58,10 +59,10 @@ outside the repo.
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| Base v1 was printed (2026-11-13) and failed: cap too tight (its tongues broke), front block not fixed (its thin pegs broke the posts), pins unreachable, big gear not fully home, support trapped in recesses, no gear marks. Write its entry with Morante's photos, then design base v2 with the CAD rules below | [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) | 3 |
-| Assemble the drive in the base with the 8 legs and 8 forks ([`print/legs-forks-v1.3mf`](print/legs-forks-v1.3mf)) and turn it by hand | [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) | 3 |
-| Before base v2: move `cad/drive/` and `cad/base/` to the design-folder layout. Split `drive/build.py` into one design per function (legs, crankshafts and idlers, test rigs) and check every moved part's STL comes out identical; `verify.py`, `out/` and `--part` in each; designs import each other as modules instead of `importlib` path tricks | [CAD rules](cad/README.md#a-design-folder) | 3 |
-| Bring `cad/drive/verify_gear_train.py` to the spec standard without touching geometry: `MARKS`, `JOINTS` with fits (the printed test cap went on with tongues at 0.3 mm a side: a measured fit for short tongues, or another kind), hardware labels, `LABELS["es"]`, `PRINT_ORIENT` for every part, `GEAR_MOTION`, `MEASURE`; full check PASS and a workshop kit with no FALTA about the spec | [Gear train test v2: the cap](build-log/3-legs-and-drive.md#gear-train-test-v2-the-cap) | 3 |
+| Design base v2 with the CAD rules in [cad/README.md](cad/README.md#a-design-folder) and the checks in [`tools/cad_verify.py`](tools/cad_verify.py) | [Base v1: print and first fitting](build-log/3-legs-and-drive.md#base-v1-print-and-first-fitting) | 3 |
+| Assemble the drive in base v2 with the 8 legs and 8 forks ([`print/legs-forks-v1.3mf`](print/legs-forks-v1.3mf)) and turn it by hand | [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) | 3 |
+| A `cad_verify` spec (`verify.py`) for [`cad/legs/`](cad/legs/), [`cad/crankshafts/`](cad/crankshafts/) and [`cad/test-frame/`](cad/test-frame/): the drive's old folder was split into these and the gear train test (2026-11-13, every STL identical), but they are still checked only by `legs/check.py` and `crankshafts/check_gear_train.py` | [CAD rules](cad/README.md#a-design-folder) | 3 |
+| Bring `cad/gear-train-test/verify.py` to the spec standard without touching geometry: `MARKS`, `JOINTS` with fits (the printed test cap went on with tongues at 0.3 mm a side: a measured fit for short tongues, or another kind), hardware labels, `LABELS["es"]`, `PRINT_ORIENT` for every part, `GEAR_MOTION`, `MEASURE`; full check PASS and a workshop kit with no FALTA about the spec | [Gear train test v2: the cap](build-log/3-legs-and-drive.md#gear-train-test-v2-the-cap) | 3 |
 | Robot master model (`cad/robot.py`): datums, the carcass envelope and a table of every interface between designs; each design imports it, and the whole robot is verified at the end of every design | [CAD rules](cad/README.md#conventions) | 3 |
 | Replace `cad/base/check.py` (ad hoc, 2.5–3 min) with a `cad_verify` spec of the whole robot | [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) | 3 |
 | Calibrate X-Y hole and contour compensation with the clearance block, and save the standard settings as a Bambu Studio preset | [Standard settings](print/README.md#standard-settings) | 3 |
