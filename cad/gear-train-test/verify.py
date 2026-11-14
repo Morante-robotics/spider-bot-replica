@@ -12,9 +12,8 @@ Every gear is placed at its real angle: crankshaft i at gear_offsets()[i] - θ (
 idler k at idler_phase(k) + θ·12/n. The idler phases are the designed ones, not a best fit: if a crankshaft were a
 tooth off, the teeth would overlap here.
 
-    python3 ../../tools/cad_verify.py verify_gear_train.py --out verify-gear-train.txt --render images/verify
+    python3 ../../tools/cad_verify.py verify.py --out verify-result.txt --render images/verify
 """
-import importlib.util
 import os
 import sys
 
@@ -23,18 +22,19 @@ import trimesh
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "..", "tools"))
-import build as B  # noqa: E402
+sys.path.insert(0, os.path.join(HERE, "..", ".."))
+from cad import common as K, design  # noqa: E402
 from cad_verify import rod  # noqa: E402
 
+B = design("gear-train-test")      # spine and test cap
+C = design("crankshafts")          # crankshafts, idlers, gear phases
 # the test must hold the shafts as base v1 does: same top (tongue length) and same tongue clearance
-_s = importlib.util.spec_from_file_location("base_build", os.path.join(HERE, "..", "base", "build.py"))
-BASE = importlib.util.module_from_spec(_s)
-_s.loader.exec_module(BASE)
-assert abs(B.TEST_TOP - BASE.DECK_BOT) < 1e-6 and abs(B.CAP_CLR - BASE.CAP_CLR) < 1e-6, "test cap differs from base cap"
+BASE = design("base")
+assert abs(B.TEST_TOP - BASE.DECK_BOT) < 1e-6 and abs(C.CAP_CLR - BASE.CAP_CLR) < 1e-6, "test cap differs from base cap"
 
-SH, IDL = B.shaft_yz(), B.idlers()
-OFF = B.gear_offsets()
-PHASE = [B.idler_phase(k) for k in range(3)]
+SH, IDL = C.shaft_yz(), C.idlers()
+OFF = C.gear_offsets()
+PHASE = [C.idler_phase(k) for k in range(3)]
 YZ = np.eye(4)
 YZ[:3, :3] = np.column_stack([[0, 1, 0], [0, 0, 1], [1, 0, 0]])   # build123d Plane.YZ
 
@@ -50,14 +50,14 @@ def rx(a, y, z):
 
 def shaft_pose(i, a):
     M = np.eye(4)
-    M[:3, 3] = [B.CX, *SH[i]]
+    M[:3, 3] = [K.CX, *SH[i]]
     return M @ rx(-a, 0, 0)
 
 
 def idler_base(k):
     y, z, _ = IDL[k]
     M = np.eye(4)
-    M[:3, 3] = [B.CX - (B.GEAR_T - 0.4) / 2, y, z]
+    M[:3, 3] = [K.CX - (C.GEAR_T - 0.4) / 2, y, z]
     return M @ YZ
 
 
@@ -68,23 +68,23 @@ def union(*ms):
 def m3(p_head, axis, length):
     """M3 socket head screw: shank of `length` from p_head along axis, head on the other side of p_head."""
     axis = np.asarray(axis, float)
-    return union(rod(3.0, length, p_head, axis), rod(B.HEAD_D, B.HEAD_H, p_head, -axis))
+    return union(rod(3.0, length, p_head, axis), rod(K.HEAD_D, K.HEAD_H, p_head, -axis))
 
 
-X_OUT = B.CX + B.WALL_OUT
-PARTS = {"spine": {"stl": "spine.stl", "fixed": True},
-         "cap": {"stl": "test-cap.stl"}}
+X_OUT = K.CX + C.WALL_OUT
+PARTS = {"spine": {"stl": "out/spine.stl", "fixed": True},
+         "cap": {"stl": "out/test-cap.stl"}}
 for i in range(4):
-    PARTS[f"crankshaft{i + 1}"] = {"stl": f"crankshaft-{i + 1}.stl"}
+    PARTS[f"crankshaft{i + 1}"] = {"stl": f"../crankshafts/out/crankshaft-{i + 1}.stl"}
 for k, (y, z, n) in enumerate(IDL):
-    PARTS[f"idler{k + 1}"] = {"stl": f"idler-{k + 1}.stl"}
+    PARTS[f"idler{k + 1}"] = {"stl": f"../crankshafts/out/idler-{k + 1}.stl"}
     # M3×12 as the axle: head on the +X wall, through both walls and the idler, nut on the -X wall
     PARTS[f"axle{k + 1}"] = {"mesh": m3([X_OUT, y, z], [-1, 0, 0], 12), "hardware": True, "fixed": True}
-    PARTS[f"axlenut{k + 1}"] = {"mesh": rod(B.NUT_AF / np.cos(np.pi / 6), B.NUT_T, [B.CX - B.WALL_OUT, y, z], [-1, 0, 0],
+    PARTS[f"axlenut{k + 1}"] = {"mesh": rod(K.NUT_AF / np.cos(np.pi / 6), K.NUT_T, [K.CX - C.WALL_OUT, y, z], [-1, 0, 0],
                                             n=6), "hardware": True, "fixed": True}
 CAP_TOP = B.TEST_TOP + B.TEST_CAP_T
 for j, (y, _) in enumerate(B.cap_screws()):
-    PARTS[f"capscrew{j + 1}"] = {"mesh": m3([B.CX, y, CAP_TOP], [0, 0, -1], B.CAP_SCREW_L),
+    PARTS[f"capscrew{j + 1}"] = {"mesh": m3([K.CX, y, CAP_TOP], [0, 0, -1], B.CAP_SCREW_L),
                                  "hardware": True, "fixed": True}
 
 # step = (crank angle in degrees, cap X shift in mm). 5° steps with the cap centred (a tooth is 30° of crank); then the
@@ -103,7 +103,7 @@ def poses(t):
     cap[0, 3] = dx
     out["cap"] = cap
     for k, (y, z, n) in enumerate(IDL):
-        out[f"idler{k + 1}"] = rx(PHASE[k] + a * B.SHAFT_TEETH / n, y, z) @ idler_base(k)
+        out[f"idler{k + 1}"] = rx(PHASE[k] + a * C.SHAFT_TEETH / n, y, z) @ idler_base(k)
     return out
 
 
@@ -122,11 +122,11 @@ ALLOWED_CONTACT = {
                       "0.2 mm off the walls' outer faces (they touch at the X extremes)",
 }
 # gear zone: tip disc, faces at ±(GEAR_T/2 + float + 0.8), in the crankshaft's own frame (axis X, gear at x = 0)
-ZONE_HALF = B.GEAR_T / 2 + B.SHAFT_FLOAT + B.GEAR_AXIAL_CLR
-ZONE_R = B.MOD * (B.SHAFT_TEETH / 2 + 1)
+ZONE_HALF = C.GEAR_T / 2 + C.SHAFT_FLOAT + C.GEAR_AXIAL_CLR
+ZONE_R = C.MOD * (C.SHAFT_TEETH / 2 + 1)
 KEEP_OUT = {f"gear{i + 1}-axial": {
     "part": f"crankshaft{i + 1}", "mesh": rod(2 * ZONE_R, 2 * ZONE_HALF, [-ZONE_HALF, 0, 0], [1, 0, 0], n=96),
-    "why": f"gear faces + {B.SHAFT_FLOAT:.2f} float + {B.GEAR_AXIAL_CLR} mm axial",
+    "why": f"gear faces + {C.SHAFT_FLOAT:.2f} float + {C.GEAR_AXIAL_CLR} mm axial",
     "except": ["spine"] + [f"idler{k + 1}" for k in range(3)],
     "except_why": "idlers mesh in the gear plane (GEARS checks them); the spine walls are 0.25 mm off the gear faces "
                   "(0-0.5 with the float) as in v2, which turned freely without the cap, 2026-11-12"}
@@ -144,8 +144,8 @@ ASSEMBLY = [("spine", None)] + [(f"idler{k + 1}", [0, 0, 1]) for k in range(3)] 
            [(f"crankshaft{i + 1}", [0, 0, 1]) for i in range(4)] + [("cap", [0, 0, 1])] + \
            [(f"capscrew{j + 1}", [0, 0, 1]) for j in range(2)]
 PRINT_ORIENT = {"cap": trimesh.transformations.rotation_matrix(np.pi, [1, 0, 0])}    # upside down, plate on the bed
-SECTIONS = [([B.CX, 0, 0], [1, 0, 0]),                                     # gear plane: all 7 gears, end blocks
-            ([B.CX + (B.WALL_IN + B.WALL_OUT) / 2, 0, 0], [1, 0, 0])]      # +X wall: journals, tongues, axles
-SECTIONS += [([B.CX, y, z], [0, 1, 0]) for y, z in SH]                     # each journal, tongue and cap
-SECTIONS += [([B.CX, y, z], [0, 1, 0]) for y, z, _ in IDL]                 # each idler on its axle
-SECTIONS += [([B.CX, y, 0], [0, 1, 0]) for y, _ in B.cap_screws()]         # cap screws and their nut pockets
+SECTIONS = [([K.CX, 0, 0], [1, 0, 0]),                                     # gear plane: all 7 gears, end blocks
+            ([K.CX + (C.WALL_IN + C.WALL_OUT) / 2, 0, 0], [1, 0, 0])]      # +X wall: journals, tongues, axles
+SECTIONS += [([K.CX, y, z], [0, 1, 0]) for y, z in SH]                     # each journal, tongue and cap
+SECTIONS += [([K.CX, y, z], [0, 1, 0]) for y, z, _ in IDL]                 # each idler on its axle
+SECTIONS += [([K.CX, y, 0], [0, 1, 0]) for y, _ in B.cap_screws()]         # cap screws and their nut pockets

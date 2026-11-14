@@ -12,9 +12,9 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "..", "tools"))
-sys.path.insert(0, os.path.join(HERE, ".."))
-import build as B  # noqa: E402,F401
-import fits  # noqa: E402
+sys.path.insert(0, os.path.join(HERE, "..", ".."))
+from cad import design, fits  # noqa: E402
+B = design(os.path.basename(HERE))                # this folder's build.py (cad/__init__.py)
 from cad_verify import rod, tool  # noqa: E402,F401
 
 STEP = int(os.environ.get("VERIFY_STEP", 10))

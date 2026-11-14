@@ -13,7 +13,7 @@ Parts (PLA, printed as laid out here):
   clearance-pin    a Ø4.0 journal and a Ø3.6 ball on a Ø2.2 stub, printed lying down like the crankshafts.
 
 Use: push the journal through each top hole and the ball into each middle hole, and an M3 screw through each bottom
-hole. The right clearance is the smallest one that turns freely without wobbling. Set CLR in ../drive/build.py to it.
+hole. The right clearance is the smallest one that turns freely without wobbling. It goes into ../fits.py (TURN, STEEL).
 
 Usage:
     python3 build.py        # STEP + STL into this folder

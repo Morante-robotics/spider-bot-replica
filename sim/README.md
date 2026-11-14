@@ -34,7 +34,7 @@ front-to-back shafts, one per side: they fit, but the feet move sideways
 of legs: it fits and walks, with a short stride ([toy_leg_3d_rows.json](toy_leg_3d_rows.json),
 [build log](../build-log/3-legs-and-drive.md#four-lateral-crankshafts)). With the limits that make it buildable (XC ≥ 12, shafts 8 mm under
 the rim), the geometry used for the CAD is [toy_leg_3d_rows_cad.json](toy_leg_3d_rows_cad.json)
-([build log](../build-log/3-legs-and-drive.md#legs-and-drive-in-cad), parts in [../cad/drive/](../cad/drive/)).
+([build log](../build-log/3-legs-and-drive.md#legs-and-drive-in-cad), parts in [../cad/legs/](../cad/legs/) and [../cad/crankshafts/](../cad/crankshafts/)).
 
 ```
 python3 toy_leg_3d.py --search 3000 --only lateral/crank --json lateral-crank.json   # search one combination

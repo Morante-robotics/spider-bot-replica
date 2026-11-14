@@ -5,7 +5,7 @@ mate marked, and an animation of what the finished assembly should do.
 Usage:
     python3 onshape_figures.py          # PNGs and GIF into images/onshape/
 
-Reads the STLs written by build.py (run that first). Flat-shaded painter's renderer with Pillow.
+Reads the STLs written by the build.py of ../legs, ../crankshafts and this folder (run those first). Flat-shaded painter's renderer with Pillow.
 Needs numpy, Pillow and build123d (for build.py's parameters and kinematics).
 """
 import os
@@ -15,10 +15,13 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
+sys.path.insert(0, os.path.join(HERE, "..", ".."))
 sys.path.insert(0, os.path.join(HERE, "..", "..", "tools"))
-import build as b  # noqa: E402
+from cad import common as K, design  # noqa: E402
 from stl_preview import load  # noqa: E402
+
+L = design("legs")
+C = design("crankshafts")
 
 OUT = os.path.join(HERE, "images", "onshape")
 SS = 2                                     # supersampling
@@ -29,14 +32,14 @@ MARK = (220, 0, 140)
 FONT = "/System/Library/Fonts/Helvetica.ttc"
 
 i_leg = 1                                  # right middle leg, crankshaft 2
-P = [x for x in b.sim.pivots() if x[0] == "R" and x[1] == i_leg][0][2]
-Y_SH, Z_SH = b.shaft_yz()[i_leg]
-WIN_X, WIN_Y, WIN_Z, YH = b.yoke_size()
-INFO = b.leg(i_leg)[1]
+P = [x for x in K.sim.pivots() if x[0] == "R" and x[1] == i_leg][0][2]
+Y_SH, Z_SH = C.shaft_yz()[i_leg]
+WIN_X, WIN_Y, WIN_Z, YH = L.yoke_size()
+INFO = L.leg(i_leg)[1]
 
 
 def mesh(name):
-    return load(os.path.join(HERE, f"{name}.stl"))
+    return load(L.stl(name))
 
 
 def tf(tris, R, t):
@@ -45,10 +48,10 @@ def tf(tris, R, t):
 
 def pose(theta):
     """Transforms (R, t) of crankshaft, leg and pivot at crank angle theta, and the ball centre / bore axis."""
-    l = b.legs_at(theta)[i_leg]
-    R_leg = b.leg_frame(l["u"])
-    return dict(crank=(b.rot_x(-theta), [b.CX, Y_SH, Z_SH]), leg=(R_leg, l["P"]),
-                pivot=(b.rot_z(np.arctan2(l["u"][1], l["u"][0])), l["P"]), A=l["A"], u=l["u"], F=l["F"])
+    l = L.legs_at(theta)[i_leg]
+    R_leg = L.leg_frame(l["u"])
+    return dict(crank=(K.rot_x(-theta), [K.CX, Y_SH, Z_SH]), leg=(R_leg, l["P"]),
+                pivot=(K.rot_z(np.arctan2(l["u"][1], l["u"][0])), l["P"]), A=l["A"], u=l["u"], F=l["F"])
 
 
 def camera(azim, elev):
@@ -90,8 +93,8 @@ def render(parts, azim, elev, center, span, size=(700, 520), marks=(), labels=()
     for kind, data in marks:
         if kind == "circle":
             cc, axis, r = data
-            ax = b.unit(axis)
-            e1 = b.unit(np.cross(ax, [0, 0, 1]) if abs(ax[2]) < 0.9 else np.cross(ax, [1, 0, 0]))
+            ax = K.unit(axis)
+            e1 = K.unit(np.cross(ax, [0, 0, 1]) if abs(ax[2]) < 0.9 else np.cross(ax, [1, 0, 0]))
             e2 = np.cross(ax, e1)
             t = np.linspace(0, 2 * np.pi, 60)
             pts = np.asarray(cc) + r * (np.outer(np.cos(t), e1) + np.outer(np.sin(t), e2))
@@ -154,10 +157,10 @@ def main():
     all_parts = [(frame, COL["frame"]), (crank_w, COL["crank"]), (piv_w, COL["pivot"]), (leg_w, COL["leg"])]
 
     # 0 · overview: names of the parts
-    mid = (np.array(P) + np.array([b.CX, Y_SH, Z_SH])) / 2 + [20, 0, -15]
+    mid = (np.array(P) + np.array([K.CX, Y_SH, Z_SH])) / 2 + [20, 0, -15]
     ov = render(all_parts, -35, 22, mid, 150, size=(900, 620), labels=[
-        ("Test frame (test-frame)", [b.CX + 20, Y_SH - 14, 38], (-90, 120)),
-        ("Crankshaft (crankshaft-2)", [b.CX, Y_SH, Z_SH + 6], (-60, -90)),
+        ("Test frame (test-frame)", [K.CX + 20, Y_SH - 14, 38], (-90, 120)),
+        ("Crankshaft (crankshaft-2)", [K.CX, Y_SH, Z_SH + 6], (-60, -90)),
         ("Fork (pivot)", list(np.array(P) + [0, 0, YH / 2]), (40, -100)),
         ("Leg (leg-middle-right)", list(ps["F"] + [0, 0, 8]), (-10, -110)),
         ("Ball", list(sl_c), (60, -60)),
@@ -165,44 +168,44 @@ def main():
     ov.save(os.path.join(OUT, "0-parts.png"), optimize=True)
 
     # 1 · crankshaft journal in the frame (revolute)
-    jr = b.JOURNAL / 2
+    jr = C.JOURNAL / 2
     a = render([(crank, COL["crank"])], -25, 25, [3, 0, 0], 30,
-               marks=[("circle", ([b.GEAR_T / 2, 0, 0], [1, 0, 0], jr))],
-               labels=[("Journal edge at the gear face", [b.GEAR_T / 2, 0, jr], (-20, -120))],
+               marks=[("circle", ([C.GEAR_T / 2, 0, 0], [1, 0, 0], jr))],
+               labels=[("Journal edge at the gear face", [C.GEAR_T / 2, 0, jr], (-20, -120))],
                title="A · Crankshaft")
-    fr_cut = keep(frame, lambda c: b.CX + 0.5 < c[0] < b.CX + 10)
-    ce = [b.CX + b.WALL_IN, Y_SH, Z_SH]
-    bb = render([(fr_cut, COL["frame"])], 60, 20, [b.CX + 3, Y_SH, Z_SH - 6], 46,
-                marks=[("circle", (ce, [1, 0, 0], (b.JOURNAL + b.CLR) / 2))],
+    fr_cut = keep(frame, lambda c: K.CX + 0.5 < c[0] < K.CX + 10)
+    ce = [K.CX + C.WALL_IN, Y_SH, Z_SH]
+    bb = render([(fr_cut, COL["frame"])], 60, 20, [K.CX + 3, Y_SH, Z_SH - 6], 46,
+                marks=[("circle", (ce, [1, 0, 0], (C.JOURNAL + K.CLR) / 2))],
                 labels=[("Hole edge on the inner face", list(np.array(ce) + [0, 0, 2.1]), (-60, -110))],
                 title="B · Test frame (near wall hidden)")
-    c = render([(frame, COL["frame"]), (crank_w, COL["crank"])], -35, 25, [b.CX, Y_SH, Z_SH - 4], 50,
+    c = render([(frame, COL["frame"]), (crank_w, COL["crank"])], -35, 25, [K.CX, Y_SH, Z_SH - 4], 50,
                title="Result")
     row([a, bb, c], os.path.join(OUT, "1-crankshaft-frame.png"))
 
     # 2 · fork in the upper arm (revolute)
-    tap = b.TAP / 2
+    tap = K.TAP / 2
     a = render([(pivot, COL["pivot"])], -40, 35, [0, 0, 4], 34,
                marks=[("circle", ([0, 0, YH / 2], [0, 0, 1], tap))],
                labels=[("Edge of the top hole", [0, 0, YH / 2], (40, -130))], title="A · Fork")
     z_arm = P[2] + YH / 2 + 0.4
     ce = [P[0], P[1], z_arm]
     bb = render([(frame, COL["frame"])], -40, -35, [P[0], P[1] + 6, z_arm], 40,
-                marks=[("circle", (ce, [0, 0, 1], (b.SCREW + b.CLR) / 2))],
+                marks=[("circle", (ce, [0, 0, 1], (K.SCREW + K.CLR) / 2))],
                 labels=[("Hole edge, underside of the arm", ce, (-20, 150))],
                 title="B · Test frame, seen from below")
     c = render([(frame, COL["frame"]), (piv_w, COL["pivot"])], -40, 20, list(P), 50, title="Result")
     row([a, bb, c], os.path.join(OUT, "2-fork-frame.png"))
 
     # 3 · leg in the fork (revolute)
-    hy = b.LEG_W / 2
+    hy = L.LEG_W / 2
     a = render([(leg, COL["leg"])], -150, 20, [-2, 0, 0], 60,
-               marks=[("circle", ([0, hy, 0], [0, 1, 0], (b.SCREW + b.CLR) / 2))],
+               marks=[("circle", ([0, hy, 0], [0, 1, 0], (K.SCREW + K.CLR) / 2))],
                labels=[("Hole edge on the side face", [0, hy, 0], (-60, -150))], title="A · Leg")
     piv_cut = keep(pivot, lambda c: c[1] > 0)
     ce = [0, WIN_Y / 2, 0]
     bb = render([(piv_cut, COL["pivot"])], -150, 15, [0, 2, 0], 34,
-                marks=[("circle", (ce, [0, 1, 0], (b.SCREW + b.CLR) / 2))],
+                marks=[("circle", (ce, [0, 1, 0], (K.SCREW + K.CLR) / 2))],
                 labels=[("Hole edge on the inner face", ce, (-40, -150))],
                 title="B · Fork (near wall hidden)")
     c = render([(piv_w, COL["pivot"]), (leg_w, COL["leg"])], -40, 20, list(np.array(P) - 12 * ps["u"]), 60,
@@ -210,7 +213,7 @@ def main():
     row([a, bb, c], os.path.join(OUT, "3-leg-fork.png"))
 
     # 4 · ball (crankshaft) to slider centre
-    ball = [b.P_["XC"], b.P_["r"], 0]       # crankshaft-2, right crank at its printed phase (pi): pin at +Y
+    ball = [K.P_["XC"], K.P_["r"], 0]       # crankshaft-2, right crank at its printed phase (pi): pin at +Y
     a = render([(crank, COL["crank"])], 35, 20, [6, 1, 0], 38, marks=[("dot", ball)],
                labels=[("Centre of the ball on the +X side", ball, (-40, -150))], title="A · Crankshaft")
     sl0 = slider_mesh([0, 0, 0], [0, 0, 1])
@@ -254,8 +257,8 @@ def main():
 
 
 def slider_mesh(c, axis, r=1.5, h=4.0, n=32):
-    ax = b.unit(axis)
-    e1 = b.unit(np.cross(ax, [0, 0, 1]) if abs(ax[2]) < 0.9 else np.cross(ax, [1, 0, 0]))
+    ax = K.unit(axis)
+    e1 = K.unit(np.cross(ax, [0, 0, 1]) if abs(ax[2]) < 0.9 else np.cross(ax, [1, 0, 0]))
     e2 = np.cross(ax, e1)
     t = np.linspace(0, 2 * np.pi, n, endpoint=False)
     ring = r * (np.outer(np.cos(t), e1) + np.outer(np.sin(t), e2))

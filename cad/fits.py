@@ -12,8 +12,8 @@ When a print gives a new value, change it here, say where it was measured, and r
 
 All values for Bambu PLA Basic, 0.4 mm nozzle, 0.20 mm layers, on the P2S, with the default X-Y compensation (0).
 
-    import sys, os; sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))   # from cad/<design>/
-    import fits
+    import sys, os; sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))   # from cad/<design>/
+    from cad import fits
     bore = fits.bore(4.0, fits.TURN)          # Ø4 journal → Ø4.5 hole
     window = leg_w + 2 * fits.WINDOW.side     # 0.5 mm a side
 """

@@ -1,16 +1,16 @@
 # Base v1
 
-The [carcass base](../carcass-120/) made to carry the [legs and drive](../drive/), modelled in code from the mesh
+The [carcass base](../carcass-120/) made to carry the [legs](../legs/) and [crankshafts](../crankshafts/), modelled in code from the mesh
 (trimesh + manifold3d booleans). How and why: [build log](../../build-log/3-legs-and-drive.md#base-v1-in-cad).
 
 ```
-python3 ../drive/build.py   # the drive's parts first
-python3 build.py            # base-v1, cap, front-block (+ body-lifted, for the check)
+python3 ../legs/build.py    # the legs' and forks' STLs first (and ../crankshafts, ../gear-train-test for check.py)
+python3 build.py            # out/: base-v1, cap, front-block (+ body-lifted, for the check)
 python3 check.py --step 10  # moving parts against base, cap, front block and body over a full turn (about 2 min)
 python3 figures.py          # the pictures below
 ```
 
-Needs Python 3.12 with build123d (for the drive), numpy, scipy, trimesh, manifold3d, shapely and matplotlib. All sizes
+Needs Python 3.12 with build123d (for the legs and crankshafts), numpy, scipy, trimesh, manifold3d, shapely and matplotlib. All sizes
 come from parameters at the top of [`build.py`](build.py).
 
 **Why a band.** The forks are 22 mm tall and swivel on a screw above and one below. On the original carcass the body
@@ -25,9 +25,9 @@ sits on the base right above the leg notches, so the top half of every fork went
 
 ![Cut along the spine](images/section-spine.png)
 
-| File | What | X × Y × Z (mm) | Print |
+| File (`out/`) | What | X × Y × Z (mm) | Print |
 |---|---|---|---|
-| `base-v1.stl` | Bowl, band, spine walls with the journal slots, a boss under each fork | 121.4 × 106.0 × 69.1 | 1 |
+| `base-v1.stl` | Bowl, band, spine walls with the journal slots, a boss under each fork | 121.4 × 106.0 × 69.6 | 1 |
 | `cap.stl` | Closes the deck over the spine; a tongue down every journal slot holds the crankshafts | 29.4 × 86.7 × 10.1 | 1 (upside down) |
 | `front-block.stl` | The carcass's front block, 18.7 mm higher, on longer stems | 63.5 × 38.2 × 51.9 | 1 |
 | `body-lifted.stl` | The carcass body moved up, for the check only (not committed: `build.py` writes it) | — | — |
@@ -40,7 +40,7 @@ Print plate: [`print/base-v1.3mf`](../../print/base-v1.3mf).
 - **Band:** the base's outline with a lobe round every fork, from the deck up to z 93.5. It is open over the cap
   and round the front block's stems. The side lips are under it, and the two posts that stood inside the body are
   gone.
-- **Spine built in:** the two walls of the [spine](../drive/), with the same journal slots and idler pin holes,
+- **Spine built in:** the two walls of the [gear train test's spine](../gear-train-test/), with the same journal slots and idler pin holes,
   join the bowl. Where the gears go lower than the bowl (the 20-tooth idler, by 2.4 mm), a **keel** 8.5 mm wide covers
   them.
 - **Forks:** each sits in a pocket 0.6 mm larger than its swivel, open outwards, so fork and leg slide in together
@@ -55,7 +55,7 @@ Print plate: [`print/base-v1.3mf`](../../print/base-v1.3mf).
   goes in through.
 
 **Hardware:** 16 × M3×10 + 16 nuts (fork swivels), 3 × M3×10 + 3 nuts (cap). The drive's own hardware is in
-[../drive/](../drive/).
+[../legs/](../legs/) and [../crankshafts/](../crankshafts/).
 
 **Assembly:**
 
@@ -64,7 +64,7 @@ Print plate: [`print/base-v1.3mf`](../../print/base-v1.3mf).
 3. Each fork with its leg slides into its pocket from outside, the leg's tube first. Slide a nut into each of the
    fork's two slots, then put one M3×10 up through the boss and one down through the band, into the fork's blind holes.
 4. Crankshafts into their slots, guiding each ball into its leg's tube, with the cranks as printed (see
-   [../drive/](../drive/)).
+   [../crankshafts/](../crankshafts/)).
 5. Cap: nuts into its three slots, then the cap on, with the tongues down the slots, and three M3×10.
 6. Front block into its place in the band, then the body on the band.
 

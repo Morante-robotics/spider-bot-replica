@@ -11,7 +11,7 @@ __pycache__/
 .venv/
 .pytest_cache/
 # Generated: the carcass body moved up (cad/base/build.py, for its check); the template's demo build
-cad/base/body-lifted.stl
+cad/base/out/body-lifted.stl
 cad/_template/out/
 # BambuStudio --info writes result.json in the working folder
 result.json

@@ -37,7 +37,10 @@ repeated. Its contents show where each step stands, and its **Open items** list 
 | [cad/carcass-jenscolt/](cad/carcass-jenscolt/) | Carcass base model by jenscolt, unmodified (CC BY-NC-SA) |
 | [cad/carcass-120/](cad/carcass-120/) | Carcass parts repaired (watertight) and scaled to 120 %: the base for cuts and holes (CC BY-NC-SA) |
 | [cad/layout/](cad/layout/) | What fits inside the body: battery holder and motor, print scale |
-| [cad/drive/](cad/drive/) | Legs, pivot forks, four crankshafts with gears, spine and a test frame, modelled in code (build123d) with a collision check over a full turn |
+| [cad/legs/](cad/legs/) | Legs and pivot forks, modelled in code (build123d), and the whole drive placed by the simulator's kinematics with a collision check over a full turn |
+| [cad/crankshafts/](cad/crankshafts/) | Four crankshafts with gears and the idlers that link them, with a 2D check of every mesh |
+| [cad/gear-train-test/](cad/gear-train-test/) | Gear train test: a stand-alone spine and cap for the crankshafts and idlers, with its `cad_verify` spec |
+| [cad/test-frame/](cad/test-frame/) | Test frame: a desk stand for one leg, its fork and a crankshaft, and the Onshape tutorial |
 | [cad/base/](cad/base/) | Base v1: the carcass base with a band that lifts the body, the spine built in, fork pockets and a cap over the crankshafts (CC BY-NC-SA) |
 | [cad/clearance-test/](cad/clearance-test/) | Block and pin to find the hole clearance this printer needs for turning and sliding fits |
 | [cad/](cad/) | The rules every design follows: axes, folder layout, what is kept in git; [`_template/`](cad/_template/) to start a new design |

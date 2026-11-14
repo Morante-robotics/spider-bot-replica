@@ -1,8 +1,8 @@
 # Clearance test
 
 How much bigger than its part a hole has to be on this printer for the drive's fits: a shaft that turns, a ball that
-slides, an M3 screw that turns, and an M3 screw that cuts its own thread. The values found go into `CLR` and
-`CLR_STEEL` in [`../drive/build.py`](../drive/build.py).
+slides, an M3 screw that turns, and an M3 screw that cuts its own thread. The values found went into `CLR` and
+`CLR_STEEL` in [`../common.py`](../common.py) and are the measured fits `TURN` and `STEEL` in [`../fits.py`](../fits.py).
 
 ```
 python3 build.py      # STEP + STL into this folder
