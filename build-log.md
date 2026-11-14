@@ -46,6 +46,7 @@ The robot's story in three parts, then what is left to do and a glossary.
    - [Gear train v2 in CAD](build-log/3-legs-and-drive.md#gear-train-v2-in-cad) · 2026-11-11 · ✅ printed
    - [Gear train test v2: the cap](build-log/3-legs-and-drive.md#gear-train-test-v2-the-cap) · 2026-11-12 · ✅ the train turns
    - [Base v1: print and first fitting](build-log/3-legs-and-drive.md#base-v1-print-and-first-fitting) · 2026-11-13 · ✅ faults found
+   - [Whole robot first: motor sizing and chassis plan](build-log/3-legs-and-drive.md#whole-robot-first-motor-sizing-and-chassis-plan) · 2026-11-14 · 🔄 plan approved
 4. **[Open items](#open-items)**: everything still to do.
 5. **[Glossary](#glossary)**: the terms used in the entries.
 
@@ -57,25 +58,23 @@ Everything still to do on the build, in one place. Each row links to the entry w
 done, its row is removed and the entry that closes it says so. Plan-level tasks (study, purchases) are tracked
 outside the repo.
 
+Since 2026-11-14 the whole robot, in its looks version, is designed and checked in CAD before anything else is
+printed. When it passes, the coupons for every untested fit are cut from it and printed as one batch; then the
+working chassis with its motor. Failures change that one version, which is checked again as a whole. Parts likely to need a fix (motor mount, cap, front block) are screwed on separately, so a fix reprints
+grams, not the base. The rows follow that order.
+
 | Pending | Came up in | Phase |
 |---|---|---|
-| Design base v2 with the CAD rules in [cad/README.md](cad/README.md#a-design-folder) and the checks in [`tools/cad_verify.py`](tools/cad_verify.py) | [Base v1: print and first fitting](build-log/3-legs-and-drive.md#base-v1-print-and-first-fitting) | 3 |
-| Assemble the drive in base v2 with the 8 legs and 8 forks ([`print/legs-forks-v1.3mf`](print/legs-forks-v1.3mf)) and turn it by hand | [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) | 3 |
-| A `cad_verify` spec (`verify.py`) for [`cad/legs/`](cad/legs/), [`cad/crankshafts/`](cad/crankshafts/) and [`cad/test-frame/`](cad/test-frame/): the drive's old folder was split into these and the gear train test (2026-11-13, every STL identical), but they are still checked only by `legs/check.py` and `crankshafts/check_gear_train.py` | [CAD rules](cad/README.md#a-design-folder) | 3 |
-| Bring `cad/gear-train-test/verify.py` to the spec standard without touching geometry: `MARKS`, `JOINTS` with fits (the printed test cap went on with tongues at 0.3 mm a side: a measured fit for short tongues, or another kind), hardware labels, `LABELS["es"]`, `PRINT_ORIENT` for every part, `GEAR_MOTION`, `MEASURE`; full check PASS and a workshop kit with no FALTA about the spec | [Gear train test v2: the cap](build-log/3-legs-and-drive.md#gear-train-test-v2-the-cap) | 3 |
+| Measure the N20 (motor, gearbox, D-shaft), the 4×AAA holder and the switch with the caliper, and put the measured values in the master model in place of the catalogue ones. They are bought only once the first looks version passes in CAD and its mass confirms the motor sizing; this replaces checking the holder's listing drawing against 64 × 49 × 16 mm (+2 mm) | [Motor, battery holder…](build-log/2-carcass.md#motor-battery-holder-and-print-scale) · [Whole robot first](build-log/3-legs-and-drive.md#whole-robot-first-motor-sizing-and-chassis-plan) | 3 |
 | Robot master model (`cad/robot.py`): datums, the carcass envelope and a table of every interface between designs; each design imports it, and the whole robot is verified at the end of every design | [CAD rules](cad/README.md#conventions) | 3 |
-| Replace `cad/base/check.py` (ad hoc, 2.5–3 min) with a `cad_verify` spec of the whole robot | [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) | 3 |
-| Calibrate X-Y hole and contour compensation with the clearance block, and save the standard settings as a Bambu Studio preset | [Standard settings](print/README.md#standard-settings) | 3 |
+| Whole robot in CAD, verified as one design, as in [the chassis plan](cad/chassis/design-plan.md#status-and-next-steps), in three parts: **A** the master model and the drive module (N20 seat and clamp, pinion, idler 3 v2, cap, new fits); **B** the looks chassis (band on the body's outline, screws and fork bosses hidden, no gap under the body's rear, side lips back), body v2 with the holder cradle and rear lug, front block v2 with the hooks, the ballast frame, the eyes pocket; **C** the whole-robot check PASS, then `mass_estimate.py` and `sim/motor_sizing.py` rerun on the CAD masses. It fixes base v1's faults with the CAD rules in [cad/README.md](cad/README.md#a-design-folder) and the checks in [`tools/cad_verify.py`](tools/cad_verify.py), and makes the carcass cuts (motor and shaft openings). Then imported as STEP into Onshape and assembled with mates, the gear train with **Gear relation** | [Whole robot first](build-log/3-legs-and-drive.md#whole-robot-first-motor-sizing-and-chassis-plan) · [Base v1: print…](build-log/3-legs-and-drive.md#base-v1-print-and-first-fitting) · [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) · [Mesh repair](build-log/2-carcass.md#mesh-repair) · [Onshape assembly](build-log/3-legs-and-drive.md#onshape-assembly) | 3 |
+| One `cad_verify` spec (`verify.py`) for the whole robot, replacing `cad/base/check.py` (ad hoc, 2.5–3 min), [`cad/legs/check.py`](cad/legs/check.py) and [`cad/crankshafts/check_gear_train.py`](cad/crankshafts/check_gear_train.py); it covers [`cad/legs/`](cad/legs/) and [`cad/crankshafts/`](cad/crankshafts/), and [`cad/test-frame/`](cad/test-frame/) gets its own | [CAD rules](cad/README.md#a-design-folder) · [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) | 3 |
+| Bring `cad/gear-train-test/verify.py` to the spec standard without touching geometry: `MARKS`, `JOINTS` with fits (the printed test cap went on with tongues at 0.3 mm a side: a measured fit for short tongues, or another kind), hardware labels, `LABELS["es"]`, `PRINT_ORIENT` for every part, `GEAR_MOTION`, `MEASURE`; full check PASS and a workshop kit with no FALTA about the spec | [Gear train test v2: the cap](build-log/3-legs-and-drive.md#gear-train-test-v2-the-cap) | 3 |
+| One batch of coupons (K1–K6b in [the plan](cad/chassis/design-plan.md#tests-and-coupons)), cut from the whole robot once it passes, one per untested fit: the pinion on the N20's D-shaft, the motor seat, the cap's tongues, the module's and the body's fits, the break of the printed gears (it decides whether the D-bore pinion is kept); K1 and K2 also wait for the motor. Also calibrate X-Y hole and contour compensation with the clearance block, and save the standard settings as a Bambu Studio preset | [Standard settings](print/README.md#standard-settings) · [Base v1: print…](build-log/3-legs-and-drive.md#base-v1-print-and-first-fitting) · [Whole robot first](build-log/3-legs-and-drive.md#whole-robot-first-motor-sizing-and-chassis-plan) | 3 |
+| Print the working chassis (v0, printed as the looks chassis) with the N20, the 8 legs and the 8 forks, and run it on the table with about 125 g of ballast at the final robot's centre of mass; measure the gear train's efficiency (test T1); the legs and forks plate ([`print/legs-forks-v1.3mf`](print/legs-forks-v1.3mf)) is reused if the whole-robot check passes it | [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) · [Whole robot first](build-log/3-legs-and-drive.md#whole-robot-first-motor-sizing-and-chassis-plan) | 4 |
 | Count the hardware in the workshop (the **Have** column) | [Hardware](hardware.md) | 3 |
-| Fix the front block (it stands loose on the deck and the cap) and the body on the band | [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) | 2 |
-| Base for looks, once v1 works: band following the body's outline, screws and fork bosses hidden, no gap under the body's rear, side lips back | [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) | 5 |
-| Carcass cuts: battery hatch in the base, motor and shaft openings | [Mesh repair](build-log/2-carcass.md#mesh-repair) | 2 |
 | Confirm that Bambu Studio keeps the support settings saved by `tools/bambu_plate.py` | [Clearance test…](build-log/3-legs-and-drive.md#clearance-test-and-test-leg-print-plate) | 2 |
-| Check the drawing of the battery holder bought against 64 × 49 × 16 mm (+2 mm) | [Motor, battery holder…](build-log/2-carcass.md#motor-battery-holder-and-print-scale) | 4 |
-| Place the battery holder and the N20 again: the body is 18.7 mm higher and the band's opening is about 70 × 49 mm | [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) | 4 |
-| N20 drive: gear ratio and motor position | [Legs and drive in CAD](build-log/3-legs-and-drive.md#legs-and-drive-in-cad) | 4 |
 | Measure battery life on 4×AAA | [Motor, battery holder…](build-log/2-carcass.md#motor-battery-holder-and-print-scale) | 4 |
-| Optional: the gear train in Onshape with **Gear relation** mates | [Onshape assembly](build-log/3-legs-and-drive.md#onshape-assembly) | 2 |
 
 [↑ Contents](#contents)
 
@@ -106,5 +105,10 @@ Terms used in the entries, in the order they first appear, with a link to that e
 | **Keel** | A narrow ridge under the bowl that covers the gears where they go lower than the bowl. | [Base v1 in CAD](build-log/3-legs-and-drive.md#base-v1-in-cad) |
 | **Keeper** | A cover that holds the crankshaft down in its slots. | [Test leg…](build-log/3-legs-and-drive.md#test-leg-first-assembly-and-clearance-result) |
 | **Gear offset** | The angle a gear is turned on its own shaft, relative to the cranks. | [Gear train v2 in CAD](build-log/3-legs-and-drive.md#gear-train-v2-in-cad) |
+| **Margin (motor)** | How many times the motor's stall torque exceeds the worst torque it has to give; 3 or more here. | [Whole robot first…](build-log/3-legs-and-drive.md#whole-robot-first-motor-sizing-and-chassis-plan) |
+| **Stall torque** | The torque at which a motor stops turning. | [Whole robot first…](build-log/3-legs-and-drive.md#whole-robot-first-motor-sizing-and-chassis-plan) |
+| **Pinion** | The small gear on the motor's shaft. | [Whole robot first…](build-log/3-legs-and-drive.md#whole-robot-first-motor-sizing-and-chassis-plan) |
+| **Coupon** | A small test piece cut from a part's design, printed to test one fit before the whole part. | [Whole robot first…](build-log/3-legs-and-drive.md#whole-robot-first-motor-sizing-and-chassis-plan) |
+| **v0** | The first working chassis with its motor, walking with ballast in place of the body. | [Whole robot first…](build-log/3-legs-and-drive.md#whole-robot-first-motor-sizing-and-chassis-plan) |
 
 [↑ Contents](#contents)

@@ -46,3 +46,20 @@ Needs numpy, scipy, matplotlib and pillow (plus trimesh and shapely for `shaft`)
 ![Toy leg in 3D](images/toy-3d-comparison.png)
 
 ![Toy leg in 3D, animated](images/toy-3d.gif)
+
+## N20 motor sizing
+
+[`motor_sizing.py`](motor_sizing.py) sizes the gear motor from the robot's mass and the 3D toy leg's kinematics: the
+crank torque over one turn (lifting the body, the feet slipping on the ground, friction in the printed joints), the
+crank speed for a walking speed, where the motor can mesh with the gear train, and Pololu's N20s scaled to 4.8 V and
+4.0 V. A motor passes with a margin of 3 (worst working torque ≤ 1/3 of stall, gear efficiency 0.5) at 4.0 V and
+at least 1.8 cm/s at 4.8 V. Output: [`motor-sizing-result.txt`](motor-sizing-result.txt).
+[`motor_sizing_figure.py`](motor_sizing_figure.py) draws the candidates against that zone and the break torque of
+the printed teeth if a leg jams. Results: [build log](../build-log/3-legs-and-drive.md#whole-robot-first-motor-sizing-and-chassis-plan).
+
+```
+../.venv/bin/python motor_sizing.py > motor-sizing-result.txt
+../.venv/bin/python motor_sizing_figure.py
+```
+
+![N20 candidates](images/motor-sizing.png)

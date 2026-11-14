@@ -30,6 +30,10 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
 6. **Base v1 printed.** It printed but could not be assembled: the cap's tongues broke, the front block was not
    held, the pins could not be reached, a gear did not seat and support stayed trapped. These lessons are now CAD
    rules and checks, and base v2 is next.
+7. **The whole robot first.** Rather than a base v2 that still could not test the motor, the whole robot, in its
+   final looks, is now modelled and checked in CAD before anything else is printed. The motor is sized (an N20,
+   380:1) and the plan for the whole robot is approved: the motor sits over the last idler, the batteries ride in
+   the body. Modelling is next.
 
 <img src="../sim/images/drive-attempts.png" alt="The three drives tried, from above and from the side">
 
@@ -1356,5 +1360,188 @@ prints (support where it cannot be removed): things a check for overlaps over a 
   against them before it is printed.
 
 This entry closes the open item «Base v1 was printed … write its entry»; designing base v2 stays open.
+Base v2 is now designed as part of the whole robot: [Whole robot first](#whole-robot-first-motor-sizing-and-chassis-plan).
+
+[↑ Contents](../build-log.md#contents)
+
+### Whole robot first: motor sizing and chassis plan
+
+**Phase 3 · Mechanisms · 2026-11-14** · Status: 🔄 plan approved; modelling next
+
+> **In short.** Base v1 had no place for the motor or the batteries, so even a corrected base v2 could not test the
+> motor, and more partial prints would follow. From now on the whole robot, in its final looks, is modelled and
+> checked in CAD before anything else is printed. The motor was sized first: a Pololu N20 HP 6 V 380:1, with a
+> margin of 3.1 on flat batteries. Then a plan for the whole robot was written and approved: the motor sits over
+> the last idler, the batteries ride in the body, and the printed teeth are the fuse that protects the gearbox if a
+> leg jams. Nothing is modelled or bought yet.
+
+[Base v1](#base-v1-print-and-first-fitting) showed that the drive works only as part of a robot: the base had no
+seat for the motor, no place for the battery holder, no way to hold the front block or the body. Each fix would
+have been one more test print (v2, v3…), each testing a part of the robot and none the motor. The new order:
+model the whole robot, check it as one design, then print one batch of small test pieces (coupons) for every fit
+not yet measured, then the working chassis (**v0**) with its motor. A failure changes that one design, which is
+checked again as a whole. The parts most likely to need a fix (motor clamp, cap, front block) are separate and
+screwed on, so a fix reprints a few grams, not the base.
+
+#### Steps
+
+1. **Size the motor** with [`sim/motor_sizing.py`](../sim/motor_sizing.py): the robot's mass from the printed parts
+   and catalogue values, the torque the four crankshafts need over one turn (from the
+   [3D toy leg](#toy-leg-in-3d) model), the speed for a desk-toy walk, and Pololu's N20 data scaled to the battery
+   voltage. A motor passes if its stall torque is at least 3 times the worst working torque (a **margin** of 3,
+   with the printed gears taken at 50 % efficiency) on flat batteries (4.0 V), and if the robot still walks at
+   1.8 cm/s or more on 4.8 V. Output: [`sim/motor-sizing-result.txt`](../sim/motor-sizing-result.txt).
+2. **Plan the whole robot** in [`cad/chassis/design-plan.md`](../cad/chassis/design-plan.md): where the motor,
+   the battery holder, the switch and the eyes board go, how each part is held and assembled, which fits are still
+   untested and which coupon tests each. A design review checked it twice; each pass asked for changes, which went
+   into revisions 3 and 4. Morante approved revision 4.
+3. **Estimate the mass** of the final robot and of v0 with
+   [`cad/chassis/mass_estimate.py`](../cad/chassis/mass_estimate.py), adding a contingency to each mass by how
+   sure it is.
+4. **Work out what breaks if a leg jams**: the motor can push harder than its own gearbox can take, so something
+   printed must give first (Fig. 5).
+
+<details>
+<summary>How to reproduce</summary>
+
+```
+uv sync
+.venv/bin/python sim/motor_sizing.py > sim/motor-sizing-result.txt
+.venv/bin/python sim/motor_sizing_figure.py
+cd cad/chassis
+../../.venv/bin/python plan_figure.py        # --lang es: Spanish copies for the workshop kit
+../../.venv/bin/python mass_estimate.py      # --lang es as well
+```
+
+`plan_figure.py` needs base v1's meshes (`cad/base/build.py`). Assumptions of the sizing, all in its docstring and
+output: the body stands on the feet within 2 mm of the lowest; friction 0.35 printed on printed, 0.25 screw on
+printed, 0.4–0.6 foot on the desk; centre of mass anywhere within ±5 mm of the body axis; 800 mAh NiMH cells and
+0.3 Ω in the battery, switch and wires.
+
+</details>
+
+#### Result
+
+**Motor.** The worst torque the cranks need over a turn is 57 N·mm (Table 1). The motor drives a 12-tooth pinion
+on the 20-tooth idler 3, and the idlers only reverse the direction, so the crankshafts turn at the motor's speed
+and the motor needs 57 / 0.5 = 113 N·mm at its shaft. Of Pololu's N20s, only the HP 380:1 passes (Fig. 1).
+
+| What | Value |
+|---|---|
+| Robot mass, measured parts and estimates | 403 g; with 15 % margin 463 g |
+| Worst crank torque over a turn | 57 N·mm: lifting the body 23.5, feet slipping 14.5, friction in the joints 18.5 |
+| Typical peak crank torque | 45 N·mm |
+| Distance walked per crank turn | 19.3 mm |
+| Chosen motor: [Pololu Micro Metal Gearmotor HP 6 V 380:1](https://www.pololu.com/product/4794) | 84 rpm and 5.5 kg·cm stall at 6 V, 1.6 A stall |
+| With it | Margin 3.8 at 4.8 V and 3.1 at 4.0 V; 1.9 cm/s at 4.8 V; 2.5–3 h on 800 mAh |
+
+*Table 1 · The motor sizing ([full output](../sim/motor-sizing-result.txt)).*
+
+<img src="../sim/images/motor-sizing.png" alt="N20 candidates: margin at 4.0 V against walking speed at 4.8 V">
+
+*Fig. 1 · Each N20 that could fit, by its margin on flat batteries (up) and its walking speed (right). Only the HP
+380:1 lands in the green zone. The HP 298:1 is faster but has a margin of 2.3; the medium- and low-power (MP, LP)
+motors are too weak at the same ratio; the HP 1000:1 is strong but walks at 0.7 cm/s. Generic N20s sold as
+«1:298, 50 rpm» use a slower motor of the MP and LP class, and fail too. Made by
+[`sim/motor_sizing_figure.py`](../sim/motor_sizing_figure.py).*
+
+**Where the motor goes.** The sizing found no room under the deck between the legs' arms: a pinion meshing with
+idler 3 sits above the deck. So the N20 lies along X over idler 3, partly through the deck, held by a clamp from
+above (Fig. 2, 3). Over a full turn every 10°, it stays 1.5–2.0 mm from the legs, 2.0–2.5 mm from the crankshafts,
+and its pinion's teeth 2.28 mm from the gears of crankshafts 3 and 4.
+
+<img src="../cad/chassis/images/plan-side.png" alt="Plan, side cut through the body axis">
+
+*Fig. 2 · Side cut through the middle of the robot. The pinion (red circle) sits on idler 3, partly through the
+deck. The battery holder (purple box) rides in the body. The arrows show how the body goes on: down, 4 mm forward
+onto two hooks, then one M3 screw from below at the rear. The switch (green) is recessed at the rear. The eyes
+board (orange) goes in a pocket cut into the head. Orange and blue fills: everything the legs and the
+crankshafts sweep over a turn. Made by [`cad/chassis/plan_figure.py`](../cad/chassis/plan_figure.py), which also
+draws the [view from above](../cad/chassis/images/plan-top.png).*
+
+<img src="../cad/chassis/images/plan-front.png" alt="Plan, front cut through idler 3 and the motor">
+
+*Fig. 3 · Front cut through idler 3 and the motor. The N20 (red box) lies along X with its pinion at the gear
+plane; the clamp (blue bar) and its screws are above the deck, away from the legs' paths.*
+
+**The plan's main choices** ([plan](../cad/chassis/design-plan.md)):
+
+- **Drive module.** The spine with the crankshafts and idlers, the motor seat, the clamp and the cap are one
+  separate part, assembled on the bench and lowered into the chassis with 4 screws. Idler 3 is reprinted 5 mm wide
+  for the pinion; the printed crankshafts, idlers 1 and 2, legs and forks are reused if the whole-robot check passes
+  them.
+- **Batteries in the body.** The 4×AAA holder rides in a cradle inside the body; body and holder lift off together
+  and a 2-pin connector (JST-XH) joins them to the chassis. To change the batteries: one screw out from below,
+  slide the body back 4 mm, lift it. There is no hatch.
+- **Switch and eyes.** A small slide switch (SS12D00) recessed at the rear; the eyes board (2 LEDs and their
+  resistors) in a 50 × 22 × 10 mm pocket cut into the solid head.
+- **v0 is printed as the looks chassis**, not as a plain test base, and walks with about 125 g of steel ballast in
+  a frame placed at the final robot's centre of mass, so the motor is tested at the final weight.
+
+**Mass.** With the parts the plan adds (drive module, front block v2, cradle, paint, the screws for each joint), the
+final robot comes to 445 g as summed, with its centre of mass 0.4 mm and 2.5 mm off the body axis (Fig. 4). With
+a contingency by source (+15 % on plan estimates, +10 % on catalogue values, +5 % on masses from the shell model of
+a mesh) the design mass is **486 g: margin 2.96, 8 g over the 478 g at which the HP 380:1 keeps a margin of 3.0**.
+The margin here is scaled from the sizing as 1/mass, a first approximation; both scripts are rerun once the parts
+are modelled and their contingency drops. The plan lists ways out if it is still over (lighter printed parts, a
+measured gear efficiency, another ratio); none is chosen.
+
+<img src="../cad/chassis/images/plan-mass.png" alt="Mass table of the final robot and the v0 test">
+
+*Fig. 4 · Mass of each part of the final robot and of v0, with where each number comes from. The ballast row is
+what v0 carries so that it weighs and balances like the final robot. Made by
+[`cad/chassis/mass_estimate.py`](../cad/chassis/mass_estimate.py).*
+
+**If a leg jams.** The motor then pushes up to its stall torque, 360–503 N·mm (4.0–5.6 V), more than any printed
+tooth and more than the gearbox's own limit, 245 N·mm (Pololu's figure for the 380:1). The pinion is pressed on
+the motor's D-shaped shaft and cannot slip, so a printed tooth must break first, below 245. Estimated with PLA at
+50 MPa, the teeth of idlers 1 and 2 break at about 191 N·mm and those of the crank gears at about 220 (Fig. 5).
+
+<img src="../sim/images/stall-protection.png" alt="Estimated break torque of the weakest printed tooth for a jam at each crankshaft">
+
+*Fig. 5 · For a jam at each crankshaft, the torque at the motor at which the weakest printed tooth in the path
+breaks (estimate). Green band: where the plain D-bore pinion is kept. A jam at the front cranks breaks a tooth
+inside the band; at the rear cranks (3 and 4) the estimate is above it, still under the gearbox's limit. Made by
+[`sim/motor_sizing_figure.py`](../sim/motor_sizing_figure.py).*
+
+**Coupons.** Each untested fit gets a small test piece cut from the robot's own geometry, printed in one batch
+once the whole robot passes (about 40 g, 3 h 15 min in all):
+
+| Coupon | Tests | Waits for |
+|---|---|---|
+| K1 pinion | The pinion's D-bore on the motor shaft (3 sizes) | The whole robot and the motor |
+| K2 motor stage | The motor seat and clamp, loaded to the worst design torque | The whole robot and the motor |
+| K3 cap tongues | The cap on a slice of the spine: on and off 5 times | The whole robot |
+| K4, K5 | The module's fit in the chassis; the body's hooks and rear screw | The whole robot |
+| K6a, K6b | The break torque of an idler tooth and of a crank-gear tooth, with weights on a 30 mm lever | The whole robot |
+
+The gear train's efficiency (test T1) is measured on the assembled module once the motor is there.
+
+#### Decisions
+
+- **The whole robot is modelled and checked in CAD before anything else is printed**, then one batch of coupons,
+  then v0. No new partial test rigs.
+- **Motor: Pololu N20 HP 6 V 380:1**, on catalogue values for now. Nothing is bought (motor, holder, batteries,
+  switch, connectors) until the first looks version passes in CAD and its mass confirms the sizing; then the bought
+  parts are measured and their values replace the catalogue ones.
+- **Stall protection: a plain D-bore pinion**, kept if every measured break (K6a, K6b) is at most 196 N·mm
+  (0.8 × 245) and at least 170 N·mm (1.5 × the 113 N·mm worst design load, so teeth do not break while walking).
+  Otherwise the fallback becomes the design: the pinion carried on a hub that slips on a friction face at 170 N·mm.
+
+#### Next
+
+Modelling goes in three parts, each checked before the next ([plan](../cad/chassis/design-plan.md#status-and-next-steps)):
+
+- **A:** the master model `cad/robot.py` (datums, carcass envelope, interface table, bought parts' envelopes); the
+  drive module (spine, idler pins and keeper, idler 3 v2, motor saddle and pad, flange slot, clamp, cap with a
+  window over the pinion, pinion); the new fits in [`cad/fits.py`](../cad/fits.py) with their rows in
+  [`measurements.csv`](../measurements.csv); the start of the whole-robot spec `cad/chassis/verify.py`.
+- **B:** the looks chassis, body v2 with the holder cradle and rear lug, front block v2 with the hooks, the ballast
+  frame, the eyes pocket.
+- **C:** the whole-robot check with a full PASS; `mass_estimate.py` and `motor_sizing.py` rerun on the CAD masses
+  (this decides the motor purchase); the coupon batch and its workshop kit.
+
+This entry closes the open item «N20 gear ratio and motor stage». The item «Base for looks, once the v0 chassis
+walks» is now part of the whole-robot item, as v0 is printed as the looks chassis.
 
 [↑ Contents](../build-log.md#contents)
