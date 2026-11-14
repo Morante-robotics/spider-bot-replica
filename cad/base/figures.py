@@ -23,23 +23,18 @@ import matplotlib.pyplot as plt  # noqa: E402
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DRIVE = os.path.join(HERE, "..", "drive")
-sys.path.insert(0, DRIVE)
-import build as D  # noqa: E402
-import check as DC  # noqa: E402
+sys.path.insert(0, os.path.join(HERE, "..", ".."))
+from cad import common as K, design  # noqa: E402
 
-sys.path.insert(0, HERE)
-import importlib.util  # noqa: E402
-
-spec = importlib.util.spec_from_file_location("basebuild", os.path.join(HERE, "build.py"))
-BB = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(BB)
+BB = design("base")
+C = design("crankshafts")
+L = design("legs")
 
 IMG = os.path.join(HERE, "images")
 GREY, BLUE, RED, GREEN, BLACK = "#9a9a9a", "#2e86c1", "#c0392b", "#27ae60", "#222222"
 
 
-def load(n, folder=HERE):
+def load(n, folder=BB.OUT):
     return trimesh.load(os.path.join(folder, n + ".stl"))
 
 
@@ -97,9 +92,9 @@ def fig_section_leg():
     old_body = load("spideybot_body", os.path.join(HERE, "..", "carcass-120"))
     old_base = load("spideybot_base", os.path.join(HERE, "..", "carcass-120"))
     th = np.radians(np.arange(0, 360, 5))
-    tilt = np.array([-np.degrees(np.arcsin(D.legs_at(t)[1]["u"][2])) for t in th])
+    tilt = np.array([-np.degrees(np.arcsin(L.legs_at(t)[1]["u"][2])) for t in th])
     t_hi, t_lo = th[tilt.argmax()], th[tilt.argmin()]
-    l = D.legs_at(t_hi)[1]
+    l = L.legs_at(t_hi)[1]
     P = l["P"]
     h = np.array([l["u"][0], l["u"][1], 0])
     h /= np.linalg.norm(h)
@@ -116,9 +111,9 @@ def fig_section_leg():
             section(ax, body, P, h, n, fill=True, color=RED, alpha=0.5)
             ax.set_title(f"Base v1: body {BB.LIFT:g} mm higher on the band", fontsize=13)
         for t, ls in ((t_hi, "-"), (t_lo, "--")):
-            for nm, f, M in DC.poses(t):
+            for nm, f, M in L.poses(t):
                 if nm in ("leg1R", "pivot1R", "crankshaft1"):
-                    m = load(f, DRIVE)
+                    m = trimesh.load(L.stl(f))
                     m.apply_transform(M)
                     col = BLACK if nm.startswith("leg") else GREEN if nm.startswith("pivot") else BLUE
                     if nm.startswith("crank") and ls == "--":
@@ -146,19 +141,19 @@ def fig_section_leg():
 
 def fig_section_spine():
     base, cap = load("base-v1"), load("cap")
-    P = np.array([D.CX, 0, 0])
+    P = np.array([K.CX, 0, 0])
     h = np.array([0, 1.0, 0])
     n = np.array([1.0, 0, 0])
     fig, ax = plt.subplots(figsize=(13, 5.5), dpi=100)
-    for x, lw in ((D.CX, 0), (D.CX + (D.WALL_IN + D.WALL_OUT) / 2, 1)):
+    for x, lw in ((K.CX, 0), (K.CX + (C.WALL_IN + C.WALL_OUT) / 2, 1)):
         pass
     section(ax, base, P, h, n, fill=True, color=GREY)
-    Pw = np.array([D.CX + (D.WALL_IN + D.WALL_OUT) / 2, 0, 0])
+    Pw = np.array([K.CX + (C.WALL_IN + C.WALL_OUT) / 2, 0, 0])
     section(ax, base, Pw, h, n, color="#555555", lw=0.8)
     section(ax, cap, Pw, h, n, fill=True, color=BLUE, alpha=0.7)
-    for nm, f, M in DC.poses(0):
+    for nm, f, M in L.poses(0):
         if nm.startswith(("crankshaft", "idler")):
-            m = load(f, DRIVE)
+            m = trimesh.load(L.stl(f))
             m.apply_transform(M)
             section(ax, m, P, h, n, color=RED, lw=1)
     ax.set_aspect("equal")

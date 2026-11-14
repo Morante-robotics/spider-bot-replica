@@ -1,5 +1,5 @@
 """Assembly diagram of the gear train test v2 (print/gear-train-test-v2.3mf), from the same parts and poses as
-verify_gear_train.py:
+verify.py:
 
   left   exploded view: every part pulled out along the direction it goes in, numbered by assembly step
   right  seen from +X (the side with the dots) at crank angle 0: every crank level, the dots per shaft, front/rear
@@ -21,7 +21,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-import verify_gear_train as V  # noqa: E402
+import verify as V  # noqa: E402  (this design's cad_verify spec)
 
 TXT = {
     "en": dict(spine="spine", cap="cap", cs="crankshaft {i}", idler="idler {k} ({n} T)", idlers="idlers (12 T front, 20 T rear)", axle="M3×12 + nut",
@@ -50,7 +50,7 @@ def placed():
     meshes = {}
     for n, p in V.PARTS.items():
         meshes[n] = p["mesh"] if "mesh" in p else trimesh.load(os.path.join(HERE, p["stl"]), force="mesh")
-    return {n: tri(m) for n, m in P(V, meshes, 0).items()}
+    return {n: tri(m) for n, m in P(V, meshes, V.MOTION[0]).items()}
 
 
 def kind(n):
@@ -142,10 +142,10 @@ def main():
         vis = t.face_normals[:, 0] > 0 if n == "spine" else np.ones(len(f), bool)
         bx.add_collection(PolyCollection(f[vis], facecolors=COL[kind(n)], edgecolors="none",
                                          alpha=0.35 if n == "spine" else 1.0))
-    rr = V.B.P_["r"]
+    rr = V.C.P_["r"]
     for i, (y, z) in enumerate(V.SH):
         u = -y
-        ph = V.B.shaft_phases(i)[0]                 # the +X (right) crank
+        ph = V.C.shaft_phases(i)[0]                 # the +X (right) crank
         du, dz = rr * np.cos(ph), rr * np.sin(ph)  # pin offset (-Y is +u)
         bx.annotate("", (u + 2.6 * du, z + 2.6 * dz), (u, z),
                     arrowprops=dict(arrowstyle="-|>", color="black", lw=2.2, mutation_scale=14))

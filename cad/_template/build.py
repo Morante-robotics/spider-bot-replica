@@ -17,8 +17,8 @@ import sys
 from build123d import Box, export_step, export_stl
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, ".."))
-import fits  # noqa: E402
+sys.path.insert(0, os.path.join(HERE, "..", ".."))
+from cad import fits  # noqa: E402,F401   another design's numbers: from cad import design; C = design("crankshafts")
 
 OUT = os.path.join(HERE, "out")
 

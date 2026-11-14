@@ -9,7 +9,7 @@ What this script does to ../carcass-120/spideybot_base.stl (all meshes, booleans
   - keeps the bowl below the seam (z 75) and hollows it into a shell with a 2 mm deck on top
   - adds the band (the base's outline, z 75 → 75 + LIFT) and lifts the parts that go up into the body (the front
     block and the two pegs) by LIFT, with their stems made longer; the two posts and the side lips are dropped
-  - builds the spine into the bowl (two walls with the journal slots, as in ../drive/spine), with a keel under the
+  - builds the spine into the bowl (two walls with the journal slots, as in ../gear-train-test), with a keel under the
     gears where they go below the bowl
   - cuts each fork's pocket (fork swivel + 0.6 mm, open outwards to slide fork and leg in), adds a boss under each
     fork, drills both swivel screws with a pocket for a captive nut, and cuts the path of every leg (+0.8 mm, up to 30 mm out of its pivot)
@@ -17,16 +17,18 @@ What this script does to ../carcass-120/spideybot_base.stl (all meshes, booleans
     (over the outer part of each wall, clear of the gears) and hold the crankshafts; three M3×10 screws into captive
     nuts
 
-Writes base-v1.stl, cap.stl, front-block.stl and body-lifted.stl (the carcass body moved up, for the check and the
-pictures). The front block is a separate part now: its stems stood over the opening the first crankshaft goes in
+Writes out/base-v1.stl, out/cap.stl, out/front-block.stl and out/body-lifted.stl (the carcass body moved up, for
+the check and the pictures; not committed). The front block is a separate part now: its stems stood over the opening the first crankshaft goes in
 through. It drops in through the band after the drive and the cap are in, and stands on the deck and the cap.
 
 Usage:
-    python3 build.py
-    python3 check.py            # moving parts against base, cap and body over a full turn
+    python3 build.py                 # every part into out/
+    python3 build.py --part cap      # one part
+    python3 check.py                 # moving parts against base, cap and body over a full turn
 
-Needs the drive's parts (run ../drive/build.py first), trimesh, manifold3d, shapely.
+Needs the legs' STLs (run ../legs/build.py first), trimesh, manifold3d, shapely.
 """
+import argparse
 import os
 import sys
 
@@ -37,23 +39,25 @@ from shapely.geometry import Polygon, Point, box as sbox
 from shapely.ops import unary_union
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DRIVE = os.path.join(HERE, "..", "drive")
+OUT = os.path.join(HERE, "out")
 CARCASS = os.path.join(HERE, "..", "carcass-120")
-sys.path.insert(0, DRIVE)
-import build as D  # noqa: E402
-import check as DC  # noqa: E402
+sys.path.insert(0, os.path.join(HERE, "..", ".."))
+from cad import common as K, design  # noqa: E402
+
+C = design("crankshafts")
+L = design("legs")
 
 # --- parameters (mm) -----------------------------------------------------------------------------------------
 SEAM = 74.8          # top of the original base's deck, where the body sat
 WALL = 2.0           # shell and deck thickness
 DECK_BOT = SEAM - WALL
-FORK_H = D.yoke_size()[3]
+FORK_H = L.yoke_size()[3]
 FORK_GAP = 0.6       # fork to the boss below and to the band above
 SCREW_IN = 3.0       # how far each swivel screw's tip goes into the fork
 SCREW_L = 10.0       # M3×10
 HEAD_D, HEAD_H = 6.0, 3.2    # M3 cap head and its counterbore
-NUT_AF, NUT_T = D.NUT_AF + 0.3, D.NUT_T + 0.3
-HOLE = D.SCREW + D.CLR_STEEL
+NUT_AF, NUT_T = K.NUT_AF + 0.3, K.NUT_T + 0.3
+HOLE = K.SCREW + K.CLR_STEEL
 Z_P = 72.0           # leg pivots
 FORK_TOP, FORK_BOT = Z_P + FORK_H / 2, Z_P - FORK_H / 2
 # band height: the upper screw's head sits flush with the band's top
@@ -62,8 +66,8 @@ TOP = SEAM + LIFT
 BOSS_R = 5.5         # boss under each fork
 LEG_CLR = 0.8        # room around the legs' path
 CAP_CLR = 0.3        # cap in its opening
-CX = D.CX
-SH = D.shaft_yz()
+CX = K.CX
+SH = C.shaft_yz()
 
 
 def cyl(r, z0, z1, xy=(0, 0), n=48):
@@ -191,7 +195,7 @@ def placements(step=15):
     """For every leg: list over crank angles of (leg 4×4, fork 4×4)."""
     out = {}
     for a in np.arange(0, 360, step):
-        for n, f, M in DC.poses(np.radians(a)):
+        for n, f, M in L.poses(np.radians(a)):
             if n.startswith("leg"):
                 out.setdefault(n[3:], {}).setdefault("leg", []).append((f, M))
             elif n.startswith("pivot"):
@@ -217,7 +221,7 @@ def leg_path(pl):
         seq = d["leg"]
         for (f1, M1), (f2, M2) in zip(seq, seq[1:] + seq[:1]):
             if f1 not in cache:
-                m = trimesh.load(os.path.join(DRIVE, f1 + ".stl"))
+                m = trimesh.load(L.stl(f1))
                 m = m.slice_plane([30, 0, 0], [-1, 0, 0])
                 cache[f1] = inflate(m.vertices, LEG_CLR)
             loc = cache[f1]
@@ -228,7 +232,7 @@ def leg_path(pl):
 
 def fork_frames(pl):
     """Per fork: pivot P, outward unit vector (mean of its swivel), and the hull of its swivel inflated."""
-    fv = trimesh.load(os.path.join(DRIVE, "pivot.stl")).vertices
+    fv = trimesh.load(L.stl("pivot")).vertices
     out = []
     for key, d in pl.items():
         Ms = d["fork"]
@@ -273,8 +277,8 @@ def fork_mounts(forks):
 # --- spine, keel, deck opening, cap ----------------------------------------------------------------------------
 def gears():
     """(y, z, tip radius) of every gear between the spine walls."""
-    g = [(y, z, D.MOD * (D.SHAFT_TEETH / 2 + 1)) for y, z in SH]
-    g += [(y, z, D.MOD * (n / 2 + 1)) for y, z, n in D.idlers()]
+    g = [(y, z, C.MOD * (C.SHAFT_TEETH / 2 + 1)) for y, z in SH]
+    g += [(y, z, C.MOD * (n / 2 + 1)) for y, z, n in C.idlers()]
     return g
 
 
@@ -287,16 +291,16 @@ def spine(shell_solid):
     """Spine walls built into the bowl, a keel under the gears, and the cap's screw bosses."""
     walls = []
     for sx in (1, -1):
-        x0, x1 = sorted((CX + sx * D.WALL_IN, CX + sx * D.WALL_OUT))
+        x0, x1 = sorted((CX + sx * C.WALL_IN, CX + sx * C.WALL_OUT))
         walls.append(boxb([x0, SPINE_Y0, 30], [x1, SPINE_Y1, DECK_BOT]))
     # front end block, between the walls, clear of the first gear
-    walls.append(boxb([CX - D.WALL_IN - 0.01, SPINE_Y0, 30], [CX + D.WALL_IN + 0.01, SH[0][0] - D.KEEP_GAP, DECK_BOT]))
+    walls.append(boxb([CX - C.WALL_IN - 0.01, SPINE_Y0, 30], [CX + C.WALL_IN + 0.01, SH[0][0] - C.KEEP_GAP, DECK_BOT]))
     # bosses for the cap's side screws
     for x, y, _ in CAP_SCREWS[1:]:
         walls.append(cyl(4.5, DECK_BOT - 9, DECK_BOT, (x, y)))
     keel = []
     for y, z, rt in gears():
-        c = trimesh.creation.cylinder(radius=rt + 0.5 + 1.6, height=2 * D.WALL_OUT, sections=64)
+        c = trimesh.creation.cylinder(radius=rt + 0.5 + 1.6, height=2 * C.WALL_OUT, sections=64)
         c.apply_transform(trimesh.transformations.rotation_matrix(np.pi / 2, [0, 1, 0]))
         c.apply_translation([CX, y, z])
         keel.append(I(c, boxb([CX - 10, y - 20, 0], [CX + 10, y + 20, z - 2])))
@@ -304,18 +308,18 @@ def spine(shell_solid):
     spine = U(I(U(*walls), shell_solid), keel)
     cut = []
     for y, z, rt in gears():
-        c = trimesh.creation.cylinder(radius=rt + 0.5, height=2 * D.WALL_IN, sections=64)
+        c = trimesh.creation.cylinder(radius=rt + 0.5, height=2 * C.WALL_IN, sections=64)
         c.apply_transform(trimesh.transformations.rotation_matrix(np.pi / 2, [0, 1, 0]))
         c.apply_translation([CX, y, z])
         cut.append(c)
     for y, z in SH:
-        c = trimesh.creation.cylinder(radius=(D.JOURNAL + D.CLR) / 2, height=20, sections=48)
+        c = trimesh.creation.cylinder(radius=(C.JOURNAL + K.CLR) / 2, height=20, sections=48)
         c.apply_transform(trimesh.transformations.rotation_matrix(np.pi / 2, [0, 1, 0]))
         c.apply_translation([CX, y, z])
         cut.append(c)
-        cut.append(boxb([CX - 10, y - (D.JOURNAL + D.CLR) / 2, z], [CX + 10, y + (D.JOURNAL + D.CLR) / 2, DECK_BOT + 1]))
-    for y, z, n in D.idlers():
-        c = trimesh.creation.cylinder(radius=(D.PIN + D.CLR_STEEL) / 2, height=20, sections=32)
+        cut.append(boxb([CX - 10, y - (C.JOURNAL + K.CLR) / 2, z], [CX + 10, y + (C.JOURNAL + K.CLR) / 2, DECK_BOT + 1]))
+    for y, z, n in C.idlers():
+        c = trimesh.creation.cylinder(radius=(K.PIN + K.CLR_STEEL) / 2, height=20, sections=32)
         c.apply_transform(trimesh.transformations.rotation_matrix(np.pi / 2, [0, 1, 0]))
         c.apply_translation([CX, y, z])
         cut.append(c)
@@ -333,28 +337,28 @@ def opening():
 def cap():
     """Plate that fills the deck opening, with two tongues down every journal slot and three screw holes.
 
-    The deck opening locates the plate (CAP_CLR a side in X, = D.CAP_X_PLAY); the tongues in the slots locate it in Y.
-    The tongues stand over the outer part of each wall only (|x| D.TONGUE_IN..D.TONGUE_OUT from the spine's axis):
-    D.GEAR_AXIAL_CLR clear of the crankshaft gears' faces with the cap and the shaft at their worst X positions. Over
+    The deck opening locates the plate (CAP_CLR a side in X, = C.CAP_X_PLAY); the tongues in the slots locate it in Y.
+    The tongues stand over the outer part of each wall only (|x| C.TONGUE_IN..C.TONGUE_OUT from the spine's axis):
+    C.GEAR_AXIAL_CLR clear of the crankshaft gears' faces with the cap and the shaft at their worst X positions. Over
     the whole wall they pinched the gears in the gear train test v2 (2026-11-12)."""
-    assert abs(D.CAP_X_PLAY - CAP_CLR) < 1e-9, "tongues are placed for a different X play"
+    assert abs(C.CAP_X_PLAY - CAP_CLR) < 1e-9, "tongues are placed for a different X play"
     plate = prism(opening().buffer(-CAP_CLR, join_style=2), DECK_BOT, SEAM)
     parts = [plate]
-    tw = D.JOURNAL + D.CLR - CAP_CLR
+    tw = C.JOURNAL + K.CLR - CAP_CLR
     for y, z in SH:
         for sx in (1, -1):
-            x0, x1 = sorted((CX + sx * D.TONGUE_IN, CX + sx * D.TONGUE_OUT))
+            x0, x1 = sorted((CX + sx * C.TONGUE_IN, CX + sx * C.TONGUE_OUT))
             parts.append(boxb([x0, y - tw / 2, z], [x1, y + tw / 2, DECK_BOT + 0.01]))
     part = U(*parts)
     cut = []
     for y, z in SH:
-        c = trimesh.creation.cylinder(radius=(D.JOURNAL + D.CLR) / 2, height=20, sections=48)
+        c = trimesh.creation.cylinder(radius=(C.JOURNAL + K.CLR) / 2, height=20, sections=48)
         c.apply_transform(trimesh.transformations.rotation_matrix(np.pi / 2, [0, 1, 0]))
         c.apply_translation([CX, y, z])
         cut.append(c)
     for y, z, rt in gears():                                  # room round the crankshaft gears (between the walls)
         if z > 60:
-            c = trimesh.creation.cylinder(radius=rt + 0.5, height=2 * D.WALL_IN, sections=64)
+            c = trimesh.creation.cylinder(radius=rt + 0.5, height=2 * C.WALL_IN, sections=64)
             c.apply_transform(trimesh.transformations.rotation_matrix(np.pi / 2, [0, 1, 0]))
             c.apply_translation([CX, y, z])
             cut.append(c)
@@ -379,25 +383,38 @@ def band(base, forks, body_lifted, stems):
     return S(prism(ring, SEAM - 0.5, TOP), body_lifted)
 
 
+PARTS = ["base-v1", "cap", "front-block", "body-lifted"]
+
+
 def main():
-    base, below, pegs, front, stems, body = carcass()
-    print(f"band: body lifted {LIFT} mm, band top at z {TOP}")
-    pl = placements()
-    forks = fork_frames(pl)
-    shell_solid = below
-    cav = cavity(base)
-    sp, sp_cut = spine(shell_solid)
-    add, cut = fork_mounts(forks)
-    bd = band(base, forks, body, stems)
-    part = U(S(below, cav), sp, bd, *pegs, *add)
-    print("cutting the legs' path…")
-    lp = leg_path(pl)
-    part = S(part, lp, prism(opening(), DECK_BOT - 0.01, SEAM + 1), *sp_cut, *cut)
-    part = export(part, os.path.join(HERE, "base-v1.stl"))
-    c = export(cap(), os.path.join(HERE, "cap.stl"))
-    fb = export(front, os.path.join(HERE, "front-block.stl"))
-    body.export(os.path.join(HERE, "body-lifted.stl"))
-    for n, m in (("base-v1", part), ("cap", c), ("front-block", fb)):
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--part", action="append", choices=PARTS, help="build only this part (repeatable)")
+    want = ap.parse_args().part or PARTS
+    os.makedirs(OUT, exist_ok=True)
+    done = []
+    if set(want) & {"base-v1", "front-block", "body-lifted"}:
+        base, below, pegs, front, stems, body = carcass()
+    if "base-v1" in want:
+        print(f"band: body lifted {LIFT} mm, band top at z {TOP}")
+        pl = placements()
+        forks = fork_frames(pl)
+        shell_solid = below
+        cav = cavity(base)
+        sp, sp_cut = spine(shell_solid)
+        add, cut = fork_mounts(forks)
+        bd = band(base, forks, body, stems)
+        part = U(S(below, cav), sp, bd, *pegs, *add)
+        print("cutting the legs' path…")
+        lp = leg_path(pl)
+        part = S(part, lp, prism(opening(), DECK_BOT - 0.01, SEAM + 1), *sp_cut, *cut)
+        done.append(("base-v1", export(part, os.path.join(OUT, "base-v1.stl"))))
+    if "cap" in want:
+        done.append(("cap", export(cap(), os.path.join(OUT, "cap.stl"))))
+    if "front-block" in want:
+        done.append(("front-block", export(front, os.path.join(OUT, "front-block.stl"))))
+    if "body-lifted" in want:
+        body.export(os.path.join(OUT, "body-lifted.stl"))
+    for n, m in done:
         s = m.bounds[1] - m.bounds[0]
         print(f"{n:10s} {s[0]:6.1f} × {s[1]:6.1f} × {s[2]:6.1f} mm  volume {m.volume / 1000:6.2f} cm³  "
               f"watertight {m.is_watertight}")

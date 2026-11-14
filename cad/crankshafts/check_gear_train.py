@@ -13,12 +13,18 @@ It also checks every idler against both neighbours at once (the v1 fault).
     python3 check_gear_train.py [--step 0.5]
 """
 import argparse
+import os
+import sys
 
 import numpy as np
 from shapely import affinity
 from shapely.geometry import Polygon
 
-import build as B
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "..", ".."))
+from cad import design  # noqa: E402
+
+B = design("crankshafts")
 
 
 def outline(teeth, ang, y, z):

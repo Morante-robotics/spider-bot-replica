@@ -42,8 +42,9 @@ VERIFY_STEP=30 ../../.venv/bin/python ../../tools/cad_verify.py verify.py --quic
 ```
 
 Designs that use another design's parameters import its `build.py` as a module (one source per number), never
-copy a value. The folders made before this layout ([drive](drive/), [base](base/)) still have their own names
-(`check.py`, `verify_gear_train.py`); each moves to this layout the next time it changes.
+copy a value: with the repo root on `sys.path`, `from cad import design` and `C = design("crankshafts")`
+([`__init__.py`](__init__.py)); a design loads its own `build.py` the same way. What several designs share (the
+simulator's geometry, hardware sizes, build123d helpers) is in [`common.py`](common.py).
 
 ## What is printed and kept in git
 

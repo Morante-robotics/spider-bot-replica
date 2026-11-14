@@ -7,6 +7,7 @@ distance), each idler at its designed phase, with the measured gaps. Writes imag
     python3 gear_phase_figure.py
 """
 import os
+import sys
 
 import matplotlib
 import numpy as np
@@ -16,9 +17,11 @@ from shapely.geometry import Polygon
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-import build as B  # noqa: E402
-
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "..", ".."))
+from cad import design  # noqa: E402
+
+B = design("crankshafts")
 
 
 def outline(teeth, ang, y, z):

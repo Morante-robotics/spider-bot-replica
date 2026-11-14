@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Collision check of the Spider-Bot legs and drive over a full crank turn.
 
-Loads the STL parts written by build.py, places them with the simulator's kinematics every few degrees (the same
+Loads the STL parts written by the build.py of legs, crankshafts, gear-train-test (its spine stands in for the
+robot's) and test-frame, places them with the simulator's kinematics every few degrees (poses() in build.py, the same
 placement as build.py --assembly) and reports every pair of parts that overlaps, with the volume. Pairs that touch on
 purpose are skipped: meshing gears. Pins are not modelled, so a leg must stay clear of its own pivot and the ball
 clear of its bore: any overlap there is a real fault. The test frame is checked with its middle leg, pivot and
@@ -16,43 +17,16 @@ Needs trimesh and manifold3d (pip install trimesh manifold3d).
 import argparse
 import itertools
 import os
+import sys
 
 import numpy as np
 import trimesh
 
-import build as B
-
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "..", ".."))
+from cad import design  # noqa: E402
 
-
-def tmat(R, t):
-    M = np.eye(4)
-    M[:3, :3], M[:3, 3] = R, t
-    return M
-
-
-MIRROR = np.diag([-1.0, 1, 1, 1])
-MIRROR[0, 3] = 2 * B.CX
-YZ = np.column_stack([[0, 1, 0], [0, 0, 1], [1, 0, 0]])     # build123d Plane.YZ: local X → Y, Y → Z, Z → X
-
-
-def poses(theta):
-    """(name, stl file, 4×4 matrix) of every part at crank angle theta, as in build.assembly()."""
-    out = []
-    sh = B.shaft_yz()
-    for l in B.legs_at(theta):
-        i = l["i"]
-        R = B.leg_frame(l["u"])
-        yaw = np.arctan2(l["u"][1], l["u"][0])
-        Ml, My = tmat(R, l["P"]), tmat(B.rot_z(yaw), l["P"])
-        out += [(f"leg{i}R", f"leg-{B.NAMES[i]}-right", Ml), (f"pivot{i}R", "pivot", My),
-                (f"leg{i}L", f"leg-{B.NAMES[i]}-right", MIRROR @ Ml), (f"pivot{i}L", "pivot", MIRROR @ My)]
-        out.append((f"crankshaft{i}", f"crankshaft-{i + 1}", tmat(B.rot_x(-theta), [B.CX, *sh[i]])))
-    out.append(("spine", "spine", np.eye(4)))
-    for k, (y, z, n) in enumerate(B.idlers()):
-        a = B.idler_phase(k) + theta * B.SHAFT_TEETH / n        # its real angle, meshing both crankshafts
-        out.append((f"idler{k}", f"idler-{k + 1}", tmat(B.rot_x(a) @ YZ, [B.CX - (B.GEAR_T - 0.4) / 2, y, z])))
-    return out
+L = design("legs")
 
 
 def skip(a, b):
@@ -104,7 +78,7 @@ def main():
 
     def mesh(f, M):
         if f not in cache:
-            cache[f] = trimesh.load(os.path.join(HERE, f + ".stl"))
+            cache[f] = trimesh.load(L.stl(f))
         m = cache[f].copy()
         m.apply_transform(M)
         return m
@@ -112,7 +86,7 @@ def main():
     worst, gaps = {}, {}
     for a in np.arange(0, 360, args.step):
         th = np.radians(a)
-        ps = poses(th)
+        ps = L.poses(th)
         ms = {n: mesh(f, M) for n, f, M in ps}
         for n1, n2 in itertools.combinations(ms, 2):
             if skip(n1, n2):

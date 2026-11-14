@@ -196,7 +196,7 @@ two revolute mates.
    0.45 mm offset. Idler 1 (11 teeth) goes between crankshafts 1 and 2, idler 2 (10) between 2 and 3, and idler 3
    (20) between 3 and 4.
 4. **Before adding any relation, set the phases.** Turn each crankshaft until its right crank (+X side) points as
-   below. The cranks point opposite ways on neighbouring shafts, as in [the assembly image](images/assembly.gif):
+   below. The cranks point opposite ways on neighbouring shafts, as in [the assembly image](../legs/images/assembly.gif):
 
    | Crankshaft | 1 | 2 | 3 | 4 |
    |---|---|---|---|---|

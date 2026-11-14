@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Collision check of the moving parts against base v1, its cap and the lifted body, over a full crank turn.
 
-Places the legs, forks, crankshafts and idlers as ../drive/check.py does and reports every overlap with the base,
+Places the legs, forks, crankshafts and idlers as ../legs/check.py does (poses() in ../legs/build.py) and reports every overlap with the base,
 the cap or the body, and every gap under 1 mm. Fork against base is reported only for overlaps: the swivel screws'
 holes are in both, so their nearest faces are 0.6 mm apart by design.
 
@@ -20,9 +20,11 @@ import numpy as np
 import trimesh
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DRIVE = os.path.join(HERE, "..", "drive")
-sys.path.insert(0, DRIVE)
-import check as DC  # noqa: E402
+OUT = os.path.join(HERE, "out")
+sys.path.insert(0, os.path.join(HERE, "..", ".."))
+from cad import design  # noqa: E402
+
+L = design("legs")
 
 
 def to_manifold(m):
@@ -34,16 +36,16 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--step", type=float, default=30)
     args = ap.parse_args()
-    fixed = {n: trimesh.load(os.path.join(HERE, n + ".stl")) for n in ("base-v1", "cap", "front-block", "body-lifted")}
+    fixed = {n: trimesh.load(os.path.join(OUT, n + ".stl")) for n in ("base-v1", "cap", "front-block", "body-lifted")}
     fixed_mf = {n: to_manifold(m) for n, m in fixed.items()}
     near = {n: trimesh.proximity.ProximityQuery(m) for n, m in fixed.items()}
     cache, worst, gaps = {}, {}, {}
     for a in np.arange(0, 360, args.step):
-        for n, f, M in DC.poses(np.radians(a)):
+        for n, f, M in L.poses(np.radians(a)):
             if n == "spine":
                 continue
             if f not in cache:
-                cache[f] = trimesh.load(os.path.join(DRIVE, f + ".stl"))
+                cache[f] = trimesh.load(L.stl(f))
             m = cache[f].copy()
             m.apply_transform(M)
             mm = to_manifold(m)
