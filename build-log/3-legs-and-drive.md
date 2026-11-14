@@ -27,6 +27,9 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
    Printed, the new train turned by hand without its cap, but the cap jammed it: its tongues ran a quarter of a
    millimetre from the gear faces. With a new cap, centred by skirts and with its tongues kept clear of the gears,
    the four shafts turn together. Base v1 is next.
+6. **Base v1 printed.** It printed but could not be assembled: the cap's tongues broke, the front block was not
+   held, the pins could not be reached, a gear did not seat and support stayed trapped. These lessons are now CAD
+   rules and checks, and base v2 is next.
 
 <img src="../sim/images/drive-attempts.png" alt="The three drives tried, from above and from the side">
 
@@ -562,10 +565,10 @@ fallback. The simulator cannot represent it (its feet slide), so it would be tes
 2. **Make the geometry buildable.** In the chosen geometry a shaft's two cranks were 12 mm apart, with no room for a
    gear and two bearing walls between them. The shafts were also so high that a gear could only be 4 mm in radius
    under the battery holder. A new search with these limits gives 10 mm per half turn and 4.6 mm of bob (Fig. 1).
-3. **Model the parts** in [`cad/drive/build.py`](../cad/drive/build.py): the leg (3 lengths × 2 sides), the pivot fork,
+3. **Model the parts** in `cad/drive/build.py` (since split into [`cad/legs/`](../cad/legs/), [`cad/crankshafts/`](../cad/crankshafts/), [`cad/gear-train-test/`](../cad/gear-train-test/) and [`cad/test-frame/`](../cad/test-frame/)): the leg (3 lengths × 2 sides), the pivot fork,
    one-piece crankshafts (gear, journals, cranks and balls), idler gears, the spine that holds them, and a test
    frame. The gears are standard involute gears, module 1.
-4. **Check collisions** with [`cad/drive/check.py`](../cad/drive/check.py): it places every part as the simulator
+4. **Check collisions** with [`cad/legs/check.py`](../cad/legs/check.py): it places every part as the simulator
    moves it, every 30°, and measures how much each pair overlaps. Fix and repeat (table below).
 5. **Make the STLs watertight.** The CAD kernel leaves a hairline gap where a sphere meets a box; `build.py` closes
    it. Bambu Studio: `manifold = yes` for all 17 files.
@@ -582,7 +585,7 @@ python3 sim/toy_leg_3d.py --strict --search 3000 --seed 2 --only rows/crank --js
 Limits added to the `rows` search: cranks at least 12 mm from the body axis (XC ≥ 12) and shafts at least 8 mm
 below the pivots (H ≤ −8). 4 seeds; seed 2 (legs 5.9 mm apart, 30 mm under the base) is in
 [`sim/toy_leg_3d_rows_cad.json`](../sim/toy_leg_3d_rows_cad.json). Parts and how they fit:
-[cad/drive/](../cad/drive/).
+[cad/legs/](../cad/legs/) and [cad/crankshafts/](../cad/crankshafts/).
 
 </details>
 
@@ -603,12 +606,12 @@ What the collision check found, in order:
 
 #### Result
 
-<img src="../cad/drive/images/parts.png" width="560" alt="Parts">
+<img src="../cad/legs/images/parts.png" width="560" alt="Parts">
 
 *Fig. 2 · The drive parts: three leg lengths, the pivot fork, a crankshaft, an idler gear, the spine, the test
 frame, and the whole robot assembled.*
 
-<img src="../cad/drive/images/assembly.gif" width="480" alt="Assembly">
+<img src="../cad/legs/images/assembly.gif" width="480" alt="Assembly">
 
 *Fig. 3 · All eight legs turning over a full crank turn, with no collisions.*
 
@@ -632,12 +635,12 @@ frame, and the whole robot assembled.*
 
 > **In short.** One leg on its test frame was assembled in Onshape from the exported STEP files, with joints
 > («mates») that let it move as the real one will, and animated through a full turn. It moves as expected. A
-> step-by-step tutorial with pictures is in [cad/drive/onshape.md](../cad/drive/onshape.md).
+> step-by-step tutorial with pictures is in [cad/test-frame/onshape.md](../cad/test-frame/onshape.md).
 
 #### Steps
 
-Full tutorial, with a picture of the edges to click for each mate: [cad/drive/onshape.md](../cad/drive/onshape.md)
-(pictures made by [`cad/drive/onshape_figures.py`](../cad/drive/onshape_figures.py)). In short:
+Full tutorial, with a picture of the edges to click for each mate: [cad/test-frame/onshape.md](../cad/test-frame/onshape.md)
+(pictures made by [`cad/test-frame/onshape_figures.py`](../cad/test-frame/onshape_figures.py)). In short:
 
 1. Import `test-frame`, `crankshaft-2`, `leg-middle-right` and `pivot` (STEP) into one document. Insert the test
    frame at the origin and **Fix** it, so the assembly uses the robot's coordinates.
@@ -651,7 +654,7 @@ Document (public): [Spider-Bot drive](https://cad.onshape.com/documents/07632681
 
 #### Result
 
-<img src="../cad/drive/images/onshape-animation.gif" width="640" alt="The assembly animated in Onshape">
+<img src="../cad/test-frame/images/onshape-animation.gif" width="640" alt="The assembly animated in Onshape">
 
 *Fig. 1 · The assembly animated in Onshape: turning the crankshaft moves the fork, the leg and the ball together.*
 
@@ -734,7 +737,7 @@ each 0.1–0.4 mm larger, to find out which one turns freely.
 
 1. Print [`print/test-leg-plate.3mf`](../print/test-leg-plate.3mf). This was the first version, with the leg 5.6 mm wide.
 2. Remove the supports, which are on the crankshaft and on one side of the leg (Fig. 2–3).
-3. Assemble following the [diagram](../cad/drive/README.md): the leg in the fork on an M3×16 and a nut, the fork between
+3. Assemble following the [diagram](../cad/test-frame/README.md): the leg in the fork on an M3×16 and a nut, the fork between
    the frame's two arms, and the crankshaft in its slots with the ball inside the leg's tube (Fig. 4).
 4. Push the clearance pin into each hole of the block and note how it turns (Fig. 6).
 
@@ -793,7 +796,7 @@ used for every hole was far too tight for the printed ones.
 
 #### Decisions and fixes
 
-All of these are changes to [`cad/drive/build.py`](../cad/drive/build.py):
+All of these are changes to `cad/drive/build.py` (since split into [`cad/legs/`](../cad/legs/), [`cad/crankshafts/`](../cad/crankshafts/), [`cad/gear-train-test/`](../cad/gear-train-test/) and [`cad/test-frame/`](../cad/test-frame/)):
 
 - **Two clearances instead of one.** `CLR` = 0.5 mm for a printed part in a printed hole (journals, ball in the
   bore) and `CLR_STEEL` = 0.3 mm for a steel screw or pin in a printed hole. 0.5 is one step past the block's
@@ -805,10 +808,10 @@ All of these are changes to [`cad/drive/build.py`](../cad/drive/build.py):
   A **keeper** (green in Fig. 7) now closes the slots from above and is held by two M3×12 into nuts.
 - **Nylon lock nut** on the leg's M3×16, so the knocks do not loosen it.
 
-<img src="../cad/drive/images/test-frame-screws.png" alt="Where every screw goes">
+<img src="../cad/test-frame/images/test-frame-screws.png" alt="Where every screw goes">
 
 *Fig. 7 · The redesigned test frame, exploded. Grey: frame. Orange: fork. Red: leg. Blue: crankshaft. Green: the
-new keeper. Made by [`cad/drive/screws_figure.py`](../cad/drive/screws_figure.py).*
+new keeper. Made by [`cad/test-frame/screws_figure.py`](../cad/test-frame/screws_figure.py).*
 
 <details>
 <summary>Collision check of the new parts</summary>
@@ -831,7 +834,7 @@ than the bore's 0.25 mm a side: to look into before printing the rear legs.
 
 1. Print [`print/test-frame-v2.3mf`](../print/test-frame-v2.3mf): frame, keeper, fork and leg (Fig. 1). The crankshaft
    from the first print is kept.
-2. Assemble following the [diagram](../cad/drive/README.md) (Fig. 7 of the [previous entry](#test-leg-first-assembly-and-clearance-result)).
+2. Assemble following the [diagram](../cad/test-frame/README.md) (Fig. 7 of the [previous entry](#test-leg-first-assembly-and-clearance-result)).
 3. Turn the crankshaft by hand (Fig. 2).
 
 <table>
@@ -868,7 +871,7 @@ The window now has 0.5 mm a side: [Base v1 in CAD](#base-v1-in-cad).
 
 ### Base v1 in CAD
 
-**Phase 3 · Mechanisms · 2026-11-11** · Status: 🔄 designed, not printed
+**Phase 3 · Mechanisms · 2026-11-11** · Status: ✅ printed; faults in [Base v1: print and first fitting](#base-v1-print-and-first-fitting)
 
 > **In short.** Before the base, two fixes from the test leg went into the CAD: the fork gets more room for the leg,
 > and the rear crankshaft's crank arms are thinner, because the rear leg came 0.15 mm from them. Fitting the drive
@@ -916,12 +919,15 @@ the carcass base's own mesh, by adding and cutting solids in code.
 <summary>How to reproduce</summary>
 
 ```
-python3 cad/drive/build.py --assembly 0
-python3 cad/drive/check.py --gaps
+python3 cad/crankshafts/build.py
+python3 cad/gear-train-test/build.py
+python3 cad/test-frame/build.py
+python3 cad/legs/build.py --assembly 0
+python3 cad/legs/check.py --gaps
 python3 cad/base/build.py
 python3 cad/base/check.py --step 10
 python3 cad/base/figures.py
-python3 ../tools/bambu_plate.py print/base-v1.3mf cad/base/base-v1.stl cad/base/cap.stl@180,0,0 cad/base/front-block.stl \
+python3 ../tools/bambu_plate.py print/base-v1.3mf cad/base/out/base-v1.stl cad/base/out/cap.stl@180,0,0 cad/base/out/front-block.stl \
     --set enable_support=1 "support_type=tree(auto)" support_on_build_plate_only=1 "curr_bed_type=Textured PEI Plate"
 ```
 
@@ -1032,7 +1038,7 @@ when the teeth push against each other. The three screws sticking up are the idl
 | Crankshafts in their slots | Stay in | Lift out: the slots are open at the top and nothing closes them in this test |
 
 **Why.** A new, general check, [`tools/cad_verify.py`](../tools/cad_verify.py), was run on this exact test
-([spec](../cad/drive/verify_gear_train.py), [full report](../cad/drive/verify-gear-train.txt)). It turns every gear at its
+([spec](../cad/gear-train-test/verify.py), [full report](../cad/gear-train-test/verify-result.txt)). It turns every gear at its
 real angle and pushes every moving part in 26 directions to see what stops it. It found three faults:
 
 1. **Nothing holds the crankshafts down.** All four can rise 3 mm or more. In the robot the base's cap closes the
@@ -1045,14 +1051,14 @@ real angle and pushes every moving part in 26 directions to see what stops it. I
 3. **No backlash.** The gears sit exactly at their theoretical distance, so even meshing teeth touch on both sides
    (0.00 mm gap). Printed teeth are never exact, and teeth without play bind.
 
-<img src="../cad/drive/images/gear-phase.png" alt="Each idler at its best angle between its two crankshafts">
+<img src="../cad/crankshafts/images/gear-phase.png" alt="Each idler at its best angle between its two crankshafts">
 
 *Fig. 3 · Top row: each idler (yellow) turned to the angle that fits best between its two crankshafts (blue), with
 the cranks at their designed angles. Red: tooth inside tooth. Idlers 1 and 2 cannot fit both neighbours; idler 3
 can. The bottom row is the fix, in [Gear train v2 in CAD](#gear-train-v2-in-cad). Made by
-[`cad/drive/gear_phase_figure.py`](../cad/drive/gear_phase_figure.py).*
+[`cad/crankshafts/gear_phase_figure.py`](../cad/crankshafts/gear_phase_figure.py).*
 
-**Why the earlier check missed it.** [`cad/drive/check.py`](../cad/drive/check.py) skipped every pair of gears, as
+**Why the earlier check missed it.** [`cad/legs/check.py`](../cad/legs/check.py) skipped every pair of gears, as
 «touching on purpose», and left the idlers at one angle while the crankshafts turned. It never asked what holds
 each part in place either.
 
@@ -1060,10 +1066,11 @@ each part in place either.
 <summary>How to reproduce</summary>
 
 ```
-python3 cad/drive/build.py
-cd cad/drive
-python3 ../../tools/cad_verify.py verify_gear_train.py --out verify-gear-train.txt --render images/verify
-python3 gear_phase_figure.py
+python3 cad/crankshafts/build.py
+python3 cad/gear-train-test/build.py
+cd cad/gear-train-test
+python3 ../../tools/cad_verify.py verify.py --out verify-result.txt --render images/verify
+python3 ../crankshafts/gear_phase_figure.py
 ```
 
 The spec places the idlers at the angle that fits their two crankshafts best, then turns everything together every
@@ -1102,7 +1109,7 @@ of both neighbours line up with the idler's gaps.
 #### Steps
 
 1. Gear offsets: 0°, 28.1°, 21.5° and 1.3° for crankshafts 1 to 4, computed in `gear_offsets()` in
-   [`cad/drive/build.py`](../cad/drive/build.py).
+   [`cad/crankshafts/build.py`](../cad/crankshafts/build.py).
 2. Idlers: 12, 12 and 20 teeth (were 11, 10 and 20). Fewer than 12 teeth would need a modified tooth shape.
    Idlers 1 and 2 are now the same part.
 3. Backlash: every pair of gears 0.275 mm further apart than in theory (`BACKLASH` = 0.2 mm). The crankshaft gears
@@ -1118,7 +1125,7 @@ of both neighbours line up with the idler's gaps.
 8. Check with [`tools/cad_verify.py`](../tools/cad_verify.py) every 5°, and a 2D gear check every 1°, then the
    whole drive against base v1, its cap and the body every 10°.
 
-<img src="../cad/drive/images/gear-train-test-v2-parts.png" alt="The parts of the gear train test v2">
+<img src="../cad/gear-train-test/images/gear-train-test-v2-parts.png" alt="The parts of the gear train test v2">
 
 *Fig. 1 · The parts of the test. The spine has a foot and an M3 nut slot at each end; the cap's tongues go down the
 journal slots. Each crankshaft is different: look at where its cranks point compared with its gear teeth. Made by
@@ -1130,22 +1137,25 @@ The bottom row of Fig. 3 in [Gear train test](#gear-train-test) shows every idle
 
 | Check | Result |
 |---|---|
-| [`verify-gear-train.txt`](../cad/drive/verify-gear-train.txt): integrity, motion, gears, what holds each part, assembly order | PASS, 0 failures, 0 warnings |
-| [`check-gear-train.txt`](../cad/drive/check-gear-train.txt): every mesh, every 1° | No tooth in tooth; backlash 0.21–0.22 mm |
+| [`verify-result.txt`](../cad/gear-train-test/verify-result.txt): integrity, motion, gears, what holds each part, assembly order | PASS, 0 failures, 0 warnings |
+| [`check-gear-train.txt`](../cad/crankshafts/check-gear-train.txt): every mesh, every 1° | No tooth in tooth; backlash 0.21–0.22 mm |
 | Crankshafts and idlers held | Only spin is free; at most 0.25 mm play (journals), 0.45 mm (idlers along their axle) |
-| [Base v1](../cad/base/check-result.txt) and [whole drive](../cad/drive/check-result.txt) over a full turn | No overlaps; closest pairs are the designed clearances |
+| [Base v1](../cad/base/check-result.txt) and [whole drive](../cad/legs/check-result.txt) over a full turn | No overlaps; closest pairs are the designed clearances |
 | [`print/gear-train-test-v2.3mf`](../print/gear-train-test-v2.3mf) | 1 h 20 min, 33.7 g of PLA (1 h 19 min, 33.5 g with [the new cap](#gear-train-test-v2-the-cap)) |
 
 <details>
 <summary>How to reproduce</summary>
 
 ```
-python3 cad/drive/build.py
-cd cad/drive
-python3 ../../tools/cad_verify.py verify_gear_train.py --out verify-gear-train.txt --render images/verify
-python3 check_gear_train.py
-python3 gear_phase_figure.py
-python3 check.py --gaps
+python3 cad/crankshafts/build.py
+python3 cad/gear-train-test/build.py
+python3 cad/test-frame/build.py
+python3 cad/legs/build.py
+cd cad/gear-train-test
+python3 ../../tools/cad_verify.py verify.py --out verify-result.txt --render images/verify
+python3 ../crankshafts/check_gear_train.py
+python3 ../crankshafts/gear_phase_figure.py
+python3 ../legs/check.py --gaps
 cd ../base && python3 build.py && python3 check.py --step 10
 ```
 
@@ -1185,11 +1195,11 @@ as an overlap.
    6.7 g. The full plate now carries the new cap.
 5. Fit the new cap and turn crankshaft 1 by its crank (Fig. 2).
 
-<img src="../cad/drive/images/gear-train-test-v2-assembly.png" alt="Exploded view of the gear train test v2 and the view from the +X side">
+<img src="../cad/gear-train-test/images/gear-train-test-v2-assembly.png" alt="Exploded view of the gear train test v2 and the view from the +X side">
 
 *Fig. 1 · Left: the parts pulled apart along the way each one goes in, numbered by assembly step. Right: the test
 seen from the +X side (the side with the dots) with every crank level; the arrows show where each +X crank points
-(front, rear, front, rear). Made by [`cad/drive/assembly_figure.py`](../cad/drive/assembly_figure.py).*
+(front, rear, front, rear). Made by [`cad/gear-train-test/assembly_figure.py`](../cad/gear-train-test/assembly_figure.py).*
 
 #### Result
 
@@ -1210,25 +1220,26 @@ one side; the crankshafts can also slide 0.25 mm along their axis. At the worst 
 of a turning gear and braked it. The check had placed every part only at its nominal position, saw a quarter of a
 millimetre free and passed.
 
-**The fix** (`test_cap()` in [`cad/drive/build.py`](../cad/drive/build.py)):
+**The fix** (`test_cap()` in [`cad/gear-train-test/build.py`](../cad/gear-train-test/build.py)):
 
 - **Tongues only over the outer part of each wall**, 1.1 mm wide instead of 2.5. With the cap and the shafts at
   their worst positions, they stay 0.9 mm from the gear faces.
 - **Four skirts** at the ends of the cap come down outside the walls, 0.2 mm off each side, so the cap sits centred
   on the spine and cannot slide onto the gears. They are by the end blocks, away from everything that turns.
 - **The check poses loose parts at their extremes now.** [`tools/cad_verify.py`](../tools/cad_verify.py) has a
-  keep-out zone around each gear face (its play plus 0.8 mm), and [the spec](../cad/drive/verify_gear_train.py) turns
+  keep-out zone around each gear face (its play plus 0.8 mm), and [the spec](../cad/gear-train-test/verify.py) turns
   the train with the cap shifted 0.2 mm either way. The first cap fails it in three places; the new one passes
-  ([report](../cad/drive/verify-gear-train.txt)).
+  ([report](../cad/gear-train-test/verify-result.txt)).
 - **Base v1's cap** had the same tongues and now has the same narrow ones ([`cad/base/build.py`](../cad/base/build.py)).
 
 <details>
 <summary>How to reproduce</summary>
 
 ```
-python3 cad/drive/build.py
-cd cad/drive
-python3 ../../tools/cad_verify.py verify_gear_train.py --out verify-gear-train.txt --render images/verify
+python3 cad/crankshafts/build.py
+python3 cad/gear-train-test/build.py
+cd cad/gear-train-test
+python3 ../../tools/cad_verify.py verify.py --out verify-result.txt --render images/verify
 python3 assembly_figure.py
 cd ../base && python3 build.py
 ```
@@ -1246,5 +1257,104 @@ cd ../base && python3 build.py
 - **Base v1 is printed next**, with the new cap.
 
 This entry closes the open item «Print the gear train test v2 and turn it by hand».
+
+[↑ Contents](../build-log.md#contents)
+
+### Base v1: print and first fitting
+
+**Phase 3 · Mechanisms · 2026-11-13** · Status: ✅ faults found; base v2 next
+
+> **In short.** [Base v1](#base-v1-in-cad) was printed with its cap and front block, and its parts were tried
+> together. It could not be assembled: the cap was so tight that its tongues broke while it was pressed in, the
+> front block was not fixed and both its thin pegs and the posts they sit on broke, the idlers' steel pins could not
+> be reached, the big gear stood about a quarter of its width out of its seat, support stayed trapped in the
+> recesses, and nothing marked how the gears go in. Each of these is now a CAD rule or an
+> automatic check, and base v2 is designed with them.
+
+#### Steps
+
+1. Print [`print/base-v1.3mf`](../print/base-v1.3mf): the base, the cap upside down and the front block, tree
+   supports on the build plate only (Fig. 1).
+2. Remove the supports.
+3. Try the parts in the base: the cap over the spine (pressed in by hand), the front block, the gears and the
+   idlers' 3 mm steel pins.
+
+<img src="../images/base-v1-print-timelapse.gif" width="440" alt="Timelapse of base v1 printing">
+
+*Fig. 1 · The plate printing: the base on tree supports (left), the front block (right) and the cap with its four
+pairs of tongues (front).*
+
+| Part | Part (g) | Support (g) |
+|---|---|---|
+| Base | 82.3 | 26.0 |
+| Front block | 23.4 | 2.9 |
+| Cap | 5.8 | 0 |
+| Plate | 7 h 57 min, 140.4 g in all | 28.8 |
+
+<details>
+<summary>How to reproduce</summary>
+
+```
+python3 tools/print_report.py print/base-v1.3mf
+python3 cad/base/cap_failure_figure.py
+```
+
+The plate and its settings: [print/README](../print/README.md#base-v1).
+
+</details>
+
+#### Result
+
+<table>
+<tr>
+<td width="50%"><img src="../images/base-v1-print-1.jpg" alt="Base v1 from above"></td>
+<td width="50%"><img src="../images/base-v1-print-2.jpg" alt="Base v1 from below"></td>
+</tr>
+<tr>
+<td><em>Fig. 2a · From above: the band with the fork pockets, the two tall round pegs that locate the body, and the
+spine down the middle.</em></td>
+<td><em>Fig. 2b · From below: the bowl with the eight fork bosses and the keel along the middle.</em></td>
+</tr>
+<tr>
+<td width="50%"><img src="../images/base-v1-print-3.jpg" alt="Base v1 from the rear"></td>
+<td width="50%"><img src="../images/base-v1-print-4.jpg" alt="Base v1 with the front block and the cap"></td>
+</tr>
+<tr>
+<td><em>Fig. 2c · From the rear. Branches of tree support are still inside the bowl, at the top left of the
+spine.</em></td>
+<td><em>Fig. 2d · The front block (left) and the cap (front): only one pair of the cap's tongues is left
+(Fig. 3).</em></td>
+</tr>
+</table>
+
+<img src="../images/base-v1-cap-failure.png" alt="The cap as designed and as printed, with the broken tongues circled">
+
+*Fig. 3 · The cap as designed (left) and as printed (right). Its tongues go down the journal slots of the spine;
+the cap went in only when pressed hard, and six of the eight broke off at their root while it was pressed in. Made by
+[`cad/base/cap_failure_figure.py`](../cad/base/cap_failure_figure.py).*
+
+| What | What happened | In the photos |
+|---|---|---|
+| Cap | Very tight: it went in only when pressed hard, and its tongues broke while it was pressed in | Fig. 2d, 3 |
+| Front block | Not fixed; its thin pegs and the posts they sit on both broke | No |
+| Idler pins | The 3 mm steel pins, which go in sideways through both spine walls, could not be reached | No |
+| Big gear | Stood out of its seat by about a quarter of its width (estimated by eye). Two possible causes, not told apart: the design, or support left inside that could not be removed | No |
+| Support | Trapped in the recesses | Fig. 2c |
+| Gears | No marks to show how they go in | No |
+
+**Against the CAD check.** The [check over a full turn](#base-v1-in-cad) found no overlaps, and it was right
+about that: none of these faults is two parts in the same place. They are about how the parts go in (tight fits,
+pins out of reach, a gear not seated, no marks), how they are held (a loose block on thin pegs) and how the base
+prints (support where it cannot be removed): things a check for overlaps over a full turn does not measure.
+
+#### Decisions
+
+- **Base v2, not a repaired v1.** The faults are in the design, so v1 is not patched or reprinted.
+- **Every lesson is a rule or a check before base v2.** They are in the design rules
+  ([cad/README.md](../cad/README.md#a-design-folder)) and in [`tools/cad_verify.py`](../tools/cad_verify.py)
+  ([commit 7663ecf](https://github.com/Morante-robotics/spider-bot-replica/commit/7663ecf)), so base v2 is checked
+  against them before it is printed.
+
+This entry closes the open item «Base v1 was printed … write its entry»; designing base v2 stays open.
 
 [↑ Contents](../build-log.md#contents)
