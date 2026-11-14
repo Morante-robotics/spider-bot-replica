@@ -1,0 +1,130 @@
+SPIDER-BOT · N20 GEAR MOTOR SIZING  (sim/motor_sizing.py)
+
+1 · ROBOT MASS
+  Base v1 (print report, part only)              82.3 g   measured; check of the shell model: 93.8 cm³, 701 cm² → 79.6 g (-3%)
+  Front block (print report)                     23.4 g   measured
+  Cap (print report)                              5.8 g   measured
+  Body, carcass at 120 % (shell model)          110.3 g   181 cm³, 865 cm², mean wall 4.2 mm: 0.84 mm skin + 15 % infill
+  Eyes and sensor, printed                        1.1 g   shell model
+  8 legs + 8 forks (legs-forks-v1 plate)         46.9 g   measured plate, incl. ~2 g support
+  4 crankshafts + 3 idlers                        4.7 g   3.83 cm³, solid
+  Motor mount, motor gear (printed, guess)        4.0 g   guess
+  4 × AAA NiMH                                   48.0 g   ~12 g each
+  4×AAA holder, switch, cover                    20.0 g   typical, empty
+  N20 gear motor                                 10.0 g   
+  Screws, nuts, pins                             36.1 g   8 M3×16 + lock nuts, 19 M3×10 + nuts, 3 Ø3 pins
+  Wiring                                          5.0 g   guess
+  Eyes board (perfboard, LEDs, resistors)         5.0 g   guess
+  Sum                                           402.7 g
+  Design mass, +15% margin: 463 g  → weight W = 4.54 N
+
+2 · CRANK TORQUE OVER ONE TURN (all 8 legs, at the crankshafts' common speed)
+  Geometry: sim/toy_leg_3d_rows_cad.json [0]: crank r 3.91 mm; stride 9.65 mm per half turn, bob 4.56 mm, step 9.5 mm, feet slip 6.5 mm/leg/turn
+  Foot vertical speed per crank radian: up to 7.4 mm/rad (crank pin 3.91 mm/rad: the leg multiplies it 1.9 ×)
+  Plain estimate: W × bob × 2 steps per turn = 4.54 × 4.56 × 2 = 41 N·mm of lift work per turn → mean 6.6 N·mm, before peaks and friction
+  Assumptions: support feet within 2.0 mm of the lowest; μ joints PLA/PLA 0.35, screw/PLA 0.25; ground μ (0.4, 0.6); centre of mass ±5.0 mm; each crankshaft's net torque counted only when positive
+   even split, μ_ground 0.4: peak  44.7 N·mm at  11.0° (lift 22.2 + ground slip 8.1 + joints 14.4 + legs' weight 0.0), mean 16.9; no leg helping another: peak 45.0, mean 17.4
+   even split, μ_ground 0.6: peak  51.0 N·mm at  11.0° (lift 22.2 + ground slip 12.1 + joints 16.7 + legs' weight 0.0), mean 20.3; no leg helping another: peak 51.4, mean 20.8
+  worst split, μ_ground 0.4: peak  48.9 N·mm at 358.5° (lift 23.5 + ground slip 9.7 + joints 15.7 + legs' weight 0.0), mean 21.1; no leg helping another: peak 49.5, mean 21.4
+  worst split, μ_ground 0.6: peak  56.6 N·mm at 358.5° (lift 23.5 + ground slip 14.5 + joints 18.5 + legs' weight 0.0), mean 25.4; no leg helping another: peak 57.2, mean 25.8
+  → Worst crank torque T_c = 57 N·mm = 0.58 kg·cm (a 14.5 N push on the 3.91 mm crank); typical peak 45 N·mm
+  → Mean crank torque 17 (even split, μ 0.4) to 25 N·mm (worst split, μ 0.6)
+
+3 · TARGET CRANK SPEED
+  Stride 9.65 mm per half turn → 19.3 mm per crank turn
+  2 cm/s →   62 rpm at the crank
+  3 cm/s →   93 rpm at the crank
+  5 cm/s →  155 rpm at the crank
+  Range for a desk toy this size: 2-5 cm/s; aim ~3 cm/s at 4.8 V, not under ~1.5 cm/s at 4.0 V
+
+4 · GEAR TRAIN AND WHERE THE MOTOR MESHES
+  Crankshaft gears: 12 T, module 1.0, axes y -37.0, -17.4, -1.9, 26.3 at z 63.9 (tips to z 70.9); deck underside z 72.8, battery holder on the deck from z 74.8; base bottom z 45.6, ground z 15.6
+  Idlers (y, z, teeth): (-27.2, 56.5, 12), (-9.7, 54.4, 12), (12.2, 55.8, 20)
+  Idlers only reverse direction: crank rpm = rpm of the motor's gear × its teeth / 12
+  The N20 lies along X (its shaft parallel to the crankshafts), gearbox face 0.5 mm outside the spine wall, body x 4.8..30.8 mm from the axis, 10 mm across Y × 12 mm tall
+  Under the deck (motor centre z 60) the legs' inner arms leave it room only at y -65..-51, 12..12, 40..55 (centre); y < -50 and y > 39 run out of the bowl
+  A: 20 T motor gear in idler 3's place (y 12.2, z 55.8), N20 along +X under the deck
+     reduction R = 0.60; box y 7.2..17.2, z 49.8..61.8; leg arms +0.5 mm; deck +11.0 mm; below base bottom 0.0 mm (ground clearance left 34 mm); overlaps base v1's solid 0.55 cm³
+  B: 12 T pinion under idler 3 (y 12.2, z 39.5), N20 along +X in a pod under the base
+     reduction R = 1.00; box y 7.2..17.2, z 33.5..45.5; leg arms +11.5 mm; deck +27.3 mm; below base bottom 12.1 mm (ground clearance left 18 mm); overlaps base v1's solid 0.00 cm³
+  B2: as B with idler 3 made 17 T (moves up to z 59.5): pinion at z 44.7
+     reduction R = 1.00; box y 7.2..17.2, z 38.7..50.7; leg arms +7.0 mm; deck +22.1 mm; below base bottom 6.9 mm (ground clearance left 23 mm); overlaps base v1's solid 0.30 cm³
+  No place was found for a 12 T pinion in the gap between the arms: meshing idler 3 puts it above the deck, and a pinion with two 12 T idlers to crankshafts 3 and 4 clashes with idler 2 or the deck. An extra compound stage (24 T, Ø26) has no room under the deck either.
+  Output shaft: ≥ 6.2 mm through the wall to the far face of the gear; a 9-10 mm D-shaft also reaches the far wall (bearing hole)
+
+5 · N20 DATA (Pololu micro metal gearmotors, rated 6 V; no-load speed and stall torque ∝ V)
+  family  ratio  rpm@6  @4.8  @4.0   Ts@6  @4.8  @4.0 kg·cm   generic 6 V label (15k / 30k motor)
+  HP        100    310   248   207   1.70  1.36  1.13         150 / 300 rpm
+  HP        150    210   168   140   2.40  1.92  1.60         100 / 200 rpm
+  HP        210    150   120   100   3.00  2.40  2.00         71 / 150 rpm
+  HP        250    120    96    80   3.40  2.72  2.27         60 / 120 rpm
+  HP        298    100    80    67   4.00  3.20  2.67         50 / 100 rpm
+  HP        380     84    67    56   5.50  4.40  3.67         39 / 80 rpm
+  HP       1000     31    25    21  12.00  9.60  8.00         15 / 30 rpm
+  MP        100    220   176   147   0.94  0.75  0.63         150 / 300 rpm
+  MP        150    150   120   100   1.30  1.04  0.87         100 / 200 rpm
+  MP        210    100    80    67   1.70  1.36  1.13         71 / 150 rpm
+  MP        250     88    70    59   2.20  1.76  1.47         60 / 120 rpm
+  MP        298     73    58    49   2.40  1.92  1.60         50 / 100 rpm
+  MP        380     57    46    38   3.60  2.88  2.40         39 / 80 rpm
+  MP       1000     22    18    15   6.70  5.36  4.47         15 / 30 rpm
+  LP        100    130   104    87   0.74  0.59  0.49         150 / 300 rpm
+  LP        150     90    72    60   1.10  0.88  0.73         100 / 200 rpm
+  LP        210     65    52    43   1.60  1.28  1.07         71 / 150 rpm
+  LP        250     54    43    36   1.70  1.36  1.13         60 / 120 rpm
+  LP        298     45    36    30   2.00  1.60  1.33         50 / 100 rpm
+  LP        380     36    29    24   2.90  2.32  1.93         39 / 80 rpm
+  LP       1000     13    10     9   5.50  4.40  3.67         15 / 30 rpm
+  Gearbox: keep output torque under 2.0 kg·cm (2.5 for 380:1 and 1000:1), Pololu's instantaneous limit
+
+6 · MOTOR TORQUE AND CANDIDATES
+  R 0.6 (20 T motor gear on idler 3's axle): motor torque = T_c / (R × eff) = 57 / (0.6 × 0.5) = 189 N·mm = 1.92 kg·cm (eff 0.7: 1.37); stall needed at 4.0 V ≥ 5.77 kg·cm
+  R 1.0 (12 T pinion on the train): motor torque = T_c / (R × eff) = 57 / (1.0 × 0.5) = 113 N·mm = 1.15 kg·cm (eff 0.7: 0.82); stall needed at 4.0 V ≥ 3.46 kg·cm
+  R 1.5 (extra stage 12:18): motor torque = T_c / (R × eff) = 57 / (1.5 × 0.5) = 75 N·mm = 0.77 kg·cm (eff 0.7: 0.55); stall needed at 4.0 V ≥ 2.31 kg·cm
+  R 2.0 (extra stage 12:24): motor torque = T_c / (R × eff) = 57 / (2.0 × 0.5) = 57 N·mm = 0.58 kg·cm (eff 0.7: 0.41); stall needed at 4.0 V ≥ 1.73 kg·cm
+
+  Margin = stall at that voltage / worst peak motor torque (eff 0.5); speed at the mean worst-case torque; current at 4.8 V incl. 20 mA eyes; runtime = 800 × 0.8 / mA
+     R motor     mrg 4.8 mrg 4.0 mrg mean 4.0 crank rpm cm/s 4.8   4.0   5.6    mA    h  verdict
+   0.6 HP 1:380      2.2     1.9          4.1        88      2.8   2.2   3.4   351  1.8  margin < 3  (typical load: 274 mA, 2.3 h)
+   0.6 HP 1:1000     4.9     4.1          9.1        37      1.2   1.0   1.4   226  2.8  slow  (typical load: 190 mA, 3.4 h)
+   0.6 MP 1:1000     2.8     2.3          5.1        24      0.8   0.6   0.9   165  3.9  margin < 3  (typical load: 140 mA, 4.6 h)
+   1.0 HP 1:210      2.0     1.7          3.8        91      2.9   2.3   3.6   374  1.7  margin < 3  (typical load: 289 mA, 2.2 h)
+   1.0 HP 1:250      2.3     1.9          4.3        76      2.4   1.9   3.0   344  1.9  margin < 3  (typical load: 269 mA, 2.4 h)
+   1.0 HP 1:298      2.7     2.3          5.0        66      2.1   1.7   2.5   311  2.1  margin < 3  (typical load: 247 mA, 2.6 h)
+   1.0 HP 1:380      3.8     3.1          7.0        58      1.9   1.5   2.2   259  2.5  PASS  (typical load: 212 mA, 3.0 h)
+   1.0 HP 1:1000     8.2     6.8         15.3        23      0.7   0.6   0.9   184  3.5  slow  (typical load: 162 mA, 3.9 h)
+   1.0 MP 1:380      2.5     2.1          4.6        37      1.2   0.9   1.4   174  3.7  margin < 3  (typical load: 146 mA, 4.4 h)
+   1.0 MP 1:1000     4.6     3.8          8.5        16      0.5   0.4   0.6   135  4.7  slow  (typical load: 120 mA, 5.3 h)
+   1.0 LP 1:380      2.0     1.7          3.7        22      0.7   0.6   0.9   115  5.5  margin < 3  (typical load: 97 mA, 6.6 h)
+   1.5 HP 1:150      2.4     2.0          4.5        90      2.9   2.3   3.5   332  1.9  margin < 3  (typical load: 261 mA, 2.5 h)
+   1.5 HP 1:210      3.1     2.5          5.7        67      2.2   1.7   2.6   290  2.2  margin < 3  (typical load: 233 mA, 2.8 h)
+   1.5 HP 1:250      3.5     2.9          6.4        55      1.8   1.4   2.1   270  2.4  margin < 3  (typical load: 219 mA, 2.9 h)
+   1.5 HP 1:298      4.1     3.4          7.6        47      1.5   1.2   1.8   247  2.6  slow  (typical load: 205 mA, 3.1 h)
+   1.5 HP 1:380      5.6     4.7         10.5        41      1.3   1.1   1.6   213  3.0  slow  (typical load: 181 mA, 3.5 h)
+   1.5 HP 1:1000    12.4    10.3         22.9        16      0.5   0.4   0.6   162  3.9  slow  (typical load: 148 mA, 4.3 h)
+   1.5 MP 1:250      2.3     1.9          4.2        37      1.2   0.9   1.4   181  3.5  margin < 3  (typical load: 151 mA, 4.2 h)
+   1.5 MP 1:298      2.5     2.1          4.6        32      1.0   0.8   1.2   174  3.7  margin < 3  (typical load: 146 mA, 4.4 h)
+   1.5 MP 1:380      3.7     3.1          6.9        27      0.9   0.7   1.0   146  4.4  slow  (typical load: 127 mA, 5.0 h)
+   1.5 LP 1:298      2.1     1.7          3.8        19      0.6   0.5   0.7   113  5.6  margin < 3  (typical load: 96 mA, 6.7 h)
+   1.5 LP 1:380      3.0     2.5          5.6        16      0.5   0.4   0.6    97  6.6  margin < 3  (typical load: 85 mA, 7.6 h)
+   2.0 HP 1:100      2.3     1.9          4.3        98      3.1   2.5   3.8   344  1.9  margin < 3  (typical load: 269 mA, 2.4 h)
+   2.0 HP 1:150      3.3     2.7          6.1        71      2.3   1.8   2.7   279  2.3  margin < 3  (typical load: 226 mA, 2.8 h)
+   2.0 HP 1:210      4.1     3.4          7.6        53      1.7   1.4   2.0   247  2.6  slow  (typical load: 205 mA, 3.1 h)
+   2.0 HP 1:250      4.7     3.9          8.6        43      1.4   1.1   1.6   232  2.8  slow  (typical load: 195 mA, 3.3 h)
+   2.0 HP 1:298      5.5     4.6         10.1        36      1.2   1.0   1.4   215  3.0  slow  (typical load: 183 mA, 3.5 h)
+   2.0 HP 1:380      7.5     6.3         14.0        31      1.0   0.8   1.2   189  3.4  slow  (typical load: 166 mA, 3.9 h)
+   2.0 MP 1:210      2.3     1.9          4.3        32      1.0   0.8   1.2   179  3.6  margin < 3  (typical load: 149 mA, 4.3 h)
+   2.0 MP 1:250      3.0     2.5          5.6        30      1.0   0.8   1.1   158  4.0  margin < 3  (typical load: 136 mA, 4.7 h)
+   2.0 MP 1:298      3.3     2.7          6.1        25      0.8   0.6   1.0   153  4.2  margin < 3  (typical load: 132 mA, 4.9 h)
+   2.0 MP 1:380      5.0     4.1          9.2        21      0.7   0.5   0.8   132  4.9  slow  (typical load: 118 mA, 5.4 h)
+   2.0 LP 1:210      2.2     1.8          4.1        21      0.7   0.5   0.8   110  5.8  margin < 3  (typical load: 93 mA, 6.9 h)
+   2.0 LP 1:250      2.3     2.0          4.3        17      0.6   0.4   0.7   107  6.0  margin < 3  (typical load: 91 mA, 7.0 h)
+
+  PASS: R 1.0 HP 1:380
+
+  Teeth at the motor's mesh (it carries the whole train). Worst peak: 113 N·mm on the 12 T pinion → 19 N at the pitch circle (typical 11 N). Lewis bending σ = F / (face × m × Y):
+    12 T pinion, 3 mm face         26 MPa worst,   14 typical
+    12 T pinion, 5 mm face         15 MPa worst,    9 typical
+    idler 3, 20 T, 2.6 mm face     23 MPa worst,   13 typical
+    idler 3, 17 T, 2.6 mm face     24 MPa worst,   14 typical
+    (printed PLA tooth, loaded along the layers: ~50 MPa tensile; aim under ~20 MPa)
