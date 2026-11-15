@@ -33,7 +33,12 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
 7. **The whole robot first.** Rather than a base v2 that still could not test the motor, the whole robot, in its
    final looks, is now modelled and checked in CAD before anything else is printed. The motor is sized (an N20,
    380:1) and the plan for the whole robot is approved: the motor sits over the last idler, the batteries ride in
-   the body. Modelling is next.
+   the body.
+8. **The drive module in CAD.** The first part of the whole robot is modelled: a gearbox of its own that carries
+   the crankshafts, the idlers and the motor, and screws into the chassis. Its first version hung 10 mm under the
+   carcass, so its gear pockets were cut flat, and a new check now keeps every part inside the carcass. It passes;
+   the robot is still about 1 % too heavy for the motor's margin, so a weight and size review is added before
+   anything is bought or printed. The looks chassis and body are next.
 
 <img src="../sim/images/drive-attempts.png" alt="The three drives tried, from above and from the side">
 
@@ -1366,7 +1371,7 @@ Base v2 is now designed as part of the whole robot: [Whole robot first](#whole-r
 
 ### Whole robot first: motor sizing and chassis plan
 
-**Phase 3 · Mechanisms · 2026-11-14** · Status: 🔄 plan approved; modelling next
+**Phase 3 · Mechanisms · 2026-11-14** · Status: ✅ plan approved; Part A modelled in [Chassis Part A](#chassis-part-a-master-model-and-drive-module)
 
 > **In short.** Base v1 had no place for the motor or the batteries, so even a corrected base v2 could not test the
 > motor, and more partial prints would follow. From now on the whole robot, in its final looks, is modelled and
@@ -1490,7 +1495,8 @@ measured gear efficiency, another ratio); none is chosen.
 
 *Fig. 4 · Mass of each part of the final robot and of v0, with where each number comes from. The ballast row is
 what v0 carries so that it weighs and balances like the final robot. Made by
-[`cad/chassis/mass_estimate.py`](../cad/chassis/mass_estimate.py).*
+[`cad/chassis/mass_estimate.py`](../cad/chassis/mass_estimate.py); the figure is made again as parts are modelled,
+so it shows the latest values ([Chassis Part A](#chassis-part-a-master-model-and-drive-module)).*
 
 **If a leg jams.** The motor then pushes up to its stall torque, 360–503 N·mm (4.0–5.6 V), more than any printed
 tooth and more than the gearbox's own limit, 245 N·mm (Pololu's figure for the 380:1). The pinion is pressed on
@@ -1524,24 +1530,203 @@ The gear train's efficiency (test T1) is measured on the assembled module once t
 - **Motor: Pololu N20 HP 6 V 380:1**, on catalogue values for now. Nothing is bought (motor, holder, batteries,
   switch, connectors) until the first looks version passes in CAD and its mass confirms the sizing; then the bought
   parts are measured and their values replace the catalogue ones.
+  The purchase now waits for the weight and size review too: [Chassis Part A](#chassis-part-a-master-model-and-drive-module).
 - **Stall protection: a plain D-bore pinion**, kept if every measured break (K6a, K6b) is at most 196 N·mm
   (0.8 × 245) and at least 170 N·mm (1.5 × the 113 N·mm worst design load, so teeth do not break while walking).
   Otherwise the fallback becomes the design: the pinion carried on a hub that slips on a friction face at 170 N·mm.
 
-#### Next
-
-Modelling goes in three parts, each checked before the next ([plan](../cad/chassis/design-plan.md#status-and-next-steps)):
-
-- **A:** the master model `cad/robot.py` (datums, carcass envelope, interface table, bought parts' envelopes); the
-  drive module (spine, idler pins and keeper, idler 3 v2, motor saddle and pad, flange slot, clamp, cap with a
-  window over the pinion, pinion); the new fits in [`cad/fits.py`](../cad/fits.py) with their rows in
-  [`measurements.csv`](../measurements.csv); the start of the whole-robot spec `cad/chassis/verify.py`.
-- **B:** the looks chassis, body v2 with the holder cradle and rear lug, front block v2 with the hooks, the ballast
-  frame, the eyes pocket.
-- **C:** the whole-robot check with a full PASS; `mass_estimate.py` and `motor_sizing.py` rerun on the CAD masses
-  (this decides the motor purchase); the coupon batch and its workshop kit.
-
 This entry closes the open item «N20 gear ratio and motor stage». The item «Base for looks, once the v0 chassis
 walks» is now part of the whole-robot item, as v0 is printed as the looks chassis.
+
+[↑ Contents](../build-log.md#contents)
+
+### Chassis Part A: master model and drive module
+
+**Phase 3 · Mechanisms · 2026-11-15** · Status: ✅ modelled and checked; Part B next
+
+> **In short.** The first part of the whole robot is in CAD: a master model that holds the robot's reference
+> heights and the joints between its designs, and the **drive module**, a gearbox of its own that carries the four
+> crankshafts, the idlers and the N20 motor with its pinion, and screws into the chassis. Checked against the
+> carcass, its first version hung 10 mm under the robot's belly; its gear pockets were cut flat, and a new check now
+> keeps every part inside the carcass. After three design reviews it passes the full check with no failures. The
+> robot's design mass is 484 g, 6 g over what the chosen motor carries with its margin of 3, so a weight and size
+> review comes before the motor is bought.
+
+The [plan](#whole-robot-first-motor-sizing-and-chassis-plan) models the whole robot in parts, each checked before
+the next. Part A is everything that turns and what holds it: the crankshafts and idlers (reused as printed), the
+motor and its pinion, and the module they sit in. The parts that give the robot its looks (Part B) are built round
+it. The motor, battery holder and switch are not bought yet, so their sizes are catalogue values, marked as such in
+the model until they are measured.
+
+#### Steps
+
+1. **Master model** ([`cad/robot.py`](../cad/robot.py)): the reference heights (ground z 15.6, leg pivots 72.0,
+   deck 72.8–74.8, body seat 93.5), the carcass as the envelope everything must fit in, the twelve interfaces I1–I12
+   between designs (which fit and which screws join them), and the envelopes of the bought parts. Every design
+   takes these numbers from here instead of copying them.
+2. **The drive module and its parts** in [`cad/chassis/build.py`](../cad/chassis/build.py) (Fig. 1, 2):
+
+   | Part | What it does | g |
+   |---|---|---|
+   | Drive module | Two walls with the crankshafts' slots, the idlers' pin holes and the gear pockets; a pad, a V-shaped saddle and an end wall for the motor; 4 nut traps to screw it to the chassis from below | 15.1 |
+   | Cap | Holds the crankshafts down (the tongues and skirts of the [test cap](#gear-train-test-v2-the-cap)), cut round the pinion | 5.8 |
+   | Motor clamp | A bar over the motor: it presses the gearbox down and its cheeks hold the gearbox's flat sides against the motor's torque | 2.3 |
+   | Pinion | 12 teeth, 5 mm wide, pressed on the motor's D-shaped shaft | 0.6 |
+   | Idler 3 v2 | Idler 3 widened to 5 mm, to match the pinion | 1.4 |
+   | Pin keeper | Holds the three steel idler pins in | 0.7 |
+   | Press jig, gauge fork, press cup | Bench tools, not in the robot: they press the pinion on the shaft square and 0.8 mm from the gearbox | 7.7 |
+
+3. **New fits** in [`cad/fits.py`](../cad/fits.py). Two are measured, from the gear train test v2 that turned
+   without its cap (rows added to [`measurements.csv`](../measurements.csv)): 0.25 mm a side between a crank gear
+   and the walls, 0.45 mm for an idler. Five are assumed, each with the coupon that will measure it: the pinion's
+   D-bore at the shaft's size (K1), the motor's seat and clamp cheeks at 0.2 mm and the clamp pad pressed 0.3 mm
+   into the gearbox (K2), the cap's tongues at 0.3 mm a side and 0.5 mm round every gear tip in its pocket (K3).
+4. **The check** ([`cad/chassis/verify.py`](../cad/chassis/verify.py), the start of the whole-robot check): every
+   part turned over a full crank turn in 10° steps with the 8 legs swept past the module, the gears over one tooth
+   in 1° steps, also with the motor lifted 0.2 mm under its clamp; what holds each part; the assembly order with the
+   finger or tool for each screw and nut; and every part kept inside the carcass.
+5. **Three design reviews**, each answered by a new revision of the model:
+
+   | Review | Found | Fixed |
+   |---|---|---|
+   | 1 | The module had never been checked against the carcass: its pointed gear pockets hung 10 mm under the carcass's bottom, taking the ground clearance from 30 to 20 mm (Fig. 3), and it stuck out at the rear and under the motor. Also: two thin posts took the motor's torque; the motor could slide about 1 mm along its axis; the clamp sat on the pinion's keep-out zone; the assembly order could not be done (the pinion dropped in alone, then the motor) | Gear pockets cut flat; a new keep-in check in [`tools/cad_verify.py`](../tools/cad_verify.py); the clamp's cheeks take the torque and its pad presses the gearbox; the clamp hollowed over the pinion |
+   | 2 | 7 of 8 points closed. Still: the assembly order (its pictures become the workshop kit); the 0.8 mm gauge was not a part; the module's rear end reaches the carcass's rear face (Fig. 4) | The pinion pressed on the motor on the bench, then motor and pinion dropped in together (Fig. 5); the press jig and gauge fork; Part B's shell bulges 2 mm at the rear |
+   | 3 | Small points: the keep-in check measured the front against the head instead of the carcass top; a measurement that could not be taken; the jig did not square the motor; a 0.31 mm skin over one screw hole; the numbering of the exploded view | All fixed |
+
+6. **Mass** rerun with the module, cap and small parts from their CAD files
+   ([`mass_estimate.py`](../cad/chassis/mass_estimate.py)).
+
+<details>
+<summary>How to reproduce</summary>
+
+```
+uv sync
+cd cad/chassis
+../../.venv/bin/python build.py
+../../.venv/bin/python ../../tools/cad_verify.py verify.py --out verify-result.txt --render images/verify
+../../.venv/bin/python mass_estimate.py
+../../.venv/bin/python part_a_figures.py
+cd ../.. && .venv/bin/python -m pytest tools/tests
+```
+
+`build.py` writes every part to `out/` (STEP and STL); the parts, hardware, screw lengths and the bench assembly are
+in the folder's [README](../cad/chassis/README.md), and the answers of the last review, each with its number, in
+[`design-review.md`](../cad/chassis/design-review.md). The keep-in check takes the carcass inset by 2 mm (the
+chassis shell's wall) below the deck, with three named exceptions, each with a bound: the keel (lowest point
+z ≥ 42.7, base v1's keel), the rear end (inside the carcass's outer face), and the band under the head where the
+carcass's top dips below the deck (at most 4.38 mm out, where Part B's flat deck replaces the carcass top).
+
+</details>
+
+#### Result
+
+<img src="../cad/chassis/images/part-a-in-robot.png" alt="The drive module in the robot, seen from the right with the near half of the carcass cut away">
+
+*Fig. 1 · The drive module in the robot. The four crankshafts sit in its slots under the cap (blue); the motor lies
+along the module behind the clamp (yellow), over idler 3. The module's top is level with the deck, so it fills the
+deck's opening; the chassis around it is Part B. Made by
+[`cad/chassis/part_a_figures.py`](../cad/chassis/part_a_figures.py), as Fig. 2–5.*
+
+<img src="../cad/chassis/images/part-a-exploded.png" alt="The drive module exploded, every part and fastener numbered by its assembly step">
+
+*Fig. 2 · Every part and fastener of the module, pulled out the way it goes in and numbered by its assembly step.
+Nuts first (2–5), then the idlers on their steel pins from the right (6–13), the crankshafts and the cap from above
+(14–19), the motor with its pinion (24) and the clamp (25–27). All 27 steps, one panel each:
+[`images/verify/assembly-steps.png`](../cad/chassis/images/verify/assembly-steps.png).*
+
+| Check ([`verify-result.txt`](../cad/chassis/verify-result.txt)) | Result |
+|---|---|
+| Whole check | PASS, 0 failures, 39 warnings |
+| Gears | Every crank–idler mesh keeps a 0.10 mm gap between teeth; pinion on idler 3 v2 0.10–0.18 mm, also with the motor lifted |
+| Legs | Every leg stays at least 1.0 mm from the module, cap, clamp, keeper and motor over a full turn |
+| Held | Each of the 12 loose parts is held; only the gears are free, to spin |
+| Inside the carcass | Below the deck, every fixed part at least 2 mm inside the carcass, apart from the three bounded exceptions |
+| Assembly | 27 steps, each along a straight line, 4 of them on the bench; every screw and nut reached by its tool |
+| Tool tests | 26 pass ([`tools/tests/`](../tools/tests/)) |
+
+Of the 39 warnings, 27 belong to the reused crankshafts and legs (printed and working). The other 12: six joints with
+an assumed fit, each waiting for its coupon; knife edges where two gear pockets meet and on the clamp, which carry no
+load; the gauge fork, 0.8 mm thick by design; two 1.3 mm ribs beside the slots of crankshafts 3 and 4, now out of
+the motor's torque path; and 837 mm² of the module printed over air when it prints upside down: the flat pocket
+floors and the saddle's underside, bridged, then nut-pocket roofs, the motor's pad and small ledges.
+
+**The keel.** The module prints upside down, so its gear pockets were drawn as teardrops whose 50° sides print
+without support. Their points hung far below the carcass (Fig. 3). Cut flat at the bottom of each gear's circle,
+they print as short bridges instead (10.7 mm under idler 3), and the module's lowest point is z 42.77, where base
+v1's keel was: 27.2 mm above the table, against 20.3 mm with the points.
+
+<img src="../cad/chassis/images/part-a-keel.png" alt="Side section through the gear plane: carcass, drive module, and the pointed pockets of rev 4 hatched">
+
+*Fig. 3 · Side section through the gear plane. Beige: the carcass; red: the module. Hatched: what the first
+version's pointed pockets added below today's module (redrawn from the same pockets). The arrows are the height
+above the table under the carcass, under the module now and under the first version.*
+
+**The rear end.** Crankshaft 4 sits where the simulator put it, so the module's rear wall, 0.95 mm behind its gear's
+room, ends at the carcass's rear face (Fig. 4). Part B's shell bulges about 2 mm there and covers it, about
+8.5 × 18 mm.
+
+<img src="../cad/chassis/images/part-a-rear.png" alt="Rear end of the module against the carcass, and the 2 mm bump of Part B">
+
+*Fig. 4 · The rear end, in the same section. The circle is crankshaft 4's gear, the dotted circle its room. The
+module's thin rear wall reaches the carcass's rear face; the dashed blue box is the bump Part B adds.*
+
+**The pinion.** It is pressed on the motor's D-shaped shaft and must end 0.8 mm from the gearbox, but once the motor
+is in the module nothing can reach that gap. So the press is done on the bench (Fig. 5): a jig holds the pinion and
+squares the motor, and a 0.8 mm fork between them stops the press. The fork must come out and go back in snug
+before the motor goes in.
+
+<img src="../cad/chassis/images/part-a-bench-press.png" alt="The pinion pressed on the motor in the press jig, then the motor dropped into the module">
+
+*Fig. 5 · Pressing the pinion on the bench, as it is done by hand: the jig stands on the table with its open side
+towards you. Grey: what is already there; in colour: the part going in, with its arrow; the pink cylinders are the
+finger the check uses to reach it. After step 4 the fork is pulled out and the motor slides out of the jig with its
+pinion.*
+
+**Mass.** With the module's parts from CAD instead of the plan's estimates, the robot as summed stays at 445 g and
+its design mass, with the contingency by source, drops 2 g:
+
+| | Plan (2026-11-14) | Now |
+|---|---|---|
+| Drive module | 14 g, estimate (+15 %) | 15.1 g, CAD (+5 %) |
+| Clamp, keeper, pinion, idler 3's extra width | 5.1 g, estimate | 4.1 g, CAD |
+| Design mass | 486 g | **484 g** (445.3 + 38.8) |
+| Over the 478 g at which the HP 380:1 keeps a margin of 3.0 | 8 g | 6 g (margin 2.96) |
+
+About 1 % over: small, but a real excess, not rounding. Most of the 38.8 g of contingency (32 g) sits on parts not
+modelled or not bought yet, and Part B gets a mass budget: looks shell at most 86 g, front block 15 g, holder cradle
+6 g, paint 10 g.
+
+#### Decisions
+
+- **Keel cut flat**, rather than leaving pointed pockets under the robot: the module goes no lower than base v1 did.
+- **A design must stay inside the carcass**, and this is now a check for every design (`KEEP_IN`, section 12 of
+  [`cad_verify.py`](../tools/cad_verify.py)): a part may stand out only where an exception names why and bounds how
+  far; an exception without a bound is a warning.
+- **Rear end: a 2 mm bump in Part B's shell**, rather than a window in the shell or a thicker module.
+- **The pinion is pressed on the bench**, with the jig and the 0.8 mm fork, and the motor goes in with it in one
+  drop. The check now handles parts moved in as one body and steps done on the bench.
+- **Six changes from the plan**, accepted by the review because the plan's version could not be built:
+  - no flange slot for the motor: the +X wall's steps and the V saddle place it;
+  - the clamp runs along the motor, not across it;
+  - the cap has 2 screws, not 3 (one shared with the clamp: there is no room for a third);
+  - the module is screwed to the chassis from below;
+  - the idler pins are Ø3 × 10, a stock length;
+  - no stop face on the motor's front: the pinion leaves no room for one, so the clamp's pressure and a stop behind
+    the motor hold it along its axis (tested by coupon K2).
+- **A weight and size review (Part D)** comes after the looks robot passes in CAD: every part made lighter where it
+  can be (thinner walls, hollow or ribbed parts, interiors and exteriors rethought), and a check of whether the
+  whole robot can be smaller and still needs the 120 % scale. The motor purchase and the coupons wait for it. Part B
+  is drawn at 120 %; the scale is decided in Part D.
+
+#### Next
+
+Part B, in the same folder and check ([plan](../cad/chassis/design-plan.md#status-and-next-steps)): the looks chassis
+shell with the deck opening for the module, the four bosses under the module (each screw cut to the length in the
+[README's table](../cad/chassis/README.md#hardware-part-a)), the 2 mm bump at the rear and the path of the motor's
+wires; body v2, front block v2, the holder cradle and the ballast frame, each within its mass budget. Before the
+workshop kit, the bench steps' titles must say directions as seen on the bench, not in the robot's axes, and
+[`tools/workshop_kit.py`](../tools/workshop_kit.py) must show when each measurement is taken.
+
+This entry closes the open item «Robot master model».
 
 [↑ Contents](../build-log.md#contents)

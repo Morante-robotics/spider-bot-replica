@@ -44,7 +44,9 @@ VERIFY_STEP=30 ../../.venv/bin/python ../../tools/cad_verify.py verify.py --quic
 Designs that use another design's parameters import its `build.py` as a module (one source per number), never
 copy a value: with the repo root on `sys.path`, `from cad import design` and `C = design("crankshafts")`
 ([`__init__.py`](__init__.py)); a design loads its own `build.py` the same way. What several designs share (the
-simulator's geometry, hardware sizes, build123d helpers) is in [`common.py`](common.py).
+simulator's geometry, hardware sizes, build123d helpers) is in [`common.py`](common.py). The robot master model,
+[`robot.py`](robot.py), holds the datums, the carcass envelope, the interfaces between designs and the bought parts'
+sizes (catalogue values until they are measured): a design takes these numbers from it, never a copy.
 
 ## What is printed and kept in git
 

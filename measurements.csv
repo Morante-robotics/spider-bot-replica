@@ -5,3 +5,5 @@ date,part,feature,nominal_mm,measured_mm,tool,result,entry
 2026-11-11,fork (red),side wall,2.0,2.0,caliper,as modelled; leg fits,test-leg-v2-turning-by-hand
 2026-11-11,fork (blue),side wall,2.0,<2.5,caliper,thicker; leg does not fit the window,test-leg-v2-turning-by-hand
 2026-11-12,crankshafts (gear train v2),journal diameter,4.0,3.9-4.0,caliper,as modelled,gear-train-test-v2-the-cap
+2026-11-12,gear train test v2,crank gear face to spine wall a side,0.25,,by hand,turned without the cap,gear-train-test-v2-the-cap
+2026-11-12,gear train test v2,idler face to spine wall a side,0.45,,by hand,turned without the cap,gear-train-test-v2-the-cap

@@ -42,9 +42,9 @@ repeated. Its contents show where each step stands, and its **Open items** list 
 | [cad/gear-train-test/](cad/gear-train-test/) | Gear train test: a stand-alone spine and cap for the crankshafts and idlers, with its `cad_verify` spec |
 | [cad/test-frame/](cad/test-frame/) | Test frame: a desk stand for one leg, its fork and a crankshaft, and the Onshape tutorial |
 | [cad/base/](cad/base/) | Base v1: the carcass base with a band that lifts the body, the spine built in, fork pockets and a cap over the crankshafts (CC BY-NC-SA) |
-| [cad/chassis/](cad/chassis/) | Chassis (base v2) and robot master model: the plan for the whole robot (motor seat, battery holder in the body, coupons), with its layout and mass scripts |
+| [cad/chassis/](cad/chassis/) | Chassis (base v2): the plan for the whole robot (motor seat, battery holder in the body, coupons), the drive module that carries the crankshafts and the motor, its bench tools and its `cad_verify` spec, with the layout, mass and figure scripts |
 | [cad/clearance-test/](cad/clearance-test/) | Block and pin to find the hole clearance this printer needs for turning and sliding fits |
-| [cad/](cad/) | The rules every design follows: axes, folder layout, what is kept in git; [`_template/`](cad/_template/) to start a new design |
+| [cad/](cad/) | The rules every design follows: axes, folder layout, what is kept in git; [`_template/`](cad/_template/) to start a new design; [`robot.py`](cad/robot.py), the robot master model (reference heights, carcass envelope, interfaces between designs, bought parts' sizes) |
 | [cad/fits.py](cad/fits.py) | The measured clearances (fits) every design takes its holes, slots and gaps from |
 | [hardware.md](hardware.md) | Screws, pins, motor, batteries: what each design uses and what is in the workshop |
 | [measurements.csv](measurements.csv) | Every caliper measurement of a printed part, the source of the fits |

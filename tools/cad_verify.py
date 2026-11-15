@@ -13,7 +13,8 @@ one is at every step of the motion, and what is allowed. The tool then runs eigh
                   nothing stops it within its allowed play, it can fall or lift out (a crankshaft in an open slot).
                   Its gear partners do not count as holding it: they would turn and let it out
   5. assembly     each part in ASSEMBLY can be moved in along its direction past the parts placed before it
-                  (its gear partners are ignored: they can be turned to let it in)
+                  (its gear partners are ignored: they can be turned to let it in). A step may move a tuple of
+                  parts as one body (a sub-assembly), or be done on the bench against its own bench parts only
   6. print        overhang area per printed part in its print orientation (information for supports)
   7. keep-out     optional zones carried by a part (e.g. a spinning gear's faces thickened by the axial clearance it
                   needs, plus its float): no other part may enter them at any step, except the parts listed
@@ -28,6 +29,11 @@ one is at every step of the motion, and what is allowed. The tool then runs eigh
       printed upright thinner than Ø4, which break along the layers)
  11. seats        every part in SEATS sits fully home on its seat: pushed further along its direction, it is
                   stopped at once
+ 12. keep-in      every part listed in a KEEP_IN envelope stays inside a reference mesh inset by a wall (a
+                  carcass shell's inner surface) within a z range: its surface is sampled and every sample must be at
+                  least `inset` inside the mesh. Named exceptions are boxes where samples may be outside, each with
+                  its reason and an optional bound (min_z): a keel allowed under the shell, but never below min_z
+                  (base v2 chassis, 2026-11-14: 17 % of the module was outside the carcass and nothing said so)
 
 Spec file (all names optional except PARTS and poses):
 
@@ -40,24 +46,42 @@ Spec file (all names optional except PARTS and poses):
     GEARS = [("shaft", "idler")]              # meshing pairs
     RETAIN = {"shaft": {"spin": [1, 0, 0], "slide": None, "play": 1.0}}   # free rotation axis, free slide axis
     ASSEMBLY = [("frame", None), ("shaft", [0, 0, 1])]   # order, and the direction each part comes in from
+                                              # a step may move parts as one body: (("motor", "pinion"), d); and
+                                              # take opts: (("pinion",), d, {"bench": ["motor", "jig"],
+                                              # "except": {"shaft": "press fit"}, "note": "..."}): done on the bench,
+                                              # checked against the bench parts only, places nothing in the machine
+                                              # PARTS[...]["bench"] = True: a jig used on the bench, not in the
+                                              # machine (only assembly, integrity, print and pictures see it)
     PRINT_ORIENT = {"shaft": 4x4}             # how each part lies on the bed (default: as in its STL)
     SECTIONS = [([0, 0, 0], [1, 0, 0])]       # cut planes (point, normal) for the pictures
     PAIR_GAP = {("pin", "shaft"): 0.1}       # smallest gap for a pair, where MIN_GAP does not fit (a pin in its bore)
     KEEP_OUT = {"gear-faces": {"part": "shaft", "mesh": m, "except": ["frame"], "why": "0.8 mm axial"}}
                                               # m in the part's own frame, moves with it; "except": parts allowed in
     ACCESS = [{"at": "pin", "tool": tool("finger", [0, 0, 6], [1, 0, 0]), "why": "push the pin in by hand"}]
-                                              # at: the ASSEMBLY entry it serves; tool from the fastener's outer end
+                                              # at: the ASSEMBLY entry it serves (a part, or a step's tuple); tool
+                                              # from the fastener's outer end
                                               # outwards; "except": parts the tool may touch (the fastener itself)
     JOINTS = {("cap", "frame"): {"fit": fits.WINDOW, "where": (center, size), "why": "cap in its opening"},
               ("pin", "shaft"): {"fit": fits.STEEL}}
                                               # fit: a fits.Fit (or anything with .side); where: optional box in the
-                                              # ground frame where the gap is measured (when the pair touches
+                                              # ground frame where the gap is measured (when the pair touches;
+                                              # a negative fit is an interference: the parts must overlap there
                                               # elsewhere, e.g. a cap resting on its frame); "moves": True to box
                                               # the region with the first part instead
     MARKS = {"shaft": "dot on the tooth that meets the idler's dot", "idler": "dot between two teeth"}
     SEATS = {"gear": {"on": "frame", "dir": [0, 0, -1], "why": "big gear in its pocket"}}   # tol: 0.05 mm default
     GEAR_MOTION = [(a, 0) for a in range(0, 31)]   # optional: meshing pairs checked over these steps only (one
                                               # tooth pitch, finer) instead of MOTION; every other pair over MOTION
+    KEEP_IN = {"shell": {"mesh": carcass, "inset": 2.0, "z": (None, 72.5), "parts": ["module"],
+                         "allow": {"keel": {"box": ((x0, y0, z0), (x1, y1, z1)), "min_z": 42.7, "why": "..."},
+                                   "end": {"box": ..., "inset": 0.0, "why": "inside the shell, not its inner face"}},
+                         "bodies": {"nut-1": mesh}, "why": "inside the shell's inner surface"}}
+                                              # mesh: closed reference mesh (ground frame); parts placed at MOTION[0]
+                                              # (WARN if a listed part moves); parts left out: every part that does
+                                              # not move over MOTION; bodies: extra meshes (not parts), the same;
+                                              # an allowance takes min_z, max_z or inset (WARN with none of them);
+                                              # allow: boxes (first match wins), skipped or checked at their own inset;
+                                              # samples: surface points per part (default 20000)
     MIN_GAP, GEAR_GAP, MIN_WALL, BED = 0.2, (0.08, 0.5), 0.8, (256, 256, 256)
 
 Usage:
@@ -251,10 +275,15 @@ def check_integrity(spec, meshes, rep, quick, only=None):
             rep.ok(f"{msg}; walls ≥ {min_wall} mm")
 
 
-def placed(spec, meshes, t):
+def placed(spec, meshes, t, bench=False):
+    """Every part as a manifold at motion step t. Bench parts (PARTS[...]["bench"]: a jig or gauge used on the
+    bench, not in the machine) only with bench=True: the motion, retention, keep-out, joint and access checks never
+    see them."""
     pose = spec.poses(t) if hasattr(spec, "poses") else {}
     out = {}
     for name in spec.PARTS:
+        if spec.PARTS[name].get("bench") and not bench:
+            continue
         M = pose.get(name, np.eye(4))
         out[name] = to_manifold(meshes[name]).transform(np.asarray(M, float)[:3, :])
     return out
@@ -454,7 +483,7 @@ def check_retention(spec, meshes, rep, quick, only=None):
     samples = motion[:1] if quick else motion[:: max(1, len(motion) // 3)][:3]
     dirs = directions()
     for name, p in spec.PARTS.items():
-        if p.get("fixed") or not involves(only, name):
+        if p.get("fixed") or p.get("bench") or not involves(only, name):
             continue
         r = retain.get(name, {})
         play = r.get("play", 1.0)
@@ -551,24 +580,70 @@ def check_keep_out(spec, meshes, rep, only=None):
                      (f" ({d['except_why']})" if d.get("except_why") else ""))
 
 
+def steps(spec):
+    """ASSEMBLY normalised: one dict per step. An entry is (name, d) or (name, d, opts); name is one part or a tuple
+    of parts moved in as one body (a sub-assembly: a motor with its pressed-on pinion). opts: "bench": the parts on
+    the bench in this step (the step is done off the machine: the moving body is checked against these only, and
+    the step places nothing in the machine; its parts go in with a later step); "except": {part: why} the moving
+    body may pass through (a press fit modelled at zero clearance); "note": what the step means."""
+    out = []
+    for e in getattr(spec, "ASSEMBLY", None) or []:
+        names, d = e[0], e[1]
+        opts = e[2] if len(e) > 2 else {}
+        names = (names,) if isinstance(names, str) else tuple(names)
+        exc = opts.get("except", {})
+        exc = exc if isinstance(exc, dict) else {n: "" for n in exc}
+        out.append({"names": names, "d": None if d is None else np.asarray(d, float) / np.linalg.norm(d),
+                    "bench": list(opts["bench"]) if opts.get("bench") is not None else None, "except": exc,
+                    "note": opts.get("note", "")})
+    return out
+
+
+def step_label(st):
+    return " + ".join(st["names"])
+
+
+def gear_partners(spec, names):
+    g = getattr(spec, "GEARS", [])
+    return {b for a, b in g if a in names} | {a for a, b in g if b in names}
+
+
+def before_step(spec, seq, k):
+    """Parts already there when step k is done: on the bench its bench parts, in the machine every part placed by
+    the machine steps before it."""
+    if seq[k]["bench"] is not None:
+        return [n for n in seq[k]["bench"] if n not in seq[k]["names"]]
+    done = []
+    for st in seq[:k]:
+        if st["bench"] is None:
+            done += [n for n in st["names"] if n not in done]
+    return done
+
+
 def check_assembly(spec, meshes, rep):
-    seq = getattr(spec, "ASSEMBLY", None)
+    seq = steps(spec)
     rep.head("5 assembly order")
     if not seq:
         rep.warn("no ASSEMBLY order in the spec: cannot tell whether the parts can be put together")
         return
     motion = list(getattr(spec, "MOTION", [0]))
-    ms = placed(spec, meshes, motion[0])
-    done = []
-    for name, d in seq:
+    ms = placed(spec, meshes, motion[0], bench=True)
+    for k, st in enumerate(seq):
+        names, d = st["names"], st["d"]
+        where = " on the bench" if st["bench"] is not None else ""
         if d is None:
-            done.append(name)
+            if where:
+                rep.info(f"{step_label(st)}: set out{where}")
             continue
-        d = np.asarray(d, float) / np.linalg.norm(d)
-        me = ms[name]
-        partners = {b for a, b in getattr(spec, "GEARS", []) if a == name} | \
-            {a for a, b in getattr(spec, "GEARS", []) if b == name}
-        others = [ms[n] for n in done if n not in partners]
+        bad = [n for n in names if n not in ms]
+        if bad:
+            rep.fail(f"ASSEMBLY step {k + 1}: no such parts {', '.join(bad)}")
+            continue
+        me = ms[names[0]]
+        for n in names[1:]:
+            me = me + ms[n]
+        skip = set(names) | set(st["except"]) | gear_partners(spec, names)
+        others = [ms[n] for n in before_step(spec, seq, k) if n not in skip]
         bme = mbox(me)
         grid = np.arange(0.25, 60, 0.25)
         # only the travel where the moving part's box crosses an obstacle's box can collide: test those steps only
@@ -584,44 +659,66 @@ def check_assembly(spec, meshes, rep):
             if any(overlap(mv, o) > b0 + EPS_VOL for o, b0 in live):
                 hit = s
                 break
+        what = step_label(st) + (" (as one body)" if len(names) > 1 else "")
         if hit is None:
-            rep.ok(f"{name} goes in from {name_dir(np.sign(d.round(3)))}")
+            rep.ok(f"{what} goes in from {name_dir(np.sign(d.round(3)))}{where}")
         else:
-            rep.fail(f"{name} cannot go in from {name_dir(np.sign(d.round(3)))}: blocked {hit:.2f} mm out")
-        done.append(name)
-    missing = set(spec.PARTS) - {n for n, _ in seq}
+            rep.fail(f"{what} cannot go in from {name_dir(np.sign(d.round(3)))}{where}: blocked {hit:.2f} mm out")
+        for n, why in st["except"].items():
+            rep.info(f"{what}: not checked against {n}" + (f" ({why})" if why else ""))
+    named = {n for st in seq for n in st["names"]} | {n for st in seq for n in (st["bench"] or [])}
+    missing = set(spec.PARTS) - named
     hw = sorted(n for n in missing if spec.PARTS[n].get("hardware"))
     if hw:
         rep.fail(f"hardware not in ASSEMBLY (how does it go in?): {', '.join(hw)}")
     if missing - set(hw):
         rep.warn(f"not in ASSEMBLY: {', '.join(sorted(missing - set(hw)))}")
+    in_machine = {n for st in seq if st["bench"] is None for n in st["names"]}
+    for n in sorted(named - in_machine):
+        if not spec.PARTS.get(n, {}).get("bench"):
+            rep.fail(f"{n}: only in bench steps, never goes into the machine (mark it PARTS[...]['bench'] if it is "
+                     f"a jig)")
+
+
+def access_step(seq, at):
+    """Index of the ASSEMBLY step an ACCESS entry serves: its "at" is a step's part, or its tuple of parts."""
+    key = (at,) if isinstance(at, str) else tuple(at)
+    for k, st in enumerate(seq):
+        if st["names"] == key:
+            return k
+    for k, st in enumerate(seq):
+        if len(key) == 1 and key[0] in st["names"]:
+            return k
+    return None
 
 
 def check_access(spec, meshes, rep):
     rep.head("8 access: can a finger or tool reach each fastener when it goes in?")
-    seq = getattr(spec, "ASSEMBLY", None) or []
+    seq = steps(spec)
     acc = getattr(spec, "ACCESS", [])
-    order = [n for n, _ in seq]
-    hw_in = [n for n, d in seq if spec.PARTS.get(n, {}).get("hardware") and d is not None]
+    hw_steps = [k for k, st in enumerate(seq) if st["d"] is not None and
+                any(spec.PARTS.get(n, {}).get("hardware") for n in st["names"])]
     if not acc:
-        if hw_in:
-            rep.fail(f"no ACCESS entries, but fasteners go in: {', '.join(hw_in)}")
+        if hw_steps:
+            rep.fail(f"no ACCESS entries, but fasteners go in: {', '.join(step_label(seq[k]) for k in hw_steps)}")
         else:
             rep.info("no fasteners in ASSEMBLY, nothing to reach")
         return
-    served = {a["at"] for a in acc}
-    for n in hw_in:
-        if n not in served:
-            rep.fail(f"{n}: no ACCESS entry (which finger or tool pushes it in, and from where?)")
+    served = {access_step(seq, a["at"]) for a in acc}
+    for k in hw_steps:
+        if k not in served:
+            rep.fail(f"{step_label(seq[k])}: no ACCESS entry (which finger or tool pushes it in, and from where?)")
     motion = list(getattr(spec, "MOTION", [0]))
-    ms = placed(spec, meshes, motion[0])
+    ms = placed(spec, meshes, motion[0], bench=True)
     for a in acc:
         at = a["at"]
-        if at not in order:
-            rep.fail(f"ACCESS for {at}: not an ASSEMBLY entry")
+        k = access_step(seq, at)
+        label = at if isinstance(at, str) else " + ".join(at)
+        if k is None:
+            rep.fail(f"ACCESS for {label}: not an ASSEMBLY entry")
             continue
-        skip = set(a.get("except", [])) | {at}
-        before = [n for n in order[:order.index(at)] if n not in skip]
+        skip = set(a.get("except", [])) | set(seq[k]["names"])
+        before = [n for n in before_step(spec, seq, k) if n not in skip]
         tm = to_manifold(a["tool"])
         hits = []
         for n in before:
@@ -630,9 +727,9 @@ def check_access(spec, meshes, rep):
                 if v > EPS_VOL:
                     hits.append(f"{n} ({v:.0f} mm³)")
         if hits:
-            rep.fail(f"{at}: the tool ({a.get('why', '')}) hits {', '.join(hits)}")
+            rep.fail(f"{label}: the tool ({a.get('why', '')}) hits {', '.join(hits)}")
         else:
-            rep.ok(f"{at}: reachable ({a.get('why', '')})")
+            rep.ok(f"{label}: reachable ({a.get('why', '')})")
 
 
 def check_print(spec, meshes, rep):
@@ -743,7 +840,12 @@ def check_joints(spec, meshes, rep, only=None):
                 worst = (g, t)
         g, t = worst
         label = f"{a} × {b} ({j.get('why', getattr(fit, 'what', ''))})"
-        if g < need - 0.01:
+        if need < 0:            # a designed interference (preload): the parts must overlap in the joint's region
+            if g > 0:
+                rep.fail(f"{label}: {g:.2f} mm apart at {t}, the fit is a {-need:.2f} mm interference")
+            else:
+                rep.ok(f"{label}: overlap at every step (interference {-need:.2f}{', ' + status if status else ''})")
+        elif g < need - 0.01:
             rep.fail(f"{label}: {g:.2f} mm a side at {t}, measured fit needs {need:.2f}")
         else:
             rep.ok(f"{label}: ≥ {g:.2f} mm a side (fit {need:.2f}{', ' + status if status else ''})")
@@ -780,6 +882,105 @@ def check_seats(spec, meshes, rep, only=None):
             rep.fail(f"{label}: {free:.2f} mm above its seat as designed (more than {tol} mm): it is not home")
         else:
             rep.ok(f"{label}: home (≤ {max(free, 0):.2f} mm)")
+
+
+def static_parts(spec):
+    """Parts that do not move over MOTION (and are not bench jigs): the default KEEP_IN parts list."""
+    motion = list(getattr(spec, "MOTION", [0]))
+    P = [poses_at(spec, t) for t in motion]
+    return [n for n, p in spec.PARTS.items() if not p.get("bench") and
+            all(np.allclose(Pt[n], P[0][n], atol=1e-6) for Pt in P[1:])]
+
+
+def check_keep_in(spec, meshes, rep, only=None):
+    """Parts that must stay inside an envelope (a carcass shell inset by its wall) do: sampled surface points, signed
+    distance to the reference mesh (positive inside) at least `inset`, except inside named, bounded allowances.
+    The parts are placed at MOTION[0] only: a listed part that moves over MOTION gets a WARN (check it in a pose
+    of its own). "parts" left out: every part that does not move over MOTION. An allowance with no bound (no
+    min_z, max_z or inset) gets a WARN: it lets anything out in its box. An allowance's box is checked over its
+    full height, past the entry's "z" range too (a bound above the deck is checked where it applies)."""
+    envs = getattr(spec, "KEEP_IN", {})
+    if not envs:
+        return
+    rep.head("12 keep-in: does every part stay inside its envelope?")
+    motion = list(getattr(spec, "MOTION", [0]))
+    pose = spec.poses(motion[0]) if hasattr(spec, "poses") else {}
+    static = set(static_parts(spec))
+    for en, e in envs.items():
+        inset, tol = e.get("inset", 0.0), e.get("tol", 0.02)
+        z0, z1 = e.get("z", (None, None))
+        allow = e.get("allow", {})
+        plist = e["parts"] if e.get("parts") is not None else [n for n in spec.PARTS if n in static]
+        if e.get("parts") is None:
+            rep.info(f"{en}: parts by default, every part that does not move over MOTION: {', '.join(plist)}")
+        for an, a in allow.items():
+            if all(a.get(k) is None for k in ("min_z", "max_z", "inset")):
+                rep.warn(f"{en} / {an}: allowance with no bound (no min_z, max_z or inset): anything in its box may "
+                         f"stand out of the envelope ({a.get('why', '')})")
+        moving = [pn for pn in plist if pn not in static and pn in spec.PARTS]
+        if moving:
+            rep.warn(f"{en}: {', '.join(moving)} move over MOTION but are checked at MOTION[0] only")
+        bodies = {pn: None for pn in plist} | dict(e.get("bodies", {}))
+        for pn, body in bodies.items():
+            if body is None and not involves(only, pn):
+                continue
+            if body is None:
+                m = meshes[pn].copy()
+                m.apply_transform(np.asarray(pose.get(pn, np.eye(4)), float))
+            else:
+                m = body
+            pts, _ = trimesh.sample.sample_surface_even(m, e.get("samples", 20000), seed=1)
+            pts = np.vstack([pts, m.vertices])
+            keep = np.ones(len(pts), bool)
+            if z0 is not None:
+                keep &= pts[:, 2] >= z0
+            if z1 is not None:
+                keep &= pts[:, 2] <= z1
+            for a in allow.values():            # an allowance's box is checked over its full height, past "z" too
+                lo, hi = (np.asarray(v, float) for v in a["box"])
+                keep |= np.all((pts >= lo) & (pts <= hi), axis=1)
+            pts = pts[keep]
+            if not len(pts):
+                rep.info(f"{en}: {pn} has no surface in z {z0}..{z1}")
+                continue
+            free = np.zeros(len(pts), bool)
+            for an, a in allow.items():
+                lo, hi = (np.asarray(v, float) for v in a["box"])
+                inb = np.all((pts >= lo) & (pts <= hi), axis=1) & ~free
+                if not inb.any():
+                    continue
+                low, top = pts[inb, 2].min(), pts[inb, 2].max()
+                bounds = []
+                if a.get("min_z") is not None:
+                    bounds.append(f"z ≥ {a['min_z']}")
+                    if low < a["min_z"] - tol:
+                        rep.fail(f"{en} / {an}: {pn} reaches z {low:.2f}, below its bound {a['min_z']} ({a['why']})")
+                if a.get("max_z") is not None:
+                    bounds.append(f"z ≤ {a['max_z']}")
+                    if top > a["max_z"] + tol:
+                        rep.fail(f"{en} / {an}: {pn} reaches z {top:.2f}, above its bound {a['max_z']} ({a['why']})")
+                bound = f" (bound {', '.join(bounds)})" if bounds else ""
+                rep.info(f"{en} / {an}: {pn} allowed outside here, {inb.sum()} samples, z {low:.2f}..{top:.2f}"
+                         f"{bound}: {a['why']}")
+                if a.get("inset") is not None:          # a smaller inset here instead of none
+                    da = trimesh.proximity.signed_distance(e["mesh"], pts[inb])
+                    if (da < a["inset"] - tol).any():
+                        rep.fail(f"{en} / {an}: {pn} {(da < a['inset'] - tol).sum()} samples less than "
+                                 f"{a['inset']} inside (worst {a['inset'] - da.min():.2f} mm out)")
+                    else:
+                        rep.ok(f"{en} / {an}: {pn} ≥ {a['inset']:g} inside here (closest {da.min() - a['inset']:+.2f})")
+                free |= inb
+            chk = pts[~free]
+            d = trimesh.proximity.signed_distance(e["mesh"], chk) if len(chk) else np.zeros(0)
+            bad = d < inset - tol
+            label = f"{en}: {pn} ({e.get('why', '')})"
+            if bad.any():
+                w = int(np.argmin(d))
+                rep.fail(f"{label}: {bad.sum()} of {len(chk)} samples ({100 * bad.mean():.1f} %) less than {inset} "
+                         f"inside; worst {inset - d[w]:.2f} mm out at ({', '.join(f'{v:.1f}' for v in chk[w])})")
+            else:
+                rep.ok(f"{label}: {len(chk)} samples ≥ {inset} inside (closest {d.min() - inset:+.2f} mm)"
+                       if len(chk) else f"{label}: every sample in an allowance")
 
 
 def check_marks(spec, rep, only=None):
@@ -910,6 +1111,7 @@ def run_checks(spec, meshes, rep, args, only):
                       ("access", lambda: check_access(spec, meshes, rep)),
                       ("joints", lambda: check_joints(spec, meshes, rep, only)),
                       ("seats", lambda: check_seats(spec, meshes, rep, only)),
+                      ("keep-in", lambda: check_keep_in(spec, meshes, rep, only)),
                       ("marks", lambda: check_marks(spec, rep, only))):
         t0 = time.perf_counter()
         fn()

@@ -6,10 +6,10 @@ sizing behind it: [build log](../../build-log/3-legs-and-drive.md#whole-robot-fi
 
 ## Status and next steps
 
-Nothing is modelled yet: `build.py`, `verify.py`, `README.md` and `design-review.md` here are still the
-template's. Modelling goes in three parts, each checked before the next starts:
+Part A is modelled (rev 6.1, 2026-11-15): full `cad_verify` PASS, reviewed twice; the departures from this plan
+are listed under «Decisions taken». Modelling goes in four parts, each checked before the next starts:
 
-1. **Part A · master model and drive module.**
+1. **Part A · master model and drive module** ✅.
    - `cad/robot.py`: datums, the carcass envelope, the interface table (end of this plan), envelopes of the bought
      parts (catalogue values, flagged `catalogue`).
    - The drive module: spine, idler pins and keeper, idler 3 v2 (5 mm face), motor saddle and pad, flange slot
@@ -20,11 +20,18 @@ template's. Modelling goes in three parts, each checked before the next starts:
    - The start of the whole-robot spec, `cad/chassis/verify.py`.
 2. **Part B · the looks parts.** The looks chassis shell, body v2 with the holder cradle and the rear lug, front
    block v2 with the hooks, the ballast frame, the eyes pocket.
-3. **Part C · whole robot.** The whole-robot verify with a full PASS; rerun `mass_estimate.py` and
-   `sim/motor_sizing.py` with the CAD masses: that decides the motor purchase. Then cut the coupon batch (K1–K6b)
-   and make the workshop kit.
+3. **Part C · whole robot.** The whole-robot verify with a full PASS, and `mass_estimate.py` rerun with the CAD
+   masses.
+4. **Part D · weight and size** (Morante, 2026-11-15). A critical review of the whole looks robot, part by part:
+   - lighter: thinner walls, hollow or ribbed parts where solid is not needed, interiors and exteriors rethought;
+   - smaller: can the whole robot be scaled down, and is the 120 % print scale still needed? It was set by the
+     4×AAA holder, which needs 118 % with 2 mm a side ([Motor, battery holder…](../../build-log/2-carcass.md#motor-battery-holder-and-print-scale)),
+     so a smaller scale means another way to carry the cells, and the chassis, legs and drive are redrawn at it.
 
-The coupons wait for the whole robot to pass; K1, K2 and the efficiency test T1 also wait for the motor.
+   Every change is verified on the whole robot. Then `mass_estimate.py` and `sim/motor_sizing.py` are rerun on the
+   final masses: that decides the motor purchase. Then cut the coupon batch (K1–K6b) and make the workshop kit.
+
+The coupons wait for Part D; K1, K2 and the efficiency test T1 also wait for the motor.
 
 ## Figures
 
@@ -63,6 +70,24 @@ motor between legs 3 and 4.*
 10. **Reuse** the printed crankshafts, idlers 1–2, legs and forks if the whole-robot check passes them.
 11. **Stall protection: D-bore pinion, 5 mm (F3).** The printed teeth break before the gearbox (245 N·mm). The
     rule and the break coupons are below; F2b is the fallback.
+12. **Keel: option (b), flatten it** (Morante, 2026-11-14). The gear pockets are teardrops cut flat at the circle's
+    bottom (bridges up to 10.7 mm under idler 3 when printed upside down), floor 1.5 mm: the module's lowest point is
+    z 42.77 (base v1's keel 42.7; the 50° points of rev 4 reached 35.9).
+13. **Rear: option (b), a 2 mm bump** (Morante, 2026-11-15). The module's rear end (y 34.73, a 0.95 mm wall with
+    crank 4's gear 0.5 mm behind it) reaches the carcass's outer face (34.84 in the gear plane). Part B's shell bulges about 2 mm
+    there (≈ 8.5 × 18 mm, z ≈ 57–74.8) and covers it, rather than leaving a window or thickening the module.
+14. **Scale is decided in Part D, not before Part B** (Morante, 2026-11-15): Part B is drawn at 120 %.
+
+Accepted departures from this plan in Part A (design review 2026-11-14, all ACCEPTED):
+
+- **No flange slot**: the module is located by the +X wall's steps and the 50° V saddle (steps now 0.5 a side,
+  `WINDOW`, out of the torque path: the clamp's cheeks take the motor torque).
+- **Clamp along X** (bar from the cap's -X bridge to the end wall), not across Y.
+- **Cap with 2 screws** (one shared with the clamp), not 3.
+- **I7 from below** (4 nut traps in the module, screws through Part B's bowl).
+- **Idler pins Ø3 × 10** (stock length; 8.5 did not reach the -X wall at idler 3).
+- **No -X motor face**: impossible with this pinion (gearbox corners 7.81 from the axis, the pinion's tip + 0.8 is
+  7.8); X is held by the clamp's preload (`MOTOR_PRELOAD`, K2) and the +X stop.
 
 ## Brief
 
@@ -108,14 +133,14 @@ All values are from [`mass_estimate.py`](mass_estimate.py) and [`images/plan-mas
 
 | | Mass | Centre of mass |
 |---|---|---|
-| Final robot, as summed | 445.1 g | **From the body axis** (x 42.72, y −3.6): x +0.4, y +2.5 mm, inside the ±5 mm `COM_BOX`. **Absolute**: (43.1, −1.1, 93.9) |
-| Contingency | +40.4 g (shell 5.5, catalogue 13.3, plan 21.6) | |
-| **Design mass** (decides the motor) | **486 g** | |
+| Final robot, as summed | 445.3 g | **From the body axis** (x 42.72, y −3.6): x +0.4, y +2.5 mm, inside the ±5 mm `COM_BOX`. **Absolute**: (43.1, −1.1, 93.9) |
+| Contingency | +38.8 g (shell 6.8, catalogue 13.3, plan 18.7) | |
+| **Design mass** (decides the motor) | **484 g** | |
 | v0 without ballast (looks shell, L2) | 319.7 g | |
 | v0 ballast (frame ≈ 15 g + steel ≈ 110 g) | 125.4 g | From the axis: x −0.2, y +1.0, z 127.4. Absolute: (42.5, −2.6, 127.4) |
 
 - **Ceiling.** HP 380:1 keeps a margin of 3.0 at 4.0 V up to 463 × 3.1 / 3 = **478 g**. The design mass is
-  **486 g (445.1 + 40.4), margin 2.96: over the ceiling by 8 g.** As summed, without contingency, it is 445 g, margin 3.22. The
+  **484 g (445.3 + 38.8), margin 2.96: over the ceiling by 6 g.** As summed, without contingency, it is 445 g, margin 3.22. The
   margin is scaled as 1/mass: a first approximation, which `motor_sizing.py` replaces once it is rerun on the
   modelled mass.
 - **Before anything is bought:**
@@ -124,6 +149,8 @@ All values are from [`mass_estimate.py`](mass_estimate.py) and [`images/plan-mas
   2. Rerun `motor_sizing.py` with that mass and centre of mass.
   3. Morante decides.
   4. Buy motor, holder, batteries and switch, and measure them.
+- **Part B's mass budget** (the plan's values above, as ceilings: a part over its line is a finding in its review):
+  looks shell ≤ 86 g, front block ≤ 15 g, holder cradle ≤ 6 g, paint ≤ 10 g.
 - **If it is still over the ceiling**, the options are below. None is chosen here.
 
 | Option | What it does |
@@ -205,12 +232,15 @@ weakest tooth and under 245.
 | Part | Why a separate part | Est. g | Print orientation |
 |---|---|---|---|
 | `chassis` = the **looks shell** (ground; also v0, L2) | Bowl, deck, a band on the body's outline, side lips, closed rear, fork pockets and bosses with hidden screws, nut traps, a recessed switch pocket at the rear, the hex-key tunnel for the body's rear screw (lug top ≤ z 81.2). No spine or keel inside; nothing above the band top | 86 + ≈ 14 support | Band top on the bed; fork screw holes vertical; the bowl prints as an inverted dome. Support is reached through the deck opening and the open fork pockets; the side lips are to be checked in the print check |
-| `drive-module` | Spine walls, journal slots, idler pin holes, idler 3 pocket, keel, motor pad and saddle, flange with the motor slot (x ≤ CX+18) | 14 | Flange on the bed |
-| `cap` | Keeper over the journal slots (test cap v2.1), cut round the pinion | 6 | Upside down |
-| `motor-clamp` | Bridge over the N20; 2 screws into bosses on the flange, above the deck | 3 | Flat |
+| `drive-module` | Spine walls, journal slots, blind idler pin holes, idler 3 pocket, flat-bottomed keel, gearbox pad between the +X wall's steps, V saddle, can stop and end wall, −X boss, keeper recess, 4 I7 nut traps (rev 5: no flange) | 15.1 | Upside down, top (deck level) on the bed |
+| `cap` | Keeper over the journal slots (test cap v2.1), cut round the pinion; 2 × M3×12 (front, and shared with the clamp) | 5.9 | Upside down |
+| `motor-clamp` | Bar over the N20 from the cap's −X bridge to the end wall: gearbox pad (preload), cheeks on the gearbox flats, can pad; 2 × M3×12 | 2.3 | Top on the bed, pads up |
 | `pinion` | 12 T, m 1, 5 mm face, D-bore pressed on (F3). A 0.5 g part, reprinted after a stall if needed. F2b adds `pinion-hub` and `pinion-collar` only if the break rule fails | 0.5 | Flat, axis vertical |
 | `idler-3-v2` | 5 mm face; the same teeth, phase and mark | 1.5 | Flat |
-| `pin-keeper` | Axial stop for the idler pins | 1 | Flat |
+| `pin-keeper` | Axial stop for the idler pins | 0.7 | Flat |
+| `gauge-fork` (bench tool) | The 0.8 mm gauge between the pinion and the gearbox face while the pinion is pressed on: a U-fork (12 wide, covers the gearbox face's 10) dropped into the press jig's slot over the pinion, open at -Z so it lifts off the shaft after the press. Measured before use (0.8 ± 0.05). Not in the robot | 0.2 | Flat (4 layers: its thickness is the gauge) |
+| `press-jig` (bench tool) | U-channel open at +Z, stood on the table (-X face down): the pinion's pocket (tip + 0.2 a side: squares it), the fork's slot over it, the gearbox socket above (10.4 × 12.4: `MOTOR_SEAT` 0.2 a side, 6 mm along the gearbox: squares the motor), a Ø4 U for the shaft tip. The motor is pushed down into the socket, so the press ends with the pinion on the fork and the fork on the gearbox face (the final force goes through the housing, not the shaft's bearing). Then the fork lifts out and the motor slides out with its pinion through the open side. Also presses K1's discs. Not in the robot | 5.6 | On its -Z face, open side up: no overhang |
+| `press-cup` (bench tool, only for the vise) | Cup over the can's rear end (skirt on the can's section + 0.2), bearing on the rear face beside and below the terminals, their relief open at +Z for the wires; a 2 mm top plate for the vise jaw. Not in the robot | 1.9 | Top plate on the bed |
 | `front-block-v2` | Hollow face filler, screwed; carries the body's front hooks | 15 | Base on the bed |
 | `holder-cradle` | Holds the holder inside the body (cover down); the same part rides on the ballast frame in v0 | 6 | Flat |
 | `ballast-frame` (v0 only) | Uses the body's hooks and rear screw; carries the cradle and about 110 g of steel at the final centre of mass | ≈ 15 | Upright |
@@ -256,13 +286,14 @@ tool, result, entry`):
 
 | Joint | Type | Holds it in ±X / ±Y / ±Z | Fit | Goes in from | Comes apart by |
 |---|---|---|---|---|---|
-| drive-module ↔ chassis | Flange on the deck + lip + 4 × M3×10 into captive nuts | ±X ±Y lip; −Z flange; +Z screws | `LOCATOR`, `STEEL` | Above | Legs off, 4 screws |
+| drive-module ↔ chassis | Deck lip + 4 × M3 from below into captive nuts (rev 5: no flange, accepted) | ±X ±Y lip; −Z Part B's bosses; +Z screws | `WINDOW` (88 mm outline), `STEEL` | Above | Legs off, robot on its back, 4 screws from below |
 | crankshaft ↔ module | Journals in slots open at the top | ±X webs on the walls; ±Y slot; −Z slot bottom; +Z cap tongues; spin free | `TURN`, `GEAR_THRUST_CRANK` | Above | Cap off |
-| cap ↔ module | Skirts + tongues + 3 × M3×12 | ±X skirts; ±Y tongues; −Z walls; +Z screws | `LOCATOR`, `TONGUE` | Above | 3 screws |
+| cap ↔ module | Skirts + tongues + 2 × M3×12 (front; −X boss, shared with the clamp) | ±X skirts; ±Y tongues; −Z walls; +Z screws (and the clamp's −X foot) | `LOCATOR`, `TONGUE` | Above | Clamp off, then the front screw |
 | idlers ↔ pins ↔ module | Ø3 steel pins, blind at −X with a push-out hole | Idler: ±Y ±Z pin, ±X walls. Pin: −X blind end, +X keeper | `STEEL`, `GEAR_THRUST_IDLER` | +X, finger (on the bench) | Keeper off, push out with a 1.5 hex key |
 | pin-keeper ↔ module | Strip + M3×8 (z ≤ 57) | All 6 | `LOCATOR` | +X | 1 screw |
-| N20 ↔ module | Pad, saddle, flange slot (x ≤ CX+18), clamp | ±X clamp stop; ±Y slot and clamp; −Z pad and saddle; +Z clamp | `MOTOR_SEAT`; centre distance + `MOTOR_SEAT.side` | Above | 2 screws, lift |
-| pinion ↔ shaft | D-bore pressed on the D-shaft | ±X press fit, set with the 0.8 gauge; spin locked by the D | `DSHAFT` | −X, by hand or with a vise, with the gauge | Pull off with pliers (a 0.5 g part) |
+| N20 ↔ module, clamp | Gearbox pad on the +X wall, V saddle under the can, +X stop block; clamp with a gearbox pad, cheeks and a can pad | ±X the clamp pad's preload, +X the stop block (0.2), −X the pinion at 0.8 from the −X wall; ±Y the clamp's cheeks on the gearbox flats (0.2: the torque path), the +X wall's steps 0.5 (backup, out of the torque path) and the V; −Z pad and V; +Z the clamp pads | `MOTOR_SEAT` (cheeks, stop), `MOTOR_PRELOAD` (−0.3, gearbox pad), `WINDOW` (steps); centre distance + `MOTOR_SEAT.side` in `GEAR_MOTION` | Above, with its pinion (one drop) | 2 clamp screws, lift with the pinion |
+| pinion ↔ shaft | D-bore pressed on the D-shaft, on the bench | ±X press fit, set by the gauge fork (0.8); spin locked by the D | `DSHAFT` | −X, motor pushed down into the press jig's socket onto the pinion, fork between them | Pull off with pliers (a 0.6 g part) |
+| gauge-fork, press-jig, press-cup | Bench tools, used in step 6 only | – | – | – | The fork lifts out (+Z), the motor slides out of the jig (+Z), the cup lifts off |
 | pinion ↔ idler 3 | Mesh | – | `GEAR_BACKLASH` | – | – |
 | legs, forks ↔ chassis | As base v1 and the legs design (screws hidden in the looks band, reached from above with the body off) | As v1 | `TURN`, `STEEL`, `WINDOW` | Outside | Screws |
 | front-block-v2 ↔ chassis | Lip + 2 × M3×10 | ±X ±Y lip; −Z deck; +Z screws | `LOCATOR`, `STEEL` | Above | 2 screws |
@@ -278,17 +309,17 @@ tool, result, entry`):
 | Step | Part or fastener | From | Hand or tool | Already in place | How you know it is right |
 |---|---|---|---|---|---|
 | **A · drive module (bench)** | | | | | |
-| 1 | Nuts: cap ×3, clamp ×2, keeper ×1 | Side slots | Pliers | Module | The hole lines up |
+| 1 | Nuts: cap front ×1, shared (cap and clamp) ×1, clamp rear ×1, keeper ×1; I7 ×4 (for step 10) | Side slots (keeper from below) | Pliers | Module | The hole lines up |
 | 2 | Idlers 1, 2, 3-v2; 3 pins from +X | +X | Finger | Module | Flush; the dots match |
 | 3 | Pin keeper, M3×8 | +X | Hex key | Pins | It covers all 3 pins |
 | 4 | Crankshafts 1–4 | Above | Hand | Idlers | The dots on the webs match the slots |
-| 5 | Cap, 3 × M3×12 | Above | Hex key | Crankshafts | Crank 1 by hand: all four turn |
-| 6 | Pinion pressed on the D-shaft with the 0.8 gauge | −X | Hand or vise | – | The gauge comes out snug |
-| 7 | N20 onto its pad and into the flange slot | Above | Hand | Train | It sits flat; the pinion meshes |
-| 8 | Clamp, 2 × M3×10 | Above | Hex key | N20 | Powered, it turns both ways; **test T1** |
+| 5 | Cap, front M3×12 (the second screw, shared with the clamp, goes in at step 8) | Above | Hex key | Crankshafts | Crank 1 by hand: all four turn |
+| 6 | On the bench: fork measured (0.8 ± 0.05); jig on the table; pinion slid into its pocket (dot up); fork dropped into its slot over the pinion; the motor pushed down into the socket by its can (thumb on the rim below the terminals; if that is not enough, the press cup on the can and jig and cup in a vise), the shaft's flat over the dot | −X (motor onto the pinion) | Thumb or vise; press jig, gauge fork, press cup | – | The gearbox face stops on the fork; **bench check before the drop**: the fork comes out snug and slides back in snug; fork out, the motor with its pinion slides out of the jig; the pinion's dot is over the flat |
+| 7 | N20 with its pinion, one drop onto the pad and the V saddle; crank 1 turned a little until the pinion drops into idler 3's teeth | Above | Hand (other hand on crank 1) | Train | It sits flat on the pad; the pinion meshes (the 0.8 gap was checked on the bench in step 6: the fork cannot reach it here) |
+| 8 | Clamp, 2 × M3×12 (shared through the cap into the −X boss, rear into the end wall) | Above | Hex key | N20 | Cheeks over the gearbox flats; powered, it turns both ways; **test T1** |
 | **B · chassis (looks shell)** | | | | | |
 | 9 | Nuts: module ×4, front block ×2, body ×1, forks ×16; switch into its pocket + retainer | Slots, inside | Pliers | Shell | The holes line up; the lever shows recessed at the rear |
-| 10 | Module in, 4 × M3×10 | Above | Both hands, hex key | Shell | The flange is flat; FRONT arrow forward |
+| 10 | Module into the deck window from above; 4 × M3 from below into its nut traps (lengths: README I7 table) | Above; screws from below | Both hands, hex key; robot on its back | Shell | The deck lip sits all round; FRONT arrow forward |
 | 11 | 8 legs with forks | Outside | Hand, hex key | Module | L/R labels; each leg follows its crank |
 | 12 | Front block v2, 2 × M3×10 | Above | Hex key | Deck | The lip sits |
 | 13 | Wiring: switch → motor; connector holders | Inside | Hand | All | The motor runs from a bench supply |
@@ -306,15 +337,15 @@ slide the cover off, change the batteries, and reverse.
 
 | Test | Proves | g | Time | Pass test | When |
 |---|---|---|---|---|---|
-| K1 pinion | `DSHAFT`: 3 D-bores around the assumed value | 1.5 | 15 min | It goes on by hand or in a vise to the gauge and does not turn on the shaft at 113 N·mm (230 g on a 50 mm lever, motor held, power off) | **Waits for the motor** |
-| K2 motor stage, **loaded** | `MOTOR_SEAT`, saddle, clamp, idler 3 v2 in its pocket with 2.55 mm walls, pin and keeper | 10 | 55 min | The motor lifts 390 g on a 50 mm spool of **fixed radius** keyed to idler 3 (190 N·mm: the worst design load, 19 N at the mesh) 10 times each way, with no visible flex or click. The motor lifts out after 2 screws. **No efficiency is claimed from K2** (one mesh only) | **Waits for the motor** |
+| K1 pinion | `DSHAFT`: 3 D-bores around the assumed value, in 5 mm discs the pinion's size, pressed with the **press jig and gauge fork** (press cup for the vise), so K1 proves the press method and the 0.8 gap too | 1.5 + jig, fork and cup 7.7 | 25 min | It goes on in the press jig to the fork, the fork then comes out and slides back in snug, and it does not turn on the shaft at 113 N·mm (230 g on a 50 mm lever, motor held, power off). **Record for each disc: «went on by thumb» or «needed the vise»** | **Waits for the motor** |
+| K2 motor stage, **loaded** | `MOTOR_SEAT` (cheeks), `MOTOR_PRELOAD`, saddle, clamp, idler 3 v2 in its pocket with 2.55 mm walls, pin and keeper. **Two clamps**: gearbox pad 0.2 clear and pad 0.3 into the gearbox (preload, ≈ 9 N from the bar) | 10 + 3 | 65 min | With each clamp: the motor lifts 390 g on a spool of **fixed radius 50 mm (100 mm across)** keyed to idler 3 (190 N·mm: the worst design load, 19 N at the mesh) 10 times each way, with no visible flex or click; **X push-out**: pushed along ±X by a finger (≈ 10 N) the motor does not move (no gap opens at the gearbox face, the 0.8 gauge still fits, not looser); the preloaded clamp goes on by hand with its 2 screws, no crack. The clamp that passes sets `MOTOR_PRELOAD` (or 0.2 clear if both pass the push-out). The motor lifts out after 2 screws. **No efficiency is claimed from K2** (one mesh only) | **Waits for the motor** |
 | T1 train efficiency (on the module at step 8, not a coupon) | The train's efficiency η | – | 30 min | Motor alone: a 10 mm spool on the D-shaft and 3 weights give its torque against current at 4.8 V (minus the no-load current). Module: the same spool on crankshaft 1 (the far end), keyed to its +X web, the same weights. η = torque out / motor torque read from that line. Feeds `motor_sizing.py` | **Waits for the motor** |
-| K3 cap tongues | `TONGUE` and skirts on a 2-slot spine slice | 5 | 25 min | On and off by hand 5 times, no crack; the crankshaft turns | **Now** |
+| K3 cap tongues and idler 3 pocket | `TONGUE` and skirts on a 2-slot spine slice; the idler 3 pocket with its flat floor (`GEAR_TIP` 0.5), printed upside down as the module (the 10.7 mm floor bridge) | 5 + 3 | 25 min | On and off by hand 5 times, no crack; the crankshaft turns | **Now** |
 | K4 module location | Flange lip, nut trap, cut from the **looks shell** | 6 | 30 min | It drops in, no wobble; the screw finds the nut | **Now** |
 | K5 body joint | Cut from the **looks shell** and body v2: band rear with tunnel and nut, rear lug, front hook and head slot | 10 | 45 min | Down, 4 mm forward, the screw from below reaches the lug; it comes off with the hex key | **Now** |
 | K6a / K6b break coupons | The break torque of the weakest printed tooth: a 2.6 mm idler, and a 3 mm crank-gear tooth printed axis-horizontal (see «Stall protection») | 0.5 + 0.8 (+ 2 × 3 holders) | 25 min | Every break ≤ 196 N·mm (667 g at 30 mm) and ≥ 170 N·mm (578 g): keep the D pinion; otherwise F2b | **Now** |
 | Clearance block | X-Y compensation (Open items) | – | – | print/README | **Now** |
-| | **Total coupons** | **≈ 40 g** | **≈ 3 h 15 min** | | Now: K3, K4, K5, K6a, K6b and the clearance block ≈ 28 g, 2 h 05 min |
+| | **Total coupons** | **≈ 51 g** (K3 + 3 g idler 3 pocket, jig, fork and cup 7.7 g) | **≈ 3 h 40 min** | | Now: K3, K4, K5, K6a, K6b and the clearance block ≈ 31 g, 2 h 20 min |
 
 ## Hardware
 
@@ -322,11 +353,12 @@ Nothing is bought until the looks version passes in CAD and the motor decision i
 
 | Item | Count | Note |
 |---|---|---|
-| M3×10 + nut | 26 | Forks 16, module 4, clamp 2, front block 2, cradle 2 |
-| M3×12 + nut | 4 | Cap 3, body rear 1 |
+| M3×10 + nut | 20 | Forks 16, front block 2, cradle 2 |
+| M3×12 + nut | 4 | Cap front 1, cap and clamp (shared) 1, clamp rear 1, body rear 1 |
+| M3 + nut, length set in Part B | 4 | I7: module to chassis from below (README I7 table) |
 | M3×8 + nut | 1 | Pin keeper |
 | M3×16 + lock nut | 8 | Leg pivots |
-| Ø3 pin, 8.5 mm | 3 | Idler pins |
+| Ø3 pin, 10 mm | 3 | Idler pins |
 | N20 HP 380:1 | 1 | Catalogue until bought |
 | 4×AAA holder, AAA ×4, LEDs, perfboard | | |
 
@@ -356,7 +388,7 @@ the design to F2b.
 | I4 | legs ↔ forks ↔ chassis | `STEEL`, `WINDOW` |
 | I5 | cap ↔ module | `LOCATOR`, `TONGUE` / 3 × M3×12 |
 | I6 | N20, pinion ↔ module, idler 3 | `MOTOR_SEAT`, `DSHAFT`, `GEAR_BACKLASH` / 2 × M3×10 |
-| I7 | module ↔ chassis | `LOCATOR` / 4 × M3×10 |
+| I7 | module ↔ chassis | `WINDOW` / 4 × M3 from below, lengths per nut (README) |
 | I8 | front block ↔ chassis and body | `LOCATOR`, `WINDOW` / 2 × M3×10 |
 | I9 | body or ballast frame ↔ chassis | `WINDOW`, `STEEL` / M3×12 from below |
 | I10 | holder ↔ cradle ↔ body | `WINDOW`, `LOCATOR` / 2 × M3×10 |

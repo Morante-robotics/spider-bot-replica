@@ -43,6 +43,16 @@ def printed(path, lift=0.0):
     return MS.printed_g(m.volume / 1000, m.area / 100), c
 
 
+def _small():
+    """Clamp, keeper, pinion and idler 3 v2's extra over the printed idler 3 (counted with the crankshafts)."""
+    parts = [printed(f"cad/chassis/out/{n}.stl") for n in ("motor-clamp", "pin-keeper", "pinion", "idler-3-v2")]
+    g3 = printed("cad/crankshafts/out/idler-3.stl")[0] if os.path.exists(
+        os.path.join(ROOT, "cad/crankshafts/out/idler-3.stl")) else 0.0
+    g = sum(p[0] for p in parts) - g3
+    c = sum(p[0] * p[1] for p in parts) / sum(p[0] for p in parts)
+    return g, c
+
+
 def legs_centroid():
     """Mean position (over a turn) of the legs and forks, weighted by volume."""
     vols, acc = 0.0, np.zeros(3)
@@ -75,9 +85,10 @@ def rows():
     # (name, grams, centre, source, in final, in v0)
     R = [
         ("Chassis looks shell (band on the body's outline, lips, screws hidden, rear closed; also v0, L2)", base_g - 4.0 - 6.0 + 14.0, base_c, "plan: base v1 82.3 − spine/keel 4 − pegs and stems 6 + looks 14", 1, 1),
-        ("Drive module (spine, keel, motor arm, flange)", 14.0, np.array([CX, -6.0, 62.0]), "plan", 1, 1),
-        ("Cap", 5.8, np.array([CX, -8.0, 74.0]), "base v1 cap, print report", 1, 1),
-        ("Motor strap, pin keeper, pinion, idler 3 v2 extra", 3.0 + 1.0 + 0.5 + 0.6, np.array([CX + 10, Y3, 74.0]), "plan", 1, 1),
+        ("Drive module (Part A rev 6)", *printed("cad/chassis/out/drive-module.stl"), "Part A STL, shell model", 1, 1),
+        ("Cap", *printed("cad/chassis/out/cap.stl"), "Part A STL, shell model", 1, 1),
+        ("Motor clamp, pin keeper, pinion, idler 3 v2 extra", *_small(), "Part A STLs, shell model (idler 3 v2 "
+         "minus the 3 mm idler 3 counted with the crankshafts)", 1, 1),
         ("Front block v2 (hollow)", 15.0, fb_c, "plan (v1 solid: 23.4 measured)", 1, 1),
         ("4 crankshafts + 3 idlers", [r[1] for r in hw if r[0].startswith("4 crankshafts")][0], shafts, "STL volume, solid", 1, 1),
         ("8 legs + 8 forks", 46.9, legs_c, "legs-forks-v1 plate, measured", 1, 1),
@@ -152,7 +163,7 @@ def main():
 
 NAMES = {
     "en": {"Chassis looks": "Chassis, looks shell (also v0)", "Drive module": "Drive module", "Cap": "Cap",
-           "Motor strap": "Clamp, pin keeper, pinion, idler 3 extra", "Front block": "Front block v2",
+           "Motor clamp": "Clamp, pin keeper, pinion, idler 3 extra", "Front block": "Front block v2",
            "4 crankshafts": "4 crankshafts + 3 idlers", "8 legs": "8 legs + 8 forks", "Body v2": "Body v2 (carcass)",
            "Holder cradle": "Holder cradle", "Eyes and": "Eyes and sensor, printed",
            "Paint": "Paint and finish (allowance)", "4×AAA holder": "Battery holder, empty",
@@ -160,7 +171,7 @@ NAMES = {
            "Wiring": "Wiring, 2 connectors, switch", "Screws: 16": "Screws: legs and forks",
            "Screws added": "Screws added (module, cap, etc.)"},
     "es": {"Chassis looks": "Chasis definitivo (estético)", "Drive module": "Módulo de transmisión", "Cap": "Tapa",
-           "Motor strap": "Abrazadera, retén, piñón, rueda 3", "Front block": "Bloque frontal v2",
+           "Motor clamp": "Brida, retén, piñón, rueda 3", "Front block": "Bloque frontal v2",
            "4 crankshafts": "4 cigüeñales + 3 ruedas", "8 legs": "8 patas + 8 horquillas",
            "Body v2": "Cuerpo v2 (carcasa)", "Holder cradle": "Soporte del portapilas", "Eyes and": "Ojos y sensor",
            "Paint": "Pintura y acabado (margen)", "4×AAA holder": "Portapilas vacío", "4 × AAA": "4 pilas AAA NiMH",

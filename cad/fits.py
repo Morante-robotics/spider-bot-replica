@@ -48,6 +48,30 @@ GEAR_AXIAL = Fit("spinning gear face to a stationary printed face, at the worst 
                  "measured", "test cap v2.1, 2026-11-12 (0.25 mm jammed the train, v2 cap)")
 LEG_PATH = Fit("moving leg to anything it sweeps past", 0.8, "assumed", "base v1 LEG_CLR, not printed yet")
 PRESS = Fit("printed press fit or snap", 0.0, "assumed", "never printed: prove on a coupon")
+GEAR_THRUST_CRANK = Fit("crank gear face to a spine wall, a side (the crankshaft's webs on the walls locate it)", 0.25,
+                        "measured", "gear train test v2, 2026-11-12: the train turned without the cap "
+                        "(gear-train-test-v2-the-cap)")
+GEAR_THRUST_IDLER = Fit("idler face to a spine wall, a side (idler on a steel pin between the walls)", 0.45,
+                        "measured", "gear train test v2, 2026-11-12: the train turned without the cap "
+                        "(gear-train-test-v2-the-cap)")
+DSHAFT = Fit("printed D-bore pressed on a steel D-shaft (N20 Ø3, flat 0.5 deep), modelled at the shaft's size", 0.0,
+             "assumed", "never printed; printed holes come out smaller, which gives the press. Coupon K1 (3 bores "
+             "round this value) waits for the motor")
+MOTOR_SEAT = Fit("bought metal motor (N20 gearbox and can) against its printed seat faces and clamp", 0.2, "assumed",
+                 "as LOCATOR for a short printed part, not printed against a metal body yet. Coupon K2 waits for the "
+                 "motor")
+TONGUE = Fit("cap tongue in a journal slot, a side", 0.3, "assumed",
+             "test cap v2.1 went on with 0.15 a side (CAP_CLR 0.3 on the width), base v1's tongues at 0.15 a side "
+             "did not go in (2026-11-12/13); 0.3 a side until coupon K3")
+
+GEAR_TIP = Fit("radial room round a gear's tip circle in its printed pocket", 0.5, "assumed",
+               "chassis rev 4 (was GEAR_ROOM typed in chassis/build.py): base v1's big gear pocket and the gear train "
+               "test's open frame are not this case; proven by the drive-module coupon (K3) turning by hand")
+MOTOR_PRELOAD = Fit("printed clamp pad pressed onto the N20 gearbox: interference, the clamp bar is the spring "
+                    "(negative side = overlap)", -0.3, "assumed",
+                    "chassis design review 2026-11-14 (motor floats 1.0 mm in X with the pads 0.2 clear): never "
+                    "printed. Coupon K2 prints the clamp with 0.2 clear and with this preload; pass = the motor does "
+                    "not move in X when pushed by hand")
 
 # gears: backlash at the pitch circle, per mesh (gear train test v2, 2026-11-12: turned with 0.20)
 GEAR_BACKLASH = 0.20

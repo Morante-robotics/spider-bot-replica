@@ -186,3 +186,163 @@ def test_disk_cache_reuses_pairs(tmp_path):
     cv.load_cache(str(tmp_path / "spec.py"), meshes)
     rows2, n2, hits2 = cv.scan_pairs(s, meshes, [0], None, 0.5)
     assert hits2 == 1 and rows2 == rows
+
+
+def keep_in_spec(part, allow=None):
+    shell = box([40, 40, 40])                       # the envelope: a 40 mm cube, inset 2 → a 36 mm cube inside
+    return spec(PARTS={"m": {"mesh": part, "fixed": True}},
+                KEEP_IN={"shell": {"mesh": shell, "inset": 2.0, "parts": ["m"], "samples": 2000,
+                                   "allow": allow or {}, "why": "test"}})
+
+
+def test_part_inside_the_inset_envelope_passes():
+    rep = run(cv.check_keep_in, keep_in_spec(box([30, 30, 30])))
+    assert not rep.fails
+
+
+def test_part_through_the_shell_wall_fails():
+    """Base v2 chassis, 2026-11-14: the module's keel and rear foot left the carcass and no check said so."""
+    rep = run(cv.check_keep_in, keep_in_spec(box([30, 30, 37])))        # 0.5 mm into the 2 mm wall, top and bottom
+    assert rep.fails
+
+
+def test_bounded_keel_allowance():
+    keel = join(box([30, 30, 30]), box([6, 6, 10], (0, 0, -20)))         # a keel down to z -25, outside the cube
+    ok = run(cv.check_keep_in, keep_in_spec(keel, {"keel": {"box": ((-4, -4, -30), (4, 4, -17)), "min_z": -25.5,
+                                                            "why": "keel"}}))
+    assert not ok.fails
+    low = run(cv.check_keep_in, keep_in_spec(keel, {"keel": {"box": ((-4, -4, -30), (4, 4, -17)), "min_z": -24.0,
+                                                             "why": "keel"}}))
+    assert low.fails
+
+
+def test_allowance_with_its_own_inset():
+    # chassis rev 5: the rear end may stand in the shell's wall (inset 0 there) but never out of the carcass
+    long = box([30, 37, 30], (0, 0.5, 0))              # +Y face at 19: in the 2 mm wall, 1 mm inside the carcass
+    ok = run(cv.check_keep_in, keep_in_spec(long, {"end": {"box": ((-20, 17, -20), (20, 30, 20)), "inset": 0.5,
+                                                           "why": "end"}}))
+    assert not ok.fails and not ok.warns
+    out = box([30, 43, 30], (0, 3.5, 0))               # +Y face at 25: out of the carcass
+    bad = run(cv.check_keep_in, keep_in_spec(out, {"end": {"box": ((-20, 17, -20), (20, 30, 20)), "inset": 0.0,
+                                                           "why": "end"}}))
+    assert bad.fails and "end" in bad.text()
+
+
+def test_unbounded_allowance_warns_and_max_z_bounds_it():
+    top = join(box([30, 30, 30]), box([6, 6, 10], (0, 0, 20)))          # a boss up to z 25, out of the cube's top
+    a = {"box": ((-4, -4, 17), (4, 4, 30)), "why": "boss"}
+    free = run(cv.check_keep_in, keep_in_spec(top, {"boss": a}))
+    assert not free.fails and free.warns == 1 and "no bound" in free.text()
+    hi = run(cv.check_keep_in, keep_in_spec(top, {"boss": {**a, "max_z": 24.0}}))
+    assert hi.fails and "above its bound" in hi.text()
+    ok = run(cv.check_keep_in, keep_in_spec(top, {"boss": {**a, "max_z": 25.5}}))
+    assert not ok.fails and not ok.warns
+
+
+def test_keep_in_z_filter_and_bodies():
+    # the deck above z 10 is another part's: samples above it are not checked; a nut (body, not a part) is
+    tall = box([30, 30, 40], (0, 0, 10))               # out through the top (z 30), inside below z 10
+    s = keep_in_spec(tall)
+    s.KEEP_IN["shell"]["z"] = (None, 10.0)
+    assert not run(cv.check_keep_in, s).fails
+    s.KEEP_IN["shell"]["z"] = (None, 25.0)
+    assert run(cv.check_keep_in, s).fails
+    s = keep_in_spec(box([10, 10, 10]))
+    s.KEEP_IN["shell"]["bodies"] = {"nut": box([5, 5, 5], (0, 0, 18))}   # out through the inset (top at 20.5)
+    rep = run(cv.check_keep_in, s)
+    assert rep.fails and "nut" in rep.text()
+
+
+def test_keep_in_default_parts_are_the_static_ones():
+    s = keep_in_spec(box([10, 10, 10]))
+    del s.KEEP_IN["shell"]["parts"]
+    s.PARTS["lid"] = {"mesh": box([10, 10, 4], (0, 0, 19))}          # static, out of the inset: must be checked
+    s.PARTS["arm"] = {"mesh": box([4, 4, 4], (0, 0, 0))}             # moves: not in the default list
+    s.MOTION = [0, 1]
+    s.poses = lambda t: {"arm": cv.move([0, 0, 30 * t])}
+    rep = run(cv.check_keep_in, s)
+    assert rep.fails and "lid" in rep.text() and "shell: arm" not in rep.text()
+
+
+def motor_rig():
+    """A motor with its shaft along -X, a pinion pressed on it (zero clearance), a frame with a slot the pinion
+    drops into from above, and a bench jig (chassis rev 6: the pinion cannot drop in alone and the motor follow)."""
+    frame = cut(box([20, 20, 10], (0, 0, 0)), box([8, 30, 20], (-2, 0, 8)))     # slot, open at the top
+    motor = box([10, 8, 8], (8, 0, 10))                 # x 3..13, z 6..14: above the frame top (5)
+    shaft = cv.rod(3.0, 6, [3, 0, 10], [-1, 0, 0])       # x -3..3
+    pin = cut(cv.rod(8.0, 4, [-3, 0, 10], [1, 0, 0]), shaft)   # x -3..1 on the shaft
+    jig = cut(box([3, 10, 10], (-4.5, 0, 10)), cv.rod(4.0, 10, [-10, 0, 10], [1, 0, 0]))  # pusher x -6..-3
+    parts = {"frame": {"mesh": frame, "fixed": True}, "motor": {"mesh": motor, "hardware": True},
+             "shaft": {"mesh": shaft, "hardware": True, "fixed": True}, "pinion": {"mesh": pin},
+             "jig": {"mesh": jig, "bench": True}}
+    return parts
+
+
+def test_sub_assembly_moves_as_one_body():
+    parts = motor_rig()
+    seq = [("frame", None),
+           (("jig", "pinion"), [-1, 0, 0], {"bench": ["motor", "shaft"], "except": {"shaft": "press fit"}}),
+           (("motor", "shaft", "pinion"), [0, 0, 1])]
+    s = spec(PARTS=parts, ASSEMBLY=seq,
+             ACCESS=[{"at": ("motor", "shaft", "pinion"), "tool": cv.tool("finger", [8, 0, 14], [0, 0, 1]),
+                      "why": "lowered by hand"}])
+    rep = run(cv.check_assembly, s)
+    assert not rep.fails, rep.text()
+    assert "as one body" in rep.text() and "on the bench" in rep.text()
+    acc = run(cv.check_access, s)
+    assert not acc.fails, acc.text()
+    # the jig is a bench part: the motion and retention checks never see it
+    assert "jig" not in cv.placed(s, {n: p["mesh"] for n, p in parts.items()}, 0)
+
+
+def test_bench_step_sees_only_its_bench_parts():
+    parts = motor_rig()
+    # from the wrong side the pinion runs into the motor on the bench: blocked
+    seq = [("frame", None), (("jig", "pinion"), [1, 0, 0], {"bench": ["motor", "shaft"]}),
+           (("motor", "shaft", "pinion"), [0, 0, 1])]
+    rep = run(cv.check_assembly, spec(PARTS=parts, ASSEMBLY=seq))
+    assert rep.fails and "on the bench" in rep.text()
+    # a machine part (a roof over the slot) does not block a bench step, but blocks the drop
+    parts["roof"] = {"mesh": box([20, 20, 2], (0, 0, 20)), "fixed": True}
+    seq = [("frame", None), ("roof", None),
+           (("jig", "pinion"), [-1, 0, 0], {"bench": ["motor", "shaft"]}),
+           (("motor", "shaft", "pinion"), [0, 0, 1])]
+    rep = run(cv.check_assembly, spec(PARTS=parts, ASSEMBLY=seq))
+    assert rep.fails == 1 and "motor + shaft + pinion (as one body) cannot" in rep.text()
+    # a jig that is not marked as a bench part never goes into the machine: a failure
+    parts["jig"].pop("bench")
+    rep = run(cv.check_assembly, spec(PARTS=parts, ASSEMBLY=seq[:1] + seq[2:]))
+    assert "jig: only in bench steps" in rep.text()
+
+
+def test_negative_fit_needs_the_overlap():
+    pad = box([4, 4, 2], (0, 0, 0.7))                     # 0.3 into the block below (top at 0)
+    blk = box([10, 10, 2], (0, 0, -1))
+    fit = SimpleNamespace(side=-0.3, status="assumed", source="test")
+    s = spec(PARTS={"blk": {"mesh": blk, "fixed": True}, "pad": {"mesh": pad}},
+             JOINTS={("pad", "blk"): {"fit": fit, "why": "preload"}})
+    rep = run(cv.check_joints, s)
+    assert not rep.fails and rep.warns == 1 and "interference" in rep.text()
+    s.PARTS["pad"]["mesh"] = box([4, 4, 2], (0, 0, 1.5))   # 0.5 above: the preload is missing
+    assert run(cv.check_joints, s).fails
+
+
+def test_exploded_view_numbers_match_the_assembly_steps():
+    """figures.exploded left the bench steps out and numbered k + 1, so every number after a bench step was off
+    (rev 6: off by 2 after step 19) while the kit shows that picture «con su número de paso»."""
+    import figures
+    s = spec(ASSEMBLY=[("base", None), ("a", [0, 0, 1]),
+                       ("jig-part", [1, 0, 0], {"bench": ["motor"]}), ("fork", [0, 0, 1], {"bench": ["motor"]}),
+                       (("motor", "pinion"), [0, 0, 1]), ("b", [0, 0, 1])])
+    got = [(k, nums) for k, _, _, nums in figures.exploded_steps(cv.steps(s))]
+    assert got == [(0, ["1"]), (1, ["2"]), (2, ["5a", "5b"]), (3, ["6"])]
+
+
+def test_allowance_is_checked_above_the_z_filter():
+    """Chassis rev 6: the front-slope allowance bounded the module top (z ≤ 74.8) but the entry's z filter (≤ 72.3)
+    dropped every sample above 72.3 first, so that band was never checked."""
+    top = join(box([30, 30, 30]), box([6, 6, 10], (0, 0, 20)))          # a boss up to z 25, out of the cube's top
+    s = keep_in_spec(top, {"boss": {"box": ((-4, -4, 10), (4, 4, 30)), "max_z": 24.0, "why": "boss"}})
+    s.KEEP_IN["shell"]["z"] = (None, 16.0)                               # the filter stops under the boss's top
+    hi = run(cv.check_keep_in, s)
+    assert hi.fails and "above its bound" in hi.text()

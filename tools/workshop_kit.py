@@ -74,7 +74,8 @@ def main():
     notes = json.load(open(args.notes)) if args.notes else {}
     os.makedirs(args.outdir, exist_ok=True)
     L = lambda n: figures.label(spec, n, "es")  # noqa: E731
-    seq = list(getattr(spec, "ASSEMBLY", []))
+    from cad_verify import steps
+    seq = steps(spec)           # a step may move a tuple of parts as one body, or be done on the bench
     marks = getattr(spec, "MARKS", {})
     out = [f"<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>"
            f"<title>{esc(notes.get('titulo', 'Paquete de taller'))}</title><style>{CSS}</style>",
@@ -116,9 +117,17 @@ def main():
     if ex:
         out.append("<p>Todas las piezas, con su número de paso:</p>" + img(ex))
     pics = figures.step_pictures(spec, meshes, args.outdir, lang="es")
-    for k, ((n, d), pic) in enumerate(zip(seq, pics)):
+    for k, (st, pic) in enumerate(zip(seq, pics)):
+        d = st["d"]
+        # notes are keyed by the part, or for a sub-assembly by «a + b + c» (else its first part's note)
+        n = " + ".join(st["names"])
+        if n not in notes.get("pasos", {}) and n not in notes.get("comprobar", {}):
+            n = st["names"][0]
         how = figures.WORDS["es"]["first"] if d is None else figures.direction_words(d, "es")
-        out.append(f'<div class="paso"><p><span class="n">{k + 1}</span><b>{esc(L(n))}</b> · {esc(how)}</p>')
+        if st["bench"] is not None:
+            how = f"{figures.WORDS['es']['bench']}: {how}"
+        name = " + ".join(L(x) for x in st["names"])
+        out.append(f'<div class="paso"><p><span class="n">{k + 1}</span><b>{esc(name)}</b> · {esc(how)}</p>')
         out.append(img(pic))
         out.append(f"<p>{esc(notes['pasos'][n])}</p>" if n in notes.get("pasos", {})
                    else (falta(f"qué hacer en el paso {k + 1}") if d is not None else ""))
