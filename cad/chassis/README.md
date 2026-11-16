@@ -33,7 +33,7 @@ Reused unchanged: crankshafts 1–4 and idlers 1–2 ([`../crankshafts/`](../cra
 | Steel pin Ø3 × 10 | 3 | Idler pins, pushed in from +X, blind at -X |
 | M3 × 8 + nut | 1 | Pin keeper |
 | M3 × 12 + nut | 3 | Cap front; cap and clamp (shared, in the -X boss); clamp rear (end wall) |
-| M3 + nut (length set in Part B) | 4 | I7: module to chassis, from below into the module's nut traps; each hole stops 0.8 mm above its nut (at the nut's top under the can), so each screw is cut to its grip (table below) |
+| M3×6 + nut, M3×8 + nut | 3 + 1 | I7: module to chassis, from below into the module's nut traps. Stock lengths, never cut: the shell's counterbores (`shell.py`) are deep enough that each tip ends between its nut's top and the hole's end: M3×6 at the front, under the can and the -X boss, M3×8 behind the can |
 | M3 nut | 8 | 4 above (keeper, cap front, shared, clamp rear) + 4 I7 (as in [`hardware.md`](../../hardware.md)) |
 | N20 HP 380:1 | 1 | Catalogue size until bought |
 
@@ -45,7 +45,7 @@ it: a longer screw stops on PLA (and under the can it would push the 0.8 mm skin
 | Nut | x, y | Nut z (bottom–top) | Module underside there | Hole above the nut | Screw tip | Slides in from |
 |---|---|---|---|---|---|---|
 | Front block | -0.15, -48.52 | 58.2–60.9 | 57.0 | 0.8 | nut top to +0.8 | -X |
-| Saddle, under the can | 20.0, 12.18 | 59.2–61.9 | 58.0 | none: 0.81 skin to the V's bottom (62.71) | **flush with the nut's top** (cut it, file the burr) | +Y |
+| Saddle, under the can | 20.0, 12.18 | 59.2–61.9 | 58.0 | none: 0.81 skin to the V's bottom (62.71) | **flush with the nut's top** (M3×6, the counterbore sets it) | +Y |
 | Saddle, behind the can | 32.5, 12.18 | 62.2–64.9 | 59.25–62.9 (sloped underside) | 0.8 | nut top to +0.8 | +Y |
 | -X boss | -10.0, 12.18 | 64.5–67.2 | 63.0 | 0.8 | nut top to +0.8 | -X |
 
@@ -78,9 +78,13 @@ with a 1.5 hex key after the keeper is off.
 
 | File | What it is |
 |---|---|
+| [`datasheet.md`](datasheet.md) | Read first: status, which file and section holds each topic, commands |
 | [`design-plan.md`](design-plan.md) | The plan: decisions, part list, fits, motor seat, joint table, assembly sequence, coupons, hardware, the master model's interface table, and the modelling order |
 | [`build.py`](build.py) | The Part A parts into `out/` (STEP and STL, robot coordinates); `--part <name>` for one |
 | [`verify.py`](verify.py) | The `cad_verify` spec, start of the whole-robot spec; last full result in [`verify-result.txt`](verify-result.txt), pictures in `images/verify/` |
+| [`design-plan-b.md`](design-plan-b.md) | Part B's plan (the looks parts), rev 3.1, approved 2026-11-15 |
+| [`shell.py`](shell.py) | Part B1 in progress: the looks shell `chassis` and the `crank-cover` (mesh builds from the carcass, as base v1) into `out/chassis.stl` and `out/crank-cover.stl`; prints their masses and the I7 stock screw lengths. Built in stages cached in `out/.cache/` (not in git; [`stage_cache.py`](../../tools/stage_cache.py)): a change rebuilds only the stages downstream of it; `--lite` (decimated body, legs every 30°) writes `out/chassis-lite.stl` |
+| [`verify_b1.py`](verify_b1.py) | Interim spec while B1 is modelled: Part A's spec + the shell and the I7 screws (not yet passing) |
 | [`design-review.md`](design-review.md) | The review of Part A, each answer with its number or picture |
 | [`plan_figure.py`](plan_figure.py) | Plan figures from real geometry: `images/plan-layout.png` and one view each |
 | [`mass_estimate.py`](mass_estimate.py) | Mass and centre of mass of the final robot and of the v0 walk test; `images/plan-mass.png` |
@@ -94,6 +98,8 @@ VERIFY_STEP=30 ../../.venv/bin/python ../../tools/cad_verify.py verify.py --quic
 ../../.venv/bin/python ../../tools/cad_verify.py verify.py --out verify-result.txt --render images/verify
 ../../.venv/bin/python plan_figure.py               # plan figures (needs ../base/out and the legs' STLs)
 ../../.venv/bin/python mass_estimate.py
+../../.venv/bin/python shell.py                    # Part B1: the looks shell (≈ 2 min cold, ≈ 15 s after a one-feature change)
+../../.venv/bin/python shell.py --lite             # for trying a fix: out/chassis-lite.stl (SHELL_LITE=1 does the same)
 ../../.venv/bin/python part_a_figures.py            # build-log diagrams (needs out/ from build.py)
 ```
 

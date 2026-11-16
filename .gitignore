@@ -16,5 +16,9 @@ cad/_template/out/
 # BambuStudio --info writes result.json in the working folder
 result.json
 .cad_verify_cache.pkl
+.verify-last.txt
 # Spanish copies of figures (--lang es) are for the private workshop kit; the scripts make them again
 *-es.png
+# Stage cache (tools/stage_cache.py) and carcass proxies (cad/robot.py): rebuilt on demand
+cad/*/out/.cache/
+cad/carcass-120/.proxy/

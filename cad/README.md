@@ -23,6 +23,7 @@ what to run and where the result is:
 
 | File | What it is |
 |---|---|
+| `datasheet.md` | The one page read first: status, where each topic lives (file and section), the commands |
 | `README.md` | What the design is, its parts and hardware, how to print and assemble it (no status: that is in the build log) |
 | `design-plan.md` | Part list, joint table, assembly sequence, alternatives, diagram: written before modelling |
 | `build.py` | The parametric model. Parameters at the top, each with its source; `--part <name>` rebuilds one part |
@@ -35,9 +36,10 @@ what to run and where the result is:
 Commands, from the design folder:
 
 ```bash
-../../.venv/bin/python build.py                     # every part into out/
-VERIFY_STEP=30 ../../.venv/bin/python ../../tools/cad_verify.py verify.py --quick --only <part>   # while iterating
-../../.venv/bin/python ../../tools/cad_verify.py verify.py --out verify-result.txt --render images/verify
+../../.venv/bin/python build.py                     # every part into out/ (coarse STL; --fine for the printed one)
+../../.venv/bin/python ../../tools/cad_verify.py verify.py --smoke --only <part>   # after every fix: seconds
+VERIFY_STEP=30 ../../.venv/bin/python ../../tools/cad_verify.py verify.py --quick --only <part>   # a moving part changed
+../../.venv/bin/python ../../tools/cad_verify.py verify.py --out verify-result.txt --render images/verify   # once, at the end
 ../../.venv/bin/python ../../tools/figures.py verify.py images --lang es
 ```
 
@@ -47,6 +49,11 @@ copy a value: with the repo root on `sys.path`, `from cad import design` and `C 
 simulator's geometry, hardware sizes, build123d helpers) is in [`common.py`](common.py). The robot master model,
 [`robot.py`](robot.py), holds the datums, the carcass envelope, the interfaces between designs and the bought parts'
 sizes (catalogue values until they are measured): a design takes these numbers from it, never a copy.
+
+Geometry stays light: no cut or check runs against the carcass body's scan (102k triangles); `robot.carcass_proxy()`
+(within 0.2 mm, cached) or `robot.carcass_envelope()` (boxes) take its place. Shared stage caching for mesh builds:
+[`tools/stage_cache.py`](../tools/stage_cache.py). A spec may name each interface's parts in `GROUPS`, so
+`--only <group>` checks one interface instead of the whole robot.
 
 ## What is printed and kept in git
 

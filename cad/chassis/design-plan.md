@@ -19,7 +19,7 @@ are listed under «Decisions taken». Modelling goes in four parts, each checked
      «Fits»).
    - The start of the whole-robot spec, `cad/chassis/verify.py`.
 2. **Part B · the looks parts.** The looks chassis shell, body v2 with the holder cradle and the rear lug, front
-   block v2 with the hooks, the ballast frame, the eyes pocket.
+   block v2 with the hooks, the ballast frame, the eyes pocket. Plan: [`design-plan-b.md`](design-plan-b.md) (rev 3.1, approved 2026-11-15).
 3. **Part C · whole robot.** The whole-robot verify with a full PASS, and `mass_estimate.py` rerun with the CAD
    masses.
 4. **Part D · weight and size** (Morante, 2026-11-15). A critical review of the whole looks robot, part by part:

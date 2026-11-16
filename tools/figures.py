@@ -300,6 +300,16 @@ def step_pictures(spec, meshes, outdir, lang="es", size=6.5, prefix="paso"):
     return paths
 
 
+def _letters(j):
+    """a, b, ... z, then aa, ab ...: a sub-assembly's member letters (the chassis module group has 23 members)."""
+    s = ""
+    j += 1
+    while j:
+        j, r = divmod(j - 1, 26)
+        s = chr(97 + r) + s
+    return s
+
+
 def exploded_steps(seq):
     """The machine steps of steps(spec) for the exploded view: [(k, names, d, numbers)], k counting the machine steps
     from 0 (the pull-out distance), numbers the step numbers as in assembly-steps.png (bench steps keep theirs, so
@@ -309,7 +319,7 @@ def exploded_steps(seq):
         if st["bench"] is not None:
             continue
         names = st["names"]
-        nums = [f"{i + 1}" if len(names) == 1 else f"{i + 1}{'abcdefgh'[j]}" for j in range(len(names))]
+        nums = [f"{i + 1}" if len(names) == 1 else f"{i + 1}{_letters(j)}" for j in range(len(names))]
         out.append((len(out), names, st["d"], nums))
     return out
 

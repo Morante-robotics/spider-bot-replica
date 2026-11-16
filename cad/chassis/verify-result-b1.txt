@@ -1,0 +1,584 @@
+cad_verify: PASS (0 failures, 88 warnings)
+
+== 1 integrity (printed parts)
+  WARN  drive-module: closed solid, 15012 mm³, 57.2 × 86.8 × 32.0 mm; 2.6% of the surface is thinner than 0.8 mm (thinnest 0.02 mm, e.g. at [[66.2, 7.4, 68.3], [69.6, 17.0, 67.9], [49.3, 7.4, 65.2]])
+  ok    cap: closed solid, 7568 mm³, 23.5 × 82.3 × 13.7 mm; walls ≥ 0.8 mm
+  WARN  motor-clamp: closed solid, 2265 mm³, 57.7 × 15.4 × 8.0 mm; 1.2% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[65.8, 16.2, 76.8], [57.5, 8.2, 76.9], [67.4, 8.2, 76.8]])
+  ok    pinion: closed solid, 501 mm³, 14.0 × 14.0 × 5.0 mm; walls ≥ 0.8 mm
+  ok    idler-3-v2: closed solid, 1482 mm³, 22.0 × 22.0 × 5.0 mm; walls ≥ 0.8 mm
+  ok    pin-keeper: closed solid, 570 mm³, 13.8 × 46.4 × 2.0 mm; walls ≥ 0.8 mm
+  WARN  gauge-fork: closed solid, 196 mm³, 24.0 × 12.0 × 0.8 mm; 86.2% of the surface is thinner than 0.8 mm (thinnest 0.80 mm, e.g. at [[46.0, 12.5, 83.4], [45.2, 9.5, 66.9], [46.0, 8.2, 83.0]])
+  ok    press-jig: closed solid, 4500 mm³, 17.8 × 20.0 × 20.0 mm; walls ≥ 0.8 mm
+  ok    press-cup: closed solid, 1548 mm³, 15.6 × 13.6 × 11.2 mm; walls ≥ 0.8 mm
+  ok    crankshaft-1: closed solid, 649 mm³, 27.6 × 14.0 × 14.0 mm; walls ≥ 0.8 mm
+  ok    crankshaft-2: closed solid, 648 mm³, 27.6 × 14.0 × 14.0 mm; walls ≥ 0.8 mm
+  ok    crankshaft-3: closed solid, 648 mm³, 27.6 × 13.9 × 13.9 mm; walls ≥ 0.8 mm
+  ok    crankshaft-4: closed solid, 608 mm³, 27.6 × 14.0 × 14.0 mm; walls ≥ 0.8 mm
+  ok    idler-1: closed solid, 254 mm³, 14.0 × 14.0 × 2.6 mm; walls ≥ 0.8 mm
+  ok    idler-2: closed solid, 254 mm³, 14.0 × 14.0 × 2.6 mm; walls ≥ 0.8 mm
+  WARN  leg-1R: closed solid, 4576 mm³, 93.6 × 7.6 × 67.6 mm; 1.1% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[-35.3, 2.8, -0.4], [-39.6, 1.5, -2.8], [-38.8, 2.8, 0.5]])
+  WARN  leg-1L: closed solid, 4576 mm³, 93.6 × 7.6 × 67.6 mm; 1.0% of the surface is thinner than 0.8 mm (thinnest 0.02 mm, e.g. at [[-38.2, -2.8, 1.5], [-33.9, -2.0, 0.1], [-36.4, -2.8, -0.1]])
+  WARN  leg-2R: closed solid, 4811 mm³, 99.7 × 7.6 × 67.6 mm; 1.0% of the surface is thinner than 0.8 mm (thinnest 0.02 mm, e.g. at [[-44.7, 2.4, -1.3], [-45.0, 2.8, 0.9], [-44.9, 2.7, -0.7]])
+  WARN  leg-2L: closed solid, 4811 mm³, 99.7 × 7.6 × 67.6 mm; 1.2% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[-45.7, -1.9, -2.6], [-42.1, -2.0, 0.0], [-44.3, 2.8, 0.8]])
+  WARN  leg-3R: closed solid, 4811 mm³, 99.7 × 7.6 × 67.6 mm; 0.9% of the surface is thinner than 0.8 mm (thinnest 0.02 mm, e.g. at [[-45.7, -2.8, 1.8], [-43.7, 2.3, -0.4], [-45.6, 1.0, -3.0]])
+  WARN  leg-3L: closed solid, 4811 mm³, 99.7 × 7.6 × 67.6 mm; 1.0% of the surface is thinner than 0.8 mm (thinnest 0.11 mm, e.g. at [[-45.5, -1.6, 2.7], [-45.5, 0.0, -3.1], [-44.2, 2.8, -1.1]])
+  WARN  leg-4R: closed solid, 4327 mm³, 87.3 × 7.6 × 67.6 mm; 1.2% of the surface is thinner than 0.8 mm (thinnest 0.02 mm, e.g. at [[-28.6, 2.0, 0.4], [-30.3, 2.8, 0.1], [-32.0, -2.8, -0.4]])
+  WARN  leg-4L: closed solid, 4327 mm³, 87.3 × 7.6 × 67.6 mm; 1.3% of the surface is thinner than 0.8 mm (thinnest 0.02 mm, e.g. at [[-33.2, -1.4, -3.5], [-31.8, -2.8, -0.2], [-31.9, -2.8, 1.4]])
+  WARN  chassis: closed solid, 57633 mm³, 121.4 × 106.0 × 50.5 mm; 3.4% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[6.4, 37.3, 69.4], [-14.9, -18.7, 74.1], [88.8, -25.7, 64.7]])
+  WARN  fork-1R: closed solid, 1348 mm³, 10.6 × 10.0 × 22.0 mm; 2.4% of the surface is thinner than 0.8 mm (thinnest 0.45 mm, e.g. at [[-1.0, 0.3, 7.0], [0.8, -0.9, 7.0], [1.4, -0.6, -7.5]])
+  WARN  fork-1L: closed solid, 1348 mm³, 10.6 × 10.0 × 22.0 mm; 2.3% of the surface is thinner than 0.8 mm (thinnest 0.45 mm, e.g. at [[-0.8, 0.3, -7.5], [0.7, -1.1, -7.5], [1.1, -0.1, -7.5]])
+  WARN  fork-2R: closed solid, 1348 mm³, 10.6 × 10.0 × 22.0 mm; 2.4% of the surface is thinner than 0.8 mm (thinnest 0.45 mm, e.g. at [[0.9, -0.4, 7.5], [-1.0, -0.5, 7.0], [-1.2, -0.1, 7.0]])
+  WARN  fork-2L: closed solid, 1348 mm³, 10.6 × 10.0 × 22.0 mm; 2.8% of the surface is thinner than 0.8 mm (thinnest 0.45 mm, e.g. at [[0.2, 0.4, 7.5], [-0.2, -0.6, 7.5], [-1.0, 0.1, -7.5]])
+  WARN  fork-3R: closed solid, 1348 mm³, 10.6 × 10.0 × 22.0 mm; 2.5% of the surface is thinner than 0.8 mm (thinnest 0.45 mm, e.g. at [[-0.8, 0.8, 7.0], [1.0, -0.1, 7.5], [-0.1, -1.3, 7.0]])
+  WARN  fork-3L: closed solid, 1348 mm³, 10.6 × 10.0 × 22.0 mm; 2.5% of the surface is thinner than 0.8 mm (thinnest 0.45 mm, e.g. at [[-0.4, -1.0, -7.5], [1.6, 0.2, -7.0], [1.4, -0.1, 7.5]])
+  WARN  fork-4R: closed solid, 1348 mm³, 10.6 × 10.0 × 22.0 mm; 2.5% of the surface is thinner than 0.8 mm (thinnest 0.45 mm, e.g. at [[0.9, -0.1, 7.0], [1.0, 1.3, 7.0], [-0.0, 0.1, -7.5]])
+  WARN  fork-4L: closed solid, 1348 mm³, 10.6 × 10.0 × 22.0 mm; 2.3% of the surface is thinner than 0.8 mm (thinnest 0.45 mm, e.g. at [[0.6, 0.7, -7.0], [0.4, 1.0, 7.5], [-0.4, 1.4, -7.0]])
+  WARN  crank-cover: closed solid, 3752 mm³, 51.0 × 60.3 × 9.7 mm; 3.5% of the surface is thinner than 0.8 mm (thinnest 0.19 mm, e.g. at [[63.3, 29.7, 75.2], [54.6, 30.0, 76.0], [58.8, 32.6, 76.0]])
+
+== 2 motion: overlaps and gaps at every step   3 gears: backlash
+  ok    no undeclared overlaps over 36 steps
+        2436 pair positions computed, 7808 repeats reused
+        swept envelopes (still part × moving part): 137 pairs clear at every step in one query each, 2 closer (gaps step by step, no overlap); scanned step by step: 0 overlapping or touching, 30 close last time, 0 close at their first step; 1464 never near, 17 declared contacts skipped; 127 envelope results from the cache
+        chassis × cover-screw-2: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × cover-screw-1: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        drive-module × i7-screw-1: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        clamp-screw × drive-module: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        drive-module × i7-screw-3: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        drive-module × keeper-screw: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        idler-3-v2 × pin-3: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        idler-2 × pin-2: gap 0.15 mm (closest at (170, 0.0, 0.0))
+        idler-1 × pin-1: gap 0.15 mm (closest at (170, 0.0, 0.0))
+        cap-screw × drive-module: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        drive-module × shared-screw: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        drive-module × i7-screw-4: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        drive-module × i7-screw-2: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-1R-nut-up: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-1L-nut-up: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-2R-nut-up: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-2L-nut-up: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-3R-nut-up: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-3L-nut-up: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-4R-nut-up: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-4L-nut-up: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-4R-nut-low: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-3R-nut-low: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-1R-nut-low: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-1L-nut-low: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-2R-nut-low: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-2L-nut-low: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-3L-nut-low: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-4L-nut-low: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × cover-nut-1: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        chassis × cover-nut-2: gap 0.15 mm (closest at (0, 0.0, 0.0))
+        crankshaft-4 × leg-4R: gap 0.25 mm (closest at (160, 0.0, 0.0))
+        crankshaft-2 × leg-2R: gap 0.25 mm (closest at (250, 0.0, 0.0))
+        crankshaft-3 × leg-3R: gap 0.25 mm (closest at (70, 0.0, 0.0))
+        crankshaft-1 × leg-1R: gap 0.25 mm (closest at (50, 0.0, 0.0))
+        crankshaft-1 × drive-module: gap 0.25 mm (closest at (20, 0.0, 0.0))
+        crankshaft-4 × drive-module: gap 0.25 mm (closest at (20, 0.0, 0.0))
+        crankshaft-3 × drive-module: gap 0.25 mm (closest at (290, 0.0, 0.0))
+        crankshaft-2 × drive-module: gap 0.25 mm (closest at (70, 0.0, 0.0))
+        motor-clamp × motor-leads: gap 0.25 mm (closest at (0, 0.0, 0.0))
+        cap × crankshaft-1: gap 0.25 mm (closest at (0, 0.0, 0.0))
+        cap × crankshaft-2: gap 0.25 mm (closest at (0, 0.0, 0.0))
+        cap × crankshaft-3: gap 0.25 mm (closest at (0, 0.0, 0.0))
+        cap × crankshaft-4: gap 0.25 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-1R: gap 0.27 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-1L: gap 0.27 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-2R: gap 0.27 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-2L: gap 0.27 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-3R: gap 0.27 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-3L: gap 0.27 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-4R: gap 0.27 mm (closest at (0, 0.0, 0.0))
+        chassis × fork-4L: gap 0.27 mm (closest at (0, 0.0, 0.0))
+        cap × crank-cover: gap 0.28 mm (closest at (0, 0.0, 0.0))
+        cap × shared-screw: gap 0.35 mm (closest at (0, 0.0, 0.0))
+        drive-module × idler-3-v2: gap 0.45 mm (closest at (0, 0.0, 0.0))
+        drive-module × idler-1: gap 0.45 mm (closest at (0, 0.0, 0.0))
+        drive-module × idler-2: gap 0.45 mm (closest at (0, 0.0, 0.0))
+        crank-cover × motor-leads: gap 0.49 mm (closest at (0, 0.0, 0.0))
+        crank-cover × shared-screw: gap 0.49 mm (closest at (0, 0.0, 0.0))
+        chassis × keeper-screw: gap 0.49 mm (closest at (0, 0.0, 0.0))
+        crank-cover × drive-module: gap 0.50 mm (closest at (0, 0.0, 0.0))
+        cap × chassis: gap 0.50 mm (closest at (0, 0.0, 0.0))
+        crank-cover × motor-clamp: gap 0.50 mm (closest at (0, 0.0, 0.0))
+        chassis × pin-keeper: gap 0.50 mm (closest at (0, 0.0, 0.0))
+        chassis × n20: gap 0.50 mm (closest at (0, 0.0, 0.0))
+        chassis × switch: gap 0.50 mm (closest at (0, 0.0, 0.0))
+        chassis × motor-leads: gap 0.50 mm (closest at (0, 0.0, 0.0))
+        crank-cover × switch: gap 0.50 mm (closest at (0, 0.0, 0.0))
+        chassis × motor-clamp: gap 0.51 mm (closest at (0, 0.0, 0.0))
+        leg-2R × leg-3R: gap 0.65 mm (closest at (170, 0.0, 0.0))
+        leg-2L × leg-3L: gap 0.65 mm (closest at (170, 0.0, 0.0))
+        chassis × i7-nut-1: gap 0.79 mm (closest at (0, 0.0, 0.0))
+        chassis × crankshaft-4: gap 0.79 mm (closest at (0, 0.0, 0.0))
+        drive-module × n20-shaft: gap 0.80 mm (closest at (50, 0.0, 0.0))
+        n20 × pinion: gap 0.80 mm (closest at (0, 0.0, 0.0))
+        idler-3-v2 × n20: gap 0.80 mm (closest at (0, 0.0, 0.0))
+        drive-module × pinion: gap 0.85 mm (closest at (0, 0.0, 0.0))
+        chassis × leg-4R: gap 0.89 mm (closest at (0, 0.0, 0.0))
+        chassis × leg-4L: gap 0.89 mm (closest at (0, 0.0, 0.0))
+        crankshaft-2 × pin-keeper: gap 0.89 mm (closest at (90, 0.0, 0.0))
+        crankshaft-3 × pin-keeper: gap 0.89 mm (closest at (270, 0.0, 0.0))
+        crankshaft-4 × leg-4L: gap 0.93 mm (closest at (350, 0.0, 0.0))
+        crankshaft-1 × leg-1L: gap 0.93 mm (closest at (170, 0.0, 0.0))
+        cap × pinion: gap 1.00 mm (closest at (0, 0.0, 0.0))
+        cap × drive-module: contact allowed (cap plate sits on the walls' tops; tongues 0.3 a side in the slots (TONGUE), skirts 0.2 off the walls (LOCATOR, touching at the cap's X extremes))
+        drive-module × pin-keeper: contact allowed (keeper flat on its recess floor, edges 0.2 (LOCATOR))
+        cap × motor-clamp: contact allowed (clamp's -X foot on the cap's -X bridge (the shared screw clamps both))
+        drive-module × motor-clamp: contact allowed (clamp's rear foot on the end wall)
+        drive-module × n20: contact allowed (gearbox on the pad, can on the V saddle's flanks; Y steps 0.5 (WINDOW: out of the torque path, the clamp's cheeks take it))
+        motor-clamp × n20: contact allowed (gearbox pad 0.3 into the gearbox (fits.MOTOR_PRELOAD, the bar is the spring ≈ 9 N); cheeks 0.2 off the gearbox flats (MOTOR_SEAT), can pad 0.2 clear)
+        n20 × n20-shaft: contact allowed (the shaft comes out of the gearbox (one bought part))
+        n20-shaft × pinion: contact allowed (D-bore pressed on the D-shaft (DSHAFT))
+        drive-module × pin-1: contact allowed (pin bottomed in its blind hole at -X)
+        drive-module × pin-2: contact allowed (pin bottomed in its blind hole at -X)
+        drive-module × pin-3: contact allowed (pin bottomed in its blind hole at -X)
+        pin-1 × pin-keeper: contact allowed (keeper on the pin's +X end)
+        pin-2 × pin-keeper: contact allowed (keeper on the pin's +X end)
+        pin-3 × pin-keeper: contact allowed (keeper on the pin's +X end)
+        keeper-nut × keeper-screw: contact allowed (screw in its nut)
+        cap-nut × cap-screw: contact allowed (screw in its nut)
+        shared-nut × shared-screw: contact allowed (screw in its nut)
+        clamp-nut × clamp-screw: contact allowed (screw in its nut)
+        keeper-screw × pin-keeper: contact allowed (head clamps the keeper)
+        cap × cap-screw: contact allowed (head clamps the cap)
+        motor-clamp × shared-screw: contact allowed (head clamps the clamp and the cap)
+        clamp-screw × motor-clamp: contact allowed (head clamps the clamp)
+        drive-module × keeper-nut: contact allowed (nut pulled against its pocket's +X face)
+        cap-nut × drive-module: contact allowed (nut pulled up against its pocket)
+        drive-module × shared-nut: contact allowed (nut pulled up against its pocket)
+        clamp-nut × drive-module: contact allowed (nut pulled up against its pocket)
+        chassis × drive-module: contact allowed (module on its 4 bosses; its top in the deck window, WINDOW 0.5 a side)
+        chassis × i7-screw-1: contact allowed (head clamps the boss from below)
+        i7-nut-1 × i7-screw-1: contact allowed (screw in its nut)
+        drive-module × i7-nut-1: contact allowed (nut pulled down onto its pocket)
+        chassis × i7-screw-2: contact allowed (head clamps the boss from below)
+        i7-nut-2 × i7-screw-2: contact allowed (screw in its nut)
+        drive-module × i7-nut-2: contact allowed (nut pulled down onto its pocket)
+        chassis × i7-screw-3: contact allowed (head clamps the boss from below)
+        i7-nut-3 × i7-screw-3: contact allowed (screw in its nut)
+        drive-module × i7-nut-3: contact allowed (nut pulled down onto its pocket)
+        chassis × i7-screw-4: contact allowed (head clamps the boss from below)
+        i7-nut-4 × i7-screw-4: contact allowed (screw in its nut)
+        drive-module × i7-nut-4: contact allowed (nut pulled down onto its pocket)
+        chassis × crank-cover: contact allowed (cover on its 3 posts; the spigot in its hole (LOCATOR))
+        cover-screw-1 × crank-cover: contact allowed (head clamps the cover)
+        cover-nut-1 × cover-screw-1: contact allowed (screw in its nut)
+        cover-screw-2 × crank-cover: contact allowed (head clamps the cover)
+        cover-nut-2 × cover-screw-2: contact allowed (screw in its nut)
+        motor-leads × n20: contact allowed (the leads are soldered to the motor's terminals)
+        motor-leads × switch: contact allowed (the leads are soldered to the switch's pins)
+        chassis × fork-1R-screw-low: contact allowed (head clamps the boss from below)
+        chassis × fork-1R-screw-up: contact allowed (head in its counterbore at the band top)
+        fork-1R-nut-low × fork-1R-screw-low: contact allowed (screw in its nut)
+        fork-1R-nut-up × fork-1R-screw-up: contact allowed (screw in its nut)
+        fork-1R × leg-1R: contact allowed (the leg pivots in its fork (legs design: the fork's window, its pivot pin))
+        fork-1R × fork-1R-screw-low: contact allowed (the screw's tip is the fork's lower swivel (3 mm into the fork))
+        fork-1R × fork-1R-screw-up: contact allowed (the screw's tip is the fork's upper swivel)
+        chassis × fork-1L-screw-low: contact allowed (head clamps the boss from below)
+        chassis × fork-1L-screw-up: contact allowed (head in its counterbore at the band top)
+        fork-1L-nut-low × fork-1L-screw-low: contact allowed (screw in its nut)
+        fork-1L-nut-up × fork-1L-screw-up: contact allowed (screw in its nut)
+        fork-1L × leg-1L: contact allowed (the leg pivots in its fork (legs design: the fork's window, its pivot pin))
+        fork-1L × fork-1L-screw-low: contact allowed (the screw's tip is the fork's lower swivel (3 mm into the fork))
+        fork-1L × fork-1L-screw-up: contact allowed (the screw's tip is the fork's upper swivel)
+        chassis × fork-2R-screw-low: contact allowed (head clamps the boss from below)
+        chassis × fork-2R-screw-up: contact allowed (head in its counterbore at the band top)
+        fork-2R-nut-low × fork-2R-screw-low: contact allowed (screw in its nut)
+        fork-2R-nut-up × fork-2R-screw-up: contact allowed (screw in its nut)
+        fork-2R × leg-2R: contact allowed (the leg pivots in its fork (legs design: the fork's window, its pivot pin))
+        fork-2R × fork-2R-screw-low: contact allowed (the screw's tip is the fork's lower swivel (3 mm into the fork))
+        fork-2R × fork-2R-screw-up: contact allowed (the screw's tip is the fork's upper swivel)
+        chassis × fork-2L-screw-low: contact allowed (head clamps the boss from below)
+        chassis × fork-2L-screw-up: contact allowed (head in its counterbore at the band top)
+        fork-2L-nut-low × fork-2L-screw-low: contact allowed (screw in its nut)
+        fork-2L-nut-up × fork-2L-screw-up: contact allowed (screw in its nut)
+        fork-2L × leg-2L: contact allowed (the leg pivots in its fork (legs design: the fork's window, its pivot pin))
+        fork-2L × fork-2L-screw-low: contact allowed (the screw's tip is the fork's lower swivel (3 mm into the fork))
+        fork-2L × fork-2L-screw-up: contact allowed (the screw's tip is the fork's upper swivel)
+        chassis × fork-3R-screw-low: contact allowed (head clamps the boss from below)
+        chassis × fork-3R-screw-up: contact allowed (head in its counterbore at the band top)
+        fork-3R-nut-low × fork-3R-screw-low: contact allowed (screw in its nut)
+        fork-3R-nut-up × fork-3R-screw-up: contact allowed (screw in its nut)
+        fork-3R × leg-3R: contact allowed (the leg pivots in its fork (legs design: the fork's window, its pivot pin))
+        fork-3R × fork-3R-screw-low: contact allowed (the screw's tip is the fork's lower swivel (3 mm into the fork))
+        fork-3R × fork-3R-screw-up: contact allowed (the screw's tip is the fork's upper swivel)
+        chassis × fork-3L-screw-low: contact allowed (head clamps the boss from below)
+        chassis × fork-3L-screw-up: contact allowed (head in its counterbore at the band top)
+        fork-3L-nut-low × fork-3L-screw-low: contact allowed (screw in its nut)
+        fork-3L-nut-up × fork-3L-screw-up: contact allowed (screw in its nut)
+        fork-3L × leg-3L: contact allowed (the leg pivots in its fork (legs design: the fork's window, its pivot pin))
+        fork-3L × fork-3L-screw-low: contact allowed (the screw's tip is the fork's lower swivel (3 mm into the fork))
+        fork-3L × fork-3L-screw-up: contact allowed (the screw's tip is the fork's upper swivel)
+        chassis × fork-4R-screw-low: contact allowed (head clamps the boss from below)
+        chassis × fork-4R-screw-up: contact allowed (head in its counterbore at the band top)
+        fork-4R-nut-low × fork-4R-screw-low: contact allowed (screw in its nut)
+        fork-4R-nut-up × fork-4R-screw-up: contact allowed (screw in its nut)
+        fork-4R × leg-4R: contact allowed (the leg pivots in its fork (legs design: the fork's window, its pivot pin))
+        fork-4R × fork-4R-screw-low: contact allowed (the screw's tip is the fork's lower swivel (3 mm into the fork))
+        fork-4R × fork-4R-screw-up: contact allowed (the screw's tip is the fork's upper swivel)
+        chassis × fork-4L-screw-low: contact allowed (head clamps the boss from below)
+        chassis × fork-4L-screw-up: contact allowed (head in its counterbore at the band top)
+        fork-4L-nut-low × fork-4L-screw-low: contact allowed (screw in its nut)
+        fork-4L-nut-up × fork-4L-screw-up: contact allowed (screw in its nut)
+        fork-4L × leg-4L: contact allowed (the leg pivots in its fork (legs design: the fork's window, its pivot pin))
+        fork-4L × fork-4L-screw-low: contact allowed (the screw's tip is the fork's lower swivel (3 mm into the fork))
+        fork-4L × fork-4L-screw-up: contact allowed (the screw's tip is the fork's upper swivel)
+  ok    gears crankshaft-1 × idler-1: gap 0.10–0.10 mm over the motion
+  ok    gears crankshaft-2 × idler-1: gap 0.10–0.10 mm over the motion
+  ok    gears crankshaft-2 × idler-2: gap 0.10–0.10 mm over the motion
+  ok    gears crankshaft-3 × idler-2: gap 0.10–0.10 mm over the motion
+  ok    gears crankshaft-3 × idler-3-v2: gap 0.10–0.10 mm over the motion
+  ok    gears crankshaft-4 × idler-3-v2: gap 0.10–0.10 mm over the motion
+  ok    gears idler-3-v2 × pinion: gap 0.10–0.18 mm over the motion
+
+== 4 retention: can a part fall, lift or tip out?
+  ok    drive-module: held within 0.5 mm / 5.0° (free: )
+  ok    cap: held within 0.5 mm / 5.0° (free: )
+  ok    motor-clamp: held within 0.5 mm / 5.0° (free: )
+  ok    pinion: held within 1.0 mm / 5.0° (free: )
+  ok    idler-3-v2: held within 1.0 mm / 5.0° (free: spin)
+  ok    pin-keeper: held within 0.5 mm / 5.0° (free: )
+  ok    n20: held within 1.0 mm / 5.0° (free: )
+  ok    crankshaft-1: held within 0.5 mm / 5.0° (free: spin)
+  ok    crankshaft-2: held within 0.5 mm / 5.0° (free: spin)
+  ok    crankshaft-3: held within 0.5 mm / 5.0° (free: spin)
+  ok    crankshaft-4: held within 0.5 mm / 5.0° (free: spin)
+  ok    idler-1: held within 1.0 mm / 5.0° (free: spin)
+  ok    idler-2: held within 1.0 mm / 5.0° (free: spin)
+  ok    fork-1R: held within 0.5 mm / 5.0° (free: spin)
+  ok    fork-1L: held within 0.5 mm / 5.0° (free: spin)
+  ok    fork-2R: held within 0.5 mm / 5.0° (free: spin)
+  ok    fork-2L: held within 0.5 mm / 5.0° (free: spin)
+  ok    fork-3R: held within 0.5 mm / 5.0° (free: spin)
+  ok    fork-3L: held within 0.5 mm / 5.0° (free: spin)
+  ok    fork-4R: held within 0.5 mm / 5.0° (free: spin)
+  ok    fork-4L: held within 0.5 mm / 5.0° (free: spin)
+  ok    crank-cover: held within 0.5 mm / 5.0° (free: )
+  ok    switch: held within 0.9 mm / 11.0° (free: )
+
+== 5 assembly order
+  ok    keeper-nut goes in from -Z on the bench
+  ok    cap-nut goes in from -X on the bench
+  ok    shared-nut goes in from -X on the bench
+  ok    clamp-nut goes in from +X on the bench
+  ok    idler-1 goes in from +Z on the bench
+  ok    idler-2 goes in from +Z on the bench
+  ok    idler-3-v2 goes in from +Z on the bench
+  ok    pin-1 goes in from +X on the bench
+  ok    pin-2 goes in from +X on the bench
+  ok    pin-3 goes in from +X on the bench
+  ok    pin-keeper goes in from +X on the bench
+  ok    keeper-screw goes in from +X on the bench
+  ok    crankshaft-1 goes in from +Z on the bench
+  ok    crankshaft-2 goes in from +Z on the bench
+  ok    crankshaft-3 goes in from +Z on the bench
+  ok    crankshaft-4 goes in from +Z on the bench
+  ok    cap goes in from +Z on the bench
+  ok    cap-screw goes in from +Z on the bench
+  ok    pinion goes in from +Z on the bench
+  ok    gauge-fork goes in from +Z on the bench
+  ok    n20 + n20-shaft (as one body) goes in from +X on the bench
+        n20 + n20-shaft (as one body): not checked against n20-shaft (D-bore pressed on the D-shaft (DSHAFT, modelled at zero clearance))
+  ok    press-cup goes in from +X on the bench
+  ok    i7-nut-1 goes in from -X on the bench
+  ok    i7-nut-2 goes in from +Y on the bench
+  ok    i7-nut-3 goes in from +Y on the bench
+  ok    i7-nut-4 goes in from -X on the bench
+  ok    drive-module + idler-1 + idler-2 + idler-3-v2 + pin-1 + pin-2 + pin-3 + pin-keeper + keeper-screw + keeper-nut + crankshaft-1 + crankshaft-2 + crankshaft-3 + crankshaft-4 + cap + cap-screw + cap-nut + shared-nut + clamp-nut + i7-nut-1 + i7-nut-2 + i7-nut-3 + i7-nut-4 (as one body) goes in from +Z
+  ok    fork-1R-screw-low goes in from -Z
+  ok    fork-1R-screw-up goes in from +Z
+  ok    fork-1L-screw-low goes in from -Z
+  ok    fork-1L-screw-up goes in from +Z
+  ok    fork-2R-screw-low goes in from -Z
+  ok    fork-2R-screw-up goes in from +Z
+  ok    fork-2L-screw-low goes in from -Z
+  ok    fork-2L-screw-up goes in from +Z
+  ok    fork-3R-screw-low goes in from -Z
+  ok    fork-3R-screw-up goes in from +Z
+  ok    fork-3L-screw-low goes in from -Z
+  ok    fork-3L-screw-up goes in from +Z
+  ok    fork-4R-screw-low goes in from -Z
+  ok    fork-4R-screw-up goes in from +Z
+  ok    fork-4L-screw-low goes in from -Z
+  ok    fork-4L-screw-up goes in from +Z
+  ok    n20 + n20-shaft + pinion (as one body) goes in from +Z
+  ok    motor-clamp goes in from +Z
+  ok    shared-screw goes in from +Z
+  ok    clamp-screw goes in from +Z
+  ok    switch goes in from +X on the bench
+  ok    crank-cover + switch (as one body) goes in from +Z
+  ok    cover-screw-1 goes in from +Z
+  ok    cover-screw-2 goes in from +Z
+  ok    i7-screw-1 goes in from -Z
+  ok    i7-screw-2 goes in from -Z
+  ok    i7-screw-3 goes in from -Z
+  ok    i7-screw-4 goes in from -Z
+
+== 6 print (overhangs over 45°, in print orientation)
+  WARN  drive-module: upright feature thinner than Ø4 (9.3 mm² section) from z -74.4 to -66.4 at [46.6, -20.5] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  drive-module: upright feature thinner than Ø4 (10.1 mm² section) from z -74.4 to -66.4 at [46.6, -3.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  drive-module: 837 mm² of overhang needing support, 287 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [62.7, -15.9, -59.2] in print orientation): open it, split the part, or give the reason in the design review
+        cap: no overhangs
+        motor-clamp: 3 mm² of overhang needing support, all of it over the bed
+        pinion: no overhangs
+        idler-3-v2: no overhangs
+        pin-keeper: no overhangs
+        gauge-fork: no overhangs
+        press-jig: no overhangs
+        press-cup: no overhangs
+  WARN  crankshaft-1: upright feature thinner than Ø4 (3.2 mm² section) from z 4.6 to 6.6 at [-0.0, -0.0] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crankshaft-1: upright feature thinner than Ø4 (3.3 mm² section) from z -6.6 to -4.6 at [-0.0, -0.0] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crankshaft-1: 131 mm² of overhang needing support, 18 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-0.5, 4.7, 1.9] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  crankshaft-2: upright feature thinner than Ø4 (3.2 mm² section) from z 4.6 to 6.6 at [-0.0, 0.2] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crankshaft-2: upright feature thinner than Ø4 (3.2 mm² section) from z -6.6 to -4.6 at [0.0, -0.0] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crankshaft-2: 134 mm² of overhang needing support, 21 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-0.5, 3.1, -3.6] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  crankshaft-3: upright feature thinner than Ø4 (2.9 mm² section) from z 4.6 to 6.6 at [-0.0, 1.0] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crankshaft-3: 135 mm² of overhang needing support, 25 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-0.5, 2.7, -3.9] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  crankshaft-4: upright feature thinner than Ø4 (3.2 mm² section) from z 4.6 to 6.6 at [-0.0, -0.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crankshaft-4: upright feature thinner than Ø4 (3.2 mm² section) from z -6.6 to -4.6 at [-0.0, 0.0] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crankshaft-4: 128 mm² of overhang needing support, 22 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-0.5, -3.4, -3.3] in print orientation): open it, split the part, or give the reason in the design review
+        idler-1: no overhangs
+        idler-2: no overhangs
+  WARN  leg-1R: 516 mm² of overhang needing support, 37 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [49.8, 2.0, -3.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-1L: 516 mm² of overhang needing support, 37 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [49.8, 2.0, -3.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-2R: 550 mm² of overhang needing support, 36 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [49.8, 2.0, -3.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-2L: 550 mm² of overhang needing support, 36 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [49.8, 2.0, -3.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-3R: 550 mm² of overhang needing support, 36 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [49.8, 2.0, -3.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-3L: 550 mm² of overhang needing support, 36 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [49.8, 2.0, -3.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-4R: 481 mm² of overhang needing support, 38 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [49.8, 2.0, -3.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-4L: 481 mm² of overhang needing support, 38 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [49.8, 2.0, -3.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  chassis: upright feature thinner than Ø4 (0.4 mm² section) from z -80.9 to -78.1 at [57.0, -36.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  chassis: upright feature thinner than Ø4 (0.4 mm² section) from z -72.9 to -69.3 at [87.8, 25.7] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  chassis: upright feature thinner than Ø4 (0.5 mm² section) from z -72.9 to -69.3 at [-2.6, 25.6] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  chassis: 16334 mm² of overhang needing support, 7261 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [69.0, 39.9, -74.7] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  fork-1R: upright feature thinner than Ø4 (6.2 mm² section) from z -1.4 to 1.4 at [3.1, -4.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-1R: upright feature thinner than Ø4 (6.2 mm² section) from z -1.4 to 1.4 at [-3.1, -4.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-1R: upright feature thinner than Ø4 (8.4 mm² section) from z -1.4 to 1.4 at [-3.1, 3.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-1R: 82 mm² of overhang needing support, 73 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-1.8, -1.3, 7.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  fork-1L: upright feature thinner than Ø4 (6.2 mm² section) from z -1.4 to 1.4 at [3.1, -4.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-1L: upright feature thinner than Ø4 (6.2 mm² section) from z -1.4 to 1.4 at [-3.1, -4.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-1L: upright feature thinner than Ø4 (8.4 mm² section) from z -1.4 to 1.4 at [-3.1, 3.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-1L: 82 mm² of overhang needing support, 73 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-1.8, -1.3, 7.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  fork-2R: upright feature thinner than Ø4 (6.2 mm² section) from z -1.4 to 1.4 at [3.1, -4.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-2R: upright feature thinner than Ø4 (6.2 mm² section) from z -1.4 to 1.4 at [-3.1, -4.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-2R: upright feature thinner than Ø4 (8.4 mm² section) from z -1.4 to 1.4 at [-3.1, 3.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-2R: 82 mm² of overhang needing support, 73 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-1.8, -1.3, 7.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  fork-2L: upright feature thinner than Ø4 (6.2 mm² section) from z -1.4 to 1.4 at [3.1, -4.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-2L: upright feature thinner than Ø4 (6.2 mm² section) from z -1.4 to 1.4 at [-3.1, -4.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-2L: upright feature thinner than Ø4 (8.4 mm² section) from z -1.4 to 1.4 at [-3.1, 3.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-2L: 82 mm² of overhang needing support, 73 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-1.8, -1.3, 7.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  fork-3R: upright feature thinner than Ø4 (6.2 mm² section) from z -1.4 to 1.4 at [3.1, -4.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-3R: upright feature thinner than Ø4 (6.2 mm² section) from z -1.4 to 1.4 at [-3.1, -4.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-3R: upright feature thinner than Ø4 (8.4 mm² section) from z -1.4 to 1.4 at [-3.1, 3.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-3R: 82 mm² of overhang needing support, 73 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-1.8, -1.3, 7.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  fork-3L: upright feature thinner than Ø4 (6.2 mm² section) from z -1.4 to 1.4 at [3.1, -4.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-3L: upright feature thinner than Ø4 (6.2 mm² section) from z -1.4 to 1.4 at [-3.1, -4.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-3L: upright feature thinner than Ø4 (8.4 mm² section) from z -1.4 to 1.4 at [-3.1, 3.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-3L: 82 mm² of overhang needing support, 73 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-1.8, -1.3, 7.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  fork-4R: upright feature thinner than Ø4 (6.2 mm² section) from z -1.4 to 1.4 at [3.1, -4.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-4R: upright feature thinner than Ø4 (6.2 mm² section) from z -1.4 to 1.4 at [-3.1, -4.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-4R: upright feature thinner than Ø4 (8.4 mm² section) from z -1.4 to 1.4 at [-3.1, 3.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-4R: 82 mm² of overhang needing support, 73 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-1.8, -1.3, 7.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  fork-4L: upright feature thinner than Ø4 (6.2 mm² section) from z -1.4 to 1.4 at [3.1, -4.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-4L: upright feature thinner than Ø4 (6.2 mm² section) from z -1.4 to 1.4 at [-3.1, -4.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-4L: upright feature thinner than Ø4 (8.4 mm² section) from z -1.4 to 1.4 at [-3.1, 3.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  fork-4L: 82 mm² of overhang needing support, 73 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-1.8, -1.3, 7.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  crank-cover: upright feature thinner than Ø4 (4.3 mm² section) from z -83.3 to -80.1 at [64.2, -20.6] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crank-cover: upright feature thinner than Ø4 (10.2 mm² section) from z -83.3 to -75.7 at [42.7, -34.2] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crank-cover: 153 mm² of overhang needing support, 118 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [58.4, -28.0, -76.0] in print orientation): open it, split the part, or give the reason in the design review
+
+== 7 keep-out zones (moving with their part, at every step)
+  ok    gear1-axial (crank gear faces + 0.25 float + 0.8 mm axial (fits.GEAR_AXIAL)): clear over 36 steps; closest cap, 0.30 mm outside it (at (0, 0.0, 0.0))
+        gear1-axial: not checked against drive-module, idler-1, idler-2, idler-3-v2 (idlers mesh in the gear plane (GEARS checks them); the spine walls are 0.25 mm off the gear faces (GEAR_THRUST_CRANK, measured on gear train test v2))
+  ok    gear2-axial (crank gear faces + 0.25 float + 0.8 mm axial (fits.GEAR_AXIAL)): clear over 36 steps; closest cap, 0.30 mm outside it (at (0, 0.0, 0.0))
+        gear2-axial: not checked against drive-module, idler-1, idler-2, idler-3-v2 (idlers mesh in the gear plane (GEARS checks them); the spine walls are 0.25 mm off the gear faces (GEAR_THRUST_CRANK, measured on gear train test v2))
+  ok    gear3-axial (crank gear faces + 0.25 float + 0.8 mm axial (fits.GEAR_AXIAL)): clear over 36 steps; closest cap, 0.30 mm outside it (at (0, 0.0, 0.0))
+        gear3-axial: not checked against drive-module, idler-1, idler-2, idler-3-v2 (idlers mesh in the gear plane (GEARS checks them); the spine walls are 0.25 mm off the gear faces (GEAR_THRUST_CRANK, measured on gear train test v2))
+  ok    gear4-axial (crank gear faces + 0.25 float + 0.8 mm axial (fits.GEAR_AXIAL)): clear over 36 steps; closest cap, 0.30 mm outside it (at (0, 0.0, 0.0))
+        gear4-axial: not checked against drive-module, idler-1, idler-2, idler-3-v2 (idlers mesh in the gear plane (GEARS checks them); the spine walls are 0.25 mm off the gear faces (GEAR_THRUST_CRANK, measured on gear train test v2))
+  ok    pinion-cap (pinion faces + 0.8 axial + the cap's X play 0.2 (cap only)): clear over 36 steps; closest cap, 0.00 mm outside it (at (0, 0.0, 0.0))
+        pinion-cap: not checked against drive-module, motor-clamp, idler-3-v2, pin-keeper, gauge-fork, press-jig, press-cup, n20, n20-shaft, keeper-screw, keeper-nut, cap-screw, cap-nut, shared-screw, shared-nut, clamp-screw, clamp-nut, holder, eyes-board, crankshaft-1, crankshaft-2, crankshaft-3, crankshaft-4, idler-1, idler-2, pin-1, pin-2, pin-3, leg-1R, leg-1L, leg-2R, leg-2L, leg-3R, leg-3L, leg-4R, leg-4L (this zone is for the cap at either skirt stop; every other part is in pinion-clear)
+  ok    pinion-clear (pinion tip circle + 0.8 radial, faces + 0.8 axial (cap, clamp, walls, pad)): clear over 36 steps; closest drive-module, 0.04 mm outside it (at (200, 0.0, 0.0))
+        pinion-clear: not checked against idler-3-v2, n20-shaft, n20 (idler 3 v2 meshes (GEARS); the shaft is the pinion's own; the gearbox face is the 0.8 gauge (the zone's +X face))
+  ok    wires-crank-window (the crank webs sweep under the deck here; the crank cover closes it: no wire may lie in it): clear over 36 steps
+        wires-crank-window: not checked against drive-module, cap, motor-clamp, pinion, idler-3-v2, pin-keeper, gauge-fork, press-jig, press-cup, n20, n20-shaft, keeper-screw, keeper-nut, cap-screw, cap-nut, shared-screw, shared-nut, clamp-screw, clamp-nut, holder, eyes-board, crankshaft-1, crankshaft-2, crankshaft-3, crankshaft-4, idler-1, idler-2, pin-1, pin-2, pin-3, leg-1R, leg-1L, leg-2R, leg-2L, leg-3R, leg-3L, leg-4R, leg-4L, chassis, i7-screw-1, i7-nut-1, i7-screw-2, i7-nut-2, i7-screw-3, i7-nut-3, i7-screw-4, i7-nut-4, fork-1R, fork-1R-screw-low, fork-1R-screw-up, fork-1R-nut-low, fork-1R-nut-up, fork-1L, fork-1L-screw-low, fork-1L-screw-up, fork-1L-nut-low, fork-1L-nut-up, fork-2R, fork-2R-screw-low, fork-2R-screw-up, fork-2R-nut-low, fork-2R-nut-up, fork-2L, fork-2L-screw-low, fork-2L-screw-up, fork-2L-nut-low, fork-2L-nut-up, fork-3R, fork-3R-screw-low, fork-3R-screw-up, fork-3R-nut-low, fork-3R-nut-up, fork-3L, fork-3L-screw-low, fork-3L-screw-up, fork-3L-nut-low, fork-3L-nut-up, fork-4R, fork-4R-screw-low, fork-4R-screw-up, fork-4R-nut-low, fork-4R-nut-up, fork-4L, fork-4L-screw-low, fork-4L-screw-up, fork-4L-nut-low, fork-4L-nut-up, crank-cover, cover-screw-1, cover-nut-1, cover-screw-2, cover-nut-2, switch (this zone is for wires; the parts in it are checked by the motion and joints checks)
+  ok    wires-motor (motor gearbox and can + 3 mm: the leads leave behind them, at the terminals): clear over 36 steps; closest motor-leads, 1.17 mm outside it (at (0, 0.0, 0.0))
+        wires-motor: not checked against drive-module, cap, motor-clamp, pinion, idler-3-v2, pin-keeper, gauge-fork, press-jig, press-cup, n20, n20-shaft, keeper-screw, keeper-nut, cap-screw, cap-nut, shared-screw, shared-nut, clamp-screw, clamp-nut, holder, eyes-board, crankshaft-1, crankshaft-2, crankshaft-3, crankshaft-4, idler-1, idler-2, pin-1, pin-2, pin-3, leg-1R, leg-1L, leg-2R, leg-2L, leg-3R, leg-3L, leg-4R, leg-4L, chassis, i7-screw-1, i7-nut-1, i7-screw-2, i7-nut-2, i7-screw-3, i7-nut-3, i7-screw-4, i7-nut-4, fork-1R, fork-1R-screw-low, fork-1R-screw-up, fork-1R-nut-low, fork-1R-nut-up, fork-1L, fork-1L-screw-low, fork-1L-screw-up, fork-1L-nut-low, fork-1L-nut-up, fork-2R, fork-2R-screw-low, fork-2R-screw-up, fork-2R-nut-low, fork-2R-nut-up, fork-2L, fork-2L-screw-low, fork-2L-screw-up, fork-2L-nut-low, fork-2L-nut-up, fork-3R, fork-3R-screw-low, fork-3R-screw-up, fork-3R-nut-low, fork-3R-nut-up, fork-3L, fork-3L-screw-low, fork-3L-screw-up, fork-3L-nut-low, fork-3L-nut-up, fork-4R, fork-4R-screw-low, fork-4R-screw-up, fork-4R-nut-low, fork-4R-nut-up, fork-4L, fork-4L-screw-low, fork-4L-screw-up, fork-4L-nut-low, fork-4L-nut-up, crank-cover, cover-screw-1, cover-nut-1, cover-screw-2, cover-nut-2, switch (this zone is for wires)
+
+== 8 access: can a finger or tool reach each fastener when it goes in?
+  ok    keeper-nut: reachable (nut pushed up its slot from below, pliers)
+  ok    cap-nut: reachable (nut slid in from -X, pliers)
+  ok    shared-nut: reachable (nut slid in from -X, pliers)
+  ok    clamp-nut: reachable (nut slid in from +X, pliers)
+  ok    pin-1: reachable (pin started by finger, pushed flush with the recess floor by the hex key's short arm)
+  ok    pin-2: reachable (pin started by finger, pushed flush with the recess floor by the hex key's short arm)
+  ok    pin-3: reachable (pin started by finger, pushed flush with the recess floor by the hex key's short arm)
+  ok    keeper-screw: reachable (M3×8 from +X, 2.5 hex key)
+  ok    cap-screw: reachable (M3×12 from above, 2.5 hex key)
+  ok    n20 + n20-shaft + pinion: reachable (motor with its pinion lowered onto the pad and V saddle by hand)
+  ok    n20 + n20-shaft: reachable (on the bench: thumb tip on the can's rear rim below the terminals, jig on the table)
+  ok    press-cup: reachable (on the bench: cup put on by hand, then the vise jaw on its top plate)
+  ok    shared-screw: reachable (M3×12 through clamp and cap, from above)
+  ok    clamp-screw: reachable (M3×12 from above)
+  ok    i7-nut-1: reachable (on the bench: nut pushed along its slot into the module, pliers)
+  ok    i7-nut-2: reachable (on the bench: nut pushed along its slot into the module, pliers)
+  ok    i7-nut-3: reachable (on the bench: nut pushed along its slot into the module, pliers)
+  ok    i7-nut-4: reachable (on the bench: nut pushed along its slot into the module, pliers)
+  ok    drive-module + idler-1 + idler-2 + idler-3-v2 + pin-1 + pin-2 + pin-3 + pin-keeper + keeper-screw + keeper-nut + crankshaft-1 + crankshaft-2 + crankshaft-3 + crankshaft-4 + cap + cap-screw + cap-nut + shared-nut + clamp-nut + i7-nut-1 + i7-nut-2 + i7-nut-3 + i7-nut-4: reachable (the module with its train and cap lowered into the deck window by hand)
+  ok    i7-screw-1: reachable (M3×6 from below, robot on its back, 2.5 hex key)
+  ok    i7-screw-2: reachable (M3×6 from below, robot on its back, 2.5 hex key)
+  ok    i7-screw-3: reachable (M3×8 from below, robot on its back, 2.5 hex key)
+  ok    i7-screw-4: reachable (M3×6 from below, robot on its back, 2.5 hex key)
+  ok    cover-screw-1: reachable (M3×10 from above, 2.5 hex key)
+  ok    cover-screw-2: reachable (M3×10 from above, 2.5 hex key)
+  ok    switch: reachable (on the bench: the switch pushed into its cradle from +X)
+  ok    crank-cover + switch: reachable (the cover with its switch lowered over the crank window by hand)
+  ok    cover-nut-1: reachable (on the bare shell (step 9a): nut slid into its post from the side, the pliers' nose)
+  ok    cover-nut-2: reachable (on the bare shell (step 9a): nut slid into its post from the side, the pliers' nose)
+  ok    fork-1R-screw-up: reachable (upper swivel screw from the band top (body off), 2.5 hex key)
+  ok    fork-1R-screw-low: reachable (lower swivel screw from below, robot on its back)
+  ok    fork-1L-screw-up: reachable (upper swivel screw from the band top (body off), 2.5 hex key)
+  ok    fork-1L-screw-low: reachable (lower swivel screw from below, robot on its back)
+  ok    fork-2R-screw-up: reachable (upper swivel screw from the band top (body off), 2.5 hex key)
+  ok    fork-2R-screw-low: reachable (lower swivel screw from below, robot on its back)
+  ok    fork-2L-screw-up: reachable (upper swivel screw from the band top (body off), 2.5 hex key)
+  ok    fork-2L-screw-low: reachable (lower swivel screw from below, robot on its back)
+  ok    fork-3R-screw-up: reachable (upper swivel screw from the band top (body off), 2.5 hex key)
+  ok    fork-3R-screw-low: reachable (lower swivel screw from below, robot on its back)
+  ok    fork-3L-screw-up: reachable (upper swivel screw from the band top (body off), 2.5 hex key)
+  ok    fork-3L-screw-low: reachable (lower swivel screw from below, robot on its back)
+  ok    fork-4R-screw-up: reachable (upper swivel screw from the band top (body off), 2.5 hex key)
+  ok    fork-4R-screw-low: reachable (lower swivel screw from below, robot on its back)
+  ok    fork-4L-screw-up: reachable (upper swivel screw from the band top (body off), 2.5 hex key)
+  ok    fork-4L-screw-low: reachable (lower swivel screw from below, robot on its back)
+
+== 9 joints: every fit at least its measured clearance, at every step
+  ok    crankshaft-1 × drive-module (journal 1 in its Ø4.5 hole (+X wall)): ≥ 0.25 mm a side (fit 0.25, measured)
+  ok    crankshaft-2 × drive-module (journal 2 in its Ø4.5 hole (+X wall)): ≥ 0.25 mm a side (fit 0.25, measured)
+  ok    crankshaft-3 × drive-module (journal 3 in its Ø4.5 hole (+X wall)): ≥ 0.25 mm a side (fit 0.25, measured)
+  ok    crankshaft-4 × drive-module (journal 4 in its Ø4.5 hole (+X wall)): ≥ 0.25 mm a side (fit 0.25, measured)
+  ok    drive-module × crankshaft-1 (crank gear 1 faces and webs to the walls): ≥ 0.25 mm a side (fit 0.25, measured)
+  ok    drive-module × crankshaft-2 (crank gear 2 faces and webs to the walls): ≥ 0.25 mm a side (fit 0.25, measured)
+  ok    drive-module × crankshaft-3 (crank gear 3 faces and webs to the walls): ≥ 0.25 mm a side (fit 0.25, measured)
+  ok    drive-module × crankshaft-4 (crank gear 4 faces and webs to the walls): ≥ 0.25 mm a side (fit 0.25, measured)
+  ok    drive-module × cap (tongues in the journal slots, a side): ≥ 0.30 mm a side (fit 0.30, assumed)
+  WARN  drive-module × cap: fit not measured yet (test cap v2.1 went on with 0.15 a side (CAP_CLR 0.3 on the width), base v1's tongues at 0.15 a side did not go in (2026-11-12/13); 0.3 a side until coupon K3): prove it on a coupon first
+  ok    cap × drive-module (front skirts): ≥ 0.20 mm a side (fit 0.20, measured)
+  ok    idler-1 × pin-1 (idler 1 on its Ø3 pin): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    idler-2 × pin-2 (idler 2 on its Ø3 pin): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    idler-3-v2 × pin-3 (idler 3 v2 on its Ø3 pin): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    drive-module × idler-1 (idler 1 between the walls): ≥ 0.45 mm a side (fit 0.45, measured)
+  ok    drive-module × idler-2 (idler 2 between the walls): ≥ 0.45 mm a side (fit 0.45, measured)
+  ok    drive-module × idler-3-v2 (idler 3 v2 in its 5.9 pocket): ≥ 0.45 mm a side (fit 0.45, measured)
+  ok    pin-1 × drive-module (pin 1 in the +X wall): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    pin-2 × drive-module (pin 2 in the +X wall): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    pin-3 × drive-module (pin 3 in the +X wall): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    pin-keeper × drive-module (keeper edges in its recess): ≥ 0.20 mm a side (fit 0.20, measured)
+  ok    n20 × drive-module (gearbox between the +X wall's steps (Y), out of the torque path): ≥ 0.50 mm a side (fit 0.50, measured)
+  ok    drive-module × n20 (can's rear face to its stop (+X)): ≥ 0.20 mm a side (fit 0.20, assumed)
+  WARN  drive-module × n20: fit not measured yet (as LOCATOR for a short printed part, not printed against a metal body yet. Coupon K2 waits for the motor): prove it on a coupon first
+  ok    motor-clamp × n20 (clamp cheeks on the gearbox flats (Y, the motor torque)): ≥ 0.20 mm a side (fit 0.20, assumed)
+  WARN  motor-clamp × n20: fit not measured yet (as LOCATOR for a short printed part, not printed against a metal body yet. Coupon K2 waits for the motor): prove it on a coupon first
+  ok    pinion × n20-shaft (D-bore on the D-shaft): ≥ 0.00 mm a side (fit 0.00, assumed)
+  WARN  pinion × n20-shaft: fit not measured yet (never printed; printed holes come out smaller, which gives the press. Coupon K1 (3 bores round this value) waits for the motor): prove it on a coupon first
+  ok    n20 × motor-clamp (clamp's gearbox pad 0.3 into the gearbox top (the bar is the spring)): overlap at every step (interference 0.30, assumed)
+  WARN  n20 × motor-clamp: fit not measured yet (chassis design review 2026-11-14 (motor floats 1.0 mm in X with the pads 0.2 clear): never printed. Coupon K2 prints the clamp with 0.2 clear and with this preload; pass = the motor does not move in X when pushed by hand): prove it on a coupon first
+  ok    idler-3-v2 × drive-module (idler 3 v2's tip circle to its pocket's flat floor and sides (radial)): ≥ 0.50 mm a side (fit 0.50, assumed)
+  WARN  idler-3-v2 × drive-module: fit not measured yet (chassis rev 4 (was GEAR_ROOM typed in chassis/build.py): base v1's big gear pocket and the gear train test's open frame are not this case; proven by the drive-module coupon (K3) turning by hand): prove it on a coupon first
+  ok    cap-screw × cap (cap screw in its hole): ≥ 0.35 mm a side (fit 0.15, measured)
+  ok    shared-screw × motor-clamp (shared screw in the clamp): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    clamp-screw × drive-module (clamp screw): ≥ 1.15 mm a side (fit 0.15, measured)
+  ok    drive-module × chassis (I7: the module's top in the deck window, a side): ≥ 0.50 mm a side (fit 0.50, measured)
+  ok    i7-screw-1 × chassis (I7 screw 1's shank in its Ø3.3 hole): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    i7-screw-2 × chassis (I7 screw 2's shank in its Ø3.3 hole): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    i7-screw-3 × chassis (I7 screw 3's shank in its Ø3.3 hole): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    i7-screw-4 × chassis (I7 screw 4's shank in its Ø3.3 hole): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    chassis × crank-cover (the post's spigot in the cover's hole: locates the cover): ≥ 0.20 mm a side (fit 0.20, measured)
+  ok    crank-cover × switch (the switch in its cradle (catalogue size + WINDOW, redrawn once measured)): ≥ 0.50 mm a side (fit 0.50, measured)
+  ok    motor-leads × chassis (motor leads in their clips' slots): ≥ 0.50 mm a side (fit 0.50, measured)
+  ok    fork-1R-screw-low × chassis (I4: lower swivel screw's shank in the boss): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    fork-1R-screw-up × chassis (I4: upper swivel screw's shank in the band): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    chassis × fork-1R (I4 in Z: the fork turns between the boss below and the upper boss (TURN, coupon K7); sideways its pocket is FORK_GAP): ≥ 0.27 mm a side (fit 0.25, measured)
+  ok    fork-1L-screw-low × chassis (I4: lower swivel screw's shank in the boss): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    fork-1L-screw-up × chassis (I4: upper swivel screw's shank in the band): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    chassis × fork-1L (I4 in Z: the fork turns between the boss below and the upper boss (TURN, coupon K7); sideways its pocket is FORK_GAP): ≥ 0.27 mm a side (fit 0.25, measured)
+  ok    fork-2R-screw-low × chassis (I4: lower swivel screw's shank in the boss): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    fork-2R-screw-up × chassis (I4: upper swivel screw's shank in the band): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    chassis × fork-2R (I4 in Z: the fork turns between the boss below and the upper boss (TURN, coupon K7); sideways its pocket is FORK_GAP): ≥ 0.27 mm a side (fit 0.25, measured)
+  ok    fork-2L-screw-low × chassis (I4: lower swivel screw's shank in the boss): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    fork-2L-screw-up × chassis (I4: upper swivel screw's shank in the band): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    chassis × fork-2L (I4 in Z: the fork turns between the boss below and the upper boss (TURN, coupon K7); sideways its pocket is FORK_GAP): ≥ 0.27 mm a side (fit 0.25, measured)
+  ok    fork-3R-screw-low × chassis (I4: lower swivel screw's shank in the boss): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    fork-3R-screw-up × chassis (I4: upper swivel screw's shank in the band): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    chassis × fork-3R (I4 in Z: the fork turns between the boss below and the upper boss (TURN, coupon K7); sideways its pocket is FORK_GAP): ≥ 0.27 mm a side (fit 0.25, measured)
+  ok    fork-3L-screw-low × chassis (I4: lower swivel screw's shank in the boss): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    fork-3L-screw-up × chassis (I4: upper swivel screw's shank in the band): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    chassis × fork-3L (I4 in Z: the fork turns between the boss below and the upper boss (TURN, coupon K7); sideways its pocket is FORK_GAP): ≥ 0.27 mm a side (fit 0.25, measured)
+  ok    fork-4R-screw-low × chassis (I4: lower swivel screw's shank in the boss): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    fork-4R-screw-up × chassis (I4: upper swivel screw's shank in the band): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    chassis × fork-4R (I4 in Z: the fork turns between the boss below and the upper boss (TURN, coupon K7); sideways its pocket is FORK_GAP): ≥ 0.27 mm a side (fit 0.25, measured)
+  ok    fork-4L-screw-low × chassis (I4: lower swivel screw's shank in the boss): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    fork-4L-screw-up × chassis (I4: upper swivel screw's shank in the band): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    chassis × fork-4L (I4 in Z: the fork turns between the boss below and the upper boss (TURN, coupon K7); sideways its pocket is FORK_GAP): ≥ 0.27 mm a side (fit 0.25, measured)
+
+== 12 keep-in: does every part stay inside its envelope?
+        carcass-shell / keel: drive-module allowed outside here, 4861 samples, z 42.77..52.99 (bound z ≥ 42.7): the gear pockets' keel and the pin keeper under the shell (Morante 2026-11-14, option b: flat-bottomed pockets, lowest z ≥ base v1's 42.7); Part B's bowl opens round it
+        carcass-shell / rear-end: drive-module allowed outside here, 714 samples, z 54.90..72.72: crank 4's gear room ends at y 33.78 (crank 4 at 26.28, fixed by the crank spacing), past the shell's inner face (32.75 at CX): the module's rear end stays inside the carcass (outer face 34.84 in the gear plane) and Part B's bowl opens its rear wall over it
+  ok    carcass-shell / rear-end: drive-module ≥ 0 inside here (closest +0.07)
+        carcass-shell / front-slope: drive-module allowed outside here, 3439 samples, z 66.01..74.80 (bound z ≤ 74.8): the carcass top dips under the head (z 74.4 at y -16 and at y -46, 70.42 at its lowest under the module's top face; the head above it, z 88-108, is not the carcass top); the deck (Part B, flat at 72.8-74.8) replaces it there, the module's top band is the deck's height and passes through the deck window; checked up to the module top (z ≤ 74.8; the cap above it is the deck window's); bound: at most 4.38 mm out of the carcass (the module top over the carcass top's lowest point there)
+  ok    carcass-shell / front-slope: drive-module ≥ -4.38 inside here (closest +0.89)
+  ok    carcass-shell: drive-module (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): 18835 samples ≥ 2.0 inside (closest +0.12 mm)
+        carcass-shell / front-slope: cap allowed outside here, 1579 samples, z 66.15..74.79 (bound z ≤ 74.8): the carcass top dips under the head (z 74.4 at y -16 and at y -46, 70.42 at its lowest under the module's top face; the head above it, z 88-108, is not the carcass top); the deck (Part B, flat at 72.8-74.8) replaces it there, the module's top band is the deck's height and passes through the deck window; checked up to the module top (z ≤ 74.8; the cap above it is the deck window's); bound: at most 4.38 mm out of the carcass (the module top over the carcass top's lowest point there)
+  ok    carcass-shell / front-slope: cap ≥ -4.38 inside here (closest +1.66)
+  ok    carcass-shell: cap (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): 1248 samples ≥ 2.0 inside (closest +0.38 mm)
+        carcass-shell: motor-clamp has no surface in z None..72.3
+        carcass-shell / keel: pin-keeper allowed outside here, 8632 samples, z 43.20..53.00 (bound z ≥ 42.7): the gear pockets' keel and the pin keeper under the shell (Morante 2026-11-14, option b: flat-bottomed pockets, lowest z ≥ base v1's 42.7); Part B's bowl opens round it
+  ok    carcass-shell: pin-keeper (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): 11552 samples ≥ 2.0 inside (closest +2.21 mm)
+  ok    carcass-shell: n20 (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): 10174 samples ≥ 2.0 inside (closest +0.40 mm)
+        carcass-shell / keel: keeper-screw allowed outside here, 20130 samples, z 43.45..48.95 (bound z ≥ 42.7): the gear pockets' keel and the pin keeper under the shell (Morante 2026-11-14, option b: flat-bottomed pockets, lowest z ≥ base v1's 42.7); Part B's bowl opens round it
+  ok    carcass-shell: keeper-screw (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): every sample in an allowance
+        carcass-shell / keel: keeper-nut allowed outside here, 20014 samples, z 43.02..49.38 (bound z ≥ 42.7): the gear pockets' keel and the pin keeper under the shell (Morante 2026-11-14, option b: flat-bottomed pockets, lowest z ≥ base v1's 42.7); Part B's bowl opens round it
+  ok    carcass-shell: keeper-nut (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): every sample in an allowance
+  ok    carcass-shell: cap-screw (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): 4620 samples ≥ 2.0 inside (closest +0.11 mm)
+        carcass-shell / front-slope: cap-nut allowed outside here, 4885 samples, z 68.35..70.75 (bound z ≤ 74.8): the carcass top dips under the head (z 74.4 at y -16 and at y -46, 70.42 at its lowest under the module's top face; the head above it, z 88-108, is not the carcass top); the deck (Part B, flat at 72.8-74.8) replaces it there, the module's top band is the deck's height and passes through the deck window; checked up to the module top (z ≤ 74.8; the cap above it is the deck window's); bound: at most 4.38 mm out of the carcass (the module top over the carcass top's lowest point there)
+  ok    carcass-shell / front-slope: cap-nut ≥ -4.38 inside here (closest +5.69)
+  ok    carcass-shell: cap-nut (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): 15129 samples ≥ 2.0 inside (closest +0.53 mm)
+  ok    carcass-shell: shared-screw (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): 1970 samples ≥ 2.0 inside (closest +0.40 mm)
+  ok    carcass-shell: shared-nut (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): 8977 samples ≥ 2.0 inside (closest +0.40 mm)
+  ok    carcass-shell: clamp-screw (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): 1971 samples ≥ 2.0 inside (closest +0.41 mm)
+  ok    carcass-shell: clamp-nut (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): 8977 samples ≥ 2.0 inside (closest +0.40 mm)
+        carcass-shell: holder has no surface in z None..72.3
+        carcass-shell: eyes-board has no surface in z None..72.3
+  ok    carcass-shell: pin-1 (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): 20066 samples ≥ 2.0 inside (closest +5.05 mm)
+        carcass-shell / keel: pin-2 allowed outside here, 2256 samples, z 52.88..53.00 (bound z ≥ 42.7): the gear pockets' keel and the pin keeper under the shell (Morante 2026-11-14, option b: flat-bottomed pockets, lowest z ≥ base v1's 42.7); Part B's bowl opens round it
+  ok    carcass-shell: pin-2 (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): 17810 samples ≥ 2.0 inside (closest +4.99 mm)
+  ok    carcass-shell: pin-3 (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): 20066 samples ≥ 2.0 inside (closest +5.20 mm)
+  ok    carcass-shell: i7-nut-1 (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): 20014 samples ≥ 2.0 inside (closest +1.28 mm)
+  ok    carcass-shell: i7-nut-2 (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): 20014 samples ≥ 2.0 inside (closest +4.48 mm)
+  ok    carcass-shell: i7-nut-3 (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): 20014 samples ≥ 2.0 inside (closest +3.96 mm)
+  ok    carcass-shell: i7-nut-4 (below the deck (z < 72.3: the deck (72.8-74.8) is Part B; the carcass top is 74.4 over the front block), ≥ 2.0 inside the carcass: the chassis shell's inner surface, Part B's bowl and I7 bosses under it): 20014 samples ≥ 2.0 inside (closest +5.65 mm)
+
+== 10 marks: can each part that must be lined up be lined up?
+  ok    crankshaft-1: 1 dots on the +X web, matching the 1 dots beside its slot on the module's +X wall (and the crank angle: every crank level)
+  ok    crankshaft-2: 2 dots on the +X web, matching the 2 dots beside its slot on the module's +X wall (and the crank angle: every crank level)
+  ok    crankshaft-3: 3 dots on the +X web, matching the 3 dots beside its slot on the module's +X wall (and the crank angle: every crank level)
+  ok    crankshaft-4: 4 dots on the +X web, matching the 4 dots beside its slot on the module's +X wall (and the crank angle: every crank level)
+  ok    idler-1: none needed: 12 identical teeth, it meshes in any position; the cranks' phase is set by the crankshafts' dots
+  ok    idler-2: none needed: as idler 1
+  ok    idler-3-v2: a dot on the +X face on tooth 0's line (idler 3's phase); any tooth meshes, the dot shows the face that goes to +X
+  ok    pinion: a dot on the +X face over the D-bore's flat: line it up with the shaft's flat before pressing
+        cap: a dot on its +X edge over every slot (it fits one way only)
+        chassis: FRONT arrow (tip to -Y) sunk 0.5 in the seat at the front left, beside the front block (x 26.2, y -41.5, placed by shell_marks()); the fork number (1-4 dots, front to rear) beside each upper swivel screw on the band top
+        crank-cover: FRONT arrow on its top face; it fits one way (the spigot and the shared screw's hole); the switch fits its cradle one way (lever to the rear slot, pins to the front slot)
+        drive-module: FRONT arrow (pointing -Y) on the front block's +X face; 1-4 dice dots beside each slot
+        fork-1L: the leg's own L/R label (legs design); the fork fits its pocket either way up
+        fork-1R: the leg's own L/R label (legs design); the fork fits its pocket either way up
+        fork-2L: the leg's own L/R label (legs design); the fork fits its pocket either way up
+        fork-2R: the leg's own L/R label (legs design); the fork fits its pocket either way up
+        fork-3L: the leg's own L/R label (legs design); the fork fits its pocket either way up
+        fork-3R: the leg's own L/R label (legs design); the fork fits its pocket either way up
+        fork-4L: the leg's own L/R label (legs design); the fork fits its pocket either way up
+        fork-4R: the leg's own L/R label (legs design); the fork fits its pocket either way up
+        n20: polarity: «+» (red wire, +Y side) and «-» sunk in the end wall's +X face; wires leave on +Y (leg 3R passes 2.9 mm from the motor's -Y side)

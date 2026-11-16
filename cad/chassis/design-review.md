@@ -65,3 +65,41 @@ Each answer with the number or the picture that shows it. Numbers from [`verify-
    the motor still in the jig the fork comes out snug and slides back in snug; after the drop the fork cannot reach
    the gap (the module's +X wall, the clamp and the cap are round it). K1 uses the same jig, fork and cup, so the
    method is proven before the motor's own pinion, and records «by thumb» or «needed the vise».
+
+# Part B1 (the looks shell `chassis` and the `crank-cover`) · design review, interim
+
+Numbers from [`verify-result-b1.txt`](verify-result-b1.txt) (`verify_b1.py`, full run, 36 steps of 10°) and from
+`shell.py`'s output; pictures in [`images/verify-b1/`](images/verify-b1/). **Result: FAIL, 8 failures, all one
+cause: the forks' Z float (below).** B1 is not finished: the switch retainer, the second lead clip and the lead
+channel are not modelled (the switch pocket's layout clashes with the crank window, «As a stranger» 2).
+
+| Question | Answer and evidence |
+|---|---|
+| Fits | Every clearance from `fits.py` (`shell.py` types none). Measured in section 2: cover screws, every fork nut and both cover nuts 0.15 (`STEEL`, nuts in pockets of `K.NUT_AF + 0.3`); cap, clamp, keeper, keeper screw, N20, motor leads to the shell 0.50 (`WINDOW`); forks to the shell 0.80 (`LEG_PATH` 0.8: pocket `FORK_GAP` = 0.8 + `FORK_ALLOW` 0.2); legs 4L/4R 0.89; crankshaft 4 0.80. The nut pockets now have a corner along their slot (`shell.nut_pocket`): base v1's hexagon put a flat across the slot's end, so 0.95 mm³ of a nut stood in the wall and a nut could not reach its screw's axis (probe: nut volume outside base v1's pocket 0.946 mm³, outside the new one 0.000); the allowed contacts that hid it are gone. Front block v2 to the shell: 0.000 mm³ overlap (it was 1188), the band cut round it by `front_block.clear_outline()` (stage `fb-clear`, keyed on the block's STL and `front_block.py`) |
+| Strength | Bowl skin 1.6 (no load but the bosses), band skin 1.2, seat 2.0, slide lip 3.0 × 1.2. I7 bosses Ø9 up to the module's underside, ≥ 1.4 of boss over each head (`I7_UNDER_HEAD`). Every feature standing on the deck is rooted 0.5 into it (`DECK_ROOT`): cover post 2 and the right pad lip floated 0.09 over the deck (its top is 74.7 there, not 74.8) and were thrown away by export (467 mm³) |
+| Held | Section 4: module, cap, clamp, train and crank cover held within their play. **FAIL: every fork moves 0.5+ in ±Z**: the pocket's Z gap is `FORK_GAP` 1.0 a side (the leg path's 0.8 + 0.2), the screws' tips slide in the fork's holes, so the fork floats 1.0 each way against `RETAIN` play 0.5. The spec is not loosened; the decision is in the report |
+| Assembly | Section 5: every step passes. The module with its train and cap goes in from +Z (it was «blocked 1.25 mm out»: the module path was swept in 1 mm steps and a 0.23 mm skin at the module's rear end let slivers of the bump survive between the steps; now 0.2 mm steps). Then forks, legs, motor and pinion, clamp (the clamp notch in seat and lip), leads, crank cover and its 2 screws, the I7 screws from below |
+| Access | Section 8: every fastener reachable (I7 from below with the robot on its back, cover screws from above, cover nuts with the pliers' nose on the bare shell, fork screws from the band top and from below) |
+| Print | Shell band top on the bed: 16 383 mm² needs support, 7 261 mm² over the part itself (largest near the switch's lever slot, [69, 39.9]); three slivers of 0.4–0.6 mm² read as thin upright features (open). 3.6 % of the surface reads under 0.8 mm (mesh slivers from the carcass and the stepped path cut, none loaded). Crank cover printed upside down (top face and its arrow on the bed): 18 mm² over the bed; its rear lip (1.2 × 8.5 × 7.6) is the thin upright WARN, nothing pushes on it |
+| Marks | FRONT arrow sunk 0.5 in the seat at x 26.2, y −41.5 (placed by `shell_marks()` on seat material clear of the front block and `DRIVE_CLEAR`: at CX it was cut in air). Fork numbers 1–4 dots beside each upper screw, every dot checked on the STL 0.5–0.6 deep (fork 4's row ran under the slide lip before). Cover: FRONT arrow on its top |
+| Mass | Shell 69.6 g (56.16 cm³), crank cover 4.0 g: 73.6 g against the plan's 86 g for the shell. The front block cut took 2.2 g; nothing is dropped by export (0 mm³) |
+| Carry-over | Base v1's fork mounts and band outline, its nut pocket corrected; Part A's I7 nuts and screw rule (stock M3×6 ×3, M3×8 ×1, every counterbore mouth open on the bowl's slope: ray probe) |
+
+## As a stranger would see it (B1)
+
+1. **The forks rattle 1 mm up and down.** The pocket's Z gap was raised to clear `LEG_PATH` everywhere; a fork only
+   turns about Z, so its top and bottom faces need a turning fit, not the leg path's. This is the test frame's old
+   failure («did not hold its fork»).
+2. **The switch pocket has no full floor.** Its −X end (x 53.5–57) is over the crank window (x up to 57.02, y up to
+   32.79), so the crank webs sweep under it; its +X end (x 66–68) is over the module. The floor is only x ≈ 57–66.
+3. **Only one lead clip**, at (69.5, 24); no channel from the terminals to it.
+4. **The front block nuts** slide in towards CX, into the module's space: they go in on the bare shell.
+5. **`shell.py` is 740 lines** (over the 600 rule): split due (features vs pipeline).
+
+## Pre-mortem (B1)
+
+1. Forks rattle and the legs' gait wanders: fix the Z float before any print (report, option a).
+2. The switch is pushed into the crank webs through its open floor: the switch layout decision first.
+3. The 0.2 mm module path leaves a stepped surface at the module's rear end (45 pinch edges notched at r 0.1):
+   cosmetic inside the bowl; K-coupon of the rear end if it prints badly.
+4. The front block changes again: `fb-clear` re-keys on its STL, the shell rebuilds in ≈ 25 s.

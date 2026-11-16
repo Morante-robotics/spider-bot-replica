@@ -123,15 +123,23 @@ def watertight(stl):
     m.export(stl)
 
 
-def export(name, p, out):
+# STL resolution: coarse while iterating (a third of the triangles, enough for every check), fine for the STL that is
+# printed. The fine export is chosen with `build.py --fine` or CAD_FINE=1; the plater only takes fine STLs.
+FINE = os.environ.get("CAD_FINE") == "1"
+STL_TOL = {True: (0.02, 0.15), False: (0.05, 0.3)}
+
+
+def export(name, p, out, fine=None):
     """STEP (Onshape) and STL (printing) of part p into folder out, and its size."""
+    fine = FINE if fine is None else fine
     os.makedirs(out, exist_ok=True)
     export_step(p, os.path.join(out, f"{name}.step"))
     stl = os.path.join(out, f"{name}.stl")
-    export_stl(p, stl, tolerance=0.02, angular_tolerance=0.15)
+    tol, ang = STL_TOL[fine]
+    export_stl(p, stl, tolerance=tol, angular_tolerance=ang)
     watertight(stl)
     bb = p.bounding_box()
-    print(f"{name:22s} {bb.size.X:6.1f} × {bb.size.Y:6.1f} × {bb.size.Z:6.1f} mm  volume {p.volume / 1000:5.2f} cm³")
+    print(f"{name:22s} {bb.size.X:6.1f} × {bb.size.Y:6.1f} × {bb.size.Z:6.1f} mm  volume {p.volume / 1000:5.2f} cm³  {'fine' if fine else 'coarse'}")
 
 
 def build_parts(parts, names, out):
@@ -145,6 +153,10 @@ def part_args(doc, parts, extra=None):
     import argparse
     ap = argparse.ArgumentParser(description=doc, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--part", action="append", choices=sorted(parts), help="build only this part (repeatable)")
+    ap.add_argument("--fine", action="store_true", help="fine STL (the one that is printed); default coarse")
     if extra:
         extra(ap)
-    return ap.parse_args()
+    args = ap.parse_args()
+    global FINE
+    FINE = FINE or args.fine
+    return args

@@ -86,14 +86,33 @@ Spec file (all names optional except PARTS and poses):
 
 Usage:
     python3 tools/cad_verify.py path/to/spec.py [--out check-result.txt] [--render images/check] [--quick]
-                                [--only part1,part2]
+                                [--only part1,part2] [--per-pose] [--full]
 
+Only a summary is printed (verdict, every FAIL, a count per check, the 10 closest gaps); the full report goes to
+--out, or to .verify-last.txt next to the spec. --full prints it all. Read the summary, grep the file for one part.
+
+GROUPS = {name: [parts]} in a spec names one interface's parts, for --only <name> (check one interface, not
+the whole robot).
+--smoke checks the rest pose only, without the motion sweep, assembly, access and print checks: seconds, after
+every small fix (always PARTIAL).
 --quick skips the wall thickness and checks retention at the first motion step only: use it while iterating.
 --only checks only what involves these parts (pairs with them, their retention, joints, marks): after a change to
 one part, run with --only that part, and the full check once at the end.
 Pairs whose relative position repeats (static parts, parts moving together) are computed once and reused, and the
 results are kept between runs in .cad_verify_cache.pkl next to the spec (--no-cache to ignore it): after a change
 to one part, only the pairs with that part cost time again.
+Swept envelopes (the default): a part that does not move over MOTION against one that does (the shell against each
+leg, fork and crankshaft) is one gap query against the moving part's swept envelope (its mesh at all its poses in
+one mesh, built once per run and shared by every still part), not one overlap and one gap per step. Only a pair
+whose envelope comes closer than every gap the report prints or checks (1 mm, MIN_GAP, PAIR_GAP) is scanned step by
+step, so the report names its worst step exactly as before: gaps only when the envelope proves the pair never
+overlaps, overlaps too when it touches. Declared contacts (ALLOWED_CONTACT) between a still and a moving part are
+not computed at all (nothing about them is reported). GEARS pairs and pairs where both parts move are always
+scanned step by step. The envelope results are cached like the pairs (by both parts' hashes and all the poses),
+and so is how each pair ended: after a fix to the shell, a pair that came closer last time goes straight to the
+step-by-step scan it needs (the envelope would only add a query), and the scan records whether it still is.
+--per-pose turns the envelopes off: every pair at every step, as before. Either way each part becomes a manifold
+once per run, not once per step.
 
 --render writes assembly.png (3 views), assembly-steps.png (one panel per ASSEMBLY step: the parts already in place
 in grey, the incoming part lifted out along its direction, the access tools in red) and section-N.png.
@@ -101,9 +120,11 @@ in grey, the incoming part lifted out along its direction, the access tools in r
 Exit code 0 when every check passes, 1 otherwise. Needs numpy, trimesh, manifold3d, rtree, matplotlib.
 """
 import argparse
+import hashlib
 import importlib.util
 import itertools
 import os
+import re
 import sys
 import time
 
@@ -217,6 +238,37 @@ class Report:
             ("PARTIAL PASS" if not self.fails else "PARTIAL FAIL")
         return "\n".join([f"cad_verify: {verdict} ({self.fails} failures, {self.warns} warnings)"] + self.lines) + "\n"
 
+    def summary(self, full_path, n_gaps=5, width=300):
+        """What is printed on screen (the full report goes to a file): the verdict, every FAIL, a count per check,
+        the closest gaps. Kept short so an agent reading it does not spend its context on hundreds of ok lines."""
+        out = self.text().splitlines()[:1]
+        out += [ln for ln in self.lines if ln.startswith("PARTIAL CHECK")]
+        counts, sec = [], None
+        for ln in self.lines:
+            if ln.startswith("== "):
+                sec = [re.split(r"[:(]", ln[3:])[0].strip(), 0, 0, 0]
+                counts.append(sec)
+            elif sec is not None:
+                for i, tag in ((1, "  ok "), (2, "  WARN"), (3, "  FAIL")):
+                    if ln.startswith(tag):
+                        sec[i] += 1
+        out.append("checks: " + "; ".join(f"{s} {o} ok" + (f", {w} warn" if w else "") + (f", {f} FAIL" if f else "")
+                                          for s, o, w, f in counts))
+        fails = [ln for ln in self.lines if ln.startswith("  FAIL")]
+        if fails:
+            out += ["failures:"] + [ln if len(ln) <= width else ln[:width] + " …" for ln in fails]
+        gaps = []
+        for ln in self.lines:
+            m = re.search(r"gap (-?[\d.]+) mm", ln)
+            if m:
+                gaps.append((float(m.group(1)), ln.strip()))
+        if gaps:
+            out += [f"closest gaps ({min(n_gaps, len(gaps))} of {len(gaps)}):"]
+            out += [f"  {ln[:width]}" for _, ln in sorted(gaps)[:n_gaps]]
+        out.append(f"full report ({len(self.lines)} lines, {self.warns} warnings): {full_path}  "
+                   f"(grep it for one part; --full prints it all)")
+        return "\n".join(out) + "\n"
+
 
 def wall_thickness(mesh, n=3000):
     """Local thickness at n surface samples: distance along the inward normal to the opposite surface."""
@@ -275,17 +327,27 @@ def check_integrity(spec, meshes, rep, quick, only=None):
             rep.ok(f"{msg}; walls ≥ {min_wall} mm")
 
 
-def placed(spec, meshes, t, bench=False):
-    """Every part as a manifold at motion step t. Bench parts (PARTS[...]["bench"]: a jig or gauge used on the
-    bench, not in the machine) only with bench=True: the motion, retention, keep-out, joint and access checks never
-    see them."""
+_BASE = {}      # id(mesh) -> (mesh, its manifold): each mesh becomes a manifold once per run, not once a step
+
+
+def base_manifold(m):
+    hit = _BASE.get(id(m))
+    if hit is None or hit[0] is not m:
+        hit = _BASE[id(m)] = (m, to_manifold(m))
+    return hit[1]
+
+
+def placed(spec, meshes, t, bench=False, names=None):
+    """Every part as a manifold at motion step t (only those in `names`, if given). Bench parts (PARTS[...]["bench"]:
+    a jig or gauge used on the bench, not in the machine) only with bench=True: the motion, retention, keep-out, joint
+    and access checks never see them."""
     pose = spec.poses(t) if hasattr(spec, "poses") else {}
     out = {}
     for name in spec.PARTS:
-        if spec.PARTS[name].get("bench") and not bench:
+        if (spec.PARTS[name].get("bench") and not bench) or (names is not None and name not in names):
             continue
         M = pose.get(name, np.eye(4))
-        out[name] = to_manifold(meshes[name]).transform(np.asarray(M, float)[:3, :])
+        out[name] = base_manifold(meshes[name]).transform(np.asarray(M, float)[:3, :])
     return out
 
 
@@ -309,7 +371,6 @@ def involves(only, *names):
 
 def mesh_hash(m):
     """Fingerprint of a mesh's geometry: same hash, same shape (for the cache between runs)."""
-    import hashlib
     h = hashlib.md5(np.ascontiguousarray(m.vertices, dtype=np.float64).tobytes())
     h.update(np.ascontiguousarray(m.faces, dtype=np.int64).tobytes())
     return h.hexdigest()[:16]
@@ -323,7 +384,7 @@ DISK, NEW, HASH = {}, {}, {}
 
 def load_cache(spec_path, meshes):
     import pickle
-    DISK.clear(), NEW.clear(), HASH.clear()
+    DISK.clear(), NEW.clear(), HASH.clear(), _ENV.clear()
     HASH.update({n: mesh_hash(m) for n, m in meshes.items()})
     f = os.path.join(os.path.dirname(os.path.abspath(spec_path)), ".cad_verify_cache.pkl")
     try:
@@ -346,24 +407,36 @@ def save_cache(f):
         pickle.dump(DISK, fh)
 
 
-def scan_pairs(spec, meshes, steps, only, gmax, which="all"):
+def scan_radius(spec, gmax):
+    """How far the gap search looks: gaps beyond 1 mm (or the largest gap a pair needs) are neither reported nor
+    checked, and a shorter search is much faster (a gap past it reads as the search length)."""
+    return max([1.0, getattr(spec, "MIN_GAP", 0.2), gmax] + list(getattr(spec, "PAIR_GAP", {}).values())) + 0.05
+
+
+def pair_wanted(spec, a, b, only, which, gears):
+    g_pair = pair_key(a, b) in gears
+    return involves(only, a, b) and not ((which == "gears" and not g_pair) or (which == "others" and g_pair))
+
+
+def scan_pairs(spec, meshes, steps, only, gmax, which="all", skip=frozenset(), disjoint=frozenset()):
     """Overlap volume and gap of every pair of parts that come near each other, at each step:
     [(t, a, b, overlap, gap)]. A pair whose relative position repeats is computed once (and, through the disk cache,
-    once across runs). which: "all", "gears" (only GEARS pairs) or "others" (every pair but GEARS)."""
+    once across runs). which: "all", "gears" (only GEARS pairs) or "others" (every pair but GEARS). skip: pairs
+    (pair_key) already settled by their swept envelope; disjoint: pairs whose envelope proved they never overlap
+    (their overlap is 0 at every step: only the gap is computed)."""
     cache, hits, rows = {}, 0, []
     gears = {pair_key(*k) for k in getattr(spec, "GEARS", [])}
-    # gaps beyond 1 mm are neither reported nor checked: a shorter search is much faster (a gap past it reads as the
-    # search length)
-    radius = max([1.0, getattr(spec, "MIN_GAP", 0.2), gmax] + list(getattr(spec, "PAIR_GAP", {}).values())) + 0.05
+    radius = scan_radius(spec, gmax)
+    names = [n for n in spec.PARTS if not spec.PARTS[n].get("bench")]
+    todo = [(a, b) for a, b in itertools.combinations(names, 2)
+            if pair_key(a, b) not in skip and pair_wanted(spec, a, b, only, which, gears)]
+    need = {n for ab in todo for n in ab}
     for t in steps:
-        ms = placed(spec, meshes, t)
+        ms = placed(spec, meshes, t, names=need)
         P = poses_at(spec, t)
         bx = {n: mbox(m) for n, m in ms.items()}
-        for a, b in itertools.combinations(ms, 2):
-            if not involves(only, a, b) or not boxes_near(bx[a], bx[b], max(1.0, gmax)):
-                continue
-            g_pair = pair_key(a, b) in gears
-            if (which == "gears" and not g_pair) or (which == "others" and g_pair):
+        for a, b in todo:
+            if not boxes_near(bx[a], bx[b], max(1.0, gmax)):
                 continue
             rk = rel_key(P[a], P[b])
             ck = (a, b, rk)
@@ -375,13 +448,141 @@ def scan_pairs(spec, meshes, steps, only, gmax, which="all"):
                 v, g = cache[ck] = DISK[dk]
                 hits += 1
             else:
-                v = overlap(ms[a], ms[b])
+                v = 0.0 if pair_key(a, b) in disjoint else overlap(ms[a], ms[b])
                 g = 0.0 if v > EPS_VOL else ms[a].min_gap(ms[b], radius)
                 cache[ck] = (v, g)
                 if dk[0]:
                     NEW[dk] = (v, g)
             rows.append((t, a, b, v, g))
     return rows, len(cache), hits
+
+
+# ---------------------------------------------------------------- swept envelopes
+# A part that does not move over the motion, against a part that does: instead of one overlap and one gap per step,
+# one gap query against the moving part's swept envelope (all its poses in one mesh). Only a pair that comes closer
+# than every gap the report prints or checks, or overlaps, is scanned pose by pose, so the report names its worst
+# step exactly as before.
+
+SWEEP = True            # main() sets it False with --per-pose
+_ENV = {}               # envelopes built in this run: key -> Manifold
+
+
+def pose_key(M):
+    return (np.round(np.asarray(M, float)[:3, :], 5) + 0.0).tobytes()
+
+
+def envelope(name, mesh, poses):
+    """The swept envelope of a part: its mesh at each of `poses` (4×4), concatenated into one mesh (overlapping
+    copies, not a union: a gap query only needs the surfaces, and a union of 36 poses takes minutes). Built once per
+    run and shared by every still part it is checked against; the query results are kept on disk (DISK) by both
+    parts' hashes and the poses, so the envelope itself is not stored (it is ~6 MB a part and faster to rebuild)."""
+    key = (HASH.get(name) or mesh_hash(mesh), b"".join(pose_key(P) for P in poses))
+    if key not in _ENV:
+        v0, f0 = np.asarray(mesh.vertices, float), np.asarray(mesh.faces, np.int64)
+        V = np.vstack([v0 @ np.asarray(P, float)[:3, :3].T + np.asarray(P, float)[:3, 3] for P in poses])
+        F = np.vstack([f0 + i * len(v0) for i in range(len(poses))])
+        _ENV[key] = Manifold(Mesh(vert_properties=np.ascontiguousarray(V, np.float32),
+                                  tri_verts=np.ascontiguousarray(F, np.uint32)))
+    return _ENV[key]
+
+
+def close_at(ms, mesh, Pm, radius, clear):
+    """Does the moving part, at pose Pm, overlap or come closer than `clear` to the still part ms? (one step: a
+    cheap probe before building an envelope for a pair that is close everywhere, a shaft in its bore)"""
+    mm = base_manifold(mesh).transform(np.asarray(Pm, float)[:3, :])
+    return overlap(ms, mm) > EPS_VOL or ms.min_gap(mm, radius) < clear
+
+
+def sweep_pairs(spec, meshes, steps, only, gmax, which="all"):
+    """Settle every pair of (a part that does not move over `steps`) × (a part that moves) with one query against
+    the moving part's swept envelope. Returns (rows, skip, disjoint, stats):
+      rows      one row (t, a, b, 0, gap) per settled pair: it never overlaps and its gap at every step is at least
+                every gap the report prints or checks (so its step does not matter)
+      skip      the pairs settled here, plus declared contacts (ALLOWED_CONTACT: nothing about them is reported)
+      disjoint  pairs that never overlap but come closer: scan_pairs computes only their gap, pose by pose
+    Every other such pair (an overlap, or surfaces touching) is scanned pose by pose as before, and so is a pair
+    that came closer the last time it was checked (an earlier version of one of its parts; stats["learn"] lists
+    them for check_motion to record how they end this time). GEARS pairs and pairs where both parts move are never
+    swept."""
+    gears = {pair_key(*k) for k in getattr(spec, "GEARS", [])}
+    allowed = {pair_key(*k) for k in getattr(spec, "ALLOWED_CONTACT", {})}
+    radius = scan_radius(spec, gmax)
+    clear = radius - 0.05 + 0.01        # every gap the report prints (< 1 mm) or checks (MIN_GAP, PAIR_GAP), + 0.01
+    margin = max(1.0, gmax)
+    names = [n for n in spec.PARTS if not spec.PARTS[n].get("bench")]
+    P = [poses_at(spec, t) for t in steps]
+    keys = {n: [pose_key(Pt[n]) for Pt in P] for n in names}
+    static = {n for n in names if len(set(keys[n])) == 1}
+    rows, skip, disjoint = [], set(), set()
+    st = {"far": 0, "settled": 0, "disjoint": 0, "scanned": 0, "allowed": 0, "cached": 0, "hinted": 0, "probed": 0,
+          "learn": [], "clear": clear}
+    uniq, boxes = {}, {}
+    for a, b in itertools.combinations(names, 2):
+        k = pair_key(a, b)
+        if (a in static) == (b in static) or k in gears or not pair_wanted(spec, a, b, only, which, gears):
+            continue
+        if k in allowed:
+            skip.add(k)
+            st["allowed"] += 1
+            continue
+        s, m = (a, b) if a in static else (b, a)
+        if m not in uniq:          # the moving part's distinct poses, in step order, with their boxes
+            u = list(dict.fromkeys(keys[m]))
+            first = {kk: keys[m].index(kk) for kk in u}
+            uniq[m] = [(kk, P[first[kk]][m]) for kk in u]
+            bm = base_manifold(meshes[m])
+            boxes[m] = {kk: mbox(bm.transform(Pm[:3, :])) for kk, Pm in uniq[m]}
+        ms = base_manifold(meshes[s]).transform(P[0][s][:3, :])
+        bs = mbox(ms)
+        near = [i for i, kk in enumerate(keys[m]) if boxes_near(boxes[m][kk], bs, margin)]
+        if not near:                                    # never near: no rows, as pose by pose
+            skip.add(k)
+            st["far"] += 1
+            continue
+        dk = ("sweep", HASH.get(s), keys[s][0], HASH.get(m), hashlib.md5(b"".join(kk for kk, _ in uniq[m])).hexdigest(),
+              round(radius, 3))
+        last = ("sweep-last", s, m)             # how this pair ended last time, whatever the parts' versions
+        if dk[1] and dk[3] and dk in DISK:
+            g, nested = DISK[dk]
+            st["cached"] += 1
+        elif DISK.get(last) == "close" or (DISK.get(last) is None and close_at(ms, meshes[m], P[near[0]][m], radius,
+                                                                                    clear)):
+            # it came closer last time (the shell before this fix), or, never seen, at its first step near: the
+            # envelope would only add a query to the scan step by step it needs anyway. check_motion learns from
+            # the scan whether it is still close
+            st["hinted" if DISK.get(last) == "close" else "probed"] += 1
+            st["learn"].append((k, last))
+            continue
+        else:
+            env = envelope(m, meshes[m], [Pm for _, Pm in uniq[m]])
+            # min_gap boxes every face of its argument and looks it up in the other's tree: pass the smaller mesh
+            g = env.min_gap(ms, radius) if env.num_tri() >= ms.num_tri() else ms.min_gap(env, radius)
+            # surfaces apart at every pose can still overlap if one part is wholly inside the other: only possible
+            # where one box holds the other; there the overlap is computed (exactly, as pose by pose)
+            nested = False
+            if g > 1e-3:
+                bm = base_manifold(meshes[m])
+                for kk, Pm in uniq[m]:
+                    b_ = boxes[m][kk]
+                    inside = np.all(b_[0] >= bs[0]) and np.all(b_[1] <= bs[1]) or \
+                        np.all(bs[0] >= b_[0]) and np.all(bs[1] <= b_[1])
+                    if inside and overlap(ms, bm.transform(Pm[:3, :])) > EPS_VOL:
+                        nested = True
+                        break
+            if dk[1] and dk[3]:
+                NEW[dk] = (g, nested)
+                NEW[last] = "clear" if g > 1e-3 and not nested and g >= clear else "close"
+        apart = g > 1e-3 and not nested         # surfaces at least 1 µm apart at every pose: no overlap anywhere
+        if apart and g >= clear:
+            skip.add(k)
+            rows.append((steps[near[0]], a, b, 0.0, g))
+            st["settled"] += 1
+        elif apart:
+            disjoint.add(k)
+            st["disjoint"] += 1
+        else:
+            st["scanned"] += 1
+    return rows, frozenset(skip), frozenset(disjoint), st
 
 
 SPEC_PATH, JOBS = None, 1     # set by main(): worker processes load the spec themselves
@@ -400,14 +601,14 @@ def _worker_scan(args):
     return rows, n, hits, dict(NEW)
 
 
-def scan_pairs_parallel(spec, meshes, steps, only, gmax, which="all"):
+def scan_pairs_parallel(spec, meshes, steps, only, gmax, which="all", skip=frozenset(), disjoint=frozenset()):
     """scan_pairs split over JOBS processes, in contiguous chunks of the motion (so repeats stay in one chunk)."""
     if JOBS <= 1 or SPEC_PATH is None or len(steps) < 60:     # each process spends ~5-10 s loading the spec
-        return scan_pairs(spec, meshes, steps, only, gmax, which)
+        return scan_pairs(spec, meshes, steps, only, gmax, which, skip, disjoint)
     import multiprocessing
     from concurrent.futures import ProcessPoolExecutor
     chunks = [list(c) for c in np.array_split(np.arange(len(steps)), JOBS)]
-    args = [([steps[i] for i in c], only, gmax, which) for c in chunks if len(c)]
+    args = [([steps[i] for i in c], only, gmax, which, skip, disjoint) for c in chunks if len(c)]
     with ProcessPoolExecutor(JOBS, mp_context=multiprocessing.get_context("spawn"), initializer=_worker_init,
                              initargs=(SPEC_PATH,)) as ex:
         parts = list(ex.map(_worker_scan, args))
@@ -416,7 +617,7 @@ def scan_pairs_parallel(spec, meshes, steps, only, gmax, which="all"):
     return [r for p in parts for r in p[0]], sum(p[1] for p in parts), sum(p[2] for p in parts)
 
 
-def check_motion(spec, meshes, rep, only=None):
+def check_motion(spec, meshes, rep, only=None, sweep=None):
     rep.head("2 motion: overlaps and gaps at every step   3 gears: backlash")
     motion = list(getattr(spec, "MOTION", [0]))
     min_gap = getattr(spec, "MIN_GAP", 0.2)
@@ -427,13 +628,19 @@ def check_motion(spec, meshes, rep, only=None):
     worst_overlap, closest, gear_overlap = {}, {}, {}
     gear_gap = {g: (np.inf, -np.inf, None, None) for g in gears if involves(only, *g)}
     gear_motion = getattr(spec, "GEAR_MOTION", None)
+    sweep = SWEEP if sweep is None else sweep
+    # parts that do not move × parts that do: settled by the moving part's swept envelope where they stay clear
+    which = "others" if gear_motion is not None else "all"
+    rs, skip, disjoint, st = sweep_pairs(spec, meshes, motion, only, gmax, which) if sweep else \
+        ([], frozenset(), frozenset(), None)
     if gear_motion is not None:
         # meshing pairs repeat every tooth: they are checked, finer, over GEAR_MOTION only; the rest over MOTION
-        r1, n1, h1 = scan_pairs_parallel(spec, meshes, motion, only, gmax, "others")
+        r1, n1, h1 = scan_pairs_parallel(spec, meshes, motion, only, gmax, "others", skip, disjoint)
         r2, n2, h2 = scan_pairs_parallel(spec, meshes, list(gear_motion), only, gmax, "gears")
-        rows, ncache, hits = r1 + r2, n1 + n2, h1 + h2
+        rows, ncache, hits = rs + r1 + r2, n1 + n2, h1 + h2
     else:
-        rows, ncache, hits = scan_pairs_parallel(spec, meshes, motion, only, gmax)
+        rows, ncache, hits = scan_pairs_parallel(spec, meshes, motion, only, gmax, "all", skip, disjoint)
+        rows = rs + rows
     for t, a, b, v, g in rows:
         k = pair_key(a, b)
         if v > EPS_VOL:
@@ -453,6 +660,15 @@ def check_motion(spec, meshes, rep, only=None):
         rep.ok(f"no undeclared overlaps over {len(motion)} steps" + (f" (only pairs with {', '.join(sorted(only))})"
                                                                      if only else ""))
     rep.info(f"{ncache} pair positions computed, {hits} repeats reused")
+    if st:
+        rep.info(f"swept envelopes (still part × moving part): {st['settled']} pairs clear at every step in one query"
+                 f" each, {st['disjoint']} closer (gaps step by step, no overlap); scanned step by step: "
+                 f"{st['scanned']} overlapping or touching, {st['hinted']} close last time, {st['probed']} close at their first step; "
+                 f"{st['far']} never near, {st['allowed']} declared contacts skipped; {st['cached']} envelope results "
+                 f"from the cache")
+        for k, last in st["learn"]:        # a pair scanned for being close last time: is it still close?
+            close = any(pair_key(a, b) == k and (v > EPS_VOL or g < st["clear"]) for _, a, b, v, g in rows)
+            NEW[last] = "close" if close else "clear"
     for k, (g, t) in sorted(closest.items(), key=lambda x: x[1][0]):
         if k in worst_overlap:
             continue
@@ -823,7 +1039,7 @@ def check_joints(spec, meshes, rep, only=None):
             if ck in cache and where is None:
                 g = cache[ck]
             else:
-                ms = placed(spec, meshes, t)
+                ms = placed(spec, meshes, t, names={a, b})
                 ma, mb = ms[a], ms[b]
                 if where is not None:
                     c, s = np.asarray(where[0], float), np.asarray(where[1], float)
@@ -1063,24 +1279,45 @@ def load_spec(path):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("spec")
-    ap.add_argument("--out", help="write the report here as well")
+    ap.add_argument("--out", help="write the full report here (default: .verify-last.txt next to the spec)")
+    ap.add_argument("--full", action="store_true",
+                    help="print the full report; by default only a summary is printed (verdict, FAILs, closest gaps)")
     ap.add_argument("--render", metavar="DIR", help="write assembly.png and section-N.png here")
     ap.add_argument("--quick", action="store_true", help="skip wall thickness; retention at the first step only")
+    ap.add_argument("--smoke", action="store_true",
+                    help="seconds: the rest pose only (first MOTION step, no sweep), no wall thickness, assembly, "
+                         "access or print checks; the check after every small fix (always PARTIAL)")
     ap.add_argument("--jobs", type=int, default=os.cpu_count() or 1,
                     help="processes for the motion check (default: all cores; 1 to run in one process)")
-    ap.add_argument("--only", help="comma-separated parts: check only what involves them (while iterating)")
-    ap.add_argument("--no-cache", action="store_true", help="ignore and do not write .cad_verify_cache.pkl")
+    ap.add_argument("--only", help="comma-separated parts or GROUPS names from the spec: check only what involves "
+                                   "them (while iterating)")
+    ap.add_argument("--no-cache", action="store_true",
+                    help="ignore and do not write .cad_verify_cache.pkl")
+    ap.add_argument("--per-pose", action="store_true",
+                    help="no swept envelopes: every pair is computed at every motion step (the old mode)")
     args = ap.parse_args()
     only = set(args.only.split(",")) if args.only else None
-    global SPEC_PATH, JOBS
-    SPEC_PATH, JOBS = os.path.abspath(args.spec), max(1, args.jobs)
+    global SPEC_PATH, JOBS, SWEEP
+    SPEC_PATH, JOBS, SWEEP = os.path.abspath(args.spec), max(1, args.jobs), not args.per_pose
     spec = load_spec(args.spec)
+    if args.smoke:
+        args.quick = True
+        spec.MOTION = list(getattr(spec, "MOTION", [0]))[:1]
+        if getattr(spec, "GEAR_MOTION", None) is not None:
+            spec.GEAR_MOTION = list(spec.GEAR_MOTION)[:1]
+        SWEEP = False
     meshes = load_meshes(spec, args.spec)
     cache_file = None if args.no_cache else load_cache(args.spec, meshes)
     rep = Report()
     timing = []
+    groups = getattr(spec, "GROUPS", {})     # {"i7": ["drive-module", "chassis", ...]}: one interface's parts
+    if only:
+        only = set().union(*({*groups[o]} if o in groups else {o} for o in only))
     if only and only - set(spec.PARTS):
         sys.exit(f"--only: no such parts in the spec: {', '.join(sorted(only - set(spec.PARTS)))}")
+    if args.smoke:
+        rep.partial = True
+        rep.lines.append("PARTIAL CHECK: smoke (rest pose only; no motion sweep, assembly, access or print checks)")
     if only:
         rep.partial = True
         rep.lines.append(f"PARTIAL CHECK: only what involves {', '.join(sorted(only))}. Run the full check before "
@@ -1091,10 +1328,10 @@ def main():
         if cache_file:              # even when a check crashes, keep what was computed
             save_cache(cache_file)
     txt = rep.text()
-    print(txt)
-    if args.out:
-        with open(args.out, "w") as f:
-            f.write(txt)
+    full_path = args.out or os.path.join(os.path.dirname(SPEC_PATH), ".verify-last.txt")
+    with open(full_path, "w") as f:
+        f.write(txt)
+    print(txt if args.full else rep.summary(full_path, n_gaps=3 if args.smoke else 5))
     if args.render:
         render(spec, meshes, args.render)
     sys.exit(1 if rep.fails else 0)
@@ -1102,17 +1339,20 @@ def main():
 
 def run_checks(spec, meshes, rep, args, only):
     timing = []
+    smoke = getattr(args, "smoke", False)
     for label, fn in (("integrity", lambda: check_integrity(spec, meshes, rep, args.quick, only)),
                       ("motion", lambda: check_motion(spec, meshes, rep, only)),
                       ("retention", lambda: check_retention(spec, meshes, rep, args.quick, only)),
-                      ("assembly", lambda: check_assembly(spec, meshes, rep)),
-                      ("print", lambda: check_print(spec, meshes, rep)),
+                      ("assembly", None if smoke else lambda: check_assembly(spec, meshes, rep)),
+                      ("print", None if smoke else lambda: check_print(spec, meshes, rep)),
                       ("keep-out", lambda: check_keep_out(spec, meshes, rep, only)),
-                      ("access", lambda: check_access(spec, meshes, rep)),
+                      ("access", None if smoke else lambda: check_access(spec, meshes, rep)),
                       ("joints", lambda: check_joints(spec, meshes, rep, only)),
                       ("seats", lambda: check_seats(spec, meshes, rep, only)),
                       ("keep-in", lambda: check_keep_in(spec, meshes, rep, only)),
                       ("marks", lambda: check_marks(spec, rep, only))):
+        if fn is None:
+            continue
         t0 = time.perf_counter()
         fn()
         timing.append(f"{label} {time.perf_counter() - t0:.0f} s")

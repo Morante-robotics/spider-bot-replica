@@ -48,6 +48,52 @@ def carcass(name="base", lifted=False):
     return m
 
 
+# The scanned carcass is for the looks parts and figures. Every computation (cuts, KEEP_IN, probes, gaps) uses the proxy
+# or the envelope below: the body's scan is 102k triangles and every boolean or gap against it costs minutes.
+PROXY_TOL = 0.2            # mm: every proxy vertex within this of the scan (measured: body 102k -> 31k faces, max 0.23)
+
+
+def carcass_proxy(name="base", lifted=False, tol=PROXY_TOL):
+    """The carcass decimated by manifold within tol (a closed solid), cached in carcass-120/.proxy/ by the STL's hash:
+    the mesh every check and cut uses instead of carcass()."""
+    import hashlib
+    import trimesh
+    from manifold3d import Manifold, Mesh
+    src = os.path.join(CARCASS, CARCASS_FILES[name])
+    with open(src, "rb") as f:
+        key = hashlib.sha1(f.read()).hexdigest()[:12]
+    cache = os.path.join(CARCASS, ".proxy", f"{name}-{tol}-{key}.npz")
+    if os.path.exists(cache):
+        z = np.load(cache)
+        m = trimesh.Trimesh(z["v"], z["f"], process=False)
+    else:
+        s = trimesh.load(src)
+        r = Manifold(Mesh(vert_properties=np.asarray(s.vertices, np.float32),
+                          tri_verts=np.asarray(s.faces, np.uint32))).simplify(tol).to_mesh()
+        m = trimesh.Trimesh(np.asarray(r.vert_properties[:, :3], float), np.asarray(r.tri_verts), process=False)
+        # no merge_vertices(): manifold's output is closed as it is; trimesh's merge pinches it into 170 pieces
+        os.makedirs(os.path.dirname(cache), exist_ok=True)
+        np.savez(cache, v=m.vertices, f=m.faces)
+    if lifted:
+        m.apply_translation([0, 0, LIFT])
+    return m
+
+
+def carcass_envelope(name="base", lifted=False, dz=2.0):
+    """The carcass as a stack of boxes, one per dz slab (each the slab's section bounds): an outer bound for coarse
+    checks (does it fit at all, which slab is tight) in milliseconds. Returns [(z0, z1, (x0, y0), (x1, y1))]."""
+    m = carcass_proxy(name, lifted)
+    z0, z1 = m.bounds[:, 2]
+    out = []
+    for z in np.arange(z0, z1, dz):
+        h = min(dz, z1 - z)
+        sec = m.section(plane_origin=[0, 0, z + h / 2], plane_normal=[0, 0, 1])
+        if sec is not None:
+            (x0, y0, _), (x1, y1, _) = sec.bounds
+            out.append((float(z), float(z + h), (float(x0), float(y0)), (float(x1), float(y1))))
+    return out
+
+
 # ---- bought parts: catalogue values until bought and measured -----------------------------------------------------
 # N20: Pololu Micro Metal Gearmotor HP 6 V 380:1 (#4794), hardware.md
 N20_W, N20_H = 10.0, 12.0  # gearbox and can section: 10 across the flats (Y) × 12 round (Z)

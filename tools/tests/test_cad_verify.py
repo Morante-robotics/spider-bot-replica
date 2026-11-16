@@ -346,3 +346,128 @@ def test_allowance_is_checked_above_the_z_filter():
     s.KEEP_IN["shell"]["z"] = (None, 16.0)                               # the filter stops under the boss's top
     hi = run(cv.check_keep_in, s)
     assert hi.fails and "above its bound" in hi.text()
+
+
+def swing_spec(post_gap=0.4, frame_gap=3.0, nested=False):
+    """A still frame round an arm that turns a full circle about Z every 30°: the frame clears the arm's tip by
+    frame_gap at every step (inside the frame's box: a pose-by-pose scan computes it at every step); a still post
+    comes post_gap from the tip at 90° only; a second arm moves too (both move: always pose by pose). nested: a still
+    block wholly inside the arm at 180° (an overlap with no surfaces touching)."""
+    arm = box([20, 4, 4], (10, 0, 0))                                 # x 0..20 at 0°, tip corners at r 20.1
+    h = 20.1 + frame_gap
+    frame = cut(box([2 * h + 6, 2 * h + 6, 4]), box([2 * h, 2 * h, 10]))
+    parts = {"frame": {"mesh": frame, "fixed": True}, "arm": {"mesh": arm},
+             "arm2": {"mesh": box([10, 4, 4], (5, 0, 4.5))}}             # 0.5 above the arm, turning 15° behind it
+    if post_gap is not None:
+        parts["post"] = {"mesh": box([4, 1, 4], (0, 20 + post_gap + 0.5, 0)), "fixed": True}
+    if nested:
+        parts["core"] = {"mesh": box([1, 1, 1], (-15, 0, 0)), "fixed": True}
+    return spec(PARTS=parts, MOTION=list(range(0, 360, 30)), MIN_GAP=0.2,
+                poses=lambda t: {"arm": cv.rot([0, 0, 1], t), "arm2": cv.rot([0, 0, 1], t - 15)})
+
+
+def motion_report(s, sweep, seen_clear=False):
+    """The motion check's report, cache empty. seen_clear: as if every still × moving pair had been clear last time
+    (then it goes to its envelope at once, without the one-step probe)."""
+    cv.HASH.clear(), cv.DISK.clear(), cv.NEW.clear()
+    if seen_clear:
+        cv.DISK.update({("sweep-last", a, b): "clear" for a in s.PARTS for b in s.PARTS if a != b})
+    rep = cv.Report()
+    cv.check_motion(s, {n: p["mesh"] for n, p in s.PARTS.items()}, rep, sweep=sweep)
+    return rep.text()
+
+
+def verdicts(txt):
+    """The report without its bookkeeping lines (how many pairs were computed, and how)."""
+    return [ln for ln in txt.splitlines() if "pair positions computed" not in ln and "swept envelopes" not in ln]
+
+
+def test_swept_envelope_gives_the_per_pose_report():
+    """Still part × moving part: one query against the moving part's swept envelope; a pair that comes closer is
+    scanned pose by pose, so its worst step is named exactly as before. Pairs where both parts move: pose by pose."""
+    for kw in ({}, {"post_gap": 0.1}, {"frame_gap": 0.6, "post_gap": None}, {"nested": True}):
+        s = swing_spec(**kw)
+        old = motion_report(s, False)
+        for seen in (False, True):
+            new = motion_report(s, True, seen)
+            assert verdicts(old) == verdicts(new), (kw, seen, old, new)
+            assert "swept envelopes" in new and "swept envelopes" not in old
+    for seen in (False, True):
+        txt = motion_report(swing_spec(post_gap=0.1), True, seen)
+        assert "FAIL  arm × post: gap 0.10 mm < 0.2 (at 90)" in txt, txt               # named at its step, as before
+        assert "arm × frame" not in txt and "2 pairs clear at every step" in txt, txt   # 3 mm off: one query
+        assert "arm × arm2: gap 0.50 mm" in txt, txt                                    # both move: pose by pose
+        # close at its first step near (90°): the probe sends it to the scan; seen clear before: the envelope does
+        assert ("1 closer" if seen else "1 close at their first step") in txt, txt
+    assert "arm × frame: gap 0.70 mm (closest at 0)" in motion_report(swing_spec(frame_gap=0.6, post_gap=None), True)
+    # the core is wholly inside the arm at 180° (no surfaces touch), and far from it at 150°, its first step near
+    nested = motion_report(swing_spec(nested=True), True)
+    assert "FAIL  arm × core: overlap 1.00 mm³ (worst at 180)" in nested and "1 overlapping or touching" in nested, \
+        nested
+
+
+def test_per_pose_flag_turns_the_envelopes_off(monkeypatch):
+    monkeypatch.setattr(cv, "SWEEP", False)
+    s = swing_spec()
+    rep = cv.Report()
+    cv.check_motion(s, {n: p["mesh"] for n, p in s.PARTS.items()}, rep)
+    assert "swept envelopes" not in rep.text()
+
+
+def test_swept_envelope_result_is_cached(tmp_path):
+    s = swing_spec(post_gap=0.1)
+    meshes = {n: p["mesh"] for n, p in s.PARTS.items()}
+    f = cv.load_cache(str(tmp_path / "spec.py"), meshes)
+    cv.DISK[("sweep-last", "post", "arm")] = "clear"
+    rows, skip, disjoint, st = cv.sweep_pairs(s, meshes, s.MOTION, None, 0.5)
+    assert st["cached"] == 0 and frozenset(("arm", "frame")) in skip and frozenset(("arm", "post")) in disjoint
+    cv.save_cache(f)
+    cv.load_cache(str(tmp_path / "spec.py"), meshes)
+    rows2, skip2, disjoint2, st2 = cv.sweep_pairs(s, meshes, s.MOTION, None, 0.5)
+    assert st2["cached"] == st["settled"] + st["disjoint"] + st["scanned"] and (rows2, skip2, disjoint2) == \
+        (rows, skip, disjoint)
+    # the arm on another path is another envelope: not taken from the cache
+    s.poses = lambda t: {"arm": cv.rot([0, 0, 1], t + 1), "arm2": cv.rot([0, 0, 1], t - 14)}
+    assert cv.sweep_pairs(s, meshes, s.MOTION, None, 0.5)[3]["cached"] == 0
+
+
+def test_pair_close_last_time_is_scanned_step_by_step(tmp_path):
+    """After a fix to the still part (a new hash), a pair that came closer last time skips the envelope (it would
+    only add a query to the scan it needs anyway); the scan records whether it is still close."""
+    s = swing_spec(post_gap=0.1)
+    path = str(tmp_path / "spec.py")
+
+    def run_with_cache(post_gap, dx=0.0):
+        # a new version of the post: post_gap off the tip at 90°, or beside it (dx), 1.27 mm off its corner
+        s.PARTS["post"]["mesh"] = box([4, 1, 4], (dx, 20 + post_gap + 0.5, 0))
+        meshes = {n: p["mesh"] for n, p in s.PARTS.items()}
+        f = cv.load_cache(path, meshes)
+        rep = cv.Report()
+        cv.check_motion(s, meshes, rep)
+        cv.save_cache(f)
+        return rep.text()
+
+    assert "0 close last time" in run_with_cache(0.1)
+    txt = run_with_cache(0.15)                                   # still close: scanned step by step at once
+    assert "1 close last time" in txt and "FAIL  arm × post: gap 0.15 mm < 0.2 (at 90)" in txt, txt
+    assert verdicts(txt) == verdicts(motion_report(s, False))
+    txt = run_with_cache(0.9, dx=4.9)                            # moved clear: scanned once more, learnt clear
+    assert "1 close last time" in txt and "arm × post" not in txt, txt
+    txt = run_with_cache(0.95, dx=4.95)                          # the next version goes to the envelope again
+    assert "0 close last time" in txt and "arm × post" not in txt, txt
+
+
+def test_smoke_skips_assembly_access_and_print():
+    calls = []
+    names = ("check_integrity", "check_motion", "check_retention", "check_assembly", "check_print", "check_keep_out",
+             "check_access", "check_joints", "check_seats", "check_keep_in", "check_marks")
+    saved = {n: getattr(cv, n) for n in names}
+    try:
+        for n in names:
+            setattr(cv, n, lambda *a, _n=n, **k: calls.append(_n))
+        cv.run_checks(None, None, None, SimpleNamespace(quick=True, smoke=True), None)
+    finally:
+        for n, f in saved.items():
+            setattr(cv, n, f)
+    assert not {"check_assembly", "check_print", "check_access"} & set(calls)
+    assert "check_motion" in calls

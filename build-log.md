@@ -59,8 +59,9 @@ Everything still to do on the build, in one place. Each row links to the entry w
 done, its row is removed and the entry that closes it says so. Plan-level tasks (study, purchases) are tracked
 outside the repo.
 
-Since 2026-11-14 the whole robot, in its looks version, is designed and checked in CAD before anything else is
-printed. When it passes, the coupons for every untested fit are cut from it and printed as one batch; then the
+Since 2026-11-14 the whole robot is designed and checked in CAD before anything else is printed. Since 2026-11-16
+the first version is the robot that walks (chassis, drive, legs, battery and switch in a functional body); the looks
+parts are screwed on afterwards and never hold it up. When it passes, the coupons for every untested fit are cut from it and printed as one batch; then the
 working chassis with its motor. Failures change that one version, which is checked again as a whole. Parts likely to need a fix (motor mount, cap, front block) are screwed on separately, so a fix reprints
 grams, not the base. The rows follow that order.
 
