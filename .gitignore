@@ -25,3 +25,6 @@ cad/carcass-120/.proxy/
 # Chassis: raw meshes and the coarse lite build are intermediate
 cad/chassis/out/*-raw.ply
 cad/chassis/out/*-lite.stl
+# Chassis: coarse STL/STEP written while iterating (front-block-v2.step alone is 48 MB). The fine files that are
+# printed are added at print time with `git add -f`.
+cad/chassis/out/
