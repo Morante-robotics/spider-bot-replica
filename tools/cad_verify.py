@@ -1108,6 +1108,16 @@ def static_parts(spec):
             all(np.allclose(Pt[n], P[0][n], atol=1e-6) for Pt in P[1:])]
 
 
+def signed_distance(env, env_key, pts):
+    """trimesh's signed distance (positive inside), kept in the disk cache by envelope and points: the points come
+    from a part's mesh and pose (seeded sampling), so an unchanged part costs nothing on the next run."""
+    key = ("keep-in", env_key, hashlib.md5(np.ascontiguousarray(pts, dtype=np.float64).tobytes()).hexdigest()[:16])
+    if key in DISK:
+        return DISK[key]
+    d = NEW[key] = trimesh.proximity.signed_distance(env, pts)
+    return d
+
+
 def check_keep_in(spec, meshes, rep, only=None):
     """Parts that must stay inside an envelope (a carcass shell inset by its wall) do: sampled surface points, signed
     distance to the reference mesh (positive inside) at least `inset`, except inside named, bounded allowances.
@@ -1124,6 +1134,7 @@ def check_keep_in(spec, meshes, rep, only=None):
     static = set(static_parts(spec))
     for en, e in envs.items():
         inset, tol = e.get("inset", 0.0), e.get("tol", 0.02)
+        env_key = mesh_hash(e["mesh"])
         z0, z1 = e.get("z", (None, None))
         allow = e.get("allow", {})
         plist = e["parts"] if e.get("parts") is not None else [n for n in spec.PARTS if n in static]
@@ -1179,7 +1190,7 @@ def check_keep_in(spec, meshes, rep, only=None):
                 rep.info(f"{en} / {an}: {pn} allowed outside here, {inb.sum()} samples, z {low:.2f}..{top:.2f}"
                          f"{bound}: {a['why']}")
                 if a.get("inset") is not None:          # a smaller inset here instead of none
-                    da = trimesh.proximity.signed_distance(e["mesh"], pts[inb])
+                    da = signed_distance(e["mesh"], env_key, pts[inb])
                     if (da < a["inset"] - tol).any():
                         rep.fail(f"{en} / {an}: {pn} {(da < a['inset'] - tol).sum()} samples less than "
                                  f"{a['inset']} inside (worst {a['inset'] - da.min():.2f} mm out)")
@@ -1187,7 +1198,7 @@ def check_keep_in(spec, meshes, rep, only=None):
                         rep.ok(f"{en} / {an}: {pn} ≥ {a['inset']:g} inside here (closest {da.min() - a['inset']:+.2f})")
                 free |= inb
             chk = pts[~free]
-            d = trimesh.proximity.signed_distance(e["mesh"], chk) if len(chk) else np.zeros(0)
+            d = signed_distance(e["mesh"], env_key, chk) if len(chk) else np.zeros(0)
             bad = d < inset - tol
             label = f"{en}: {pn} ({e.get('why', '')})"
             if bad.any():

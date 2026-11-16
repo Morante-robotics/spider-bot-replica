@@ -471,3 +471,19 @@ def test_smoke_skips_assembly_access_and_print():
             setattr(cv, n, f)
     assert not {"check_assembly", "check_print", "check_access"} & set(calls)
     assert "check_motion" in calls
+
+
+def test_keep_in_distances_come_from_the_disk_cache(tmp_path, monkeypatch):
+    # an unchanged part is not measured again on the next run, with the same verdict; a changed part is
+    calls = []
+    real = trimesh.proximity.signed_distance
+    monkeypatch.setattr(trimesh.proximity, "signed_distance", lambda m, p: calls.append(len(p)) or real(m, p))
+    inside, out = keep_in_spec(box([30, 30, 30])), keep_in_spec(box([30, 30, 37]))
+    f = cv.load_cache(str(tmp_path / "spec.py"), {})
+    first = run(cv.check_keep_in, inside)
+    assert len(calls) == 1 and not first.fails
+    cv.save_cache(f)
+    cv.load_cache(str(tmp_path / "spec.py"), {})
+    again = run(cv.check_keep_in, inside)
+    assert len(calls) == 1 and again.text() == first.text()
+    assert run(cv.check_keep_in, out).fails and len(calls) == 2

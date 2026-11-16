@@ -17,6 +17,7 @@ dependencies = [
     "lxml>=6.1",
     "matplotlib>=3.11",     # every figure (tools/figures.py)
     "pillow>=13.0",         # photos and GIFs
+    "embreex>=4.4.0.post1",
 ]
 
 [dependency-groups]

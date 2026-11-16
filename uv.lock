@@ -212,6 +212,20 @@ wheels = [
 ]
 
 [[package]]
+name = "embreex"
+version = "4.4.0.post1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/48/8e/4099a0c88a36207c4a18a9b800b4bc6d03ef1c266cad6724a2e130ff982f/embreex-4.4.0.post1-cp312-cp312-macosx_13_0_arm64.whl", hash = "sha256:a902809f99ac7a8bf1267a4a207d415a7a7e95a8d2b5e9d443a2cc291b9c1482", size = 5052543, upload-time = "2026-10-21T22:48:32.056Z" },
+    { url = "https://files.pythonhosted.org/packages/35/33/ac598c648dd66f783fa54c43272e6469e922787f471a7a6557e5c2022233/embreex-4.4.0.post1-cp312-cp312-macosx_13_0_x86_64.whl", hash = "sha256:1704af3c2e80fc6be4c1637402748ca20fd217980bd641dd3f228f7e09b0a461", size = 13224525, upload-time = "2026-10-21T22:48:34.347Z" },
+    { url = "https://files.pythonhosted.org/packages/3c/fe/49e8e481cb0f460a7949617847d4afbd573f5c5e1cb3a8c4df509e3a4e8a/embreex-4.4.0.post1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:9ee31b8b40a129620e40e06ae5c0af088b12e5f52c583e43428b87a02786d6bb", size = 14593360, upload-time = "2026-10-21T22:48:37.281Z" },
+    { url = "https://files.pythonhosted.org/packages/2e/3e/218cb6cdd12e361320c0c27c47ce284500e43322bdab9ed19ad76ab92474/embreex-4.4.0.post1-cp312-cp312-win_amd64.whl", hash = "sha256:6286204fdcd75465cc458e610319c19dcf898292211755cca13da7248db172ab", size = 13124419, upload-time = "2026-10-21T22:48:40.056Z" },
+]
+
+[[package]]
 name = "et-xmlfile"
 version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -879,6 +893,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "build123d" },
+    { name = "embreex" },
     { name = "lxml" },
     { name = "manifold3d" },
     { name = "matplotlib" },
@@ -906,6 +921,7 @@ office = [
 [package.metadata]
 requires-dist = [
     { name = "build123d", specifier = ">=0.13" },
+    { name = "embreex", specifier = ">=4.4.0.post1" },
     { name = "lxml", specifier = ">=6.1" },
     { name = "manifold3d", specifier = ">=3.5" },
     { name = "matplotlib", specifier = ">=3.11" },
