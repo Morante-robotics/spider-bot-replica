@@ -39,6 +39,10 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
    carcass, so its gear pockets were cut flat, and a new check now keeps every part inside the carcass. It passes;
    the robot is still about 1 % too heavy for the motor's margin, so a weight and size review is added before
    anything is bought or printed. The looks chassis and body are next.
+9. **The chassis and a clutch.** The chassis shell is built within its mass budget, which brings the robot's
+   design mass under the motor's ceiling; the checks of the whole robot are one spec that passes, and a friction
+   clutch on the motor's shaft is modelled so a jam slips instead of breaking a gear. Nothing will be printed until
+   the looks parts are modelled: one robot, not a ballasted test chassis.
 
 <img src="../sim/images/drive-attempts.png" alt="The three drives tried, from above and from the side">
 
@@ -1481,7 +1485,8 @@ plane; the clamp (blue bar) and its screws are above the deck, away from the leg
 - **Switch and eyes.** A small slide switch (SS12D00) recessed at the rear; the eyes board (2 LEDs and their
   resistors) in a 50 × 22 × 10 mm pocket cut into the solid head.
 - **v0 is printed as the looks chassis**, not as a plain test base, and walks with about 125 g of steel ballast in
-  a frame placed at the final robot's centre of mass, so the motor is tested at the final weight.
+  a frame placed at the final robot's centre of mass, so the motor is tested at the final weight. ↩️ Dropped on
+  2026-11-16: [one robot, the looks one](#chassis-part-b1-part-c-check-and-the-friction-clutch).
 
 **Mass.** With the parts the plan adds (drive module, front block v2, cradle, paint, the screws for each joint), the
 final robot comes to 445 g as summed, with its centre of mass 0.4 mm and 2.5 mm off the body axis (Fig. 4). With
@@ -1718,15 +1723,109 @@ modelled or not bought yet, and Part B gets a mass budget: looks shell at most 8
   whole robot can be smaller and still needs the 120 % scale. The motor purchase and the coupons wait for it. Part B
   is drawn at 120 %; the scale is decided in Part D.
 
+This entry closes the open item «Robot master model».
+
+[↑ Contents](../build-log.md#contents)
+
+### Chassis Part B1, Part C check and the friction clutch
+
+**Phase 3 · Mechanisms · 2026-11-16** · Status: 🔄 chassis built and checked, clutch modelled; weight review and looks parts next
+
+> **In short.** The chassis shell (B1) is built and its mass is measured from the model: 70.1 g against an 86 g
+> budget, which brings the robot's design mass to 466 g, under the 478 g the chosen motor carries with its margin of
+> 3 (it was 484 g). The three checks of the whole robot are now one spec and it passes. A friction clutch on the
+> motor's output shaft is also modelled: it slips before the gearbox or a printed tooth can break, and a stack of
+> thin steel shims sets the torque at which it slips. The order of what is left changed: the walking robot is
+> checked in CAD, then the clutch, the weight review and the looks parts, and only then is anything bought or
+> printed, as one robot.
+
+The [plan](#whole-robot-first-motor-sizing-and-chassis-plan) models the whole robot in parts, each checked before the
+next. Part A, the drive module, is [done](#chassis-part-a-master-model-and-drive-module); this entry adds the chassis
+shell it screws into (B1), the whole-robot check (C, step 1) and a torque limiter for the motor.
+
+#### Steps
+
+1. **Chassis shell B1 and its mass.** [`mass_estimate.py`](../cad/chassis/mass_estimate.py) now takes the masses of
+   the shell, the crank cover and the front block from the STL files in `out/` instead of from estimates:
+
+   | Part | Built mass | Budget or estimate |
+   |---|---|---|
+   | Chassis shell | 70.1 g | 86 g budget |
+   | Front block v2 | 19.1 g | 13–15 g in the plan (opened at its rear face to get here) |
+   | Crank cover | 4.7 g | |
+
+   With these and the clutch's steel parts, the robot sums to 438 g and its design mass, with the contingency by
+   source, is **466 g**: margin 3.08 against 3.0 required, 12 g under the ceiling. The motor stays the HP 380:1
+   (decision Q5, option A1b). It closes the weight worry of [Part A](#chassis-part-a-master-model-and-drive-module);
+   the weight and size review still comes (Part D), because every gram under the ceiling is margin.
+2. **One check for the walking robot (Part C, step 1).** `verify_b1.py` and `verify_fb.py` are merged into
+   [`cad/chassis/verify.py`](../cad/chassis/verify.py), which now checks the drive module, the chassis shell, the
+   front block and the clutch together. Full check: PASS ([`verify-result.txt`](../cad/chassis/verify-result.txt)). This closes the open item «One `cad_verify` spec for the whole robot».
+3. **The clutch plan** ([`design-plan-clutch.md`](../cad/chassis/design-plan-clutch.md)). A jam of the legs would
+   push the motor past what its gearbox tolerates (stall is 360–503 N·mm, the gearbox's limit 245), so something
+   must slip first. Three places and three candidates were compared with numbers (Fig. 1). The design reviewer asked
+   for changes on revision 1 (8 objections: a PTC fuse does not separate a slip from walking, the pinion was not
+   centred, the collar had no way to be pressed by hand…); revision 2 was approved with Morante's answers:
+
+   | Question | Answer |
+   |---|---|
+   | Slip window | 129–196 N·mm (walking needs at most 117, the gearbox 245) |
+   | Module change | A notch in the module's -X wall and the motor axis 0.1 mm further out; the nut trap stays |
+   | Audible clicker | No |
+   | Pinion face | 4 mm instead of 5 |
+
+4. **The clutch in CAD.** A sleeve pressed on the motor's D-shaft carries the pinion, which turns on it; a steel wave
+   washer (DIN 137 B M3) presses the pinion against the sleeve's shoulder through steel shims (DIN 988 3 × 6, 0.1 mm
+   steps), and a collar pressed on the shaft's tip holds the stack. Slip torque is set on the bench by adding or
+   taking away a shim. Modelled in [`build.py`](../cad/chassis/build.py), the interface I6 of
+   [`robot.py`](../cad/robot.py) and a new assumed fit, `SLIP_BORE` (0.1 mm a side) in
+   [`fits.py`](../cad/fits.py). Full check: `cad_verify: PASS (0 failures, 94 warnings)`; the four warnings it added (90 to 94) are
+   explained in [`design-review.md`](../cad/chassis/design-review.md). One change from the plan: the sleeve and the
+   collar are pressed in one push in the jig (step 6 of the README), not one after the other.
+5. **Coupons.** CL1 (the clutch on the real shaft), CL1-heat (60 s with the crank blocked), CL2 and CL3 (two
+   other ways to get the same slip, kept as fair alternatives: a printed detent and O-rings) and K1 (the pinion's
+   D-bore, now also the collar's pull-off) are updated in
+   [`coupons_clutch.py`](../cad/chassis/coupons_clutch.py); they print in the one coupon batch.
+6. **Hardware** added to [`hardware.md`](../hardware.md), bought with the motor: the wave washer, the shims and the
+   O-rings.
+
+#### Result
+
+<img src="../cad/chassis/images/clutch-plan.png" alt="Half section of the clutch along the motor shaft: sleeve, pinion, wave washer, shims, collar">
+
+*Fig. 1 · The clutch in half section along the motor's shaft. Yellow: sleeve and collar, pressed on the steel shaft;
+green: the pinion, which turns on the sleeve; red: wave washer and shims; the two red bars are the friction faces.
+The dashed red box is the notch cut in the module's -X wall; the blue line is the tip of idler 3, which the clutch
+stays clear of. Drawn at the plan stage, from the same numbers; it is not yet re-rendered from the built parts.*
+
+| | Before | Now |
+|---|---|---|
+| Design mass | 484 g (Part A) | 466 g, margin 3.08 (ceiling 478 g) |
+| Whole-robot check | three specs | one: PASS, 0 failures, 94 warnings |
+| Stall protection | teeth break first | friction clutch, 129–196 N·mm |
+
+What this proves is only that the parts exist, fit and clear each other in CAD. The clutch's numbers (the slip
+torque, whether the collar's 1.2 mm of grip on the shaft holds under the spring) are predictions until the coupons
+are printed.
+
+#### Decisions
+
+- **One robot, the looks one.** Morante dropped the functional body, the ballast frame and the v0 print with
+  ballast: nothing is printed until the looks parts are modelled. This reverses the plan's v0 (see the note in
+  [Whole robot first](#whole-robot-first-motor-sizing-and-chassis-plan)).
+- **New order:** the walking robot checked in CAD; the friction clutch; Part D, the weight and size review (kept,
+  scale included); the looks parts in CAD (body v2 with the holder cradle, the eyes); then the motor, battery holder,
+  switch and clutch hardware are bought and measured, one coupon batch is printed, and the one robot.
+- **Friction clutch over a PTC fuse**, because a slip draws only 2.1 times the walking current and a PTC cannot tell
+  them apart; no clicker; the pinion face is 4 mm.
+
 #### Next
 
-Part B, in the same folder and check ([plan](../cad/chassis/design-plan.md#status-and-next-steps)): the looks chassis
-shell with the deck opening for the module, the four bosses under the module (each screw cut to the length in the
-[README's table](../cad/chassis/README.md#hardware-part-a)), the 2 mm bump at the rear and the path of the motor's
-wires; body v2, front block v2, the holder cradle and the ballast frame, each within its mass budget. Before the
-workshop kit, the bench steps' titles must say directions as seen on the bench, not in the robot's axes, and
-[`tools/workshop_kit.py`](../tools/workshop_kit.py) must show when each measurement is taken.
-
-This entry closes the open item «Robot master model».
+- Part C, rest: `sim/motor_sizing.py` rerun on the built masses.
+- The weight and size review (Part D); the shell's STL still carries the swept cut of the old 5 mm pinion, so it is
+  rebuilt there. The figures in `cad/chassis/images/` are not re-rendered yet.
+- Before buying the wave washer, check the seller's load table (the shims need a spring of at most 60 N/mm).
+- Coupon K1's pull-off test decides whether 1.2 mm of shaft is enough to hold the collar; if not, a longer collar in
+  the notch's spare 0.8 mm, or thread-locking fluid on the tip.
 
 [↑ Contents](../build-log.md#contents)

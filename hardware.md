@@ -9,7 +9,7 @@ count per robot or test.
 
 | Item | Size | Have | Used by | Notes |
 |---|---|---|---|---|
-| Socket head screw | M3 × 10 | ? | [test frame v2](cad/test-frame/): 2 (fork swivel); [chassis Part B](cad/chassis/design-plan-b.md): 16 (forks) + 2 (front block) + 2 (holder cradle) + 1 (eyes board) + 1 (switch retainer) + 2 (body lug) + 2 (ballast lid, v0) + 2 (crank cover) = 28 | Nuts in the M3 nut row |
+| Socket head screw | M3 × 10 | ? | [test frame v2](cad/test-frame/): 2 (fork swivel); [chassis Part B](cad/chassis/design-plan-b.md): 16 (forks) + 2 (front block) + 2 (holder cradle) + 1 (eyes board) + 1 (switch retainer) + 2 (body lug) + 2 (crank cover) = 26 | Nuts in the M3 nut row |
 | Socket head screw | M3 × 12 | ? | [gear train test v2](cad/gear-train-test/): 3 (idler axles) + 2 (cap); [chassis Part A](cad/chassis/): 1 (cap front) + 1 (cap and clamp, shared) + 1 (clamp rear); chassis Part B: none (the body's rear screw is an M3×8, below) | |
 | Socket head screw | M3 × 16 | ? | [test leg](build-log/3-legs-and-drive.md#test-leg-first-assembly-and-clearance-result) | |
 | Nut | M3 | ? | gear train test v2: 3; test frame v2: 2; [chassis Part A](cad/chassis/): 4 (cap front, cap and clamp shared, clamp rear, pin keeper) + 4 (I7, module to chassis) | 5.5 mm across flats, 2.4 mm thick |
@@ -26,6 +26,8 @@ count per robot or test.
 | Mini slide switch | SPDT, panel, about 12 × 6 × 6 mm (e.g. SS12D00) | ? | [chassis](cad/chassis/design-plan.md): 1 (main switch, recessed at the rear) | To buy with the motor |
 | 2-pin connector pair | JST-XH 2.54 mm, with leads | ? | [chassis](cad/chassis/design-plan.md): 2 (battery → chassis; switched power → eyes board) | To buy with the motor |
 | Resistor | 100–220 Ω, ¼ W | ? | Eyes board: 2 (one per LED) | From the Arduino kit, or to buy |
-| Ballast | Steel nuts or washers, about 110 g | ? | [chassis](cad/chassis/design-plan.md) v0 walk test: 1 set, in the ballast frame | Workshop stock or to buy; mass from [`cad/chassis/mass_estimate.py`](cad/chassis/mass_estimate.py), weighed on a kitchen scale |
+| Wave washer | DIN 137 B M3, stainless | ? | [chassis](cad/chassis/design-plan-clutch.md): 1 (clutch spring) | To buy with the motor; check the seller's load table first: spring rate at most 60 N/mm |
+| Shim washer | DIN 988 3 × 6, 0.1 / 0.2 / 0.3 mm (one assortment) | ? | [chassis](cad/chassis/design-plan-clutch.md): 0–3 (sets the slip torque) | To buy with the motor |
+| O-ring | 5 × 1, NBR 70 | ? | Coupon CL3 (clutch alternative) | To buy with the motor |
 
 Tools in the workshop (for `ACCESS` in the CAD checks and the kit): screwdrivers, hex keys, pliers, caliper.

@@ -103,3 +103,18 @@ channel are not modelled (the switch pocket's layout clashes with the crank wind
 3. The 0.2 mm module path leaves a stepped surface at the module's rear end (45 pinch edges notched at r 0.1):
    cosmetic inside the bowl; K-coupon of the rear end if it prints badly.
 4. The front block changes again: `fb-clear` re-keys on its STL, the shell rebuilds in ≈ 25 s.
+
+## Friction clutch (2026-11-16, plan rev 2 approved)
+
+| Question | Answer, with its number or picture |
+|---|---|
+| Brief → how met → how checked | Window 129–196 N·mm: set per unit with DIN 988 shims (lever test in `verify.py` MEASURE: 440–665 g at 30 mm). Notch x −3.3 to −5.4, r 5.5 (`build.py` `NOTCH_*`): `collar-clear` keep-out passes. Motor axis +0.1 (`robot.MOTOR_CD_EXTRA`): pinion × idler 3 v2 gap in section 3 (GEAR_MOTION, motor also lifted 0.2). I7 nut traps unchanged (`I7_NUTS` untouched). No clicker. Pinion face 4 mm (`R.PINION_FACE`); gearbox face kept at x 3.3 (`R.GEARBOX_X` now pinion + shoulder + 0.8). Cap, clamp top, front block and crank cover unchanged: `CLAMP_Z0` held at 79.85 (pinion tip 0.7 radial, 1.7 under the relief); shell.py and front_block.py not edited or rebuilt |
+| Fits | Sleeve and collar D-bores `DSHAFT` (K1, assumed); pinion on sleeve `SLIP_BORE` 0.1 a side (new, assumed, CL1); collar to notch 1.0 radial and 0.8 to its end (`GEAR_AXIAL`); shoulder r 4.5 and wave washer r 4.0 inside the `idler3-ring` keep-out r 4.77 (\|x\| ≤ 2.95): idler 3 floated tip r 5.27 |
+| Strength | Sleeve wall 1.0 (K1 tests 1 mm walls at 215 N·mm); collar 1.2 long on the D: pull-off ≥ 170 N is a K1 test, not a calculation; pinion 4 mm: Lewis ≈ 19 MPa worst (plan §3) |
+| Held | Pinion, washer, shims spin on the shaft between the shoulder and the collar (RETAIN spin X); sleeve and collar held by their press, with the 0.8 gauge / notch end behind them (as the old pinion) |
+| Assembly | One push in the press jig: collar (dot to the shaft's flat), shim, wave washer, pinion, sleeve, fork, motor (section 5). Service: collar prised off with two small screwdrivers, a new one pressed (0.1 g) |
+| Print | Pinion and collar flat; sleeve shoulder down (D-bore vertical, no support) |
+| Marks | Sleeve and collar: a dot over the D's flat; pinion none (either way round) |
+| New WARNs (90 → 94) | +5, −1: `clutch-sleeve` 1.5 % and `clutch-collar` 1.9 % of the surface read under 0.8 mm (the D-bore's flat corners, lead-in rims and the dot; the walls are 1.0 and the collar 1.2 thick, none a knife edge that carries load); `clutch-sleeve × n20-shaft` and `clutch-collar × n20-shaft` `DSHAFT` assumed (K1); `pinion × clutch-sleeve` `SLIP_BORE` assumed (CL1); the old `pinion × n20-shaft` DSHAFT WARN is gone. The module's overhang went 837 → 848 mm²: the notch's arc is a roof when the module prints upside down, 11 mm² over the bed, none over the part (287 unchanged) |
+
+Pre-mortem: (1) the collar's 1.2 mm press lets go under the spring and the slip creeps (K1 pull-off decides; fallback: collar longer into the notch's 0.8, or Loctite 638 on the tip); (2) PLA faces glaze or smear during a long stall (CL1-heat; kit rule «humming, legs stopped = switch off»); (3) the wave washer's rate is stiffer than 60 N/mm and one 0.1 shim jumps past the window (two washers in series; the seller's load table is checked before buying); (4) the collar's dot is set the wrong way and the press jams (the thumb test: if it does not go in by thumb, stop and re-align before the vise).

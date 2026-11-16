@@ -22,3 +22,6 @@ result.json
 # Stage cache (tools/stage_cache.py) and carcass proxies (cad/robot.py): rebuilt on demand
 cad/*/out/.cache/
 cad/carcass-120/.proxy/
+# Chassis: raw meshes and the coarse lite build are intermediate
+cad/chassis/out/*-raw.ply
+cad/chassis/out/*-lite.stl

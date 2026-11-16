@@ -10,7 +10,10 @@ Parts (all PLA), in robot coordinates (../README.md: mm, Z up, forward = -Y, +X 
                 shaft tip and motor; 2 × M3×12 (one shared with the clamp)
   motor-clamp   bar along X over the N20, from the cap's -X bridge (over the pinion at the keep-out height) to the
                 end wall behind the motor; presses the gearbox and can through two pads; 2 × M3×12
-  pinion        12 teeth, module 1, 5 mm face, D-bore pressed on the N20 shaft (F3)
+  pinion        12 teeth, module 1, 4 mm face, Ø5.2 slip bore: the friction clutch's disc (design-plan-clutch.md)
+  clutch-sleeve D-bore pressed on the N20 shaft, Ø5 journal for the pinion, Ø9 × 1 shoulder (+X friction face)
+  clutch-collar D-bore pressed on the shaft tip, holds the DIN 988 shims and the DIN 137 B M3 wave washer
+  coupon-*      clutch coupons CL1 (stand, arm), CL2, CL3, K1: coupons_clutch.py
   idler-3-v2    idler 3 with a 5 mm face: same 20 teeth, same phase, a phase dot
   pin-keeper    strip over the three idler pins' +X ends, in a recess, 1 × M3×8
   gauge-fork    bench tool: the 0.8 mm gauge, a U-fork slid into the press jig over the pinion; the press ends with
@@ -35,13 +38,14 @@ import os
 import sys
 
 import numpy as np
-from build123d import Box, Cone, Cylinder, Plane, Polygon, Pos, Rot, extrude
+from build123d import Align, Box, Cone, Cylinder, Plane, Polygon, Pos, Rot, extrude
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", ".."))
 from cad import common as K, design, fits, robot as R  # noqa: E402
 
 C = design("crankshafts")
+ZMIN = (Align.CENTER, Align.CENTER, Align.MIN)   # cylinders standing on z 0
 OUT = os.path.join(HERE, "out")
 
 # ---- datums and drive geometry (imported) -------------------------------------------------------------------------
@@ -103,7 +107,8 @@ TIP_SH = C.MOD * (C.SHAFT_TEETH / 2 + 1)
 # ---- pinion zone, gearbox pad, saddle ---------------------------------------------------------------------------------
 PIN_R = R.PINION_TIP_R + GAX            # 7.8: nothing still inside this radius next to the pinion's faces
 TESS = 0.05                # cuts that must clear a keep-out exactly: + the STL's chord error (export tolerance 0.02)
-PZ_X = R.PINION_FACE / 2 + GAX          # 3.3: walls inside |x| < 3.3 stop below the pinion (at ZM - 7.8)
+PZ_X = GB_X0                            # 3.3: walls inside |x| < 3.3 stop below the pinion (at ZM - 7.8): the clutch
+                                        # (pinion x -2.5..+1.5, shoulder to +2.5) + GEAR_AXIAL both sides
 SHAFT_X0 = GB_X0 - R.N20_SHAFT_L        # shaft tip, x from CX (-5.7)
 SHAFT_SLOT = R.N20_SHAFT_D / 2 + GAX    # U-slot in the -X wall round the spinning shaft tip (2.3)
 SAD_Y = (R.MOTOR_ENVELOPE[0][1] + LOC, R.MOTOR_ENVELOPE[1][1] - LOC)  # saddle inside the motor's own Y band
@@ -119,7 +124,9 @@ SCREW_CLAMP_X = (END_X0 + END_X1) / 2
 
 # ---- cap ---------------------------------------------------------------------------------------------------------
 CAP_W = 10.0               # half width of the plate (test cap v2.1 TEST_CAP_W 20)
-CLAMP_Z0 = ZM + PIN_R      # clamp bar underside: the pinion's keep-out height (79.85)
+CLAMP_Z0 = ZM - R.MOTOR_CD_EXTRA + PIN_R   # clamp bar underside (79.85), held where it was when the motor axis rose
+                           # 0.1 (clutch): cap, clamp top, front block and crank cover unchanged; the pinion tip clears
+                           # it by 0.7 radially (1.7 under PINION_RELIEF), ≥ GEAR_TIP 0.5
 CAP_T = CLAMP_Z0 - TOP     # cap plate 5.05 (test cap v2.1: 5.0): its top carries the clamp's -X foot
 CAP_Y0, CAP_Y1 = Y0, SH[3][0] + 4.0     # over every slot; ends behind crank 4's tongues
 TONGUE_W = J_HOLE - 2 * fits.TONGUE.side   # 3.9
@@ -146,8 +153,25 @@ KEEPER_SCREW = (-0.5, 46.2)             # (y, z): between idler 2 and idler 3 po
 KEEPER_TAB = (KEEPER_SCREW[1] - 3.0, KEEPER_Z[0])
 KEEPER_BLOCK = (-5.0, 4.0, None)        # spine block round the keeper nut (y0, y1, z bottom = KEEL_Z)
 KEEPER_SCREW_L = 8.0
+# ---- friction clutch on the N20 shaft (design-plan-clutch.md rev 2, approved 2026-11-16; x from CX) -----------------
+SLEEVE_WALL = 1.0          # sleeve wall round the D-bore (plan 3b; K1 tests 1 mm-wall sleeves)
+SLEEVE_OD = R.N20_SHAFT_D + 2 * SLEEVE_WALL            # 5.0: the pinion's journal
+SLEEVE_X0 = R.PINION_X0 + 0.2                           # -2.3: 0.2 inside the pinion's -X face (the spring bears on it)
+SHOULDER_X = (R.PINION_X0 + R.PINION_FACE, R.PINION_X0 + R.PINION_FACE + R.CLUTCH_SHOULDER)   # +1.5..+2.5
+SHOULDER_D = 9.0           # +X friction face; 0.77 radial to idler 3 floated (r 5.27, plan 3b)
+PINION_BORE = fits.bore(SLEEVE_OD, fits.SLIP_BORE)     # 5.2: the pinion turns on the sleeve (slip bore, assumed)
+SPRING = (3.2, 8.0, 0.8)   # wave washer DIN 137 B M3: d1, d2, compressed height (x -2.5..-3.3; hardware.md, to buy)
+SHIM = (3.0, 6.0, 0.1)     # shim DIN 988 3×6×0.1 (stock 0.1/0.2/0.3; one 0.1 modelled: set per unit on the bench)
+SPRING_X1 = R.PINION_X0 - SPRING[2]                     # -3.3: spring's -X face = shims' +X face
+COLLAR_X1 = SPRING_X1 - SHIM[2]                         # -3.4: collar's +X face
+COLLAR_L = 1.2             # collar length: its -X face at -4.6, 1.1 short of the shaft tip (-5.7)
+COLLAR_X0 = COLLAR_X1 - COLLAR_L                        # -4.6
+COLLAR_D = 9.0             # same as the shoulder: squared by the jig's Ø9.5 pocket
+NOTCH_R = 5.5              # -X wall notch round the collar (1.0 radial, plan 3b), open at +Z
+NOTCH_X0 = COLLAR_X0 - GAX                              # -5.4: notch end (I7 / shared-nut wall ≥ 1.25, probe_notch.py)
+JIG_COLLAR = COLLAR_D / 2 + fits.TURN.side              # 4.75: jig pocket Ø9.5 behind the pinion step (collar, spring)
 # ---- bench tools: gauge fork, press jig and cup (in robot coordinates at the press position, the motor at its place) ----
-FORK_X = (R.PINION_FACE / 2, GB_X0)     # 2.5..3.3: the 0.8 gauge is the gap the pinion keeps from the gearbox face
+FORK_X = (GB_X0 - GAX, GB_X0)           # 2.5..3.3: the 0.8 gauge is the gap the pinion keeps from the gearbox face
 FORK_HW = R.N20_W / 2 + 1.0             # 6.0: fork half width (Y): covers the gearbox face (10 across Y) with 1 to spare
 FORK_Z = (ZM - R.N20_H / 2, ZM + 18.0)  # from the gearbox's -Z face (6 below the axis) to a handle 8 above the jig
 FORK_SLOT = R.N20_SHAFT_D / 2 + WIN     # 2.0: U-slot round the shaft, open at -Z (the fork drops over it)
@@ -308,6 +332,9 @@ def drive_module():
     # -X wall: U-slot for the spinning shaft tip, open at the top
     cut += [cylx(YM, ZM, SHAFT_SLOT, -W_THICK - 1, -PZ_X + 0.01),
             box(-W_THICK - 1, -PZ_X + 0.01, YM - SHAFT_SLOT, YM + SHAFT_SLOT, ZM, TOP + 1)]
+    # -X wall: U-notch round the clutch's collar, open at the top (the motor drops in with its clutch)
+    cut += [cylx(YM, ZM, NOTCH_R, NOTCH_X0, -PZ_X + 0.01), box(NOTCH_X0, -PZ_X + 0.01, YM - NOTCH_R, YM + NOTCH_R, ZM,
+                                                              TOP + 1)]
     # +X wall: the gearbox drops onto the pad (wall top at PAD_Z) between two steps that locate it in Y (MOTOR_SEAT)
     cut += [box(PZ_X - 0.01, W_THICK + 1, YM - R.N20_W / 2 - WIN, YM + R.N20_W / 2 + WIN, PAD_Z, TOP + 1)]
     # saddle: a 90° V under the gearbox (clear) and under the can (it rests on the V's flanks), then the can's stop
@@ -382,6 +409,7 @@ def cap():
     part -= box(-PZ_X - CAP_PLAY, PZ_X + CAP_PLAY, YM - PIN_R, YM + PIN_R, z0 - 1, z1 + 1)
     part -= box(SHAFT_X0 - GAX, -PZ_X + 0.01, YM - R.N20_SHAFT_D / 2 - WIN, YM + R.N20_SHAFT_D / 2 + WIN, z0 - 1,
                 z1 + 1)
+    part -= box(NOTCH_X0 - CAP_PLAY, -PZ_X + 0.01, YM - NOTCH_R, YM + NOTCH_R, z0 - 1, z1 + 1)   # over the collar
     cw = R.N20_W / 2 + SEAT + CHEEK_T + WIN            # round the clamp's cheeks
     part -= box(PZ_X - 0.01, CAP_W + 1, YM - cw, YM + cw, z0 - 1, z1 + 1)
     for sx, sy in (SCREW_FRONT, SCREW_SHARED):
@@ -428,17 +456,53 @@ def dot(x, y, z):
     return Pos(x, y, z + K.MARK_D / 2 + 0.1 - K.MARK_DEPTH) * Sphere(K.MARK_D / 2 + 0.1)
 
 
-def pinion():
-    """12 T, module 1, 5 mm, D-bore at the shaft's size + DSHAFT (pressed on), in its own frame: axis Z, the face
-    at z 0 goes to -X (the shaft enters there: 0.5 mm lead-in). The flat of the D faces +Y here (= +Z in place at
-    angle 0, R.n20_shaft()); a dot on the top face over the flat."""
+def d_bore(length, top_lead=True):
+    """D-bore at the shaft's size + DSHAFT along Z (0..length), the shaft's flat towards +Y (= +Z in place at angle 0,
+    R.n20_shaft()); a LEAD lead-in at the top mouth (the shaft enters there in the press) and 0.2 at the bottom
+    (first layer)."""
     d = R.d_profile(R.N20_SHAFT_D + 2 * fits.DSHAFT.side, R.N20_SHAFT_FLAT)
-    bore = Pos(0, 0, -1) * extrude(Polygon(*[tuple(p) for p in d], align=None), amount=R.PINION_FACE + 2)
-    for z, (r0, r1) in ((-0.01, (R.N20_SHAFT_D / 2 + LEAD, R.N20_SHAFT_D / 2)),          # both mouths: the shaft
-                        (R.PINION_FACE - LEAD, (R.N20_SHAFT_D / 2, R.N20_SHAFT_D / 2 + LEAD))):  # enters at +X
-        bore += Pos(0, 0, z) * Cone(r0, r1, LEAD + 0.01, align=None)
-    g = flat_gear(R.PINION_TEETH, R.PINION_FACE, bore)
-    return g - dot(0, 3.4, R.PINION_FACE)
+    bore = Pos(0, 0, -1) * extrude(Polygon(*[tuple(p) for p in d], align=None), amount=length + 2)
+    r = R.N20_SHAFT_D / 2
+    bore += Pos(0, 0, -0.01) * Cone(r + fits.FIRST_LAYER, r, fits.FIRST_LAYER + 0.01, align=None)
+    if top_lead:
+        bore += Pos(0, 0, length - LEAD) * Cone(r, r + LEAD, LEAD + 0.01, align=None)
+    return bore
+
+
+def pinion(bore_d=PINION_BORE, face=None):
+    """12 T, module 1, 4 mm (clutch), round slip bore on the sleeve, in its own frame: axis Z, z 0 = the -X face (the
+    spring's side; at x R.PINION_X0 in place). No mark: it goes on either way round (both faces are friction faces)."""
+    face = face or R.PINION_FACE
+    r = bore_d / 2
+    bore = Pos(0, 0, -1) * Cylinder(r, face + 2, align=ZMIN)
+    bore += Pos(0, 0, -0.01) * Cone(r + fits.FIRST_LAYER + 0.2, r, fits.FIRST_LAYER + 0.21, align=None)
+    bore += Pos(0, 0, face - 0.3) * Cone(r, r + 0.3, 0.31, align=None)
+    g = flat_gear(R.PINION_TEETH, face, bore)
+    return g
+
+
+def clutch_sleeve():
+    """Sleeve pressed on the D-shaft: Ø5 journal (x -2.3..+1.5) and the Ø9 shoulder (x +1.5..+2.5), the pinion's +X
+    friction face. Own frame: axis Z, z 0 = its -X end (x SLEEVE_X0); printed shoulder down (PRINT_ORIENT flips it),
+    the D-bore vertical. A dot on the shoulder's +X face over the flat: line it up with the shaft's flat."""
+    L = SHOULDER_X[1] - SLEEVE_X0
+    zs = SHOULDER_X[0] - SLEEVE_X0
+    part = Cylinder(SLEEVE_OD / 2, zs + 0.01, align=ZMIN) + Pos(0, 0, zs) * Cylinder(SHOULDER_D / 2, L - zs,
+                                                                                          align=ZMIN)
+    part -= Pos(0, 0, -0.01) * (Cylinder(SLEEVE_OD / 2 + 1, 0.31, align=ZMIN) -
+                                 Cone(SLEEVE_OD / 2 - 0.3, SLEEVE_OD / 2 + 0.01, 0.31, align=None))   # 0.3 chamfer
+    part -= Pos(0, 0, -1) * extrude(Polygon(*[tuple(p) for p in R.d_profile(R.N20_SHAFT_D + 2 * fits.DSHAFT.side,
+                                                                              R.N20_SHAFT_FLAT)], align=None),
+                                    amount=L + 2)
+    part -= Pos(0, 0, L - LEAD) * Cone(R.N20_SHAFT_D / 2, R.N20_SHAFT_D / 2 + LEAD, LEAD + 0.01, align=None)
+    return part - dot(0, 3.5, L)
+
+
+def clutch_collar():
+    """Collar pressed on the shaft's tip (D-keyed): holds the shims and the wave spring against the pinion. Own frame:
+    axis Z, z 0 = its -X face (x COLLAR_X0), printed that face down; dot on the +X face over the flat."""
+    part = Cylinder(COLLAR_D / 2, COLLAR_L, align=ZMIN) - d_bore(COLLAR_L)
+    return part - dot(0, 3.4, COLLAR_L)
 
 
 def idler_3_v2():
@@ -483,13 +547,13 @@ def press_jig():
     """U-channel open at +Z, used with its -X face on the table: pinion pocket (its floor at the pinion's -X face,
     x -2.5), the fork's slot over it, the gearbox socket above. Printed on its -Z face, the open side up: every
     pocket, slot and hole is open upwards (no overhang). 0.5 lead-ins on the socket's and the channel's mouths."""
-    x0 = -R.PINION_FACE / 2 - JIG_BACK
+    x0 = R.PINION_X0 - JIG_BACK
     zt = ZM + JIG_HW
     part = box(x0, JIG_TOP, YM - JIG_HW, YM + JIG_HW, ZM - JIG_HW, zt)
     sy, sz = JIG_SOCKET
     px1 = FORK_X[0] + LOC                          # pocket up to 0.2 over the pinion's +X face
-    part -= cylx(YM, ZM, JIG_POCKET, -R.PINION_FACE / 2, px1) + \
-        box(-R.PINION_FACE / 2, px1, YM - JIG_POCKET, YM + JIG_POCKET, ZM, zt + 1)
+    part -= cylx(YM, ZM, JIG_POCKET, R.PINION_X0, px1) + \
+        box(R.PINION_X0, px1, YM - JIG_POCKET, YM + JIG_POCKET, ZM, zt + 1)
     a, b, w = JIG_SLOT
     part -= box(a, b, YM - w, YM + w, JIG_SLOT_Z0, zt + 1)
     part -= box(b - 0.01, JIG_TOP + 1, YM - sy, YM + sy, ZM - sz, zt + 1)
@@ -501,11 +565,13 @@ def press_jig():
                                                         (JIG_TOP + 0.01, ZM - sz), align=None), amount=sy + m,
                                      both=True)
     for s in (-1, 1):                              # channel's +Z mouth: lead-ins on the pocket's, slot's, socket's sides
-        for y, xa, xb in ((JIG_POCKET, -R.PINION_FACE / 2, px1), (w, a, b), (sy, b, JIG_TOP)):
+        for y, xa, xb in ((JIG_POCKET, R.PINION_X0, px1), (w, a, b), (sy, b, JIG_TOP)):
             part -= prism_yz([(YM + s * y, zt - m), (YM + s * (y + m + 0.01), zt + 0.01), (YM + s * y, zt + 0.01)],
                              xa, xb)
-    part -= cylx(YM, ZM, JIG_HOLE, x0 - 1, -R.PINION_FACE / 2 + 0.01) + \
-        box(x0 - 1, -R.PINION_FACE / 2 + 0.01, YM - JIG_HOLE, YM + JIG_HOLE, ZM, zt + 1)   # a U, open upwards
+    part -= cylx(YM, ZM, JIG_COLLAR, COLLAR_X0, R.PINION_X0 + 0.01) + \
+        box(COLLAR_X0, R.PINION_X0 + 0.01, YM - JIG_COLLAR, YM + JIG_COLLAR, ZM, zt + 1)   # Ø9.5 collar pocket, a U
+    part -= cylx(YM, ZM, JIG_HOLE, x0 - 1, COLLAR_X0 + 0.01) + \
+        box(x0 - 1, COLLAR_X0 + 0.01, YM - JIG_HOLE, YM + JIG_HOLE, ZM, zt + 1)   # shaft tip: a U, open upwards
     return part
 
 
@@ -525,11 +591,14 @@ def press_cup():
 
 
 PARTS = {"drive-module": drive_module, "cap": cap, "motor-clamp": motor_clamp, "pinion": pinion,
+         "clutch-sleeve": clutch_sleeve, "clutch-collar": clutch_collar,
          "idler-3-v2": idler_3_v2, "pin-keeper": pin_keeper, "gauge-fork": gauge_fork, "press-jig": press_jig,
          "press-cup": press_cup}
 
 
 def main():
+    import coupons_clutch as CC
+    PARTS.update(CC.PARTS)
     args = K.part_args(__doc__, PARTS)
     K.build_parts(PARTS, args.part or PARTS, OUT)
 

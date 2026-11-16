@@ -44,8 +44,9 @@ def printed(path, lift=0.0):
 
 
 def _small():
-    """Clamp, keeper, pinion and idler 3 v2's extra over the printed idler 3 (counted with the crankshafts)."""
-    parts = [printed(f"cad/chassis/out/{n}.stl") for n in ("motor-clamp", "pin-keeper", "pinion", "idler-3-v2")]
+    """Clamp, keeper, clutch (pinion, sleeve, collar) and idler 3 v2's extra over the printed idler 3 (counted with the crankshafts)."""
+    parts = [printed(f"cad/chassis/out/{n}.stl") for n in ("motor-clamp", "pin-keeper", "pinion", "clutch-sleeve",
+                                                                 "clutch-collar", "idler-3-v2")]
     g3 = printed("cad/crankshafts/out/idler-3.stl")[0] if os.path.exists(
         os.path.join(ROOT, "cad/crankshafts/out/idler-3.stl")) else 0.0
     g = sum(p[0] for p in parts) - g3
@@ -84,12 +85,13 @@ def rows():
     m3_10, m3_12, m3_8 = 0.9 + 0.25, 1.0 + 0.25, 0.8 + 0.25   # as motor_sizing.py (screw + nut)
     # (name, grams, centre, source, in final, in v0)
     R = [
-        ("Chassis looks shell (band on the body's outline, lips, screws hidden, rear closed; also v0, L2)", base_g - 4.0 - 6.0 + 14.0, base_c, "plan: base v1 82.3 − spine/keel 4 − pegs and stems 6 + looks 14", 1, 1),
+        ("Chassis shell B1 (band, lips, fork mounts, bump, rear block; also v0, L2)", *printed("cad/chassis/out/chassis.stl"), "B1 STL, shell model", 1, 1),
+        ("Crank cover", *printed("cad/chassis/out/crank-cover.stl"), "B1 STL, shell model", 1, 1),
         ("Drive module (Part A rev 6)", *printed("cad/chassis/out/drive-module.stl"), "Part A STL, shell model", 1, 1),
         ("Cap", *printed("cad/chassis/out/cap.stl"), "Part A STL, shell model", 1, 1),
-        ("Motor clamp, pin keeper, pinion, idler 3 v2 extra", *_small(), "Part A STLs, shell model (idler 3 v2 "
+        ("Motor clamp, pin keeper, clutch, idler 3 v2 extra", *_small(), "Part A STLs, shell model (idler 3 v2 "
          "minus the 3 mm idler 3 counted with the crankshafts)", 1, 1),
-        ("Front block v2 (hollow)", 15.0, fb_c, "plan (v1 solid: 23.4 measured)", 1, 1),
+        ("Front block v2 (hollow)", *printed("cad/chassis/out/front-block-v2.stl"), "B1 STL, shell model", 1, 1),
         ("4 crankshafts + 3 idlers", [r[1] for r in hw if r[0].startswith("4 crankshafts")][0], shafts, "STL volume, solid", 1, 1),
         ("8 legs + 8 forks", 46.9, legs_c, "legs-forks-v1 plate, measured", 1, 1),
         ("Body v2 (carcass 120 %, cuts ≈ −3, bosses and hooks slots ≈ +2)", body_g - 1.0, body_c, "shell model of the mesh", 1, 0),
@@ -99,6 +101,8 @@ def rows():
         ("4×AAA holder, empty", 20.0, holder_c, "catalogue (sizing)", 1, 1),
         ("4 × AAA NiMH", 48.0, holder_c, "catalogue (sizing)", 1, 1),
         ("N20 HP 380:1", 10.0, np.array([CX + 3.3 + 13, Y3, ZP]), "catalogue (datasheet)", 1, 1),
+        ("Clutch steel: wave washer DIN 137 B M3 + shims DIN 988 3×6", 0.2, np.array([CX - 3.0, Y3, ZP]),
+         "catalogue (DIN 137 B M3 ≈ 0.1 g, shims ≈ 0.02 g each)", 1, 1),
         ("Eyes board (perfboard, 2 LEDs, 2 resistors)", 5.0, head, "catalogue guess (sizing)", 1, 0),
         ("Wiring, 2 connector pairs, panel switch", 5.0 + 2 * 0.8 + 1.0, np.array([CX, 20.0, 85.0]), "plan (sizing 5 + connectors, switch)", 1, 1),
         ("Screws: 16 fork M3×10, 8 pivot M3×16, 3 pins (sizing set)", screws_sizing - 3 * (0.9 + 0.25), pivots, "catalogue screw masses (sizing set; its 19 M3×10 incl. 3 cap)", 1, 1),
@@ -163,7 +167,8 @@ def main():
 
 NAMES = {
     "en": {"Chassis looks": "Chassis, looks shell (also v0)", "Drive module": "Drive module", "Cap": "Cap",
-           "Motor clamp": "Clamp, pin keeper, pinion, idler 3 extra", "Front block": "Front block v2",
+           "Motor clamp": "Clamp, pin keeper, clutch, idler 3 extra",
+           "Chassis shell": "Chassis shell B1", "Crank cover": "Crank cover", "Clutch steel": "Clutch steel washers", "Front block": "Front block v2",
            "4 crankshafts": "4 crankshafts + 3 idlers", "8 legs": "8 legs + 8 forks", "Body v2": "Body v2 (carcass)",
            "Holder cradle": "Holder cradle", "Eyes and": "Eyes and sensor, printed",
            "Paint": "Paint and finish (allowance)", "4×AAA holder": "Battery holder, empty",
@@ -171,7 +176,8 @@ NAMES = {
            "Wiring": "Wiring, 2 connectors, switch", "Screws: 16": "Screws: legs and forks",
            "Screws added": "Screws added (module, cap, etc.)"},
     "es": {"Chassis looks": "Chasis definitivo (estético)", "Drive module": "Módulo de transmisión", "Cap": "Tapa",
-           "Motor clamp": "Brida, retén, piñón, rueda 3", "Front block": "Bloque frontal v2",
+           "Motor clamp": "Brida, retén, embrague, rueda 3",
+           "Chassis shell": "Chasis B1", "Crank cover": "Tapa de los cigüeñales", "Clutch steel": "Arandelas del embrague", "Front block": "Bloque frontal v2",
            "4 crankshafts": "4 cigüeñales + 3 ruedas", "8 legs": "8 patas + 8 horquillas",
            "Body v2": "Cuerpo v2 (carcasa)", "Holder cradle": "Soporte del portapilas", "Eyes and": "Ojos y sensor",
            "Paint": "Pintura y acabado (margen)", "4×AAA holder": "Portapilas vacío", "4 × AAA": "4 pilas AAA NiMH",

@@ -1,12 +1,22 @@
-"""cad_verify spec for the chassis, Part A: the drive module with everything it carries (crankshafts, idlers, pins
-and keeper, cap, N20 with its pinion and clamp), the 8 legs swept round it, and the bought parts of the master model
-(../robot.py) at their places. It is the start of the whole-robot spec: Part B adds the looks chassis, body, front
-block, cradle and ballast frame, and the chassis becomes the fixed part.
+"""cad_verify spec for the walking robot (Part C step 1: Part A, the shell and the front block, one spec).
 
-Fixed here: the drive module (ground of Part A: the chassis it screws to is Part B). The legs are reference bodies:
-placed by ../legs poses() at every step to sweep their paths past the module, cap, clamp and motor (LEG_PATH), but
-held by the chassis's forks, which do not exist yet: their retention and joints are Part B's. The holder and eyes
-board are reference bodies at their master-model places (fitted in Part B).
+What is in it: the drive module with everything it carries (crankshafts, idlers, pins and keeper, cap, N20 with its
+pinion and clamp), the 8 legs swept round it, the shell `chassis` (ground part), the crank cover with its switch and
+motor leads, the 8 forks with their swivel screws, the front block v2 with its screws, the bought parts of the master
+model (../robot.py) at their places, and the I7, I4, cover and front-block hardware. It was three specs (Part A's,
+verify_b1.py's and verify_fb.py's); their checks and exceptions are kept as they were.
+
+Fixed: the shell `chassis`. The drive module stands on the shell's 4 bosses, its top in the deck window, held by 4 stock
+M3 from below (I7); the 8 forks swivel on 2 M3×10 each (I4); the front block's pads stand in the shell's lips, held by
+2 M3×10 (I8). The legs are placed by ../legs poses() at every step to sweep their paths past everything (LEG_PATH):
+the lips' notches, the bump, the band, the rear screw column at CX-9, the front block nut bosses at y -51, the
+rear-left deck bridge, the module, cap, clamp, motor and the cover. The holder and eyes board are reference bodies at
+their master-model places (the body v2, cradle and frame are Part B rest).
+
+The assembly follows the plan (design-plan-b.md «Assembly sequence»): the module is built on the bench (Part A's
+steps, checked against the bench parts only), goes into the shell from above as one sub-assembly (no motor), then the
+legs and forks, then the motor with its pinion, the clamp, the crank cover with its switch, the front block, and the
+I7 screws from below with the robot on its back.
 
 Motion step t = (crank angle in degrees, cap X shift, motor lift): 10° steps with everything at nominal. Loose parts
 at their worst positions: the gears are checked over one tooth (GEAR_MOTION) also with the motor lifted by its seat
@@ -16,7 +26,15 @@ a 0.3 play). VERIFY_STEP=30 gives coarse steps for quick runs.
 Every gear is at its real angle: crankshaft i at -θ (its gear at gear_offsets()[i]), idler k at idler_phase(k) +
 θ·12/n, the pinion at its meshing phase - θ.
 
+Front block (I8): the body's way in (lowered 4 mm behind its place, slid forward) is cut from the block in
+front_block.py; the carcass body is not a part here (body v2 is B2, its L-slots take the tongues; its spec checks the
+slide). Probe on the lifted carcass body, tongues excluded (2026-11-16): no overlap at its place, slid 2 and 4 mm, and
+lowered at +4 Y from 5 and 15 mm up; smallest gap 0.39 mm. The shell must be cut round the block
+(front_block.clear_outline()); FB_CHASSIS=<stl> runs this spec on a what-if shell cut so.
+
     ../../.venv/bin/python ../../tools/cad_verify.py verify.py --out verify-result.txt --render images/verify
+    VERIFY_STEP=30 ../../.venv/bin/python ../../tools/cad_verify.py verify.py --quick --only chassis
+    SHELL_LITE=1 VERIFY_STEP=30 …                 # the same on shell.py --lite's out/chassis-lite.stl
 """
 import os
 import sys
@@ -25,10 +43,13 @@ import numpy as np
 import trimesh
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "..", "tools"))
 sys.path.insert(0, os.path.join(HERE, "..", ".."))
 from cad import common as K, design, fits, robot as R  # noqa: E402
 from cad_verify import rod, tool  # noqa: E402
+import shell as SHL  # noqa: E402  (the shell, Part B1)
+import front_block as FB  # noqa: E402  (front block v2, I8)
 
 B = design("chassis")              # this folder's build.py
 C = design("crankshafts")
@@ -82,6 +103,21 @@ def gear_base(face, y, z):
     return move([CX - face / 2, y, z]) @ YZ
 
 
+DROP = ("n20", "n20-shaft", "clutch-sleeve", "pinion", "wave-washer", "shim", "clutch-collar")   # the motor with its clutch
+
+
+def own(x0):
+    """A clutch part built in its own frame (axis Z, z 0 = its -X face) placed with that face at x0 (from CX)."""
+    return move([CX + x0, YM, ZM]) @ YZ
+
+
+def washer(d_in, d_out, x0, x1):
+    """Steel washer (wave washer at its compressed height, shim) on the motor axis, x from CX."""
+    m = trimesh.creation.annulus(d_in / 2, d_out / 2, x1 - x0, sections=64)
+    m.apply_transform(move([CX + (x0 + x1) / 2, YM, ZM]) @ YZ)
+    return m
+
+
 # ---- parts -------------------------------------------------------------------------------------------------------
 TOPC = B.TOP + B.CAP_T                       # cap top
 TOPK = B.CLAMP_Z0 + B.CLAMP_T                # clamp top
@@ -90,6 +126,12 @@ PARTS = {"drive-module": {"stl": "out/drive-module.stl", "fixed": True},
          "cap": {"stl": "out/cap.stl"},
          "motor-clamp": {"stl": "out/motor-clamp.stl"},
          "pinion": {"stl": "out/pinion.stl"},
+         "clutch-sleeve": {"stl": "out/clutch-sleeve.stl"},
+         "clutch-collar": {"stl": "out/clutch-collar.stl"},
+         "wave-washer": {"mesh": washer(B.SPRING[0], B.SPRING[1], B.SPRING_X1, R.PINION_X0), "hardware": True,
+                         "label": "arandela ondulada DIN 137 B M3 (acero)"},
+         "shim": {"mesh": washer(B.SHIM[0], B.SHIM[1], B.COLLAR_X1, B.SPRING_X1), "hardware": True,
+                  "label": "arandela de ajuste DIN 988 3×6×0,1 (0 a 3, según el ajuste)"},
          "idler-3-v2": {"stl": "out/idler-3-v2.stl"},
          "pin-keeper": {"stl": "out/pin-keeper.stl"},
          # bench tools (not in the robot): placed at the press position on the motor, in the bench steps only
@@ -153,7 +195,10 @@ def poses(t):
     out["idler-3-v2"] = rx(PHASE[2] + a * C.SHAFT_TEETH / n, y, z) @ gear_base(R.IDLER3_FACE, y, z)
     up = move([0, 0, dz])
     ap = PINION_PHASE - a
-    out["pinion"] = up @ rx(ap, YM, ZM) @ gear_base(R.PINION_FACE, YM, ZM)
+    out["pinion"] = up @ rx(ap, YM, ZM) @ own(R.PINION_X0)
+    out["clutch-sleeve"] = up @ rx(ap, YM, ZM) @ own(B.SLEEVE_X0)
+    out["clutch-collar"] = up @ rx(ap, YM, ZM) @ own(B.COLLAR_X0)
+    out["wave-washer"] = out["shim"] = up
     out["n20-shaft"] = up @ rx(ap, YM, ZM)
     out["n20"] = up
     out["cap"] = move([dx, 0, 0])
@@ -177,6 +222,10 @@ PAIR_GAP = {**{(f"pin-{k + 1}", "drive-module"): 0.1 for k in range(3)},      # 
             **{(nn, "drive-module"): 0.1 for nn in NUTS.values()},            # nut in its pocket (+0.15 a side)
             ("cap-screw", "cap"): 0.1, ("shared-screw", "cap"): 0.1, ("shared-screw", "motor-clamp"): 0.1,
             ("clamp-screw", "motor-clamp"): 0.1, ("keeper-screw", "pin-keeper"): 0.1,
+            ("pinion", "clutch-sleeve"): 0.08,            # slip bore Ø5.2 on Ø5 (SLIP_BORE 0.1 a side)
+            ("wave-washer", "n20-shaft"): 0.08,           # DIN 137 B M3 bore Ø3.2 on the Ø3 shaft
+            ("wave-washer", "clutch-sleeve"): 0.15,       # sleeve ends 0.2 inside the pinion's -X face
+            ("wave-washer", "clutch-collar"): 0.05,       # one 0.1 shim between them (0 to 0.3 by the setting)
             }
 for leg in LEGS:                                                              # moving legs: LEG_PATH 0.8
     for other in ["drive-module", "cap", "motor-clamp", "n20", "pin-keeper"] + HW_SCREWS + list(NUTS.values()):
@@ -192,7 +241,12 @@ ALLOWED_CONTACT = {
     ("motor-clamp", "n20"): "gearbox pad 0.3 into the gearbox (fits.MOTOR_PRELOAD, the bar is the spring ≈ 9 N); "
                             "cheeks 0.2 off the gearbox flats (MOTOR_SEAT), can pad 0.2 clear",
     ("n20", "n20-shaft"): "the shaft comes out of the gearbox (one bought part)",
-    ("pinion", "n20-shaft"): "D-bore pressed on the D-shaft (DSHAFT)",
+    ("clutch-sleeve", "n20-shaft"): "sleeve's D-bore pressed on the D-shaft (DSHAFT)",
+    ("clutch-collar", "n20-shaft"): "collar's D-bore pressed on the shaft's tip (DSHAFT)",
+    ("pinion", "clutch-sleeve"): "pinion's +X face on the shoulder: the clutch's +X friction face (bore SLIP_BORE 0.1)",
+    ("pinion", "wave-washer"): "the wave washer presses the pinion's -X face: the clutch's -X friction face",
+    ("shim", "wave-washer"): "stack: wave washer on the shims", ("clutch-collar", "shim"): "stack: shims on the collar",
+    ("n20-shaft", "shim"): "DIN 988 bore Ø3 on the Ø3 shaft (modelled at the shaft's size)",
     **{(f"pin-{k + 1}", "drive-module"): "pin bottomed in its blind hole at -X" for k in range(3)},
     **{(f"pin-{k + 1}", "pin-keeper"): "keeper on the pin's +X end" for k in range(3)},
     **{(s, n): "screw in its nut" for s, n in NUTS.items()},
@@ -214,22 +268,43 @@ KEEP_OUT = {f"gear{i + 1}-axial": {
     "except_why": "idlers mesh in the gear plane (GEARS checks them); the spine walls are 0.25 mm off the gear faces "
                   "(GEAR_THRUST_CRANK, measured on gear train test v2)"} for i in range(4)}
 # the cap is free in X by CAP_PLAY: its own zone, wider by that much (the cap at either skirt stop)
+_CL = B.SHOULDER_X[1] - R.PINION_X0          # pinion + shoulder along X (5.0): the zone covers both
 KEEP_OUT["pinion-cap"] = {
-    "part": "pinion", "mesh": rod(2 * B.PIN_R, R.PINION_FACE + 2 * (B.GAX + CAP_PLAY), [0, 0, -B.GAX - CAP_PLAY],
+    "part": "pinion", "mesh": rod(2 * B.PIN_R, _CL + 2 * (B.GAX + CAP_PLAY), [0, 0, -B.GAX - CAP_PLAY],
                                   [0, 0, 1], n=96),
     "why": f"pinion faces + {B.GAX} axial + the cap's X play {CAP_PLAY} (cap only)",
     "except": [p for p in PARTS if p not in ("cap", "pinion")],
     "except_why": "this zone is for the cap at either skirt stop; every other part is in pinion-clear"}
 KEEP_OUT["pinion-clear"] = {
-    "part": "pinion", "mesh": rod(2 * B.PIN_R, R.PINION_FACE + 2 * B.GAX, [0, 0, -B.GAX], [0, 0, 1], n=96),
-    "why": f"pinion tip circle + {B.GAX} radial, faces + {B.GAX} axial (cap, clamp, walls, pad)",
-    "except": ["idler-3-v2", "n20-shaft", "n20"],
-    "except_why": "idler 3 v2 meshes (GEARS); the shaft is the pinion's own; the gearbox face is the 0.8 gauge "
-                  "(the zone's +X face)"}
+    "part": "pinion", "mesh": rod(2 * B.PIN_R, _CL + 2 * B.GAX, [0, 0, -B.GAX], [0, 0, 1], n=96),
+    "why": f"pinion tip circle + {B.GAX} radial; pinion's -X face and the sleeve's shoulder + {B.GAX} axial "
+           f"(cap, clamp, walls, pad)",
+    "except": ["idler-3-v2", "n20-shaft", "n20", "clutch-sleeve", "wave-washer", "shim", "clutch-collar"],
+    "except_why": "idler 3 v2 meshes (GEARS); shaft, sleeve, wave washer, shims and collar are the clutch "
+                  "itself; the gearbox face is the 0.8 gauge (the zone's +X face)"}
+KEEP_OUT["collar-clear"] = {
+    "part": "clutch-collar", "mesh": rod(2 * (B.COLLAR_D / 2 + B.GAX), B.COLLAR_L + B.GAX, [0, 0, -B.GAX], [0, 0, 1],
+                                         n=96),
+    "why": f"spinning collar + {B.GAX} radial and to -X (the -X wall's notch r {B.NOTCH_R}, the cap's window)",
+    "except": ["n20-shaft", "shim", "wave-washer", "pinion", "clutch-sleeve"],
+    "except_why": "the clutch's own parts (shaft, shims on its +X face)"}
+KEEP_OUT["idler3-ring"] = {
+    "part": "n20-shaft",
+    "mesh": rod(2 * (R.PINION_TIP_R - 2.0 - 0.23), 2 * (R.IDLER3_FACE / 2 + fits.GEAR_THRUST_IDLER.side),
+                [CX - R.IDLER3_FACE / 2 - fits.GEAR_THRUST_IDLER.side, YM, ZM], [1, 0, 0], n=96),
+    "why": "ring r 4.77 round the motor axis over |x| ≤ 2.95 (idler 3 at either float): idler 3's tip (r 5.27 "
+           "floated, 5.37 nominal) stays out of it, so the clutch's shoulder (r 4.5) and wave washer (r 4.0) inside "
+           "it clear idler 3 by ≥ GEAR_TIP 0.5 (design-plan-clutch.md 3b)",
+    "except": ["pinion", "clutch-sleeve", "wave-washer", "shim", "clutch-collar", "n20", "drive-module"],
+    "except_why": "the clutch itself; the module's pinion zone is checked by pinion-clear"}
 RETAIN = {**{f"crankshaft-{i + 1}": {"spin": [1, 0, 0], "play": 0.5, "not_by": list(LEGS)} for i in range(4)},
           **{f"idler-{k + 1}": {"spin": [1, 0, 0], "play": 1.0} for k in range(2)},
           "idler-3-v2": {"spin": [1, 0, 0], "play": 1.0},
-          "pinion": {"play": 1.0},
+          # the clutch: pinion, wave washer and shims spin on the shaft (that is the clutch); sleeve and collar are
+          # held by their press (DSHAFT, K1 pull-off) and, like the old pinion, have the 0.8 gauge / notch end behind
+          "pinion": {"spin": [1, 0, 0], "play": 1.0},
+          "clutch-sleeve": {"play": 1.0}, "clutch-collar": {"play": 1.0},
+          "wave-washer": {"spin": [1, 0, 0], "play": 0.5}, "shim": {"spin": [1, 0, 0], "play": 0.5},
           "n20": {"play": 1.0},
           "cap": {"play": 0.5, "not_by": [f"crankshaft-{i + 1}" for i in range(4)]},
           "motor-clamp": {"play": 0.5},
@@ -242,24 +317,37 @@ ASSEMBLY = [("drive-module", None),
             ("pin-keeper", [1, 0, 0]), ("keeper-screw", [1, 0, 0])] + \
            [(f"crankshaft-{i + 1}", [0, 0, 1]) for i in range(4)] + \
            [("cap", [0, 0, 1]), ("cap-screw", [0, 0, 1]),
-            # on the bench, the jig stood on the table (-X face down, open side +Z): pinion into its pocket, the
-            # fork into its slot over the pinion, then the motor pushed down (-X) into the socket onto both
-            ("pinion", [0, 0, 1], {"bench": ["press-jig"],
-                                   "note": "pinion slid into the jig's pocket from the open side, dot up (+X)"}),
-            ("gauge-fork", [0, 0, 1], {"bench": ["press-jig", "pinion"],
-                                       "note": "fork down into the jig's slot, flat on the pinion"}),
+            # on the bench, the jig stood on the table (-X face down, open side +Z): the clutch stacked in its
+            # pockets from the bottom up (collar, shim, wave washer, pinion, sleeve), the fork over the sleeve's
+            # shoulder, then the motor pushed down (-X): its shaft presses into the sleeve and the collar at once
+            ("clutch-collar", [0, 0, 1], {"bench": ["press-jig"],
+                                          "note": "collar into the jig's Ø9.5 pocket, dot up (+X), turned so the dot "
+                                                  "points the way the motor shaft's flat points"}),
+            ("shim", [1, 0, 0], {"bench": ["press-jig", "clutch-collar"],
+                                 "note": "shims (0.1 to start) dropped onto the collar from above"}),
+            ("wave-washer", [1, 0, 0], {"bench": ["press-jig", "clutch-collar", "shim"],
+                                        "note": "wave washer dropped onto the shims"}),
+            ("pinion", [0, 0, 1], {"bench": ["press-jig", "clutch-collar", "shim", "wave-washer"],
+                                   "note": "pinion slid into its pocket from the open side, onto the step"}),
+            ("clutch-sleeve", [1, 0, 0], {"bench": ["press-jig", "clutch-collar", "shim", "wave-washer", "pinion"],
+                                          "note": "sleeve dropped into the pinion, shoulder up, its dot the same way "
+                                                  "as the collar's"}),
+            ("gauge-fork", [0, 0, 1], {"bench": ["press-jig", "clutch-collar", "shim", "wave-washer", "pinion", "clutch-sleeve"],
+                                       "note": "fork down into the jig's slot, flat on the sleeve's shoulder"}),
             (("n20", "n20-shaft"), [1, 0, 0],
-             {"bench": ["press-jig", "pinion", "gauge-fork"],
-              "except": {"n20-shaft": "D-bore pressed on the D-shaft (DSHAFT, modelled at zero clearance)"},
-              "note": "shaft's flat over the pinion's dot; motor pushed down by its can into the socket until the "
+             {"bench": ["press-jig", "clutch-collar", "shim", "wave-washer", "pinion", "clutch-sleeve", "gauge-fork"],
+              "except": {"clutch-sleeve": "D-bore pressed on the D-shaft (DSHAFT, modelled at zero clearance)",
+                         "clutch-collar": "D-bore pressed on the shaft's tip (DSHAFT)",
+                         "shim": "DIN 988 bore Ø3 on the Ø3 shaft (modelled at the shaft's size)"},
+              "note": "shaft's flat over the two dots; motor pushed down by its can into the socket until the "
                       "gearbox face stops on the fork"}),
             ("press-cup", [1, 0, 0],
-             {"bench": ["press-jig", "pinion", "gauge-fork", "n20", "n20-shaft"],
+             {"bench": ["press-jig", "clutch-collar", "shim", "wave-washer", "pinion", "clutch-sleeve", "gauge-fork", "n20", "n20-shaft"],
               "note": "only if the thumb is not enough: cup over the can's rear, jig and cup between the vise's "
                       "jaws, closed until the gearbox face stops on the fork; then the fork lifts out (+Z) and the "
-                      "motor with its pinion slides out of the jig (+Z)"}),
-            # one drop: the motor with its pinion (idler 3 is the pinion's GEARS partner: crank 1 turns it)
-            (("n20", "n20-shaft", "pinion"), [0, 0, 1]),
+                      "motor with its clutch slides out of the jig (+Z); lever test, shims changed if needed"}),
+            # one drop: the motor with its clutch (idler 3 is the pinion's GEARS partner: crank 1 turns it)
+            (DROP, [0, 0, 1]),
             ("motor-clamp", [0, 0, 1]), ("shared-screw", [0, 0, 1]), ("clamp-screw", [0, 0, 1])] + \
            [(leg, None) for leg in LEGS] + [("holder", None), ("eyes-board", None)]
 _mouth = TOPC - B.CAP_SCREW_L + 0.5 + K.NUT_T / 2
@@ -280,9 +368,11 @@ ACCESS = [
                                         [1, 0, 0]), "why": "M3×8 from +X, 2.5 hex key"},
     {"at": "cap-screw", "tool": tool("hex-key", [CX + B.SCREW_FRONT[0], B.SCREW_FRONT[1], TOPC + K.HEAD_H],
                                      [0, 0, 1]), "why": "M3×12 from above, 2.5 hex key"},
-    {"at": ("n20", "n20-shaft", "pinion"), "tool": tool("finger", [CX + 20.0, YM, R.MOTOR_ENVELOPE[1][2]],
-                                                         [0, 0, 1]),
-     "why": "motor with its pinion lowered onto the pad and V saddle by hand"},
+    {"at": DROP, "tool": tool("finger", [CX + 20.0, YM, R.MOTOR_ENVELOPE[1][2]], [0, 0, 1]),
+     "why": "motor with its clutch lowered onto the pad and V saddle by hand"},
+    *[{"at": n, "tool": tool("finger", [CX + B.JIG_TOP + 0.5, YM, ZM], [1, 0, 0], d=10.0, reach=20.0),
+       "why": "on the bench: dropped from the fingertips into the jig's socket mouth (jig standing, +X up); it "
+              "falls onto the part below"} for n in ("shim", "wave-washer")],
     # thumb tip on the can's rear rim under the terminal block (the block spans z -2..+4 from the axis, Y ±3)
     {"at": ("n20", "n20-shaft"), "tool": tool("finger", [CX + B.CAN_X1, YM, ZM + R.N20_TERM_Z[0] - 2.6],
                                                  [1, 0, 0], d=5.0, reach=20.0),
@@ -300,12 +390,15 @@ PRINT_ORIENT = {"drive-module": FLIP,                 # top (deck level) on the 
                 "motor-clamp": FLIP,                  # top on the bed, pads up
                 "pin-keeper": trimesh.transformations.rotation_matrix(-np.pi / 2, [0, 1, 0]),   # flat
                 "gauge-fork": trimesh.transformations.rotation_matrix(-np.pi / 2, [0, 1, 0]),   # flat: 4 layers
-                "press-jig": np.eye(4),                # on its -Z face, the open side up: no overhang
+                "press-jig": np.eye(4),
+                "pinion": np.eye(4), "clutch-collar": np.eye(4),   # flat, -X face down (own frame z 0)
+                "clutch-sleeve": FLIP,                 # shoulder (+X face) down, the D-bore vertical                # on its -Z face, the open side up: no overhang
                 "press-cup": trimesh.transformations.rotation_matrix(np.pi / 2, [0, 1, 0])}     # top plate down
 SECTIONS = [([CX, 0, 0], [1, 0, 0]),                                  # gear plane: all gears, pinion, end blocks
             ([CX + B.PIN_X1 - 1.0, 0, 0], [1, 0, 0]),                 # +X wall: journals, pins, keeper, pad
             ([CX - 4.8, 0, 0], [1, 0, 0]),                            # -X wall: blind pin ends, shaft U-slot
-            ([CX, YM, ZM], [0, 1, 0]),                                # motor axis: pinion, pad, V saddle, clamp
+            ([CX, YM, ZM], [0, 1, 0]),                                # motor axis: clutch, pad, V saddle, clamp
+            ([CX + (B.COLLAR_X0 + B.COLLAR_X1) / 2, 0, 0], [1, 0, 0]),  # collar in the -X wall's notch
             ([CX, 0, ZM], [0, 0, 1])]                                 # deck level from above
 SECTIONS += [([CX, y, z], [0, 1, 0]) for y, z in SH]                  # each journal, tongue and cap
 SECTIONS += [([CX, y, z], [0, 1, 0]) for y, z, _ in IDL[:2]]          # idlers 1-2 on their pins
@@ -346,7 +439,16 @@ JOINTS = {
     ("motor-clamp", "n20"): {"fit": fits.MOTOR_SEAT, "where": _box([CX + (B.GB_X0 + B.GB_X1) / 2, YM, 76.0],
                                                                     [B.GB_X1 - B.GB_X0, 16.0, 3.0]),
                              "why": "clamp cheeks on the gearbox flats (Y, the motor torque)"},
-    ("pinion", "n20-shaft"): {"fit": fits.DSHAFT, "why": "D-bore on the D-shaft"},
+    ("clutch-sleeve", "n20-shaft"): {"fit": fits.DSHAFT, "why": "sleeve's D-bore pressed on the D-shaft"},
+    ("clutch-collar", "n20-shaft"): {"fit": fits.DSHAFT, "why": "collar's D-bore pressed on the shaft's tip"},
+    ("pinion", "clutch-sleeve"): {"fit": fits.SLIP_BORE,
+                                  "where": _box([CX + R.PINION_X0 + R.PINION_FACE / 2, YM, ZM],
+                                                [R.PINION_FACE - 0.4, 8.0, 8.0]),
+                                  "why": "pinion's Ø5.2 bore turning on the Ø5 sleeve (slip bore, CL1)"},
+    ("clutch-collar", "drive-module"): {"fit": fits.GEAR_AXIAL,
+                                        "where": _box([CX + (B.NOTCH_X0 + B.COLLAR_X1) / 2, YM, ZM - 3.0],
+                                                      [B.COLLAR_X1 - B.NOTCH_X0 + 1.0, 14.0, 6.0]),
+                                        "why": "spinning collar in the -X wall's notch: 1.0 radial, 0.8 to its end"},
     ("n20", "motor-clamp"): {"fit": fits.MOTOR_PRELOAD,
                              "where": _box([CX + (B.GB_X0 + B.GAX + B.GB_X1) / 2, YM, B.MOTOR_TOP + 0.25],
                                            [B.GB_X1 - B.GB_X0 - B.GAX - 0.5, 6.0, 1.5]),
@@ -368,13 +470,18 @@ MARKS = {**{f"crankshaft-{i + 1}": f"{i + 1} dots on the +X web, matching the {i
                     "crankshafts' dots", "idler-2": "none needed: as idler 1",
          "idler-3-v2": "a dot on the +X face on tooth 0's line (idler 3's phase); any tooth meshes, the dot shows "
                        "the face that goes to +X",
-         "pinion": "a dot on the +X face over the D-bore's flat: line it up with the shaft's flat before pressing",
+         "pinion": "none needed: round bore, both faces alike (it goes on either way round)",
+         "clutch-sleeve": "a dot on the shoulder's +X face over the D-bore's flat: line it up with the shaft's flat",
+         "clutch-collar": "a dot on the +X face over the D-bore's flat: the same way as the sleeve's dot",
+         "wave-washer": "none needed: symmetric", "shim": "none needed: flat, symmetric",
          "drive-module": "FRONT arrow (pointing -Y) on the front block's +X face; 1-4 dice dots beside each slot",
          "cap": "a dot on its +X edge over every slot (it fits one way only)",
          "n20": "polarity: «+» (red wire, +Y side) and «-» sunk in the end wall's +X face; wires leave on +Y "
                 "(leg 3R passes 2.9 mm from the motor's -Y side)"}
 LABELS = {"es": {"drive-module": "módulo de transmisión", "cap": "tapa", "motor-clamp": "brida del motor",
-                 "pinion": "piñón", "idler-3-v2": "rueda intermedia 3 (v2)", "pin-keeper": "retén de pasadores",
+                 "pinion": "piñón", "clutch-sleeve": "casquillo del embrague",
+                 "clutch-collar": "collarín del embrague", "wave-washer": "arandela ondulada",
+                 "shim": "arandelas de ajuste", "idler-3-v2": "rueda intermedia 3 (v2)", "pin-keeper": "retén de pasadores",
                  "n20": "motor N20", "n20-shaft": "eje del motor", "keeper-screw": "tornillo del retén",
                  "keeper-nut": "tuerca del retén", "cap-screw": "tornillo delantero de la tapa",
                  "cap-nut": "tuerca delantera de la tapa", "shared-screw": "tornillo de tapa y brida",
@@ -399,13 +506,29 @@ MEASURE = [
      "tol": (-0.1, 0.1), "points": "depth gauge from the top face to the pad"},
     {"part": "cap", "what": "tongue width (along Y)", "nominal": B.TONGUE_W, "tol": (-0.1, 0.05),
      "points": "each tongue"},
-    {"part": "pinion", "what": "D-bore across the flat", "nominal": R.N20_SHAFT_D - R.N20_SHAFT_FLAT,
+    {"part": "clutch-sleeve", "what": "D-bore across the flat", "nominal": R.N20_SHAFT_D - R.N20_SHAFT_FLAT,
      "tol": (-0.1, 0.05), "points": "flat to the round side"},
+    {"part": "clutch-collar", "what": "D-bore across the flat", "nominal": R.N20_SHAFT_D - R.N20_SHAFT_FLAT,
+     "tol": (-0.1, 0.05), "points": "flat to the round side"},
+    {"part": "clutch-sleeve", "what": "journal diameter (the pinion turns on it)", "nominal": B.SLEEVE_OD,
+     "tol": (-0.1, 0.05), "points": "two places 90° apart"},
+    {"part": "pinion", "what": "bore diameter (slip bore)", "nominal": B.PINION_BORE, "tol": (-0.05, 0.1),
+     "points": "pin gauge or caliper's inside jaws, both faces"},
+    {"part": "pinion", "what": "face width", "nominal": R.PINION_FACE, "tol": (-0.1, 0.05), "points": "rim"},
+    {"part": "pinion", "what": "slip torque (lever test, N·mm): weight on the CL1 arm's 30 mm hole that makes it slip, "
+     "3 trials; window 129-196 N·mm = 440-665 g at 30 mm", "nominal": 162.5, "tol": (-33.5, 33.5),
+     "points": "motor held (380:1 does not back-drive), arm on the pinion, weight hung at the hole, raised slowly; "
+               "add a shim if it slips below 440 g, take one off above 665 g",
+     "when": "bench, after the press, before the drop (and once a year)"},
+    {"part": "pinion", "what": "CL1-heat: motor run 60 s at 4.8 V with the crank blocked (slip torque after, N·mm)",
+     "nominal": 162.5, "tol": (-33.5, 33.5), "points": "no fusing or smear on the faces; slip torque re-measured "
+               "(lever test) inside the window; if it fails, the time it lasted / 2 goes into the kit rule",
+     "when": "coupon CL1, before the robot's first run"},
     {"part": "idler-3-v2", "what": "face width", "nominal": R.IDLER3_FACE, "tol": (-0.1, 0.05), "points": "rim"},
     {"part": "pin-keeper", "what": "thickness", "nominal": B.KEEPER_T, "tol": (-0.1, 0.1), "points": "strip"},
     {"part": "gauge-fork", "what": "thickness (the 0.8 gauge), measure before use", "nominal": B.GAX,
      "tol": (-0.05, 0.05), "points": "both prongs, beside the slot", "when": "kit step: before the press"},
-    {"part": "pinion", "what": "pinion's gap to the gearbox face, on the bench right after the press (motor still in "
+    {"part": "clutch-sleeve", "what": "the shoulder's gap to the gearbox face, on the bench right after the press (motor still in "
      "the jig, before the drop)", "nominal": B.GAX, "tol": (0.0, 0.1),
      "points": "feeler: the fork comes out (+Z) snug and slides back in snug", "when": "bench check, before the drop"},
 ]
@@ -468,18 +591,455 @@ KEEP_IN = {"carcass-shell": {
 # little from above; the drop step keeps the default view (its tuple named, or it would take the pinion's)
 BENCH_VIEW = (115, 185)
 STEP_VIEW = {"pinion": BENCH_VIEW, "gauge-fork": BENCH_VIEW, ("n20", "n20-shaft"): BENCH_VIEW,
-             "press-cup": BENCH_VIEW, ("n20", "n20-shaft", "pinion"): (25, -60)}
+             "press-cup": BENCH_VIEW, "clutch-collar": BENCH_VIEW, "shim": BENCH_VIEW, "wave-washer": BENCH_VIEW,
+             "clutch-sleeve": BENCH_VIEW, DROP: (25, -60)}
 STEP_NOTES = {   # what the step means, for the documenter (kit «pasos»; keys as workshop_kit: a part or «a + b»)
-    "pinion": "on the bench: jig on the table, open side towards you; pinion slid into its pocket, dot up",
+    "clutch-collar": "on the bench: jig on the table, open side towards you; collar into the small deep pocket, "
+                     "dot up, turned to point the way the motor shaft's flat points",
+    "shim": "drop the shims onto the collar (one 0.1 to start)",
+    "wave-washer": "drop the wave washer onto the shims",
+    "pinion": "pinion slid into its pocket from the open side, flat on the step (either face up)",
+    "clutch-sleeve": "sleeve dropped into the pinion, shoulder up, its dot the same way as the collar's",
     "gauge-fork": "on the bench: measure the fork first (0.8 ± 0.05); slide it down into the jig's slot, flat on the "
-                  "pinion",
-    "n20 + n20-shaft": "on the bench: shaft's flat over the pinion's dot; push the motor down into the socket by its "
+                  "sleeve's shoulder",
+    "n20 + n20-shaft": "on the bench: shaft's flat over the two dots; push the motor down into the socket by its "
                        "can (thumb on the rim below the terminals) until the gearbox face stops on the fork; note "
                        "whether it went on by thumb or needed the vise",
     "press-cup": "only if the thumb is not enough: cup over the can's rear, jig and cup between the vise's jaws, "
                  "closed until the gearbox face stops on the fork. Then: the fork lifts out snug and slides back in "
                  "snug (the 0.8 gap); fork out, the motor with its pinion slides out of the jig towards you",
-    "n20 + n20-shaft + pinion": "lower the motor with its pinion from above onto the pad and the V saddle; turn "
+    "n20 + n20-shaft + clutch-sleeve + pinion + wave-washer + shim + clutch-collar": "lever test first (440-665 g at "
+    "30 mm; a shim more or less: collar pried off, a new one pressed); then lower the motor with its clutch from above onto the pad and the V saddle; turn "
                                 "crank 1 a little until the pinion drops into the teeth (380:1: the motor shaft "
                                 "cannot be turned by hand)",
     "i7": "service: legs off, robot on its back, 4 screws from below (Part B)"}
+
+
+# =====================================================================================================================
+# The shell, the forks, the cover and the front block on top of Part A (was verify_b1.py and verify_fb.py)
+# =====================================================================================================================
+BV = SHL.BV
+MIN_GAP = 0.2
+SECTIONS += [([CX - 9.0, 0, 0], [1, 0, 0]),                      # rear screw, shelf, groove
+             ([CX, 0, 0], [1, 0, 0])]
+
+# the carcass keep-in was Part A's stand-in for the shell: it applies to Part A's static parts, not the shell itself
+_static = [n for n, p in PARTS.items() if not p.get("bench") and not n.startswith(("crankshaft", "idler-1",
+                                                                                    "idler-2", "leg-"))]
+KEEP_IN = {k: {**v, "parts": [n for n in _static if n not in ("idler-3-v2", "n20-shaft") + DROP]}
+           for k, v in KEEP_IN.items()}
+
+# ---- parts: the shell -----------------------------------------------------------------------------------------------
+LITE = os.environ.get("SHELL_LITE") == "1"                 # shell.py --lite's mesh, while trying a fix (never final)
+# FB_CHASSIS=<stl>: a what-if shell (e.g. the shell cut by front_block.clear_outline(), before shell.py does it)
+PARTS["chassis"] = {"stl": os.environ.get("FB_CHASSIS", "out/chassis-lite.stl" if LITE else "out/chassis.stl"),
+                    "fixed": True}
+if LITE:
+    print("verify: SHELL_LITE=1, checking out/chassis-lite.stl (decimated body, legs every 30°): not a final result")
+PARTS["drive-module"]["fixed"] = False                     # it now stands on the shell (I7)
+
+# I7: positions and stock lengths from shell.py (one source)
+_base = R.carcass("base")
+_mod = trimesh.load(os.path.join(HERE, "out", "drive-module.stl"))
+I7 = SHL.i7_bosses(_base, _mod)[2]
+for k, r in enumerate(I7):
+    p = [CX + r["x"], r["y"], r["head"]]
+    PARTS[f"i7-screw-{k + 1}"] = {"mesh": m3(p, [0, 0, 1], r["length"]), "hardware": True, "fixed": True,
+                                  "label": f"M3×{r['length']:g} Allen"}
+    PARTS[f"i7-nut-{k + 1}"] = {"mesh": nut([CX + r["x"], r["y"], r["nut"][0] + 0.15], [0, 0, 1]),
+                                "hardware": True, "fixed": True, "label": "tuerca M3"}
+
+# I4: forks and their swivel screws (base v1's fork_mounts with the shell's gaps: shell.py sets FORK_GAP = LEG_PATH)
+GAP = SHL.FORK_GAP_Z                               # shell.py: the fork's faces up and down, a turning fit (TURN)
+FORK_BOT, FORK_TOP = BV.FORK_BOT, BV.FORK_TOP
+BOSS_TOP = FORK_BOT - GAP
+BOSS_BOT = BOSS_TOP - (BV.SCREW_L - BV.SCREW_IN - GAP)
+FORKS = {}
+_U = {f"fork-{int(f['key'][0]) + 1}{f['key'][1]}": f["u"] for f in SHL.fork_frames_cached()}   # nut slot directions
+
+
+def _turned(m, x, y, d):
+    """A nut mesh turned as its pocket (shell.nut_pocket: a corner along the slot, the flats on its sides)."""
+    m.apply_transform(trimesh.transformations.rotation_matrix(np.arctan2(d[1], d[0]), [0, 0, 1], [x, y, 0]))
+    return m
+
+
+for n, f, M in L.poses(0.0):
+    if n.startswith("pivot"):
+        name = f"fork-{int(n[5]) + 1}{n[6]}"
+        FORKS[name] = n
+        PARTS[name] = {"stl": L.stl(f)}
+        P = M[:3, 3]
+        PARTS[f"{name}-screw-low"] = {"mesh": m3([P[0], P[1], BOSS_BOT], [0, 0, 1], BV.SCREW_L), "hardware": True,
+                                      "fixed": True, "label": "M3×10 Allen"}
+        PARTS[f"{name}-screw-up"] = {"mesh": m3([P[0], P[1], R.BAND_TOP - BV.HEAD_H], [0, 0, -1], BV.SCREW_L),
+                                     "hardware": True, "fixed": True, "label": "M3×10 Allen"}
+        PARTS[f"{name}-nut-low"] = {"mesh": _turned(nut([P[0], P[1], (BOSS_BOT + BOSS_TOP) / 2 - BV.NUT_T / 2 + 0.15],
+                                                        [0, 0, 1]), P[0], P[1], _U[name]),
+                                    "hardware": True, "fixed": True, "label": "tuerca M3"}
+        PARTS[f"{name}-nut-up"] = {"mesh": _turned(nut([P[0], P[1], FORK_TOP + GAP + 1.2 + 0.15], [0, 0, 1]),
+                                                   P[0], P[1], _U[name]),
+                                   "hardware": True, "fixed": True, "label": "tuerca M3"}
+FORK_HW = [f"{f}-{s}" for f in FORKS for s in ("screw-low", "screw-up", "nut-low", "nut-up")]
+
+# crank cover (Morante 2026-11-15, option b): on 3 posts, 2 × M3×10 from above into nuts in the posts
+PARTS["crank-cover"] = {"stl": "out/crank-cover.stl"}
+COVER_SCREWS = [(x, y, d) for x, y, kind, d in SHL.COVER_POSTS if kind == "screw"]
+for k, (x, y, d) in enumerate(COVER_SCREWS):
+    top = SHL.COVER_Z0 + SHL.COVER_T
+    PARTS[f"cover-screw-{k + 1}"] = {"mesh": m3([x, y, top], [0, 0, -1], SHL.COVER_SCREW_L), "hardware": True,
+                                     "fixed": True, "label": "M3×10 Allen"}
+    _n = _turned(nut([x, y, SHL.COVER_Z0 - 1.2 - BV.NUT_T + 0.15], [0, 0, 1]), x, y, d)
+    PARTS[f"cover-nut-{k + 1}"] = {"mesh": _n,                    # turned as its pocket (a corner along the slot)
+                                   "hardware": True, "fixed": True, "label": "tuerca M3"}
+
+
+def _tube(points, d):
+    """A wire bundle along a polyline (Ø d), with round joints."""
+    segs = []
+    for a, b in zip(points[:-1], points[1:]):
+        a, b = np.asarray(a, float), np.asarray(b, float)
+        segs.append(rod(d, float(np.linalg.norm(b - a)), a, b - a))
+        segs.append(trimesh.creation.icosphere(subdivisions=1, radius=d / 2).apply_translation(b))
+    return trimesh.boolean.union(segs, engine="manifold")
+
+
+# motor leads (I12): out of the terminals on +Y, up, along the clips to the switch's inner face
+_T = R.MOTOR_ENVELOPE[1][0] - 1.0
+_LZ0 = R.MOTOR_AXIS[2] + R.N20_TERM_Z[1] + 0.5      # just over the terminal block, under the clamp
+_SB = SHL.SW_BODY
+_ZL = (_SB[4] + _SB[5]) / 2
+LEAD_PATH = [(_T, R.MOTOR_AXIS[1] + 4.0, _LZ0), (_T, SHL.LEAD_Y, _LZ0), (_T, SHL.LEAD_Y, SHL.LEAD_Z),   # up the terminals
+             ((_SB[0] + _SB[2]) / 2 - 0.3, SHL.LEAD_Y, SHL.LEAD_Z),        # through clip 1 (shell) and the cover's eye
+             ((_SB[0] + _SB[2]) / 2 - 0.3, SHL.LEAD_Y, _ZL),               # down in front of the cradle's front wall
+             ((_SB[0] + _SB[2]) / 2 - 0.3, SHL.LEAD_Y + 0.9, _ZL)]        # into the pins' slot (soldered to them)
+# the switch on the crank cover (coordinator 2026-11-16, option b), its stop screw and nut
+PARTS["switch"] = {"mesh": SHL.switch_mesh(), "hardware": True, "label": "interruptor SS12D00 (medidas de catálogo)"}
+PARTS["motor-leads"] = {"mesh": _tube(LEAD_PATH, SHL.LEAD_D), "hardware": True, "fixed": True,
+                        "label": "cables del motor (2 × 26 AWG) por sus pinzas hasta el interruptor"}
+
+# ---- parts: the front block v2 (I8) ---------------------------------------------------------------------------------
+NAME = FB.NAME
+PARTS[NAME] = {"stl": f"out/{NAME}.stl"}
+HEAD_Z = R.DECK_TOP + FB.PAD_T                          # head face on the boss (76.8)
+NUT_Z = HEAD_Z - FB.SCREW_L + 0.5                       # shell.front_block_seat: nut 0.5 above the tip
+for k, (x, y, d) in enumerate(FB.FB_SCREWS_FULL):
+    PARTS[f"fb-screw-{k + 1}"] = {"mesh": m3([x, y, HEAD_Z], [0, 0, -1], FB.SCREW_L), "hardware": True,
+                                  "fixed": True, "label": "M3×10 Allen"}
+    _n = nut([x, y, NUT_Z + 0.15], [0, 0, 1])
+    # turned as its pocket in the shell (base v1 nut_pocket: flats facing the slot's sides, a corner towards the slot;
+    # measured on out/chassis.stl 2026-11-16: flats at 2.9 across ±Y for a slot along X)
+    _n.apply_transform(trimesh.transformations.rotation_matrix(np.arctan2(d[1], d[0]), [0, 0, 1], [x, y, 0]))
+    PARTS[f"fb-nut-{k + 1}"] = {"mesh": _n, "hardware": True, "fixed": True, "label": "tuerca M3"}
+FB_HW = [f"fb-{s}-{k + 1}" for k in range(2) for s in ("screw", "nut")]
+
+_poses_a = poses
+
+
+def poses(t):
+    out = _poses_a(t)
+    lp = {n: M for n, _, M in L.poses(np.radians(t[0]))}
+    for name, n in FORKS.items():
+        out[name] = lp[n]
+    return out
+
+
+# ---- gaps and contacts ----------------------------------------------------------------------------------------------
+for m in LEGS:                                           # moving legs: LEG_PATH 0.8 to the shell
+    PAIR_GAP[(m, "chassis")] = fits.LEG_PATH.side
+for m in FORKS:                                          # forks: TURN up and down (JOINTS); sideways the pocket is
+    PAIR_GAP[(m, "chassis")] = fits.TURN.side            # FORK_GAP (LEG_PATH + 0.2) by construction (shell.py)
+for f in FORKS:
+    for s in ("screw-low", "screw-up"):
+        PAIR_GAP[(f"{f}-{s}", "chassis")] = 0.1          # M3 in Ø3.3 (STEEL)
+        PAIR_GAP[(f"{f}-{s}", f)] = 0.1                  # the fork turns on the screw's shank
+    for s in ("nut-low", "nut-up"):
+        PAIR_GAP[(f"{f}-{s}", "chassis")] = 0.1          # nut in its pocket (+0.15 a side)
+for k in range(len(COVER_SCREWS)):
+    PAIR_GAP[(f"cover-screw-{k + 1}", "chassis")] = 0.1
+    PAIR_GAP[(f"cover-screw-{k + 1}", "crank-cover")] = 0.1
+    PAIR_GAP[(f"cover-nut-{k + 1}", "chassis")] = 0.1
+PAIR_GAP[("motor-leads", "chassis")] = 0.1                 # in the clips' slots (WINDOW round the leads)
+PAIR_GAP[("motor-leads", "crank-cover")] = 0.1               # through the eye (WINDOW round the leads)
+for leg in LEGS:
+    PAIR_GAP[(leg, "crank-cover")] = fits.LEG_PATH.side
+for leg in LEGS:
+    PAIR_GAP[(leg, "motor-leads")] = fits.LEG_PATH.side
+for k in range(4):
+    PAIR_GAP[(f"i7-screw-{k + 1}", "chassis")] = 0.1
+    PAIR_GAP[(f"i7-screw-{k + 1}", "drive-module")] = 0.1
+    PAIR_GAP[(f"i7-nut-{k + 1}", "drive-module")] = 0.1
+# front block (I8)
+for leg in LEGS:
+    PAIR_GAP[(leg, NAME)] = fits.LEG_PATH.side
+PAIR_GAP[(NAME, "cap")] = fits.WINDOW.side
+PAIR_GAP[(NAME, "cap-screw")] = fits.WINDOW.side
+PAIR_GAP[(NAME, "crank-cover")] = fits.WINDOW.side
+for k in range(2):
+    PAIR_GAP[(f"fb-screw-{k + 1}", "chassis")] = 0.1      # M3 in Ø3.3 (STEEL 0.15)
+    PAIR_GAP[(f"fb-screw-{k + 1}", NAME)] = 0.1
+    PAIR_GAP[(f"fb-nut-{k + 1}", "chassis")] = 0.1        # nut in its pocket (+0.15 a side)
+
+ALLOWED_CONTACT[("drive-module", "chassis")] = "module on its 4 bosses; its top in the deck window, WINDOW 0.5 a side"
+for k in range(4):
+    ALLOWED_CONTACT[(f"i7-screw-{k + 1}", "chassis")] = "head clamps the boss from below"
+    ALLOWED_CONTACT[(f"i7-screw-{k + 1}", f"i7-nut-{k + 1}")] = "screw in its nut"
+    ALLOWED_CONTACT[(f"i7-nut-{k + 1}", "drive-module")] = "nut pulled down onto its pocket"
+ALLOWED_CONTACT[("crank-cover", "chassis")] = "cover on its 3 posts; the spigot in its hole (LOCATOR)"
+for k in range(len(COVER_SCREWS)):
+    ALLOWED_CONTACT[(f"cover-screw-{k + 1}", "crank-cover")] = "head clamps the cover"
+    ALLOWED_CONTACT[(f"cover-screw-{k + 1}", f"cover-nut-{k + 1}")] = "screw in its nut"
+ALLOWED_CONTACT[("motor-leads", "n20")] = "the leads are soldered to the motor's terminals"
+ALLOWED_CONTACT[("motor-leads", "switch")] = "the leads are soldered to the switch's pins"
+
+for f in FORKS:
+    ALLOWED_CONTACT[(f"{f}-screw-low", "chassis")] = "head clamps the boss from below"
+    ALLOWED_CONTACT[(f"{f}-screw-up", "chassis")] = "head in its counterbore at the band top"
+    ALLOWED_CONTACT[(f"{f}-screw-low", f"{f}-nut-low")] = "screw in its nut"
+    ALLOWED_CONTACT[(f"{f}-screw-up", f"{f}-nut-up")] = "screw in its nut"
+    leg = "leg-" + f[5:]
+    ALLOWED_CONTACT[(f, leg)] = "the leg pivots in its fork (legs design: the fork's window, its pivot pin)"
+    ALLOWED_CONTACT[(f"{f}-screw-low", f)] = "the screw's tip is the fork's lower swivel (3 mm into the fork)"
+    ALLOWED_CONTACT[(f"{f}-screw-up", f)] = "the screw's tip is the fork's upper swivel"
+# front block (I8)
+ALLOWED_CONTACT[(NAME, "chassis")] = "the pads stand on the deck (z 74.8) inside their LOCATOR lips (JOINTS measures " \
+                                     "the lips)"
+for k in range(2):
+    ALLOWED_CONTACT[(f"fb-screw-{k + 1}", NAME)] = "head clamps the pad's boss"
+    ALLOWED_CONTACT[(f"fb-screw-{k + 1}", f"fb-nut-{k + 1}")] = "screw in its nut"
+    ALLOWED_CONTACT[(f"fb-nut-{k + 1}", "chassis")] = "nut pulled up against its pocket under the deck"
+    ALLOWED_CONTACT[(f"fb-screw-{k + 1}", "chassis")] = "the shank passes the deck and the boss to its nut"
+
+# ---- keep-out ---------------------------------------------------------------------------------------------------------
+# wires (I12): never under the crank cover (the crank webs and the window), never on the module's top or the motor
+_cw = SHL.CRANK_WIN
+KEEP_OUT["wires-crank-window"] = {
+    "part": "chassis", "mesh": trimesh.creation.box(bounds=[(_cw[0], _cw[1], 57.0), (_cw[2], _cw[3], SHL.COVER_Z0)]),
+    "why": "the crank webs sweep under the deck here; the crank cover closes it: no wire may lie in it",
+    "except": [n for n in PARTS if n != "motor-leads"],
+    "except_why": "this zone is for wires; the parts in it are checked by the motion and joints checks"}
+KEEP_OUT["wires-motor"] = {
+    "part": "chassis", "mesh": trimesh.creation.box(bounds=[np.array(R.MOTOR_ENVELOPE[0]) - [3, 3, 3],
+                                                            (R.MOTOR_ENVELOPE[1][0] - R.N20_TERM_L, R.MOTOR_ENVELOPE[1][1] + 3,
+                                                             R.MOTOR_ENVELOPE[1][2] + 3)]),
+    "why": "motor gearbox and can + 3 mm: the leads leave behind them, at the terminals",
+    "except": [n for n in PARTS if n != "motor-leads"],
+    "except_why": "this zone is for wires"}
+_h = trimesh.creation.cylinder(radius=K.HEAD_D / 2 + fits.WINDOW.side, height=K.HEAD_H + fits.WINDOW.side, sections=48)
+_h.apply_translation([FB.CAP_SCREW_XY[0], FB.CAP_SCREW_XY[1], FB.CAP_TOP + (K.HEAD_H + fits.WINDOW.side) / 2])
+KEEP_OUT["cap-screw-head"] = {
+    "part": "chassis", "mesh": _h,
+    "why": "the cap's front screw head + WINDOW (plan: the block >= 83.35 over it): the cap comes off with the block off",
+    "except": ["cap-screw", "cap", "chassis"], "except_why": "the screw, the cap it clamps, the shell's clear space"}
+# the block stays inside the carcass's front block (base v1, lifted) but for the tongues (body v2's L-slots take them)
+_v1 = trimesh.load(os.path.join(HERE, "..", "base", "out", "front-block.stl"))
+_fbm = trimesh.load(os.path.join(HERE, "out", f"{NAME}.stl"))
+_t0, _t1 = _fbm.bounds[0][0] + FB.TONGUE_OUT, _fbm.bounds[1][0] - FB.TONGUE_OUT     # the side faces, read on the part
+KEEP_IN["carcass-front-block"] = {
+    "mesh": _v1, "inset": 0.0, "parts": [NAME],
+    "why": "front block v2 is the carcass's front block made hollow and cut: nothing of it outside the carcass shape",
+    "allow": {"tongue-L": {"box": ((_t0 - FB.TONGUE_OUT - 0.5, FB.TONGUE_Y[0] - 0.5, 90.0),
+                                   (_t0 + 0.5, FB.TONGUE_Y[1] + 0.5, FB.TONGUE_TOP)),
+                           "inset": -(FB.TONGUE_OUT + 0.2), "why": "the -X hook tongue (plan C1), into body v2's L-slot"},
+              **{f"tube-{k + 1}": {"box": ((x - 4.5, y - 4.5, FB.FOOT_TOP - 0.1), (x + 4.5, y + 4.5, 110.0)),
+                                  "inset": -0.6, "why": "the access tube's 0.8 wall (rev 3.2 screw place) stands up to "
+                                  "0.45 mm proud of the carcass's face curve at y -55, under the body's head"}
+                 for k, (x, y) in enumerate(FB.FB_SCREWS)},
+              "tongue-R": {"box": ((_t1 - 0.5, FB.TONGUE_Y[0] - 0.5, 90.0),
+                                   (_t1 + FB.TONGUE_OUT + 0.5, FB.TONGUE_Y[1] + 0.5, FB.TONGUE_TOP)),
+                           "inset": -(FB.TONGUE_OUT + 0.2), "why": "the +X hook tongue"}}}
+
+# ---- retention -------------------------------------------------------------------------------------------------------
+RETAIN["drive-module"] = {"play": 0.5}
+RETAIN["crank-cover"] = {"play": 0.5}
+RETAIN["switch"] = {"play": 0.9, "tilt": 11.0}   # WINDOW 0.5 a side round its catalogue size (plan: redrawn once
+                       # measured): 0.87 along a box diagonal, and a 6 × 6 section rocks 10.6° in 7 × 7 about its long
+                       # axis (the lever moves ±0.5 in its 3 mm window). Once measured the cradle goes to LOCATOR          # cradle walls, floor and top pad (WINDOW); at +X the shell's stop rib
+for f in FORKS:
+    RETAIN[f] = {"spin": [0, 0, 1], "play": 0.5, "not_by": ["leg-" + f[5:]]}   # swivels on its 2 screws
+RETAIN[NAME] = {"play": 0.5}       # pads in LOCATOR lips (0.2 a side, 1.5 tall); deck below; 2 screws above
+
+# ---- assembly (plan order) -------------------------------------------------------------------------------------------
+MODULE_GROUP = ("drive-module", "idler-1", "idler-2", "idler-3-v2", "pin-1", "pin-2", "pin-3", "pin-keeper",
+                "keeper-screw", "keeper-nut", "crankshaft-1", "crankshaft-2", "crankshaft-3", "crankshaft-4", "cap",
+                "cap-screw", "cap-nut", "shared-nut", "clamp-nut", "i7-nut-1", "i7-nut-2", "i7-nut-3", "i7-nut-4")
+_ASSEMBLY_A = ASSEMBLY
+_bench, ASSEMBLY = ["drive-module"], [("chassis", None)]
+# cover nuts on the bare shell: pushed 6 mm along their slots by the pliers' nose (ACCESS checks it, 25 mm reach);
+# the 60 mm straight-path test does not apply (every way out of a post meets the switch block, the band or the clip
+# 33-43 mm away), so they are placed, as the fork nuts are
+ASSEMBLY += [(f"cover-nut-{k + 1}", None) for k in range(len(COVER_SCREWS))]
+# front block nuts, step 9a, on the bare shell before the module (its slot runs 12 mm towards CX, into the module's
+# space): pushed along the slot by the pliers' nose (ACCESS); the 60 mm straight-path test does not apply (the bowl's
+# far wall stands 29-36 mm away), so they are placed, as the cover nuts are
+ASSEMBLY += [(f"fb-nut-{k + 1}", None) for k in range(2)]
+for step in _ASSEMBLY_A:
+    names, d, *o = step
+    if names == "drive-module":
+        continue
+    if names in (DROP, "motor-clamp", "shared-screw", "clamp-screw") or \
+            (isinstance(names, str) and names.startswith("leg-")) or names in ("holder", "eyes-board"):
+        continue                                          # these go in on the shell, below
+    opts = dict(o[0]) if o else {}
+    if "bench" not in opts:                               # module steps, on the bench with what is there
+        opts["bench"] = list(_bench)
+        _bench += [names] if isinstance(names, str) else list(names)
+    ASSEMBLY.append((names, d, opts))
+ASSEMBLY += [(f"i7-nut-{k + 1}", [n[3][0], n[3][1], 0], {"bench": list(_bench)})      # slid in along its slot
+             for k, n in enumerate(B.I7_NUTS)]
+ASSEMBLY.append((MODULE_GROUP, [0, 0, 1], {"note": "the module with its train and cap, no motor, into the deck "
+                                                   "window from above (plan step 10)"}))
+for f in FORKS:
+    ASSEMBLY += [(f"{f}-nut-low", None), (f"{f}-nut-up", None), (f, None), ("leg-" + f[5:], None),
+                 (f"{f}-screw-low", [0, 0, -1]), (f"{f}-screw-up", [0, 0, 1])]
+ASSEMBLY += [(DROP, [0, 0, 1]), ("motor-clamp", [0, 0, 1]), ("shared-screw", [0, 0, 1]),
+             ("clamp-screw", [0, 0, 1])]
+# the switch goes into the cover on the bench (cover upside down; leads threaded through the eye, then soldered)
+ASSEMBLY += [("switch", [1, 0, 0], {"bench": ["crank-cover"],
+                                    "note": "slid in from the open +X end, lever and pins in their slots"})]
+COVER_GROUP = ("crank-cover", "switch")
+ASSEMBLY += [(COVER_GROUP, [0, 0, 1], {"note": "after the clamp: the cover with its switch, over the crank window, "
+                                               "its spigot in the post; the leads' loop follows it"})]
+ASSEMBLY += [("motor-leads", None)]
+ASSEMBLY += [(f"cover-screw-{k + 1}", [0, 0, 1]) for k in range(len(COVER_SCREWS))]
+ASSEMBLY += [(NAME, [0, 0, 1], {"note": "step 13: pads down into their lips, over the cap"})]
+ASSEMBLY += [(f"fb-screw-{k + 1}", [0, 0, 1], {"note": "down the access tube, 2.5 hex key"}) for k in range(2)]
+ASSEMBLY += [(f"i7-screw-{k + 1}", [0, 0, -1]) for k in range(4)] + [("holder", None), ("eyes-board", None)]
+
+ACCESS += [{"at": f"i7-nut-{k + 1}", "tool": tool("pliers", [CX + x + d[0] * 8.0, y + d[1] * 8.0, nz + K.NUT_T / 2],
+                                                  [d[0], d[1], 0]),
+            "why": "on the bench: nut pushed along its slot into the module, pliers"}
+           for k, (x, y, nz, d) in enumerate(B.I7_NUTS)]
+ACCESS += [{"at": MODULE_GROUP, "tool": tool("finger", [CX, -10.0, R.DECK_TOP + 6.0], [0, 0, 1]),
+            "why": "the module with its train and cap lowered into the deck window by hand"}]
+ACCESS += [{"at": f"i7-screw-{k + 1}", "tool": tool("hex-key", [CX + r["x"], r["y"], r["head"] - K.HEAD_H],
+                                                     [0, 0, -1]),
+            "why": f"M3×{r['length']:g} from below, robot on its back, 2.5 hex key"} for k, r in enumerate(I7)]
+ACCESS += [{"at": f"cover-screw-{k + 1}", "tool": tool("hex-key", [x, y, SHL.COVER_Z0 + SHL.COVER_T + K.HEAD_H],
+                                                      [0, 0, 1]), "why": "M3×10 from above, 2.5 hex key"}
+           for k, (x, y, _) in enumerate(COVER_SCREWS)]
+ACCESS += [{"at": "switch", "tool": tool("finger", [SHL.SW_BODY[2] + 12.0, (_SB[1] + _SB[3]) / 2, _ZL], [1, 0, 0]),
+            "why": "on the bench: the switch pushed into its cradle from +X"},
+           {"at": COVER_GROUP, "tool": tool("finger", [CX, 0.0, SHL.COVER_Z0 + SHL.COVER_T + 8.0], [0, 0, 1]),
+            "why": "the cover with its switch lowered over the crank window by hand"}]
+ACCESS += [{"at": f"cover-nut-{k + 1}", "tool": tool("pliers", [x + d[0] * 6, y + d[1] * 6, SHL.COVER_Z0 - 2.5],
+                                                     [d[0], d[1], 0], d=6.0, reach=25.0),
+            "why": "on the bare shell (step 9a): nut slid into its post from the side, the pliers' nose"}
+           for k, (x, y, d) in enumerate(COVER_SCREWS)]
+for f, n in FORKS.items():
+    P = PARTS[f"{f}-screw-up"]["mesh"].centroid
+    ACCESS += [{"at": f"{f}-screw-up", "tool": tool("hex-key", [P[0], P[1], R.BAND_TOP], [0, 0, 1]),
+                "why": "upper swivel screw from the band top (body off), 2.5 hex key"},
+               {"at": f"{f}-screw-low", "tool": tool("hex-key", [P[0], P[1], BOSS_BOT - K.HEAD_H], [0, 0, -1]),
+                "why": "lower swivel screw from below, robot on its back"}]
+# front block (I8)
+ACCESS += [{"at": f"fb-screw-{k + 1}", "tool": tool("hex-key", [x, y, HEAD_Z + K.HEAD_H], [0, 0, 1]),
+            "why": "M3×10 down the Ø6.5 access tube from the block's top, 2.5 hex key (body off)"}
+           for k, (x, y, _) in enumerate(FB.FB_SCREWS_FULL)]
+ACCESS += [{"at": f"fb-nut-{k + 1}", "tool": tool("pliers", [x + d[0] * 6.0, y + d[1] * 6.0, NUT_Z + K.NUT_T / 2],
+                                                 [d[0], d[1], 0], d=2.0, reach=25.0),
+            "why": "step 9a on the bare shell: nut pushed along its 2.7 mm slot into the boss by the pliers' nose tip "
+                   "(or a small screwdriver)"}
+           for k, (x, y, d) in enumerate(FB.FB_SCREWS_FULL)]
+
+# ---- joints ----------------------------------------------------------------------------------------------------------
+JOINTS[("drive-module", "chassis")] = {"fit": fits.WINDOW, "where": ((CX, -8.0, 73.8), (16.0, 90.0, 1.8)),
+                                       "why": "I7: the module's top in the deck window, a side"}
+for k, r in enumerate(I7):
+    z0, z1 = r["head"] + 0.5, r["z_mod"] - 0.2         # the shank in its hole, above the head
+    JOINTS[(f"i7-screw-{k + 1}", "chassis")] = {"fit": fits.STEEL,
+                                                "where": ((CX + r["x"], r["y"], (z0 + z1) / 2), (5.0, 5.0, z1 - z0)),
+                                                "why": f"I7 screw {k + 1}'s shank in its Ø3.3 hole"}
+_sp = [(x, y) for x, y, kind, _ in SHL.COVER_POSTS if kind == "spigot"][0]
+JOINTS[("chassis", "crank-cover")] = {"fit": fits.LOCATOR, "where": ((*_sp, SHL.COVER_Z0 + 0.8), (7.0, 7.0, 1.4)),
+                                      "why": "the post's spigot in the cover's hole: locates the cover"}
+JOINTS[("crank-cover", "switch")] = {"fit": fits.WINDOW, "where": (((_SB[0] + _SB[2]) / 2, (_SB[1] + _SB[3]) / 2, _ZL),
+                                                                    (_SB[2] - _SB[0] + 1.5, _SB[3] - _SB[1] + 1.5, 8.0)),
+                                      "why": "the switch in its cradle (catalogue size + WINDOW, redrawn once measured)"}
+JOINTS[("motor-leads", "chassis")] = {"fit": fits.WINDOW, "where": ((SHL.CLIPS[0][0], SHL.LEAD_Y, SHL.LEAD_Z), (5.0, 8.0, 5.0)),
+                                      "why": "motor leads in their clips' slots"}
+for f in FORKS:
+    P = PARTS[f"{f}-screw-up"]["mesh"].centroid
+    JOINTS[(f"{f}-screw-low", "chassis")] = {"fit": fits.STEEL, "where": ((P[0], P[1], BOSS_TOP - 2.0),
+                                                                          (5.0, 5.0, 2.5)),
+                                             "why": "I4: lower swivel screw's shank in the boss"}
+    JOINTS[(f"{f}-screw-up", "chassis")] = {"fit": fits.STEEL, "where": ((P[0], P[1], FORK_TOP + GAP + 0.6),
+                                                                         (5.0, 5.0, 0.8)),
+                                            "why": "I4: upper swivel screw's shank in the band"}
+    JOINTS[("chassis", f)] = {"fit": fits.TURN, "where": ((P[0], P[1], (FORK_BOT + FORK_TOP) / 2),
+                                                          (2 * BV.BOSS_R, 2 * BV.BOSS_R, FORK_TOP - FORK_BOT + 2.0)),
+                              "why": "I4 in Z: the fork turns between the boss below and the upper boss (TURN, coupon "
+                                     "K7); sideways its pocket is FORK_GAP"}
+# front block (I8)
+_lz = R.DECK_TOP + SHL.FB_LIP_H / 2
+_hz0, _hz1 = FB.FOOT_TOP, R.BAND_TOP + SHL.LIP_H + 0.5
+JOINTS[(NAME, "chassis")] = {"fit": fits.LOCATOR, "where": ((CX, -43.0, _lz), (90.0, 44.0, SHL.FB_LIP_H - 0.4)),
+                             "why": "I8: both pads in their lips, a side (the deck contact is below this box)"}
+JOINTS[("chassis", NAME)] = {"fit": fits.WINDOW, "where": ((CX, -43.0, (_hz0 + _hz1) / 2), (90.0, 44.0, _hz1 - _hz0)),
+                             "why": "above the lips: the shell's band, seat and slide lip round the block (shell cuts "
+                                    "front_block.clear_outline())"}
+for k, (x, y, _) in enumerate(FB.FB_SCREWS_FULL):
+    JOINTS[(f"fb-screw-{k + 1}", NAME)] = {"fit": fits.STEEL, "where": ((x, y, R.DECK_TOP + FB.PAD_T / 2),
+                                                                         (5.0, 5.0, FB.PAD_T - 0.4)),
+                                           "why": f"I8 screw {k + 1}'s shank in the pad's Ø3.3 hole"}
+    JOINTS[(f"fb-screw-{k + 1}", "chassis")] = {"fit": fits.STEEL, "where": ((x, y, R.DECK_TOP - 1.0), (5.0, 5.0, 1.6)),
+                                                "why": f"I8 screw {k + 1}'s shank in the deck's Ø3.3 hole"}
+    JOINTS[(f"fb-nut-{k + 1}", "chassis")] = {"fit": fits.STEEL, "where": ((x, y, NUT_Z + K.NUT_T / 2), (8.0, 8.0, 1.6)),
+                                              "why": f"I8 nut {k + 1} in its pocket (NUT_AF + 2 × STEEL)"}
+
+_pl = FB.pads(FB.BV.carcass()[4])[0]
+_seg = _pl.intersection(__import__("shapely.geometry", fromlist=["LineString"]).LineString([(20.0, -45.0), (20.0, -20.0)]))
+_pad_d = _seg.length
+
+# ---- marks, labels, print, measure ----------------------------------------------------------------------------------
+MARKS.update({f: "the leg's own L/R label (legs design); the fork fits its pocket either way up" for f in FORKS})
+MARKS["chassis"] = ("FRONT arrow (tip to -Y) sunk 0.5 in the seat at the front left, beside the front block (x 26.2, y -41.5, placed by shell_marks()); the fork number (1-4 dots, front to rear) beside each "
+                    "upper swivel screw on the band top")
+MARKS["crank-cover"] = ("FRONT arrow on its top face; it fits one way (the spigot and the shared screw's hole); the "
+                        "switch fits its cradle one way (lever to the rear slot, pins to the front slot)")
+MARKS[NAME] = ("none needed: it fits one way only (the pads' outlines in their lips and the face's curve); the eyes "
+               "JST seat and the slack box show its left side")
+LABELS = {"es": {**LABELS["es"], "chassis": "carcasa base (chasis de vista)",
+                 **{f"i7-screw-{k + 1}": f"tornillo I7 {k + 1}" for k in range(4)},
+                 "crank-cover": "tapa de los cigüeñales", "motor-leads": "cables del motor",
+                 "switch": "interruptor",
+                 **{f"cover-screw-{k + 1}": f"tornillo de la tapa de los cigüeñales {k + 1}" for k in range(2)},
+                 **{f"cover-nut-{k + 1}": f"tuerca de la tapa de los cigüeñales {k + 1}" for k in range(2)},
+                 **{f"i7-nut-{k + 1}": f"tuerca I7 {k + 1}" for k in range(4)},
+                 **{f: f"horquilla {f[5:]}" for f in FORKS},
+                 **{f"{f}-screw-low": f"tornillo inferior de la horquilla {f[5:]}" for f in FORKS},
+                 **{f"{f}-screw-up": f"tornillo superior de la horquilla {f[5:]}" for f in FORKS},
+                 **{f"{f}-nut-low": f"tuerca inferior de la horquilla {f[5:]}" for f in FORKS},
+                 **{f"{f}-nut-up": f"tuerca superior de la horquilla {f[5:]}" for f in FORKS},
+                 NAME: "bloque frontal v2",
+                 **{f"fb-screw-{k + 1}": f"tornillo del bloque frontal {k + 1}" for k in range(2)},
+                 **{f"fb-nut-{k + 1}": f"tuerca del bloque frontal {k + 1}" for k in range(2)}}}
+PRINT_ORIENT["chassis"] = FLIP          # band top (slide lip) on the bed (plan A1b)
+PRINT_ORIENT["crank-cover"] = FLIP     # top face (sunk arrow) on the bed, the rear lip standing up: no support (upright
+                                         # it printed its whole plate over the bed). The lip (1.2 × 8.5, 7.6 tall) closes the
+                                         # module path's slot in the band's rear wall: nothing pushes on it (the WARN on it)
+PRINT_ORIENT[NAME] = np.eye(4)      # base (the pads) on the bed, as built
+MEASURE += [
+    {"part": "chassis", "what": "crank window width across X", "nominal": round(2 * SHL.CRANK_HALF, 2),
+     "tol": (0.0, 0.3), "points": "at crank 2's slot, deck edge to deck edge"},
+    {"part": "chassis", "what": "slide lip height over the seat", "nominal": SHL.LIP_H, "tol": (-0.2, 0.2),
+     "points": "either side, at y 0"},
+    {"part": "chassis", "what": "fork pocket height (boss top to band underside)",
+     "nominal": round(FORK_TOP - FORK_BOT + 2 * GAP, 2), "tol": (0.0, 0.3), "points": "any fork pocket, at the screw"},
+    {"part": "chassis", "what": "cover post spigot diameter", "nominal": SHL.SPIGOT_D, "tol": (-0.1, 0.05),
+     "points": "the front-left post"},
+    {"part": "crank-cover", "what": "spigot hole diameter", "nominal": fits.bore(SHL.SPIGOT_D, fits.LOCATOR),
+     "tol": (-0.05, 0.15), "points": "front-left hole"},
+    {"part": NAME, "what": "left pad's depth along Y at x 20 (its rear block)", "nominal": round(_pad_d, 2),
+     "tol": (-0.1, 0.1), "points": "front face to rear face of the pad, 1 mm above the bed"},
+    {"part": NAME, "what": "JST seat across X", "nominal": round(FB.SEAT[2] - FB.SEAT[0], 2), "tol": (0.0, 0.2),
+     "points": "the seat at the slack box's bottom"},
+    {"part": NAME, "what": "access tube bore", "nominal": SHL.CBORE, "tol": (-0.1, 0.3), "points": "either tube, at the top"},
+    {"part": NAME, "what": "hook tongue height at its tip", "nominal": FB.TONGUE_TIP, "tol": (-0.1, 0.1),
+     "points": "either tongue, outer edge"},
+    {"part": NAME, "what": "hook tongue reach from the side face", "nominal": FB.TONGUE_OUT, "tol": (-0.1, 0.1),
+     "points": "either tongue, top face"},
+    {"part": NAME, "what": "boss thickness under the head", "nominal": FB.PAD_T, "tol": (-0.1, 0.1),
+     "points": "depth gauge down the access tube, from the bed face"}]
+SECTIONS += [([FB.FB_SCREWS[0][0], 0, 0], [1, 0, 0]), ([33.7, 0, 0], [1, 0, 0]), ([0, -51.0, 0], [0, 1, 0]),
+             ([0, -31.0, 0], [0, 1, 0])]

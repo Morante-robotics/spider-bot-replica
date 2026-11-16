@@ -57,6 +57,9 @@ GEAR_THRUST_IDLER = Fit("idler face to a spine wall, a side (idler on a steel pi
 DSHAFT = Fit("printed D-bore pressed on a steel D-shaft (N20 Ø3, flat 0.5 deep), modelled at the shaft's size", 0.0,
              "assumed", "never printed; printed holes come out smaller, which gives the press. Coupon K1 (3 bores "
              "round this value) waits for the motor")
+SLIP_BORE = Fit("printed gear turning on a printed sleeve as a friction clutch (pinion on the clutch sleeve), a side",
+                0.1, "assumed", "never printed; tighter than TURN to centre the pinion (design-plan-clutch.md rev 2 "
+                "item 4). Coupon CL1: the pinion turns on the pressed sleeve by hand when the spring is off")
 MOTOR_SEAT = Fit("bought metal motor (N20 gearbox and can) against its printed seat faces and clamp", 0.2, "assumed",
                  "as LOCATOR for a short printed part, not printed against a metal body yet. Coupon K2 waits for the "
                  "motor")

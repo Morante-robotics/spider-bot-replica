@@ -103,7 +103,7 @@ FORK_GAP_Z = fits.TURN.side + MESH_TOL   # up and down: the fork only turns abou
 # crankshafts; the crank cover closes it (it replaces Q5's solid strip)
 CRANK_HALF = 13.8 + WIN    # crankshaft half width (Part A CRANK_X) + WINDOW
 CRANK_WIN = (CX - CRANK_HALF, min(_SH_Y) - SWEEP_R + LEG - WIN, CX + CRANK_HALF, max(_SH_Y) + SWEEP_R - LEG + WIN)
-COVER_Z0 = R.MOTOR_ENVELOPE[1][2] + 4.8 + WIN   # cover plate underside: the clamp's top (Part A CLAMP_Z0 + CLAMP_T) + WINDOW
+COVER_Z0 = B.CLAMP_Z0 + B.CLAMP_T + WIN   # cover plate underside: the clamp's top + WINDOW (82.85 + 0.5; was written from the motor envelope, which rose 0.1 with the clutch)
 COVER_T = 1.6
 COVER_Y = (-23.5, 32.3)    # the front block covers ahead of y -24; the rear stops at the bowl's inner wall
 COVER_HALF = CRANK_HALF + 1.0
@@ -115,7 +115,7 @@ SPIGOT_D, SPIGOT_H = 5.0, 1.5    # locates the cover (LOCATOR): a cover is never
 COVER_SCREW_L = 10.0
 # clamp notch (Morante 2026-11-15): seat ring and slide lip cut over the clamp's end so it drops in from above
 CLAMP_NOTCH = (CX + 30.0, 5.0, 19.0)  # x0, y0, y1: the seat's overhang reaches over the clamp from x ≈ 78 (quick check)
-# motor leads (I12): clips on the deck, the leads' path in verify_b1.py
+# motor leads (I12): clips on the deck, the leads' path in verify.py
 LEAD_D = 2.5               # two 26 AWG leads side by side
 CLIPS = [(69.5, None)]     # clip 1 on the shell, at the leads' run (LEAD_Y); a clip at x 74 came out floating
 LEAD_Z = 81.6              # the leads' run: over the motor's KEEP_OUT (its top + 3 = 81.05), through clip 1 and the
@@ -143,7 +143,7 @@ REAR_FACE_Y = 34.84         # the carcass's rear face at CX (Part A Y1 note): th
 REAR_LIP_T = 1.2
 DRIVE_CLEAR = (CX - 10.5, B.Y0 - 0.5, CX + 10.5, 33.0)   # x0 y0 x1 y1: nothing of the shell above the deck over the
                           # module, cap and clamp (they go in from above); a leftover of the band outline stood here
-SWEEP_CHORD = 0.3          # leg path cut: + this on LEG_PATH (10° hull steps fell 0.15 short in verify_b1)
+SWEEP_CHORD = 0.3          # leg path cut: + this on LEG_PATH (10° hull steps fell 0.15 short in the B1 check)
 I7_UNDER_HEAD = 1.4       # boss left between an I7 head's counterbore and the module (in compression only)
 CBORE_MOUTH = 11.0        # counterbores start this far under the bowl's bottom on their axis: screw 2's mouth stayed
                           # closed on the bowl's slope from 6.0
@@ -377,7 +377,7 @@ def module_path(module, dz=1.0):
     P = A.poses((0, 0.0, 0.0))
     for n in ("idler-1", "idler-2", "idler-3-v2", "pin-1", "pin-2", "pin-3", "pin-keeper", "keeper-screw", "keeper-nut",
               "crankshaft-1", "crankshaft-2", "crankshaft-3", "crankshaft-4", "cap", "cap-screw", "cap-nut",
-              "shared-nut", "clamp-nut"):                 # the whole sub-assembly that goes in (verify_b1 MODULE_GROUP)
+              "shared-nut", "clamp-nut"):                 # the whole sub-assembly that goes in (verify.py MODULE_GROUP)
         p = A.PARTS[n]
         m = p["mesh"].copy() if "mesh" in p else trimesh.load(os.path.join(HERE, p["stl"]))
         m.apply_transform(P.get(n, np.eye(4)))
@@ -470,7 +470,7 @@ def cradle():
 
 
 def switch_mesh():
-    """The SS12D00 (catalogue sizes, robot.SWITCH): body, lever at mid travel, the pin row; for verify_b1.py."""
+    """The SS12D00 (catalogue sizes, robot.SWITCH): body, lever at mid travel, the pin row; for verify.py."""
     x0, y0, x1, y1, z0, z1 = SW_BODY
     xc, zl = (x0 + x1) / 2, (z0 + z1) / 2
     lx, ly, lz = SW_LEVER
@@ -586,7 +586,7 @@ def set_base_globals():
 
 
 def fork_frames_cached():
-    """The forks' frames (pivot P, outward u: the nut slots' direction) from the full build's cache (verify_b1.py)."""
+    """The forks' frames (pivot P, outward u: the nut slots' direction) from the full build's cache (verify.py)."""
     from stage_cache import Stages
     set_base_globals()
     st = Stages(os.path.join(OUT, ".cache"), DEPS, tag="full")

@@ -115,12 +115,16 @@ CATALOGUE = {"N20_W": N20_W, "N20_H": N20_H, "N20_GEARBOX_L": N20_GEARBOX_L, "N2
 
 # ---- the motor at M1: pinion on idler 3, axis along +X -------------------------------------------------------------
 PINION_TEETH = 12
-PINION_FACE = 5.0          # pinion face, = idler 3 v2's face (decision 1 and 11)
+PINION_FACE = 4.0          # clutch pinion (design-plan-clutch.md, Morante 2026-11-16: 4 mm; was 5 = idler 3's face)
 IDLER3_FACE = 5.0
-_Y3, _Z3, _N3 = IDLERS[2]
-MOTOR_AXIS = (CX, _Y3, _Z3 + C.MOD * (PINION_TEETH + _N3) / 2 + C.CD_EXTRA)   # (CX, 12.18, 72.04)
+PINION_X0 = -IDLER3_FACE / 2   # pinion's -X face, x from CX: flush with idler 3's -X face (-2.5); +X face at +1.5
+CLUTCH_SHOULDER = 1.0      # clutch sleeve's shoulder between the pinion's +X face and the 0.8 gauge (x +1.5..+2.5)
+MOTOR_CD_EXTRA = 0.1       # motor axis 0.1 further from idler 3 than C.CD_EXTRA: covers the slip bore's 0.1 a side
+_Y3, _Z3, _N3 = IDLERS[2]  # (backlash worst +0.054, design-plan-clutch.md rev 2 item 4; Morante 2026-11-16)
+MOTOR_AXIS = (CX, _Y3, _Z3 + C.MOD * (PINION_TEETH + _N3) / 2 + C.CD_EXTRA + MOTOR_CD_EXTRA)   # (CX, 12.18, 72.14)
 PINION_TIP_R = C.MOD * (PINION_TEETH / 2 + 1)
-GEARBOX_X = CX + PINION_FACE / 2 + fits.GEAR_AXIAL.side     # gearbox face: the pinion's face + the 0.8 gauge (3.3)
+# gearbox face: pinion's +X face + the sleeve's shoulder + the 0.8 gauge (3.3, unchanged by the clutch)
+GEARBOX_X = CX + PINION_X0 + PINION_FACE + CLUTCH_SHOULDER + fits.GEAR_AXIAL.side
 MOTOR_ENVELOPE = ((GEARBOX_X, _Y3 - N20_W / 2, MOTOR_AXIS[2] - N20_H / 2),
                   (GEARBOX_X + N20_GEARBOX_L + N20_CAN_L + N20_TERM_L, _Y3 + N20_W / 2, MOTOR_AXIS[2] + N20_H / 2))
 
@@ -194,8 +198,10 @@ INTERFACES = {
     "I4": {"between": ("legs", "forks", "chassis"), "fits": ("STEEL", "WINDOW"), "hardware": "M3×16 pivots, M3×10"},
     "I5": {"between": ("cap", "drive-module"), "fits": ("LOCATOR", "TONGUE"), "hardware": "2 × M3×12 (one shared "
                                                                                         "with the clamp)"},
-    "I6": {"between": ("N20", "pinion", "drive-module", "idler-3-v2"), "fits": ("MOTOR_SEAT", "DSHAFT"),
-           "gear_backlash": fits.GEAR_BACKLASH, "hardware": "motor-clamp, 2 × M3×12"},
+    "I6": {"between": ("N20", "clutch (sleeve, pinion, spring, shims, collar)", "drive-module", "idler-3-v2"),
+           "fits": ("MOTOR_SEAT", "DSHAFT", "SLIP_BORE"), "gear_backlash": fits.GEAR_BACKLASH,
+           "pinion_face": PINION_FACE, "motor_cd_extra": MOTOR_CD_EXTRA,
+           "hardware": "motor-clamp, 2 × M3×12; wave washer DIN 137 B M3, shims DIN 988 3×6"},
     "I7": {"between": ("drive-module", "chassis"), "fits": ("WINDOW", "STEEL"),
            "hardware": "4 × M3 from below into the module's 4 nut traps (positions in chassis/build.py I7_NUTS, "
                        "lengths per nut: chassis README I7 table); deck lip WINDOW (88 mm outline)"},

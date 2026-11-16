@@ -8,13 +8,12 @@ them), clearances in [`../fits.py`](../fits.py), part parameters at the top of e
 
 | Part | Built by | Spec | Last full check |
 |---|---|---|---|
-| A: drive module, cap, motor clamp, pinion, idler 3 v2, pin keeper, bench tools | `build.py` | `verify.py` | `verify-result.txt`: PASS, 39 warnings |
-| B1: shell `chassis`, `crank-cover` | `shell.py` (stages cached in `out/.cache/`) | `verify_b1.py` (interim) | `verify-result-b1.txt`: PASS, 88 warnings |
-| Front block v2 | `front_block.py` | `verify_fb.py` (interim) | `verify-result-fb.txt`: PASS, 42 warnings |
+| A: drive module, cap, motor clamp, pinion, idler 3 v2, pin keeper, bench tools | `build.py` | `verify.py` (same spec) | see the next row |
+| Friction clutch (rev 2, approved 2026-11-16): `clutch-sleeve`, 4 mm `pinion`, wave washer + shims, `clutch-collar`; -X wall notch; jig's Ø9.5 pocket; motor axis +0.1 (`R.MOTOR_CD_EXTRA`); coupons CL1/CL2/CL3/K1 | `build.py`, `coupons_clutch.py` | `verify.py` | `verify-result.txt` (2026-11-16) |
+| B1 shell `chassis`, `crank-cover`, front block v2: the whole walking robot | `shell.py`, `front_block.py` | `verify.py` | `verify-result.txt`: PASS, 90 warnings (Part A, B1 and the front block in one spec) |
 | B rest (body v2, cradle, ballast frame, eyes pocket), C, D | not started | | |
 
-The three specs merge into `verify.py` in Part C (the whole-robot check); until then `verify_b1.py` and `verify_fb.py`
-import Part A's spec and add their parts.
+`verify.py` is the one spec of the walking robot (it was `verify.py`, `verify_b1.py` and `verify_fb.py`). `verify-result-b1.txt` is kept: `design-review.md` cites it.
 
 ## Where to read, by task
 
@@ -26,6 +25,7 @@ import Part A's spec and add their parts.
 | Shell mass | `design-plan-b.md` | Shell mass |
 | Open questions | `design-plan-b.md` | Open questions for Morante |
 | Front block | `front_block.py` docstring | |
+| Clutch (slip window 129–196 N·mm, stack, coupons) | `design-plan-clutch.md` | Morante's answers (end), 3b, 4 |
 | Interfaces I1–I12 | `../robot.py` | `INTERFACES` |
 
 Figure and probe scripts (`plan_figure.py`, `plan_b_figure.py`, `plan_b_rear_section.py`, `part_a_figures.py`,
