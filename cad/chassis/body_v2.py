@@ -21,7 +21,7 @@ Features (every number below derived and commented; clearances from ../fits.py):
 `holder-cradle`: a tray round the 4×AAA holder (snap lips 1.0 on the long bottom edges, ε 0.56 %), -Y crossbar above
 the cover's plane, +Y end wall, top frame, 2 ears. `body-lug`: plan B's tab section.
 
-    ../../.venv/bin/python body_v2.py                     # all three parts: out/*.stl, .step, grams
+    ../../.venv/bin/python body_v2.py                     # all parts: out/*.stl, grams (add --step for the STEPs)
     ../../.venv/bin/python body_v2.py --part holder-cradle
 """
 import os
@@ -380,8 +380,9 @@ def write_step(m, stl, path):
 PARTS = {"body-v2": body_v2, "holder-cradle": holder_cradle, "body-lug": body_lug, "eyes-tab": eyes_tab}
 
 
-def build(n, step=True):
-    """Build one part into out/ (STL, and STEP unless step is False); build.py --part <name> calls this."""
+def build(n, step=False):
+    """Build one part into out/ (STL; STEP only if step: the mesh STEP of body-v2 takes ≈ 6 min and 184 MB, for
+    Onshape and milestones only); build.py --part <name> [--step] calls this."""
     t0 = time.time()
     m = PARTS[n]()
     p = os.path.join(OUT, f"{n}.stl")
@@ -395,7 +396,7 @@ def build(n, step=True):
 def main():
     names = [sys.argv[sys.argv.index("--part") + 1]] if "--part" in sys.argv else list(PARTS)
     for n in names:
-        build(n, "--no-step" not in sys.argv)
+        build(n, "--step" in sys.argv)
 
 
 if __name__ == "__main__":

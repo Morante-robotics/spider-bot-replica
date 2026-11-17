@@ -22,7 +22,7 @@ by LIFT, its stems run down to the deck; ../base/build.py carcass()) made into a
     JST seat at its bottom (floor 1.2 at z 88); the switch lead leaves the seat's bottom by a tunnel to the rear face
 Every clearance from ../fits.py; shell numbers from shell.py (FB_SCREWS, pad split, lip, pad thickness, JST size).
 
-    ../../.venv/bin/python front_block.py          # out/front-block-v2.stl (+ .step as a mesh), mass, times
+    ../../.venv/bin/python front_block.py          # out/front-block-v2.stl, mass, times (--step: + .step as a mesh)
 """
 import os
 import sys
@@ -397,9 +397,11 @@ def main():
     lo, hi = m.bounds
     print(f"{NAME}: {np.round(m.bounds, 2).tolist()}  {m.volume / 1000:.2f} cm³ = {m.volume / 1000 * RHO:.1f} g "
           f"(budget 13-15)  watertight {m.is_watertight}  total {time.time() - t0:.1f} s")
+    if "--step" not in sys.argv:                                     # STEP of a mesh: for Onshape viewing only, 22 s
+        return
     try:
         write_step(m, os.path.join(OUT, f"{NAME}.step"))
-    except Exception as e:                                           # STEP of a mesh: for Onshape viewing only
+    except Exception as e:
         print(f"STEP not written: {e}")
 
 

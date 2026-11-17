@@ -65,6 +65,8 @@ against the parts already in; it reports «goes in: down 30 mm, then +Y 4 mm» o
 ## What is printed and kept in git
 
 - STL and STEP of a part are committed when that version is printed, and at milestones.
+- Mesh parts (`body-v2`, `front-block-v2`: the STEP is the STL sewn face by face, minutes and 50-180 MB) write their
+  STEP only with `--step`: pass it before an Onshape upload or a milestone, never in the inner loop.
 - A print plate (`../print/*.3mf`) is committed once, for the version that was printed; a re-slice of the same
   parts does not get a new commit, since the README's command rebuilds it. Plates of milestones also go into the
   GitHub release.

@@ -33,7 +33,7 @@ are); print orientations are in verify.py PRINT_ORIENT and README.md.
 Usage:
     ../../.venv/bin/python build.py                  # every part
     ../../.venv/bin/python build.py --part cap       # one part
-    ../../.venv/bin/python build.py --part body-v2   # Part B2: also holder-cradle, body-lug (body_v2.py; STL + STEP)
+    ../../.venv/bin/python build.py --part body-v2   # Part B2: also holder-cradle, body-lug (body_v2.py; STL; --step adds the mesh STEP)
 """
 import os
 import sys
@@ -603,12 +603,14 @@ B2_PARTS = ("body-v2", "holder-cradle", "body-lug", "eyes-tab")      # body_v2.p
 def main():
     import coupons_clutch as CC
     PARTS.update(CC.PARTS)
-    args = K.part_args(__doc__, {**PARTS, **dict.fromkeys(B2_PARTS)})
+    args = K.part_args(__doc__, {**PARTS, **dict.fromkeys(B2_PARTS)},
+                       lambda ap: ap.add_argument("--step", action="store_true",
+                                                  help="also the mesh STEP of the B2 parts (slow: Onshape, milestones)"))
     wanted = args.part or list(PARTS)
     K.build_parts(PARTS, [n for n in wanted if n in PARTS], OUT)
     for n in [n for n in wanted if n in B2_PARTS]:
         import body_v2
-        body_v2.build(n)
+        body_v2.build(n, args.step)
 
 
 if __name__ == "__main__":
