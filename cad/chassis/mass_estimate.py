@@ -83,6 +83,7 @@ def rows():
     hw = MS.mass_table()                      # the sizing's own rows, for the numbers it measured
     screws_sizing = [r[1] for r in hw if r[0].startswith("Screws")][0]
     m3_10, m3_12, m3_8 = 0.9 + 0.25, 1.0 + 0.25, 0.8 + 0.25   # as motor_sizing.py (screw + nut)
+    m3_6 = 0.7 + 0.25                  # same 0.05 g/mm line through the 8, 10 and 12 (screw + nut)
     # (name, grams, centre, source, in final, in v0)
     R = [
         ("Chassis shell B1 (band, lips, fork mounts, bump, rear block; also v0, L2)", *printed("cad/chassis/out/chassis.stl"), "B1 STL, shell model", 1, 1),
@@ -106,7 +107,7 @@ def rows():
         ("Eyes board (perfboard, 2 LEDs, 2 resistors)", 5.0, head, "catalogue guess (sizing)", 1, 0),
         ("Wiring, 2 connector pairs, panel switch", 5.0 + 2 * 0.8 + 1.0, np.array([CX, 20.0, 85.0]), "plan (sizing 5 + connectors, switch)", 1, 1),
         ("Screws: 16 fork M3×10, 8 pivot M3×16, 3 pins (sizing set)", screws_sizing - 3 * (0.9 + 0.25), pivots, "catalogue screw masses (sizing set; its 19 M3×10 incl. 3 cap)", 1, 1),
-        ("Screws added: 4 module, 2 strap, 2 front block, 2 cradle M3×10; 3 cap + 1 body M3×12; keeper M3×8", 10 * m3_10 + 4 * m3_12 + m3_8, np.array([CX, -5.0, 85.0]), "catalogue screw masses × counts from the plan", 1, 1),
+        ("Screws added (spec count): 2 strap, 2 front block, 2 cradle M3×10; 3 cap M3×12; 3 I7 M3×6 + 1 I7 M3×8; body + keeper M3×8", 6 * m3_10 + 3 * m3_12 + 3 * m3_6 + 3 * m3_8, np.array([CX, -5.0, 85.0]), "catalogue screw masses × counts from the plan", 1, 1),
     ]
     return R
 

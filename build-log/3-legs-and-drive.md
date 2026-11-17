@@ -43,6 +43,8 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
    design mass under the motor's ceiling; the checks of the whole robot are one spec that passes, and a friction
    clutch on the motor's shaft is modelled so a jam slips instead of breaking a gear. Nothing will be printed until
    the looks parts are modelled: one robot, not a ballasted test chassis.
+10. **The weight review.** The robot is made 7 g lighter without new hardware, and the shell no longer carries the
+    cut of the old 5 mm pinion. The looks parts are next.
 
 <img src="../sim/images/drive-attempts.png" alt="The three drives tried, from above and from the side">
 
@@ -1729,7 +1731,7 @@ This entry closes the open item «Robot master model».
 
 ### Chassis Part B1, Part C check and the friction clutch
 
-**Phase 3 · Mechanisms · 2026-11-16** · Status: 🔄 chassis built and checked, clutch modelled; weight review and looks parts next
+**Phase 3 · Mechanisms · 2026-11-16** · Status: ✅ chassis built and checked, clutch modelled
 
 > **In short.** The chassis shell (B1) is built and its mass is measured from the model: 70.1 g against an 86 g
 > budget, which brings the robot's design mass to 466 g, under the 478 g the chosen motor carries with its margin of
@@ -1814,18 +1816,83 @@ are printed.
   ballast: nothing is printed until the looks parts are modelled. This reverses the plan's v0 (see the note in
   [Whole robot first](#whole-robot-first-motor-sizing-and-chassis-plan)).
 - **New order:** the walking robot checked in CAD; the friction clutch; Part D, the weight and size review (kept,
-  scale included); the looks parts in CAD (body v2 with the holder cradle, the eyes); then the motor, battery holder,
+  scale included; the scale study was dropped the next day, see [Part D](#chassis-part-d-the-weight-review)); the looks parts in CAD (body v2 with the holder cradle, the eyes); then the motor, battery holder,
   switch and clutch hardware are bought and measured, one coupon batch is printed, and the one robot.
 - **Friction clutch over a PTC fuse**, because a slip draws only 2.1 times the walking current and a PTC cannot tell
   them apart; no clicker; the pinion face is 4 mm.
 
+[↑ Contents](../build-log.md#contents)
+
+### Chassis Part D: the weight review
+
+**Phase 3 · Mechanisms · 2026-11-17** · Status: 🔄 459 g, in CAD; looks parts next
+
+> **In short.** Every part of the robot was reviewed for weight. The printed parts turned out to be near their floor
+> (each carries under 0.7 g of infill), so only two thinner walls and a recount of the screws were kept: the design
+> mass falls from 466 g to 459 g, margin 3.12 against 3.0 required, 19 g under the 478 g ceiling. The 120 % print
+> scale and the 4×AAA holder stay: Morante dropped the scale study. The big saving is still to come, in the body
+> v2: it gets a 90 g budget, about 20 g under the scanned body. Nothing is printed.
+
+[Part B1](#chassis-part-b1-part-c-check-and-the-friction-clutch) left the robot 12 g under the motor's ceiling, and
+every gram below it is margin. The review looked at each part for a lighter wall, a hollow or a ribbed section, and
+ranked the levers in three sets (safe, moderate, aggressive).
+
+<img src="../cad/chassis/images/plan-d.png" alt="The shell from below coloured by the set that thins each region, and the design mass of each set">
+
+*Fig. 1 · The plan. Left: the shell from below; green is thinned in the safe set, yellow in the moderate one, red in
+the aggressive one, grey stays. Right: design mass of each set against the 478 g ceiling; the margins printed are the
+plan's estimates.*
+
+#### Steps
+
+1. **The plan** ([`design-plan-d.md`](../cad/chassis/design-plan-d.md)): infill and wall-loop changes, or hollowing
+   the thick parts, save under 1.5 g in all, so they were rejected. Sets: safe 459 g, moderate 456 g (3.6 g more
+   than safe, but a recut coupon, new hardware and stiffness risk), aggressive 427 g (needs aluminium screws, no side
+   lips and windows in the belly). A bug turned up: the stage cache in [`tools/stage_cache.py`](../tools/stage_cache.py)
+   did not see parameters read inside project modules, so a thinner wall would have reused the old shape.
+2. **The review** asked for changes on nine points: the cache hole was wider than the wall setting; the crank cover
+   carries the switch cradle and the front block reads its thickness; the grams of thinned parts must come from the
+   Bambu slice, not a home-made per-layer model; moderate buys little over safe.
+3. **Morante chose** the safe set, no new hardware, lips kept, no belly windows, and a 90 g budget for body v2. The
+   cover stays 1.6 mm under the switch cradle and its posts and is 1.2 mm on the free span. With no 0.01 g scale,
+   legs, forks and screws keep their catalogue and plate masses.
+4. **The fix.** The stage cache now follows project-module functions (test
+   [`tools/tests/test_stage_cache.py`](../tools/tests/test_stage_cache.py)). The shell was rebuilt round the 4 mm
+   pinion and the clutch, which removes the old 5 mm pinion's cut (Part C leftover), with the bowl skin 1.6 → 1.2 mm;
+   the crank cover is 1.2 mm on its free span; the front block was rebuilt against the new cover. The screws were
+   recounted in [`mass_estimate.py`](../cad/chassis/mass_estimate.py), and the shell's export retries other
+   tolerances if its STL reads back open.
+
+#### Result
+
+<img src="../cad/chassis/images/plan-mass.png" alt="Mass table of the robot after Part D">
+
+*Fig. 2 · The mass table after the review, from the built parts.*
+
+| | Before | Now |
+|---|---|---|
+| Chassis shell | 70.1 g | 65.2 g |
+| Crank cover | 4.7 g | 3.8 g |
+| Front block v2 | 19.1 g | 19.1 g |
+| Sum, no contingency | 438 g | 431 g |
+| Design mass (contingency by source) | 466 g | 459 g |
+| Margin (ceiling 478 g) | 3.08 | 3.12 |
+
+The full check of the whole robot passes: `cad_verify: PASS (0 failures, 94 warnings)`, the same warnings as before
+([`verify-result.txt`](../cad/chassis/verify-result.txt)). It proves the lighter parts exist and still fit and clear
+each other in CAD. The thinner skin's strength and printability are predictions until the coupons.
+
+#### Decisions
+
+- **Safe set only.** The moderate set adds 3.6 g for new hardware and a recut; the aggressive one reverses a looks
+  choice.
+- **Scale study dropped** (2026-11-16): 120 % and the 4×AAA holder stay.
+- **Body v2 budget of 90 g** at a 1.6 mm wall: the largest lever left in the robot.
+
 #### Next
 
-- Part C, rest: `sim/motor_sizing.py` rerun on the built masses.
-- The weight and size review (Part D); the shell's STL still carries the swept cut of the old 5 mm pinion, so it is
-  rebuilt there. The figures in `cad/chassis/images/` are not re-rendered yet.
-- Before buying the wave washer, check the seller's load table (the shims need a spring of at most 60 N/mm).
-- Coupon K1's pull-off test decides whether 1.2 mm of shaft is enough to hold the collar; if not, a longer collar in
-  the notch's spare 0.8 mm, or thread-locking fluid on the tip.
+- The print-plater checks the support and overhang of the 1.2 mm bowl on the FLIP print; coupon K4 is recut from it
+  and states its load.
+- `sim/motor_sizing.py` rerun on the final masses.
 
 [↑ Contents](../build-log.md#contents)

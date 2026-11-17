@@ -54,7 +54,7 @@ CBORE = K.HEAD_D + 2 * WIN                                    # 6.5: a screw hea
 RHO = 1.24                                                    # PLA g/cm³ (mass_estimate.py)
 
 # ---- mass levers (plan «Shell mass», Q8: every lever) ---------------------------------------------------------------
-WALL = 1.6                 # bowl skin (plan lever: 2.0 -> 1.6, nothing pushes on it but the bosses)
+WALL = 1.2                 # bowl skin (levers: 2.0 -> 1.6 Part B, -> 1.2 Part D; nothing pushes on it but the bosses)
 BAND_SKIN = 1.2            # band wall (lever: 2.0 -> 1.2)
 SEAT_T = 2.0               # seat plate under the body's wall
 LIP_H, LIP_T = 3.0, 1.2    # slide lip: height above the seat, wall
@@ -104,7 +104,8 @@ FORK_GAP_Z = fits.TURN.side + MESH_TOL   # up and down: the fork only turns abou
 CRANK_HALF = 13.8 + WIN    # crankshaft half width (Part A CRANK_X) + WINDOW
 CRANK_WIN = (CX - CRANK_HALF, min(_SH_Y) - SWEEP_R + LEG - WIN, CX + CRANK_HALF, max(_SH_Y) + SWEEP_R - LEG + WIN)
 COVER_Z0 = B.CLAMP_Z0 + B.CLAMP_T + WIN   # cover plate underside: the clamp's top + WINDOW (82.85 + 0.5; was written from the motor envelope, which rose 0.1 with the clutch)
-COVER_T = 1.6
+COVER_T = 1.6                       # thick part: under the switch cradle and round the three posts (loaded)
+COVER_T_FREE = 1.2                  # the free span between them (Morante 2026-11-17; the arrow leaves 0.7)
 COVER_Y = (-23.5, 32.3)    # the front block covers ahead of y -24; the rear stops at the bowl's inner wall
 COVER_HALF = CRANK_HALF + 1.0
 COVER_POSTS = [(CX - 20.0, 9.0, "screw", (1, 0)),    # y 9: 1.3 clear of the rear slack pocket; nut in from +X
@@ -407,8 +408,11 @@ def crank_cover():
     lip_x = (sx0 + WIN, sx1 - WIN)
     plate = plate.union(sb(lip_x[0], COVER_Y[1] - 1.0, lip_x[1], REAR_FACE_Y))
     c_add, c_cut = cradle()
+    thick = cradle_plan()
+    for x, y, _k, _ in COVER_POSTS:
+        thick = thick.union(Point(x, y).buffer(POST_R + 1.0))
     plate = plate.union(cradle_plan())
-    m = U(prism(plate, COVER_Z0, COVER_Z0 + COVER_T),
+    m = U(prism(plate, COVER_Z0, COVER_Z0 + COVER_T_FREE), prism(thick, COVER_Z0, COVER_Z0 + COVER_T),
           boxb([lip_x[0], REAR_FACE_Y - REAR_LIP_T, SEAM + WIN], [lip_x[1], REAR_FACE_Y, COVER_Z0 + 0.01]), *c_add)
     cut = [cyl(CBORE / 2, COVER_Z0 - 1, COVER_Z0 + COVER_T + 1, (CX + B.SCREW_SHARED[0], R.MOTOR_AXIS[1]))] + c_cut
     for x, y, kind, _ in COVER_POSTS:
@@ -418,7 +422,7 @@ def crank_cover():
             cut.append(cyl(fits.bore(SPIGOT_D, fits.LOCATOR) / 2, COVER_Z0 - 1, COVER_Z0 + COVER_T + 1, (x, y)))
     # FRONT arrow, 0.5 deep in the top face (printed top up: no support)
     arrow = Polygon([(CX + 6, -14), (CX + 3, -20), (CX + 9, -20)])
-    cut.append(prism(arrow, COVER_Z0 + COVER_T - 0.5, COVER_Z0 + COVER_T + 1))
+    cut.append(prism(arrow, COVER_Z0 + COVER_T_FREE - 0.5, COVER_Z0 + COVER_T + 1))
     return S(m, *cut)
 
 
@@ -775,6 +779,7 @@ SLIDE = 4.0                # the body is lowered this far behind its place, then
 
 PINCH_R = 0.1              # a pinch edge (two solids touching along a line) is notched by a cylinder this wide
 EXPORT_TOL = 0.01          # mm: well under a layer, over the read-back merge (0.001)
+EXPORT_TOL_RETRY = (0.003, 0.02, 0.005, 0.015)   # tried in turn if EXPORT_TOL's STL opens a hole on read-back
 EXPORT_PASSES = 8          # notch passes: a notch can leave a new pinch edge next to it (the 0.2 mm module path steps)
 
 
@@ -814,14 +819,18 @@ def export(m, path):
             break
         print(f"notching {len(a)} pinch edges (r {PINCH_R})")
         m = S(keep, *[notch(p, q) for p, q in zip(a, b)])
-    keep = simplified(keep, EXPORT_TOL)                 # vertices closer than this merged by manifold (stays closed):
-    keep.export(path)                                   # the STL's float32 and the 0.001 merge then close nothing
-    r = trimesh.load(path)
-    r.merge_vertices(digits_vertex=3)
-    r.update_faces(r.nondegenerate_faces())
-    r.remove_unreferenced_vertices()
-    ps = r.split(only_watertight=False)
-    r = max(ps, key=lambda p: abs(p.volume))
+    for tol in (EXPORT_TOL,) + EXPORT_TOL_RETRY:        # vertices closer than this merged by manifold (stays closed):
+        k = simplified(keep, tol)                       # the STL's float32 and the 0.001 merge then close nothing
+        k.export(path)                                  # (a thin skin can still open one at a given tol: try the next)
+        r = trimesh.load(path)
+        r.merge_vertices(digits_vertex=3)
+        r.update_faces(r.nondegenerate_faces())
+        r.remove_unreferenced_vertices()
+        ps = r.split(only_watertight=False)
+        r = max(ps, key=lambda p: abs(p.volume))
+        if r.is_watertight and r.is_volume:
+            break
+        print(f"export: tol {tol} does not read back closed, trying the next")
     if not (r.is_watertight and r.is_volume):
         raise RuntimeError(f"{path}: does not read back as one closed solid ({len(ps)} pieces)")
     r.export(path)

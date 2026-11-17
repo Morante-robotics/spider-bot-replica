@@ -4,14 +4,15 @@ The one page an agent reads first. It points into the long files at the section 
 number that has a home in code: datums and interfaces in [`../robot.py`](../robot.py) (`python3 ../robot.py` prints
 them), clearances in [`../fits.py`](../fits.py), part parameters at the top of each build file.
 
-## Status (2026-11-16)
+## Status (2026-11-17)
 
 | Part | Built by | Spec | Last full check |
 |---|---|---|---|
 | A: drive module, cap, motor clamp, pinion, idler 3 v2, pin keeper, bench tools | `build.py` | `verify.py` (same spec) | see the next row |
 | Friction clutch (rev 2, approved 2026-11-16): `clutch-sleeve`, 4 mm `pinion`, wave washer + shims, `clutch-collar`; -X wall notch; jig's Ø9.5 pocket; motor axis +0.1 (`R.MOTOR_CD_EXTRA`); coupons CL1/CL2/CL3/K1 | `build.py`, `coupons_clutch.py` | `verify.py` | `verify-result.txt` (2026-11-16) |
 | B1 shell `chassis`, `crank-cover`, front block v2: the whole walking robot | `shell.py`, `front_block.py` | `verify.py` | `verify-result.txt`: PASS, 90 warnings (Part A, B1 and the front block in one spec) |
-| B rest (body v2, cradle, ballast frame, eyes pocket), C, D | not started | | |
+| C: mass rerun on the built parts. D: weight review, safe set (2026-11-17): `WALL` 1.2, cover 1.2 on the free span, stage-cache fix, shell rebuilt round the 4 mm pinion, screw recount; design mass 459 g, margin 3.12; plan `design-plan-d.md` | `shell.py`, `front_block.py`, `mass_estimate.py` | `verify.py` | `verify-result.txt`: PASS, 0 failures, 94 warnings |
+| B rest (body v2 at a 90 g budget, cradle, eyes pocket, eyes board) | not started | | |
 
 `verify.py` is the one spec of the walking robot (it was `verify.py`, `verify_b1.py` and `verify_fb.py`). `verify-result-b1.txt` is kept: `design-review.md` cites it.
 

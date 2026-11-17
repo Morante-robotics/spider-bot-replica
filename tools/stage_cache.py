@@ -102,6 +102,16 @@ def _names(code):
     return out
 
 
+_REPO = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+
+
+def _in_repo(fn):
+    try:
+        return os.path.realpath(inspect.getsourcefile(fn) or "").startswith(_REPO + os.sep)
+    except TypeError:
+        return False
+
+
 def fingerprint(fn, h=None, seen=None):
     """Hash fn's source, the module-level parameters and same-module functions it names, recursively."""
     h = h or hashlib.sha256()
@@ -123,7 +133,9 @@ def fingerprint(fn, h=None, seen=None):
                 _feed(h, v)
         for m in mods:                                       # attributes of imported modules it names: by value
             v = getattr(m, n, None)
-            if v is not None and _plain(v):
+            if inspect.isfunction(v) and v.__module__ == m.__name__ and _in_repo(v):
+                fingerprint(v, h, seen)                      # a project module's function: its source and parameters
+            elif v is not None and _plain(v):
                 h.update(f"{m.__name__}.{n}=".encode())
                 _feed(h, v)
     return h

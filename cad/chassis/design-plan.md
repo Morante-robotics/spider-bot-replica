@@ -20,18 +20,17 @@ are listed under «Decisions taken». Modelling goes in four parts, each checked
    - The start of the whole-robot spec, `cad/chassis/verify.py`.
 2. **Part B · the looks parts.** The looks chassis shell, body v2 with the holder cradle and the rear lug, front
    block v2 with the hooks, the ballast frame, the eyes pocket. Plan: [`design-plan-b.md`](design-plan-b.md) (rev 3.1, approved 2026-11-15).
-3. **Part C · whole robot.** The whole-robot verify with a full PASS, and `mass_estimate.py` rerun with the CAD
+3. **Part C · whole robot** ✅ (2026-11-17). The whole-robot verify with a full PASS, and `mass_estimate.py` rerun with the CAD
    masses.
-4. **Part D · weight and size** (Morante, 2026-11-15). A critical review of the whole looks robot, part by part:
+4. **Part D · weight and size** ✅ (Morante, 2026-11-15; done 2026-11-17, safe set, 459 g, plan in [`design-plan-d.md`](design-plan-d.md)). A critical review of the whole looks robot, part by part:
    - lighter: thinner walls, hollow or ribbed parts where solid is not needed, interiors and exteriors rethought;
-   - smaller: can the whole robot be scaled down, and is the 120 % print scale still needed? It was set by the
-     4×AAA holder, which needs 118 % with 2 mm a side ([Motor, battery holder…](../../build-log/2-carcass.md#motor-battery-holder-and-print-scale)),
-     so a smaller scale means another way to carry the cells, and the chassis, legs and drive are redrawn at it.
+   - smaller: dropped (Morante, 2026-11-16). The 120 % print scale and the 4×AAA holder stay; Part D only
+     lightens.
 
-   Every change is verified on the whole robot. Then `mass_estimate.py` and `sim/motor_sizing.py` are rerun on the
-   final masses: that decides the motor purchase. Then cut the coupon batch (K1–K6b) and make the workshop kit.
+   Every change is verified on the whole robot. Then `mass_estimate.py` (done: 459 g) and `sim/motor_sizing.py`
+   (still to rerun) are run on the final masses: that decides the motor purchase. Then cut the coupon batch (K1–K6b) and make the workshop kit.
 
-The coupons wait for Part D; K1, K2 and the efficiency test T1 also wait for the motor.
+The coupons wait for the looks parts; K1, K2 and the efficiency test T1 also wait for the motor.
 
 ## Figures
 
