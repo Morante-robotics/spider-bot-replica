@@ -67,6 +67,11 @@ TONGUE = Fit("cap tongue in a journal slot, a side", 0.3, "assumed",
              "test cap v2.1 went on with 0.15 a side (CAP_CLR 0.3 on the width), base v1's tongues at 0.15 a side "
              "did not go in (2026-11-12/13); 0.3 a side until coupon K3")
 
+TONGUE_SHORT = Fit("short cap tongue (≤ 12 mm of slot) in a journal slot, a side", 0.15, "measured",
+                   "test cap v2.1, 2026-11-12: went on and the train turned with the tongues 4.2 in a 4.5 slot "
+                   "(CAP_CLR 0.3 on the width); see measurements.csv. Not valid for base v1's 70 mm cap: its tongues "
+                   "at 0.15 a side did not go in (WINDOW, 2026-11-13); TONGUE stays 0.3 for that")
+
 GEAR_TIP = Fit("radial room round a gear's tip circle in its printed pocket", 0.5, "assumed",
                "chassis rev 4 (was GEAR_ROOM typed in chassis/build.py): base v1's big gear pocket and the gear train "
                "test's open frame are not this case; proven by the drive-module coupon (K3) turning by hand")

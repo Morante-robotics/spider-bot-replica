@@ -22,7 +22,11 @@ Notes file (JSON, Spanish), all keys optional:
      "no_imprimir_aun": ["..."], "herramientas": ["destornillador Allen 2,5", "calibre"],
      "piezas_previas": ["horquilla roja de la placa legs-forks-v1"],
      "pasos": {"<part name>": "qué hacer"}, "comprobar": {"<part name>": "cómo sé que está bien"},
-     "grabar": ["..."]}
+     "grabar": ["..."], "mesa": {"+X": "up", "+Z": "toward"},
+     "cuando": {"<MEASURE what>": "cuándo se mide, en español"}}
+"mesa": where the model axes point on the bench (up/down/toward/away/left/right; the spec's BENCH_POSE does the same
+and wins): a bench step then reads «en la mesa: hacia abajo» instead of «entra desde el lado +X». MEASURE's "when"
+is shown per measurement (when_es, or notes "cuando", or the "when" as given); none: a red FALTA line.
 Spec fields used (see cad_verify.py and figures.py): PARTS (with "label" for hardware, e.g. "M3×12 Allen"), ASSEMBLY,
 ACCESS, MARKS, MEASURE, LABELS["es"].
 
@@ -72,6 +76,8 @@ def main():
     spec = load_spec(args.spec)
     meshes = load_meshes(spec, args.spec)
     notes = json.load(open(args.notes)) if args.notes else {}
+    if notes.get("mesa") and not hasattr(spec, "BENCH_POSE"):
+        spec.BENCH_POSE = notes["mesa"]     # bench steps read as seen on the bench (the spec's own BENCH_POSE wins)
     os.makedirs(args.outdir, exist_ok=True)
     L = lambda n: figures.label(spec, n, "es")  # noqa: E731
     from cad_verify import steps
@@ -123,9 +129,7 @@ def main():
         n = " + ".join(st["names"])
         if n not in notes.get("pasos", {}) and n not in notes.get("comprobar", {}):
             n = st["names"][0]
-        how = figures.WORDS["es"]["first"] if d is None else (figures.path_words(st["path"], "es") if st.get("path") else figures.direction_words(d, "es"))
-        if st["bench"] is not None:
-            how = f"{figures.WORDS['es']['bench']}: {how}"
+        how = figures.step_words(st, spec, "es")
         name = " + ".join(L(x) for x in st["names"])
         out.append(f'<div class="paso"><p><span class="n">{k + 1}</span><b>{esc(name)}</b> · {esc(how)}</p>')
         out.append(img(pic))
@@ -142,6 +146,17 @@ def main():
     out.append("<h2>5 · Medir</h2>")
     ms = figures.measure_sheet(spec, meshes, os.path.join(args.outdir, "medir.png"), lang="es")
     out.append(img(ms) if ms else "<p>Nada que medir en este paso (sin MEASURE en el spec).</p>")
+    if ms:
+        # when each one is taken: MEASURE's "when_es", else notes["cuando"][what], else the "when" as given; none: FALTA
+        out.append("<table><tr><th>Medida</th><th>Cuándo</th></tr>")
+        for k, mz in enumerate(spec.MEASURE):
+            w = mz.get("when_es") or notes.get("cuando", {}).get(mz["what"]) or mz.get("when")
+            nm = esc(f"{k + 1}. {mz.get('what_es', mz['what'])}")
+            if w:
+                out.append(f"<tr><td>{nm}</td><td>{esc(w)}</td></tr>")
+            else:
+                out.append(f'<tr><td>{nm}</td><td class="falta">FALTA: cuándo se mide</td></tr>')
+        out.append("</table>")
 
     out.append("<h2>6 · Qué grabar</h2>")
     out.append("<ul>" + "".join(f"<li>{esc(x)}</li>" for x in notes["grabar"]) + "</ul>" if notes.get("grabar")

@@ -26,6 +26,10 @@ the printed gears).
 Usage:  uv run python sim/motor_sizing.py > sim/motor-sizing-result.txt
         uv run python sim/motor_sizing.py --mass 459 > sim/motor-sizing-result.txt   (design mass from
         cad/chassis/mass_estimate.py, contingency included, in place of the step-1 table)
+        uv run python sim/motor_sizing.py --mass 478 --leg-g 7.9   (one printed leg + its fork, g, in place of
+        LEG_G = 5.9: the leg-weight term; without --mass the legs' row of the step-1 table becomes 8 × it)
+        uv run python sim/motor_sizing.py --mass 478 --sweep 5,5,-5,-5   (sweep added per leg, deg: front, middle 1,
+        middle 2, rear; L2 stretched to keep the foot's height; default none: one sweep for all 8 legs)
 """
 import json
 import os
@@ -78,7 +82,10 @@ def mass_table():
     eyes = sum(printed_g(*mesh(f"cad/carcass-120/spideybot_{n}.stl")) * k
                for n, k in (("eye", 2), ("small_eye", 2), ("sensor", 1)))
     rows.append(("Eyes and sensor, printed", eyes, "shell model"))
-    rows.append(("8 legs + 8 forks (legs-forks-v1 plate)", 46.9, "measured plate, incl. ~2 g support"))
+    if LEG_G == 5.9:
+        rows.append(("8 legs + 8 forks (legs-forks-v1 plate)", 46.9, "measured plate, incl. ~2 g support"))
+    else:
+        rows.append(("8 legs + 8 forks (--leg-g)", 8 * LEG_G, f"8 × {LEG_G} g given with --leg-g"))
     v = sum(mesh(f"cad/crankshafts/out/{n}.stl")[0] for n in
             ("crankshaft-1", "crankshaft-2", "crankshaft-3", "crankshaft-4", "idler-1", "idler-2", "idler-3"))
     rows.append(("4 crankshafts + 3 idlers", v * PLA, f"{v:.2f} cm³, solid"))
@@ -107,11 +114,14 @@ BALL_R = 1.8         # ball on the crank pin (cad/crankshafts BALL / 2)
 JOURNAL_R = 2.0      # crankshaft journal (JOURNAL / 2)
 SCREW_R = 1.5        # M3 pivot screws
 LEG_G = 5.9          # one leg + its fork (46.9 g plate / 8), weight taken at the knee
+DSWEEP = None        # --sweep a,b,c,d: sweep added per leg (deg; front, middle 1, middle 2, rear), toy_leg_3d.leg_params
 
 
 def kinematics():
     geo = json.load(open(os.path.join(HERE, "toy_leg_3d_rows_cad.json")))[0]
     p = {k: geo[k] for k in sim.ranges("rows")}
+    if DSWEEP:
+        p["dsweep"] = DSWEEP
     theta, legs = sim.simulate(p, "rows", "crank", steps=STEPS)
     m = sim.measure(p, "rows", "crank", steps=STEPS, strict=True)
     d = lambda x: (np.roll(x, -1, axis=0) - np.roll(x, 1, axis=0)) / (2 * (theta[1] - theta[0]))   # per rad
@@ -325,8 +335,16 @@ def motor_point(fam, ratio, V, T_out_kgcm):
 
 
 def main():
+    global LEG_G, DSWEEP
+    if "--leg-g" in sys.argv:
+        LEG_G = float(sys.argv[sys.argv.index("--leg-g") + 1])
+    if "--sweep" in sys.argv:
+        DSWEEP = [float(v) for v in sys.argv[sys.argv.index("--sweep") + 1].split(",")]
     warnings.filterwarnings("ignore", category=RuntimeWarning)   # trimesh: centre of mass of a 0-volume cut
     print("SPIDER-BOT · N20 GEAR MOTOR SIZING  (sim/motor_sizing.py)\n")
+    print(f"  One leg + its fork: LEG_G = {LEG_G} g" + (" (--leg-g)" if "--leg-g" in sys.argv else "") + "\n")
+    if DSWEEP:
+        print(f"  Sweep per leg (--sweep, deg added; front, middle 1, middle 2, rear): {DSWEEP}\n")
 
     # 1 · mass
     print("1 · ROBOT MASS")

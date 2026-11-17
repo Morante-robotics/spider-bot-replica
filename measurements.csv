@@ -7,3 +7,4 @@ date,part,feature,nominal_mm,measured_mm,tool,result,entry
 2026-11-12,crankshafts (gear train v2),journal diameter,4.0,3.9-4.0,caliper,as modelled,gear-train-test-v2-the-cap
 2026-11-12,gear train test v2,crank gear face to spine wall a side,0.25,,by hand,turned without the cap,gear-train-test-v2-the-cap
 2026-11-12,gear train test v2,idler face to spine wall a side,0.45,,by hand,turned without the cap,gear-train-test-v2-the-cap
+2026-11-12,test cap v2.1 (gear train test),tongue in journal slot a side,0.15,,by hand,went on and the train turned (tongues 4.2 in 4.5 slot),gear-train-test-v2-the-cap

@@ -60,6 +60,12 @@ the printed teeth if a leg jams. Results: [build log](../build-log/3-legs-and-dr
 ```
 ../.venv/bin/python motor_sizing.py > motor-sizing-result.txt
 ../.venv/bin/python motor_sizing_figure.py
+../.venv/bin/python motor_sizing.py --mass 478 --leg-g 7.9 --sweep 5,5,-5,-5   # a candidate leg
 ```
+
+Two flags try a different leg without editing the code. `--leg-g G` is the printed mass of one leg plus its fork in
+grams, in place of 5.9 (without `--mass`, the legs' row of the step-1 table becomes 8 × G). `--sweep a,b,c,d` adds a
+sweep, in degrees, to each leg (front, middle 1, middle 2, rear), stretching L2 so the foot keeps its height; without
+it all eight legs share one sweep, and the default output is unchanged.
 
 ![N20 candidates](images/motor-sizing.png)

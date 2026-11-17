@@ -23,8 +23,8 @@ import trimesh
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "..", "tools"))
 sys.path.insert(0, os.path.join(HERE, "..", ".."))
-from cad import common as K, design  # noqa: E402
-from cad_verify import rod  # noqa: E402
+from cad import common as K, design, fits  # noqa: E402
+from cad_verify import rod, tool  # noqa: E402
 
 B = design("gear-train-test")      # spine and test cap
 C = design("crankshafts")          # crankshafts, idlers, gear phases
@@ -79,13 +79,14 @@ for i in range(4):
 for k, (y, z, n) in enumerate(IDL):
     PARTS[f"idler{k + 1}"] = {"stl": f"../crankshafts/out/idler-{k + 1}.stl"}
     # M3×12 as the axle: head on the +X wall, through both walls and the idler, nut on the -X wall
-    PARTS[f"axle{k + 1}"] = {"mesh": m3([X_OUT, y, z], [-1, 0, 0], 12), "hardware": True, "fixed": True}
+    PARTS[f"axle{k + 1}"] = {"mesh": m3([X_OUT, y, z], [-1, 0, 0], 12), "hardware": True, "fixed": True,
+                              "label": "M3×12 Allen (eje de la rueda intermedia)"}
     PARTS[f"axlenut{k + 1}"] = {"mesh": rod(K.NUT_AF / np.cos(np.pi / 6), K.NUT_T, [K.CX - C.WALL_OUT, y, z], [-1, 0, 0],
-                                            n=6), "hardware": True, "fixed": True}
+                                            n=6), "hardware": True, "fixed": True, "label": "tuerca M3"}
 CAP_TOP = B.TEST_TOP + B.TEST_CAP_T
 for j, (y, _) in enumerate(B.cap_screws()):
     PARTS[f"capscrew{j + 1}"] = {"mesh": m3([K.CX, y, CAP_TOP], [0, 0, -1], B.CAP_SCREW_L),
-                                 "hardware": True, "fixed": True}
+                                 "hardware": True, "fixed": True, "label": "M3×12 Allen (tapa)"}
 
 # step = (crank angle in degrees, cap X shift in mm). 5° steps with the cap centred (a tooth is 30° of crank); then the
 # cap against each skirt stop. The gear zone is a full disc, so the shifted steps need not be fine: 30°
@@ -149,3 +150,74 @@ SECTIONS = [([K.CX, 0, 0], [1, 0, 0]),                                     # gea
 SECTIONS += [([K.CX, y, z], [0, 1, 0]) for y, z in SH]                     # each journal, tongue and cap
 SECTIONS += [([K.CX, y, z], [0, 1, 0]) for y, z, _ in IDL]                 # each idler on its axle
 SECTIONS += [([K.CX, y, 0], [0, 1, 0]) for y, _ in B.cap_screws()]         # cap screws and their nut pockets
+
+FLIP = trimesh.transformations.rotation_matrix(np.pi, [1, 0, 0])
+PRINT_ORIENT = {"spine": np.eye(4),                       # on its foot, as modelled
+                "cap": FLIP,                              # upside down, plate on the bed
+                **{f"crankshaft{i + 1}": np.eye(4) for i in range(4)},   # as in ../crankshafts/verify.py
+                **{f"idler{k + 1}": np.eye(4) for k in range(3)}}
+
+# the gear pairs repeat every tooth: checked finer over one tooth pitch only
+GEAR_MOTION = [(a, 0.0) for a in range(0, 31)]
+
+_Y0, _Y1, _, _ZT = B.spine_box()
+_SY = [y for y, _ in SH]
+JOINTS = {
+    **{(f"crankshaft{i + 1}", "spine"): {
+        "fit": fits.TURN, "where": ([K.CX + (C.WALL_IN + C.WALL_OUT) / 2, y, z], [C.WALL_OUT - C.WALL_IN, 6, 6]),
+        "why": f"journal {i + 1} in its hole (+X wall)"} for i, (y, z) in enumerate(SH)},
+    **{("spine", f"crankshaft{i + 1}"): {
+        "fit": fits.GEAR_THRUST_CRANK, "where": ([K.CX, y, z], [2 * C.WALL_OUT + 0.6, 16, 16]),
+        "why": f"crank gear {i + 1} faces and webs to the walls"} for i, (y, z) in enumerate(SH)},
+    **{("spine", f"idler{k + 1}"): {"fit": fits.GEAR_THRUST_IDLER, "why": f"idler {k + 1} between the walls"}
+       for k in range(3)},
+    **{(f"idler{k + 1}", f"axle{k + 1}"): {"fit": fits.STEEL, "why": f"idler {k + 1} on its M3 axle"}
+       for k in range(3)},
+    **{(f"axle{k + 1}", "spine"): {"fit": fits.STEEL, "where": ([K.CX + (C.WALL_IN + C.WALL_OUT) / 2, y, z], [2.5, 5, 5]),
+                                   "why": f"axle {k + 1} in the +X wall"} for k, (y, z, _) in enumerate(IDL)},
+    ("spine", "cap"): {"fit": fits.TONGUE_SHORT,
+                       "where": ([K.CX, (_SY[0] + _SY[-1]) / 2, B.TEST_TOP - 3.0], [9.0, _SY[-1] - _SY[0] + 6.0, 4.0]),
+                       "why": "tongues in the journal slots, a side (measured on this very cap, 0.15)"},
+    # not joints here: the cap's skirts (LOCATOR, TEST_SKIRT_CLR 0.2 a side) and its screw holes (STEEL 0.15) touch
+    # by design when the cap is pushed to an X extreme (ALLOWED_CONTACT); the motion sweep proves they do not
+    # overlap, and the two asserts below keep the typed numbers at the measured fits
+}
+assert B.TEST_SKIRT_CLR >= fits.LOCATOR.side - 1e-9, "skirts tighter than the measured LOCATOR"
+assert (B.SCREW + B.CLR_STEEL - B.SCREW) / 2 >= fits.STEEL.side - 1e-9, "cap screw holes tighter than STEEL"
+MARKS = {**{f"crankshaft{i + 1}": f"{i + 1} dots on the +X web, matching the {i + 1} dots beside its slot on the "
+                                  f"spine (and the crank angle)" for i in range(4)},
+         **{f"idler{k + 1}": "none needed: identical teeth, it meshes in any position; the cranks' phase is set by "
+                             "the crankshafts' dots" for k in range(3)},
+         "spine": "1-4 dots beside each journal slot, as the crankshafts' dots",
+         "cap": "a dot on its +X edge over every slot (it fits one way only)"}
+LABELS = {"es": {"spine": "columna de prueba", "cap": "tapa de prueba",
+                 **{f"crankshaft{i + 1}": f"cigüeñal {i + 1}" for i in range(4)},
+                 **{f"idler{k + 1}": f"rueda intermedia {k + 1}" for k in range(3)},
+                 **{f"axle{k + 1}": f"tornillo eje {k + 1}" for k in range(3)},
+                 **{f"axlenut{k + 1}": f"tuerca del eje {k + 1}" for k in range(3)},
+                 **{f"capscrew{j + 1}": f"tornillo de la tapa {j + 1}" for j in range(2)}}}
+_TW = B.JOURNAL + B.CLR - C.CAP_CLR
+_TX = K.CX + (C.TONGUE_IN + C.TONGUE_OUT) / 2
+_SK = C.WALL_OUT + B.TEST_SKIRT_CLR
+MEASURE = [
+    {"part": "cap", "what": "tongue width across Y (the slot is 4.5)", "nominal": round(_TW, 2), "tol": 0.1,
+     "points": "each tongue, mid-height", "when": "kit step: before fitting the cap",
+     "point": [_TX, SH[0][0], B.TEST_TOP - 2.0], "normal": [1, 0, 0],
+     "from": [_TX, SH[0][0] - _TW / 2, B.TEST_TOP - 2.0], "to": [_TX, SH[0][0] + _TW / 2, B.TEST_TOP - 2.0]},
+    {"part": "cap", "what": "skirt-to-skirt inside width across X", "nominal": round(2 * _SK, 2), "tol": 0.15,
+     "points": "between the skirts' inner faces", "when": "kit step: before fitting the cap",
+     "point": [K.CX, _Y0 + 3.0, B.TEST_TOP - 1.0], "normal": [0, 1, 0],
+     "from": [K.CX - _SK, _Y0 + 3.0, B.TEST_TOP - 1.0], "to": [K.CX + _SK, _Y0 + 3.0, B.TEST_TOP - 1.0]},
+    {"part": "crankshaft1", "what": "journal diameter", "nominal": C.JOURNAL, "tol": 0.15,
+     "points": "either journal, two directions", "when": "kit step: before assembly",
+     "point": [K.CX + 3.0, *SH[0]], "normal": [1, 0, 0],
+     "from": [K.CX + 3.0, SH[0][0], SH[0][1] - C.JOURNAL / 2], "to": [K.CX + 3.0, SH[0][0], SH[0][1] + C.JOURNAL / 2]},
+]
+ACCESS = [{"at": f"axle{k + 1}", "tool": tool("hex-key", [X_OUT + K.HEAD_H, y, z], [1, 0, 0]),
+           "why": "M3×12 from +X through the wall, the idler and the other wall, 2.5 hex key"}
+          for k, (y, z, _) in enumerate(IDL)] + \
+         [{"at": f"axlenut{k + 1}", "tool": tool("finger", [X_OUT - 12 - 0.5, y, z], [-1, 0, 0]),
+           "why": "nut started by a fingertip past the screw tip (12 long, 1.1 past the nut); the screw then turns it in"}
+          for k, (y, z, _) in enumerate(IDL)] + \
+         [{"at": f"capscrew{j + 1}", "tool": tool("hex-key", [K.CX, y, CAP_TOP + K.HEAD_H], [0, 0, 1]),
+           "why": "M3×12 from above, 2.5 hex key"} for j, (y, _) in enumerate(B.cap_screws())]

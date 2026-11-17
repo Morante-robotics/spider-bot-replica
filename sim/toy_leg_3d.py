@@ -134,12 +134,25 @@ def mirror(pts):
     return q
 
 
+def leg_params(p, i):
+    """Parameters of right/left leg i (front to rear). Optional p["dsweep"] = 4 sweeps (deg) added per leg (front,
+    middle 1, middle 2, rear; the left leg i is the mirror of the right one), L2 stretched by cos(sweep) / cos(sweep +
+    dsweep) so the foot keeps its height below the knee. Without "dsweep" (default) every leg uses p as given."""
+    ds = p.get("dsweep")
+    if not ds or not ds[i]:
+        return p
+    s0, s1 = np.radians(p["sweep"]), np.radians(p["sweep"] + ds[i])
+    return dict(p, sweep=p["sweep"] + ds[i], L2=p["L2"] * np.cos(s0) / np.cos(s1))
+
+
 def simulate(p, axle, slide, steps=STEPS):
     """All 8 legs over one crank turn. Left legs are mirror images; with a vertical or longitudinal axle their cranks
-    then turn the other way (reported, a gear pair does it)."""
+    then turn the other way (reported, a gear pair does it). p["dsweep"] (optional): a sweep per leg, leg_params()."""
     theta = np.linspace(0, 2 * np.pi, steps, endpoint=False)
     legs = []
+    p0 = p
     for side, i, P, rhat in pivots():
+        p = leg_params(p0, i)
         ph = np.pi * GROUP[side][i]
         if side == "R":
             s = solve_leg(p, axle, slide, P, rhat, theta + ph, crank_centre(p, axle, i, P, rhat))

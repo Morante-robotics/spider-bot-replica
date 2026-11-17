@@ -49,6 +49,10 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
     holder's cradle, a rear lug and an eyes tab. After four fix passes the whole robot passes the check, 420 g
     built and 457 g by design mass, still under the motor's ceiling. The motor and the other hardware can now be
     bought.
+12. **The looks pass and the legs.** The robot works but looks functional, so the legs were to be rethought as thick
+    and curved like the toy's. Three plan rounds gave legs that fit the 478 g ceiling only by being thinner than the
+    toy's, and Morante rejected them: the legs are not traded for weight, so every other printed part is audited
+    first and the legs come back with the grams it frees.
 
 <img src="../sim/images/drive-attempts.png" alt="The three drives tried, from above and from the side">
 
@@ -1969,5 +1973,114 @@ and its print are predictions until it is printed.
   key relief cuts, and the print-plater confirming 3 extra loops on the two thin upright features at z 94.4–97.2
   (x 10.4 and 74.6, y −27.6).
 - Buying and measuring the motor, holder, switch, connectors and clutch hardware, then the coupon batch.
+
+[↑ Contents](../build-log.md#contents)
+
+### Chassis Part E: the looks pass, planned and paused
+
+**Phase 3 · Mechanisms · 2026-11-17** · Status: 🔄 planned, paused until the legs are rethought
+
+> **In short.** Three small items were closed, and the looks pass was planned and then paused. The whole robot works
+> in CAD but looks functional, not like the toy: plain bar legs, a ribbed base with visible screws, an open front
+> block. Plan E went through one review round (7 objections) and a second version. Then Morante saw that neither leg
+> option looks like the thick, curved legs of the reference photo of the toy (kept outside the repo), so the legs
+> become a new step and Part E waits for it. Nothing is modelled or printed.
+
+#### Small items closed
+
+- **Body v2 strip:** the strip at z 99.25 to 101.25 is a scan-skin ring boss under the cradle block. It is harmless
+  and no geometry changes ([design-review.md](../cad/chassis/design-review.md)).
+- **Gear train test:** [`verify.py`](../cad/gear-train-test/verify.py) now meets the spec standard, full check PASS
+  (0 failures, 12 print warnings). The cap that went on with 0.15 mm a side per tongue gave a measured fit,
+  `TONGUE_SHORT` in [`fits.py`](../cad/fits.py), with its row in [`measurements.csv`](../measurements.csv). It is
+  valid for short tongues only; base v1's 70 mm cap keeps its 0.3 mm.
+- **Workshop kit tools:** a spec can give the bench pose (words such as «down» for a part standing on its end) and the
+  Measure sheet shows when each measurement is taken. 36 tool tests pass. Two findings: one pose for the whole
+  chassis spec is wrong (the press jig, cradle and eyes benches differ), so it must be per step; and the chassis
+  `MEASURE` entries lack the keys `figures.measure_sheet` expects and 28 of 34 have no «when». The chassis kit's Measure
+  sheet never finished rendering (stopped after 15 minutes).
+
+#### Part E
+
+[Plan E](../cad/chassis/design-plan-e.md) (rev 1, then rev 2 after the reviewer's 7 objections) proposed a skin on the
+base, a face wall on the front block, a separate dome and shells over the legs. Morante's decisions after rev 2:
+
+- **Legs:** rethought as a new step, thicker and curved as in the photo. The black legs are straight 5 × 6 mm bars
+  and the middle shins sit 0.8 mm apart, so shells cannot get there. Shape, spacing, mechanism, mass and motor margin
+  may all change.
+- **Base skin all-round** (+8.6 g) and **lever V4** accepted (SEAT_T 1.6, RING 6, −1.6 g).
+- **Front block:** to be reviewed as a separate part at all (large, heavy, it mainly covers).
+- **Colours** are painted in the slicer by Morante, so colour no longer justifies splitting parts. The separate dome,
+  its joint and the cut faces' solid layers (+3.8 to +6.1 g, +2.0 to +3.0 g) are probably not needed; the next plan
+  confirms. The blue/red boundary follows the toy's panel line.
+- **Eyes** are out of scope.
+
+### Legs v2: three plan rounds, paused
+
+**Phase 3 · Mechanisms · 2026-11-17** · Status: 🔄 paused, a new direction (mass audit first)
+
+> **In short.** Part E's first item was to rethink the legs so they look like the thick, curved legs of the toy.
+> Three plan rounds found that the leg turns as one rigid body, so its shape between fork and foot does not change
+> the gait, and that a thick leg fits the motor if it prints at 10 % infill; but every option that fits the 478 g
+> ceiling made the legs thinner than the toy's. Morante rejected them. The legs are not traded for weight: first
+> every other printed part is audited for grams, and the legs come back with what that frees. Nothing is modelled
+> or printed.
+
+The plan is in [`design-plan-v2.md`](../cad/legs/design-plan-v2.md); the figure and its geometry are in
+[`plan_v2_figure.py`](../cad/legs/plan_v2_figure.py) and [`plan_v2_geom.py`](../cad/legs/plan_v2_geom.py). The
+reference photo of the toy is private and is not in the repo. The probe scripts (clearance sweeps, grams, levers,
+gait) are kept outside the repo.
+
+#### Rounds
+
+1. **Rev 1** compared four candidates: **A** (one-piece arched leg, 5 mm across, same feet), **B** (8 mm across, feet
+   spread along the body), **C** (today's leg plus a screwed shell) and **D** (the middle forks moved). Key finding:
+   the leg turns as one rigid body about its pivot, so its shape between fork and foot does not change the gait. C
+   and D collide with the neighbouring legs. Morante kept A and B.
+2. **Rev 2** recommended A: 8.2 g for leg and fork, design mass 475.5 to 479.8 g, the HP 380:1 motor at R 1.0 with
+   margin 3.6 / 3.0 / 6.7 (4.8 V, 4.0 V, mean). The design-reviewer asked for changes (6 objections): A passes only if
+   body and dome are one piece; the support is a 0.3 to 3.1 mm wedge under the shin; the middle gap of 0.64 mm is
+   from a refined sweep; the base skin was not probed; A reads as sticks from the 3/4 and side views; B was drawn
+   unfairly. Plan E rev 2 had quoted the margin at R 0.6, while the built drive is R 1.0.
+3. **Morante's decisions:** body and dome are one piece (as plan E decision 5); legs print at 10 % infill; the
+   shin is never flat on the bed (at least 1 mm above it); A is rejected as too thin.
+4. **Rev 3** worked the B family with a sweep per leg (new flags `--leg-g` and `--sweep` in
+   [`motor_sizing.py`](../sim/motor_sizing.py), see [`sim/README.md`](../sim/README.md)). Gait with the per-leg
+   sweep: the same support feet, stride 0.2 to 0.3 mm shorter.
+
+#### Result
+
+<img src="../cad/legs/images/plan-v2.png" alt="Today's legs and three B candidates in four views">
+
+*Fig. 1 · Today's 5 × 6 mm bar legs (top) and the three B candidates, shin raised 1 mm, in the four standard views;
+the bars show printed leg + fork in grams. All three are visibly thinner than the toy's legs.*
+
+| | B″ (±14/10, shin 8) | Bs (±5, shin 6.5) | Bb (+2/−8, shin 7) |
+|---|---|---|---|
+| Middle gap (mm; needs ≥ 0.8) | 1.87 | 1.84 | **0.61** (0.59 on the refined sweep) |
+| Leg to fork (design 0.5) | 0.22 | 0.31 | 0.50 |
+| Design mass at 10 % infill (g; ceiling 478) | 483.4 | 480.0 | 481.0 |
+| Margin at 4.0 V (needs 3) | 3.1 | 3.1 | 3.0 |
+
+Coarse probe, grid 1; margin computed with `--mass 478`. B″ and Bs must print the front and middle-1 legs on the +Y
+face once the shin is raised, which leaves support that cannot be removed at the fork bar; Bb avoids that but fails
+the middle gap. None meets the mass ceiling and the looks together.
+
+#### Decisions
+
+- **Morante's verdict** (2026-11-17): «No me convence. Las patas son muy finas y pierdo todo el encanto. Quiero patas
+  como las del dibujo y si hay que adelgazar que sea en la base y la carcasa/cuerpo. Analiza los volúmenes para ver
+  si sobra algo. No podemos estar sacrificando constantemente el diseño exterior, especialmente de las patas.»
+  (In English: «I am not convinced. The legs are very thin and I lose all the charm. I want legs like the drawing,
+  and if something has to get thinner let it be the base and the shell/body. Analyse the volumes to see if anything
+  is spare. We cannot keep sacrificing the exterior design, especially the legs.»)
+- **New direction:** the legs are as thick and wide as the toy's and are not traded for weight. The weight comes from
+  the other parts.
+- Morante also said that the function and size of some parts are unclear to him, the front block v2 among them: the
+  audit explains those first.
+
+#### Next
+
+- Mass and purpose audit, then legs v3, then the motor side only if needed. See Open items.
 
 [↑ Contents](../build-log.md#contents)

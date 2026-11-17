@@ -81,6 +81,41 @@ def direction_words(d, lang):
     return f"{w['in']} {w[key]}"
 
 
+BENCH_WORDS = {
+    "en": {"up": "up", "down": "down", "toward": "towards you", "away": "away from you", "left": "to the left",
+           "right": "to the right"},
+    "es": {"up": "hacia arriba", "down": "hacia abajo", "toward": "hacia ti", "away": "hacia el fondo",
+           "left": "hacia la izquierda", "right": "hacia la derecha"},
+}
+_OPP = {"up": "down", "down": "up", "toward": "away", "away": "toward", "left": "right", "right": "left"}
+
+
+def bench_words(d, spec, lang):
+    """A bench step's move as seen on the bench, or None (no pose given: use direction_words).
+    spec.BENCH_POSE (optional) says where each model axis points on the bench: {"+X": "up", "+Z": "toward", ...} with
+    up / down / toward (you) / away / left / right; the opposite axis is derived. A part that comes in from d moves
+    along -d, so «in from +X» with +X up reads «hacia abajo»."""
+    pose = dict(getattr(spec, "BENCH_POSE", None) or {})
+    for k, v in list(pose.items()):
+        pose.setdefault(("-" if k[0] == "+" else "+") + k[1:], _OPP[v])
+    d = np.asarray(d, float)
+    i = int(np.argmax(np.abs(d)))
+    move = ("-" if d[i] > 0 else "+") + "XYZ"[i]      # the part moves opposite to the side it comes from
+    return BENCH_WORDS[lang][pose[move]] if move in pose else None
+
+
+def step_words(st, spec, lang):
+    """How a step reads in its title and in the kit: first step, a path, or a direction (bench steps as on the bench)."""
+    d = st["d"]
+    if d is None:
+        return WORDS[lang]["first"]
+    if st.get("path"):
+        how = path_words(st["path"], lang)
+    else:
+        how = (bench_words(d, spec, lang) if st["bench"] is not None else None) or direction_words(d, lang)
+    return f"{WORDS[lang]['bench']}: {how}" if st["bench"] is not None else how
+
+
 def path_words(path, lang):
     """The moves of an ASSEMBLY path in order: «down 30 mm, then +Y 4 mm»."""
     from cad_verify import move_words
@@ -262,9 +297,7 @@ def _step_panel(ax, spec, ctx, k, lang, number=True):
         move_arrow(ax, proj, c0, c0 - d * lift * 0.8, col[names[0]])   # a path: only its last move is drawn
     if number:
         badge(ax, k + 1)
-    how = WORDS[lang]["first"] if d is None else (path_words(st["path"], lang) if st.get("path") else direction_words(d, lang))
-    if st["bench"] is not None:
-        how = f"{WORDS[lang]['bench']}: {how}"
+    how = step_words(st, spec, lang)
     ax.set_title(f"{' + '.join(label(spec, n, lang) for n in names)}\n{how}", fontsize=FONT + 2, pad=4)
 
 
