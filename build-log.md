@@ -75,7 +75,7 @@ once, before printing. Everything before the redesign is in the
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| Measure the original toy (size, mass, battery type and count) and size motor, cells and scale from the bottom up | Redesign, looks first | 3 |
+| Buy the N10 (3 V, ≈ 100–150 rpm) and 6 × AG13, and measure the N10 for the mock-up. Chosen bottom-up from the original Mini Spider-Bot (≈ 10 cm, 6 × AG13, walks on legs): the body holds them at ≈ 60 % (`cad/mockup/sizing.py`) | Redesign, looks first | 3 |
 | The mock-up tool: the whole robot in simple shapes, compared with the toy from the same views, in seconds | Redesign, looks first | 3 |
 | Mock-up of the looks robot (body low like the toy's, legs from jenscolt's shape on the toy leg's motion) until it looks like the toy | Redesign, looks first | 3 |
 | The real looking parts as light meshes, moving without collisions | Redesign, looks first | 3 |
