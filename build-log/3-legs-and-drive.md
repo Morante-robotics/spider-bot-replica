@@ -44,7 +44,11 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
    clutch on the motor's shaft is modelled so a jam slips instead of breaking a gear. Nothing will be printed until
    the looks parts are modelled: one robot, not a ballasted test chassis.
 10. **The weight review.** The robot is made 7 g lighter without new hardware, and the shell no longer carries the
-    cut of the old 5 mm pinion. The looks parts are next.
+    cut of the old 5 mm pinion.
+11. **The looks parts.** Body v2 keeps the scanned skin as it is and the slicer lightens it; it carries the battery
+    holder's cradle, a rear lug and an eyes tab. After four fix passes the whole robot passes the check, 420 g
+    built and 457 g by design mass, still under the motor's ceiling. The motor and the other hardware can now be
+    bought.
 
 <img src="../sim/images/drive-attempts.png" alt="The three drives tried, from above and from the side">
 
@@ -1825,7 +1829,7 @@ are printed.
 
 ### Chassis Part D: the weight review
 
-**Phase 3 · Mechanisms · 2026-11-17** · Status: 🔄 459 g, in CAD; looks parts next
+**Phase 3 · Mechanisms · 2026-11-17** · Status: ✅ 459 g, looks parts next
 
 > **In short.** Every part of the robot was reviewed for weight. The printed parts turned out to be near their floor
 > (each carries under 0.7 g of infill), so only two thinner walls and a recount of the screws were kept: the design
@@ -1887,12 +1891,83 @@ each other in CAD. The thinner skin's strength and printability are predictions 
 - **Safe set only.** The moderate set adds 3.6 g for new hardware and a recut; the aggressive one reverses a looks
   choice.
 - **Scale study dropped** (2026-11-16): 120 % and the 4×AAA holder stay.
-- **Body v2 budget of 90 g** at a 1.6 mm wall: the largest lever left in the robot.
+- **Body v2 budget of 90 g** at a 1.6 mm wall: the largest lever left in the robot. Changed in
+  [Part B2](#chassis-part-b2-the-looks-parts): the body keeps the scanned skin and the slicer lightens it (≈ 93 g).
+
+### Chassis Part B2: the looks parts
+
+**Phase 3 · Mechanisms · 2026-11-17** · Status: 🔄 whole robot passes in CAD; buying next
+
+> **In short.** The looks parts are modelled: body v2 is the scanned carcass skin as it is, with a cradle for the
+> battery holder, a lug that screws it to the chassis and a small tab that holds the eyes board. The first full check
+> of the whole robot failed in 13 places; four fix passes brought it to zero failures. The robot weighs 420.2 g and
+> its design mass is 457 g against the motor's 478 g ceiling (margin 3.14, 3.0 needed), and the motor sizing still
+> passes. That releases the purchase of the motor, the holder, the switch, the connectors and the clutch hardware.
+> Nothing is printed yet.
+
+[Part D](#chassis-part-d-the-weight-review) left the body for last: it is the biggest part, and it carries what
+Morante sees (the skin) and what the robot needs (the battery holder, the switch's wires, the eyes). Instead of
+rebuilding the skin thinner, which would have redrawn the whole scan, it is used as it is and the slicer lightens it
+(one wall loop, 10 % gyroid infill, about 93 g). The design is checked as one robot: every part against every other,
+every screw reachable by a tool, every part able to go in by hand.
+
+#### Steps
+
+1. **The first check.** The spec of the looks parts went into [`verify.py`](../cad/chassis/verify.py) and the full
+   check ran: 13 failures. The eyes screw's nut touched the board, one bench assembly could not be done and some
+   tools could not reach a nut.
+2. **Pass 1.** A new part, the **eyes tab** (a 2 mm plate under the eyes boss that carries the screw), and wider nut
+   slots (open mouths 25 mm long) took the failures from 13 to 7.
+3. **Pass 2 and 3.** The body was first cut 0.2 mm clear of the shell where it rests, then lifted further sideways;
+   each made the build slower (4 minutes) and left slivers. The coordinator stopped it: the approved plan says the
+   body **bears** on the band's top at the sides and front ([design-plan-b.md](../cad/chassis/design-plan-b.md)).
+   The seat was trimmed flat at the band top (z = 93.5 mm) with 13 flat layers carried 4 mm along the slide, and
+   declared a **designed sliding contact** in the spec. The body builds in 8 s and its way in (down 30 mm, then 4 mm
+   toward the front) passes.
+4. **Pass 4.** Four tool-access failures were left. Three reliefs were cut inside the body (Fig. 1): a rod of
+   r 5.2 mm along the body lug's two nut slots and along the eyes nut slot (the pliers' Ø10 rod pushes the nut along
+   its slot), and a cylinder of r 3.05 mm under the cradle block's floor (the hex key's room). Together they remove
+   at most 0.6 cm³ and touch no outer face.
+
+<img src="../cad/chassis/images/part-b2-body.png" alt="Body v2, translucent, on the chassis with the seat and the three reliefs marked">
+
+*Fig. 1 · Body v2 (purple, translucent) on the chassis from behind and the left. The seat is the band top the body
+rests on. The coloured rods are the reliefs cut inside the body: red, the lug's nut slots; orange, the eyes nut slot;
+green, under the cradle block (the cylinders show the cut's extent). Made by
+[`part_b2_figure.py`](../cad/chassis/part_b2_figure.py).*
+
+#### Result
+
+`cad_verify: PASS (0 failures, 100 warnings)` ([`verify-result.txt`](../cad/chassis/verify-result.txt)). Most of the
+extra warnings are body v2's own print warnings; each is explained in
+[`design-review.md`](../cad/chassis/design-review.md).
+
+| | Part D | Now |
+|---|---|---|
+| Robot, built parts | n/a | 420.2 g |
+| Design mass (contingency by source) | 459 g | 457 g |
+| Ceiling for the HP 1:380 motor | 478 g | 478 g |
+| Margin (3.0 needed) | 3.12 | 3.14 |
+
+`sim/motor_sizing.py` on the final masses: PASS, R 1.0 with the HP 1:380
+([`motor-sizing-result.txt`](../sim/motor-sizing-result.txt)). This proves the looks parts exist, fit and can be
+assembled and reached by hand in CAD. The body's strength, its printed weight (about 93 g is the slicer's estimate)
+and its print are predictions until it is printed.
+
+#### Decisions
+
+- **Scanned skin kept as it is,** lightened by the slicer, not rebuilt at 1.6 mm: the budget is met without redrawing
+  the scan.
+- **A contact the plan designs is declared, not cleared.** Clearing the seat by 0.2 mm broke the plan and cost minutes
+  of build time; declaring it as a sliding contact keeps the body resting on the band.
+- **Reliefs inside the body, not a different tool or order:** the failures were fixed with geometry that touches no
+  outer face.
 
 #### Next
 
-- The print-plater checks the support and overhang of the 1.2 mm bowl on the FLIP print; coupon K4 is recut from it
-  and states its load.
-- `sim/motor_sizing.py` rerun on the final masses.
+- The pre-print gate takes two reviewer notes: an unidentified body strip at z 99.25–101.25 that the cradle-screw
+  key relief cuts, and the print-plater confirming 3 extra loops on the two thin upright features at z 94.4–97.2
+  (x 10.4 and 74.6, y −27.6).
+- Buying and measuring the motor, holder, switch, connectors and clutch hardware, then the coupon batch.
 
 [↑ Contents](../build-log.md#contents)

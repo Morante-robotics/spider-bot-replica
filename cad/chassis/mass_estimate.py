@@ -95,8 +95,14 @@ def rows():
         ("Front block v2 (hollow)", *printed("cad/chassis/out/front-block-v2.stl"), "B1 STL, shell model", 1, 1),
         ("4 crankshafts + 3 idlers", [r[1] for r in hw if r[0].startswith("4 crankshafts")][0], shafts, "STL volume, solid", 1, 1),
         ("8 legs + 8 forks", 46.9, legs_c, "legs-forks-v1 plate, measured", 1, 1),
-        ("Body v2 (carcass 120 %, cuts ≈ −3, bosses and hooks slots ≈ +2)", body_g - 1.0, body_c, "shell model of the mesh", 1, 0),
-        ("Holder cradle (in the body)", 6.0, holder_c + [0, 0, 9.5], "plan", 1, 1),
+        # B2 (2026-11-17): the scan as it is, sliced upright at 1 loop + gyroid 10 % = 85.5 g (print-plater probe S1);
+        # + its designed features at the same settings with a «more loops» modifier: 9.24 cm³ added outside the scan
+        # (body_v2.py, out/body-v2.stl minus the scan) at 0.9 of solid, minus 5.56 cm³ of scan cut away at the scan's
+        # sliced 0.472 g/cm³ (85.5 g / 181.27 cm³): +7.7 g
+        ("Body v2 (scan as it is + B2 features)", 85.5 + 7.7, body_c, "slicer + plan", 1, 0),
+        ("Holder cradle (in the body)", *printed("cad/chassis/out/holder-cradle.stl"), "B2 STL, shell model", 1, 1),
+        ("Body lug", *printed("cad/chassis/out/body-lug.stl"), "B2 STL, shell model", 1, 0),
+        ("B2 screws: 2 lug M3×10, 1 eyes board M3×10 (+ nuts)", 3 * m3_10, np.array([CX, 0.0, 100.0]), "catalogue × count", 1, 0),
         ("Eyes and sensor, printed", [r[1] for r in hw if r[0].startswith("Eyes and")][0], head + [0, -12, 0], "shell model", 1, 0),
         ("Paint and finish allowance", 10.0, body_c, "plan: primer + paint ≈ 0.6 g / 100 cm² over 1570 cm²", 1, 0),
         ("4×AAA holder, empty", 20.0, holder_c, "catalogue (sizing)", 1, 1),
@@ -171,7 +177,7 @@ NAMES = {
            "Motor clamp": "Clamp, pin keeper, clutch, idler 3 extra",
            "Chassis shell": "Chassis shell B1", "Crank cover": "Crank cover", "Clutch steel": "Clutch steel washers", "Front block": "Front block v2",
            "4 crankshafts": "4 crankshafts + 3 idlers", "8 legs": "8 legs + 8 forks", "Body v2": "Body v2 (carcass)",
-           "Holder cradle": "Holder cradle", "Eyes and": "Eyes and sensor, printed",
+           "Holder cradle": "Holder cradle", "Body lug": "Body lug", "B2 screws": "B2 screws (lug, eyes board)", "Eyes and": "Eyes and sensor, printed",
            "Paint": "Paint and finish (allowance)", "4×AAA holder": "Battery holder, empty",
            "4 × AAA": "4 AAA NiMH batteries", "N20": "N20 motor HP 380:1", "Eyes board": "Eyes board",
            "Wiring": "Wiring, 2 connectors, switch", "Screws: 16": "Screws: legs and forks",
@@ -180,7 +186,7 @@ NAMES = {
            "Motor clamp": "Brida, retén, embrague, rueda 3",
            "Chassis shell": "Chasis B1", "Crank cover": "Tapa de los cigüeñales", "Clutch steel": "Arandelas del embrague", "Front block": "Bloque frontal v2",
            "4 crankshafts": "4 cigüeñales + 3 ruedas", "8 legs": "8 patas + 8 horquillas",
-           "Body v2": "Cuerpo v2 (carcasa)", "Holder cradle": "Soporte del portapilas", "Eyes and": "Ojos y sensor",
+           "Body v2": "Cuerpo v2 (carcasa)", "Holder cradle": "Soporte del portapilas", "Body lug": "Orejeta del cuerpo", "B2 screws": "Tornillos B2 (orejeta, placa de ojos)", "Eyes and": "Ojos y sensor",
            "Paint": "Pintura y acabado (margen)", "4×AAA holder": "Portapilas vacío", "4 × AAA": "4 pilas AAA NiMH",
            "N20": "Motor N20 380:1", "Eyes board": "Placa de los ojos", "Wiring": "Cables, 2 conectores, interruptor",
            "Screws: 16": "Tornillos de patas y horquillas", "Screws added": "Tornillos nuevos (módulo, tapa, etc.)"},

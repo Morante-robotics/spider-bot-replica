@@ -542,3 +542,142 @@ sideways.
   (B3), all over the 86 g budget. The design mass becomes ≈ 482 g (shell counted as CAD) to ≈ 497 g (+15 % kept),
   against the 478 g motor ceiling. Default: model B1 with every lever, report the built mass, and decide in Part D
   (scale, lighter body) before the motor is bought.
+
+## B2 addendum: body v2 at 1.6 mm against the 90 g budget (cad-designer, 2026-11-17, PLAN)
+
+Probes (scratchpad `pfeat.py`, `parea.py`, `pbody2.py`, on `R.carcass_proxy("body", lifted=True)`; shell model of
+`sim/motor_sizing.py`):
+- Bare body at a uniform 1.6 wall: ≈ 86 g (half of the scan's 862 cm² both faces × 1.6, plan D's method).
+- Designed features, volume outside the scan skin (boxes at plan sizes): eyes pocket walls 1.2 → 4.20 cm³; hook
+  blocks 0.65 + 0.64; cradle groove blocks 1.58 + 1.56; lug root block 0.31. **8.94 cm³ = 11.1 g.**
+- The body's inner side face is at x 2.8 / 82.7 (y −31, z 100) and −3.3 / 88.8 (y 11): the tongues and the cradle
+  ears are ≈ 10 mm inboard, so the hook and groove blocks hang from the head on the scan's rib and peg-tube places
+  (scan volume there 0.6 + 2.3 cm³ a side), redrawn as designed posts.
+- **Body v2 at a uniform 1.6: ≈ 97 g, 7 g over the 90 g budget.**
+
+| Option | Body v2 g | Note |
+|---|---|---|
+| A. 1.6 everywhere, plan B's features | ≈ 97 | Over by 7 g; design mass ≈ +7 g against the budget |
+| **B (proposed). 1.6 below z 125 (seat rim, hooks, lug root, cradle grooves, eyes pocket); 1.2 on the dome above z 125** (≈ 235 cm² outer) | **≈ 85** | 3 lines on the dome, where only handling pushes; 5 g spare |
+| C. 1.6 everywhere; eyes pocket walls 0.8 (two lines, nothing pushes), blocks ribbed | ≈ 94 | Still over by 4 g |
+| D. 1.4 everywhere | ≈ 86 | Departs from the brief's 1.6 |
+
+Open: (1) which option (default B); (2) `robot.py` I9 lists «M3×12 from below», plan B and the shell use an M3×8
+(the tip limit 81.2): the interface row to be corrected by its owner. Diagram: not drawn (budget).
+
+**Decision (Morante, 2026-11-17): option B**, 1.6 mm below z 125 and 1.2 mm on the dome above it, ≈ 85 g. The I9
+row in `cad/robot.py` now reads M3×8 from below (the coordinator, same day).
+
+### B2 state (cad-designer, 2026-11-17, FAIL at the budget: parts built, spec rows not written)
+
+The ray-thinning stage (the old B2 state) is gone: `body_v2.py` now builds the scan as it is plus the features, per
+the decision below. All three parts build in ≈ 10 s (`../../.venv/bin/python body_v2.py [--part <name>] [--no-step]`),
+every STL reads back closed:
+
+| Part | Solid g (STL) | Feature (numbers at the top of `body_v2.py`, each from its source) |
+|---|---|---|
+| `body-v2` | 229.3 solid; sliced ≈ 93.2 (85.5 S1 + 7.7) | Hook posts on the scan's ribs round front-block-v2's tongues (entry at +4 Y open below, roof over the tongue, end wall at y −27.5; 1.2 a side in X, WINDOW in Y/Z; no floor: the slide lip, top 96.5, is under it, −Z is the band top's). Cradle groove blocks (x 6–16 / 69.4–79.4, y −7…17.5, z 102.5–113.6): L-groove, entry 11.5 forward, +Y end stop, 1 × M3×10 up through floor, ear and roof into a nut slid in from the inboard face (the tray wall then closes the slot). Eyes pocket = `EYES_BOX` + WINDOW, open downwards, 1.2 walls from z 112, 2 LED holes Ø6.0 at x 25 / 60.44, z 128 into the eye sockets; 1 × M3×10 at x 16.0 whose head reaches 0.75 under the board's left bottom edge, nut in a boss slid in from −X; lead clip (3.5 slot) behind the pocket. Lug root block x 27.7–39.7, y 36–49, z 81.2–92 under the rear skirt, 2 nut pockets slid in from ±X (the notch walls 1.0 away keep them) |
+| `holder-cradle` | 6.6 | Tray: walls 1.2 with windows, snap lips 1.0 under the case's long edges (wall 1.2 × 18 flexes 1.0: ε 0.56 %), −Y crossbar from z 101 (the cover slides under it), +Y end wall, top frame, 2 ears 7 × 8 × 2.4 with Ø3.3 holes |
+| `body-lug` | 0.9 | Plan section: y 33.55–41.55, z 75.3–81.2, Ø7 × 0.5 ring on the shelf, M3×8 nut z 76.9–79.6 slid in from −X; rear part y 41.55–48.5, z 76–81.2 with 2 Ø3.3 holes at (30.4 / 37.0, 44.8) for the 2 × M3×10 from below (heads at z 73–76, 0.45 behind the shelf) into the root block |
+
+Changes to the plan's joints (for the reviewer): the lug screws are vertical from below on the bench (the plan's
+horizontal −Y screws had no room: the skirt's inner face is at y 35.65 and the lug's top limit 81.2); the eyes board's
+«tab» is the screw head itself (0.75 mm under the board; a printed washer is the fallback); the cradle's holder goes in
+by a 1.0 snap (the plan's tray had no way in for the holder).
+
+Probes (scratchpad `b2/p3.py`, `p4.py`, on the built STLs; overlap volumes by manifold):
+- At place: body-v2 against front-block-v2, crank cover, cradle, lug: 0. Against `chassis`: 8.2 mm³, all at z 93.4–93.5,
+  the scan's own seat 0.1 mm into the band top (the bare scan gives the same): a seat contact for `ALLOWED_CONTACT`.
+- Body lowered at +4 Y from 30 mm in 1 mm steps and slid −4 Y in 0.25 steps: no overlap with the front block; with
+  the shell only the seat's 0.1. The lug through the notch: 0. Cradle + holder up at −11.5 Y from 30 mm below, then
+  +11.5 Y: 0 with the body. Eyes board up into its pocket from 30 mm below: 0. Sampled gaps: body–block 0.5,
+  cradle–body 0.28 (to locate: below WINDOW somewhere), holder–cradle 0.5.
+- Mass: `mass_estimate.py` body row 85.5 (slicer S1) + 7.7 g of features (9.24 cm³ added outside the scan at 0.9 of
+  solid with «more loops», minus 5.56 cm³ of scan cut at its sliced 0.472 g/cm³), source «slicer + plan»; cradle and
+  lug from their STLs; + 3 × M3×10. **Design mass 457 g**; `sim/motor_sizing.py --mass 457`: HP 1:380 margin 3.2 at
+  4.0 V (PASS, ≥ 3.0).
+
+Not done (next call): rows in `verify.py` (PARTS body-v2, holder-cradle, body-lug and their 7 screws + 6 nuts;
+holder and eyes board made non-fixed with `RETAIN`; `ALLOWED_CONTACT` seat, ring on shelf, lug on root, heads; ASSEMBLY:
+cad_verify takes one straight direction per step, so the body's +Z-then-−Y and the cradle's +Z-then-+Y paths need
+either a two-move option in `tools/cad_verify.py` or a probe in the spec that fails the run; ACCESS, JOINTS, MARKS
+(«insert here» arrows on the cradle not modelled), LABELS es, PRINT_ORIENT with `body_v2.FEATURE_BOXES` as the
+modifier regions, MEASURE, SECTIONS); `build.py` hook (`--part body-v2`); STEP for body-v2 (102k faces: the sewing
+writer not timed); the full `cad_verify` run.
+
+**B2 spec rows (cad-fixer, 2026-11-17): FAIL at the budget, 13 failures left, rows written.** `verify.py` now has the
+section «Part B2» at its end (parts, 6 screws + 6 nuts, RETAIN, ALLOWED_CONTACT, PAIR_GAP, bench ASSEMBLY, ACCESS,
+JOINTS, MARKS, LABELS es, PRINT_ORIENT + `PRINT_SETTINGS` (modifier boxes from `FEATURE_BOXES`; the tool does not read
+them), MEASURE, SECTIONS); holder and eyes board are no longer fixed; `build.py --part body-v2|holder-cradle|body-lug`
+calls `body_v2.build()`. Fixed in the geometry (checks proved them): `body-lug` clipped 8.85 mm³ into the crank cover's
+rear lip (corner cut at x ≥ `rear_slot()[0]`, y < rear face + WINDOW); `holder-cradle`'s side walls came 0.025 mm from
+the scan's rear inner wall at (x 16.5 / 68.9, y 44.6, z 96.8-97.3), the «0.28»: lower rear corners cut (y > holder end +
+WINDOW, below the crossbar), gap now 0.5. STEP: body-v2 takes 3 min and writes 177 MB.
+Left (full run `verify-result.txt`, 4 min 50 s): (1) **real fault: `eyes-board × eyes-nut` 5.74 mm³**: the nut pocket at
+x 16.0 (nut half-width 2.75-3.2) reaches x 18.8-19.2, the board's left edge is at 18.0: no nut fits 2.0 mm from the
+board over the board's whole height (z 117-139); needs a design decision (washer tab instead of the head, screw moved
+and a printed tab, or a notch in the board's corner). (2) bench ASSEMBLY steps that are spec choices, not yet tuned:
+lug-nut-2, cradle-nut-2, eyes-nut, eyes-screw blocked on the bench; the body group «down 30, then -Y 4» blocked at the
+end of move 1 (check the sign of the slide and the lug/cover/hooks at +4 Y: the cover-lip corner cut was made after
+the first smoke); pliers/hex-key ACCESS tools hit body-v2 for the lug, cradle and eyes nuts and the eyes and
+cradle-1 screws (tools to be re-aimed or the slots' mouths opened).
+
+**Decision (Morante, 2026-11-17): the slicer lightens the body**, in place of thinning the scanned skin in CAD. Body
+v2 keeps the scan's skin as it is (outer look untouched) with plan B's features added; its weight comes from per-object
+slicer settings (fewer wall loops, sparse infill; modifiers with more loops round screws and hooks). First a slicing
+probe on the scanned body gives the real grams for each setting; `body_v2.py`'s ray thinning (stage 1 above) is set
+aside.
+
+**Slicing probe (print-plater, 2026-11-17)**, scanned body as is, upright, standard settings 0.20 mm: 2 loops + 15 %
+grid 117.0 g (the shell model said 110); 1 loop + gyroid 10 % **85.5 g**; 1 loop + gyroid 15 % 93.1 g; 2 loops +
+gyroid 5 % 104.2 g. Fewer top layers need `top_shell_thickness=0` as well (not measured). Support 40.6 g in every
+setting (35–47 % of the part): the orientation is the plater's to fix at the plate step. The 1-loop skin on the dome,
+face and eye slits is not yet inspected layer by layer.
+
+**Decision (Morante, 2026-11-17): the eyes board is held by a printed tab** (washer tab clamping the board's edge),
+with the eyes screw moved ≈ 3 mm outboard so its nut clears the board (the full check found the nut 1 mm into the
+board's edge at x 18.0). The screw head alone held only 0.75 mm of board.
+
+**B2 fixes (cad-fixer, 2026-11-17): FAIL at the budget, 7 failures left in the partial run (no full run).**
+Done: new part `eyes-tab` (PLA, 9.5-20.5 × 8 × 2, z 114.5-116.5, hole Ø3.3) under the eyes boss, slot cut open downwards
+through the pocket wall; eyes screw x 16.0 -> 13.0 (`EB_OUT` 3.0), head under the tab (`EB_SCREW_Z` 114.5), nut clears
+the board's edge (x 16.35 vs 18.0); bench order board -> tab -> screw; JOINTS/MARKS/LABELS/RETAIN/PRINT_ORIENT rows.
+Nut slot mouths opened `MOUTH` 25 mm (lug ±X, eyes -X); cradle nuts as paths (-20 / +20 mm: the 60 mm grid reached the
+other block). Seat: body cut 0.2 clear of the shell (`SEAT_CUT`, chassis swept over the slide, 9 y steps × 3 z steps);
+the ALLOWED_CONTACT for the seat dropped; move 1 of the body path now passes, move 2 (the slide) still blocked.
+Left: (1) body × chassis 0.0012 mm³ (above EPS 1e-3) at z 93.4-96.5 and 1 zero-area face in body-v2; a finer sweep (0.25 y,
+5 z) cut the body into 13 pieces (it hugs the shell sideways somewhere: look there). (2) ACCESS: lug-nut-1 4 mm³, lug-nut-2
+264 mm³ (pliers Ø10 vs the 2.7 slot / skirt on +X), eyes-nut 2 mm³, cradle-screw-1 2 mm³. (3) full run not done; body-v2 now
+228.3 g solid (was 229.3): mass_estimate not rerun.
+
+**B2 fixes, second pass (cad-fixer, 2026-11-17): FAIL at the budget, items 2 and 3 not started.**
+Item 1 (body × chassis): the 0.0012 mm³ was slivers all along the seat (z 93.40-93.50, the body hugging the shell
+sideways, not a z 96.5 feature). `body_v2.py` now cuts the swept shell also ±`SIDE_CUT` 0.1 mm in X (3 x copies of the
+27 sweep shapes; no finer sweep: body stays 1 watertight piece, 184.1 cm³). Rest-pose overlap with the chassis fell from
+1.2e-3 to ~1e-6 mm³ (PASS), but the smoke now reports «body-v2 × chassis: gap 0.00 < 0.2» (surfaces touching somewhere,
+not yet located: closest-point scan of the body vs chassis.stl at d < 0.19 was running when the budget ended) and
+«body-v2: 2 zero-area faces» (was 1; the seat cut leaves coplanar slivers). The build now takes ~4 min (81 shapes in one
+union); to speed it, union per dz first or cut with one dilated slab. Next: find the touching spot (probably where the
+slab's z edge 96.5 or a wall crosses the cut), then clean the zero-area faces (merge/remove degenerate faces after S()).
+Items 2 (ACCESS: lug-nut-1/2, cradle-nut-1/2, eyes-nut, cradle-screw-1, eyes-screw) and 3 (full run, mass_estimate,
+motor_sizing) untouched. Slot mouths (`MOUTH` 25) and the eyes-tab stay as in the first pass.
+
+
+**B2 fixes, third pass (cad-fixer, 2026-11-17): seat done; ACCESS left.**
+The seat is a designed contact, not an interference. `body_v2.py`: the swept-shell cut (`SEAT_CUT` 0.2, `SIDE_CUT` 0.1,
+81 3D shapes) is replaced by 13 flat layers: the chassis section at each layer of z (`BAND_TOP` - `SEAT_DEPTH` 3.0 to
++ `SEAT_ABOVE` 3.0, 12 layers, plus one `SEAT_TRIM` 0.2 layer under the band top), carried back `SLIDE` 4 mm in -Y as a 2D
+union, `WIN` wider sideways, extruded and cut. The seat is trimmed flat at z 93.5 (the body rests on the band top), with
+no lift. `verify.py`: `ALLOWED_CONTACT[(BODY, "chassis")]` declares the sliding seat. The body path (down 30, -Y 4) needs
+nothing more: `sweep_path` counts only overlap above the one at the place, and the body's overlap with the chassis is now
+0 at every mm of the slide. Smoke: PASS, no zero-area face. `body_v2()` takes 8 s (the 6 min of `build.py` is the STEP
+sewing). Left: ACCESS (lug-nut-1 4 mm³, lug-nut-2 264 mm³, eyes-nut 2 mm³, cradle-screw-1 2 mm³); no full run.
+
+**B2 fixes, fourth pass (cad-fixer, 2026-11-17): PASS, `verify-result.txt` says «cad_verify: PASS (0 failures, 100 warnings)».**
+The 4 ACCESS fails are closed by geometry only (no RETAIN, bench order or tool change). `body_v2.py`: new `PLIERS_R` 5.0,
+`RELIEF` 0.2 and `xcyl()`; (1) lug nuts: a cylinder r 5.2 along X at the nut's mid-plane (y 44.8, z `ROOT_NUT_Z0` + 1.2), from the
+root block's side face out 29 mm (-X for lug 1, +X for lug 2): the skirt's slope (underside z 86-90 over x 40-68) was inside the
+Ø10 rod; (2) eyes-nut: the same cylinder along the eyes slot from x `EB_BOSS[0]` - 8 for `MOUTH` (clipped the cheek's rounded
+edge, 2 mm³); (3) cradle-screw-1: a cylinder r `HEAD_D`/2 + 0.3 from `BLK_Z0` - 4 up to the block's floor (a strip at z 99.25-101.25 sat under the
+head and the key). The seat cut and `ALLOWED_CONTACT[(BODY, "chassis")]` are untouched. Body-v2 183.5 cm³ solid (was 184.1).
+Mass: 420.2 g final, design mass 457 g (ceiling 478 g), HP 1:380 margin 3.14 (mass_estimate), motor_sizing PASS R 1.0 HP 1:380.

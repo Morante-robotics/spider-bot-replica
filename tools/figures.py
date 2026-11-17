@@ -81,6 +81,12 @@ def direction_words(d, lang):
     return f"{w['in']} {w[key]}"
 
 
+def path_words(path, lang):
+    """The moves of an ASSEMBLY path in order: «down 30 mm, then +Y 4 mm»."""
+    from cad_verify import move_words
+    return (", then " if lang == "en" else ", luego ").join(move_words(m) for m in path)
+
+
 # ---------------------------------------------------------------- the renderer
 
 def simplify(mesh, cell=0.2):
@@ -253,10 +259,10 @@ def _step_panel(ax, spec, ctx, k, lang, number=True):
     proj = draw(ax, items, view)
     if d is not None:
         c0 = np.mean([m.bounds.mean(axis=0) for m in moving], axis=0)
-        move_arrow(ax, proj, c0, c0 - d * lift * 0.8, col[names[0]])
+        move_arrow(ax, proj, c0, c0 - d * lift * 0.8, col[names[0]])   # a path: only its last move is drawn
     if number:
         badge(ax, k + 1)
-    how = WORDS[lang]["first"] if d is None else direction_words(d, lang)
+    how = WORDS[lang]["first"] if d is None else (path_words(st["path"], lang) if st.get("path") else direction_words(d, lang))
     if st["bench"] is not None:
         how = f"{WORDS[lang]['bench']}: {how}"
     ax.set_title(f"{' + '.join(label(spec, n, lang) for n in names)}\n{how}", fontsize=FONT + 2, pad=4)

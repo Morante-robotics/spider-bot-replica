@@ -487,3 +487,44 @@ def test_keep_in_distances_come_from_the_disk_cache(tmp_path, monkeypatch):
     again = run(cv.check_keep_in, inside)
     assert len(calls) == 1 and again.text() == first.text()
     assert run(cv.check_keep_in, out).fails and len(calls) == 2
+
+
+def hook_parts():
+    """An L-hook: a hook box sits under an overhang (y 2..10, z 4..6) on a base. A straight drop hits the
+    overhang; lowered in the open (y < 2) and then slid +Y 4 mm it gets in."""
+    base = box([20, 20, 2], (0, 0, -1))                              # z -2..0
+    over = box([20, 8, 2], (0, 6, 5))                                # overhang y 2..10, z 4..6
+    hook = box([4, 4, 4], (0, 4, 2))                                 # placed y 2..6, z 0..4
+    return {"base": {"mesh": base, "fixed": True}, "over": {"mesh": over, "fixed": True}, "hook": {"mesh": hook}}
+
+
+HOOK_SEQ = [("base", None), ("over", None)]
+
+
+def test_path_down_then_slide_passes():
+    s = spec(PARTS=hook_parts(), ASSEMBLY=HOOK_SEQ + [("hook", [[0, 0, -8], [0, 4, 0]])])
+    rep = run(cv.check_assembly, s)
+    assert not rep.fails, rep.text()
+    assert "goes in: down 8 mm, then +Y 4 mm" in rep.text()
+    # a straight drop from above hits the overhang
+    rep = run(cv.check_assembly, spec(PARTS=hook_parts(), ASSEMBLY=HOOK_SEQ + [("hook", [0, 0, 1])]))
+    assert rep.fails
+    # steps() keeps a unit "d" (the side the last move comes from) and the path
+    st = cv.steps(s)[-1]
+    assert np.allclose(st["d"], [0, -1, 0]) and len(st["path"]) == 2
+
+
+def test_path_blocked_on_move_2_fails():
+    parts = hook_parts()
+    parts["wall"] = {"mesh": box([20, 1, 4], (0, 0.5, 2)), "fixed": True}      # y 0..1, z 0..4: in the way of the slide only
+    s = spec(PARTS=parts, ASSEMBLY=HOOK_SEQ + [("wall", None), ("hook", [[0, 0, -8], [0, 8, 0]])])
+    rep = run(cv.check_assembly, s)
+    assert rep.fails and "blocked on move 2" in rep.text(), rep.text()
+
+
+def test_straight_step_is_unchanged():
+    s = spec(PARTS=hook_parts(), ASSEMBLY=HOOK_SEQ + [("hook", [0, -1, 0])])
+    st = cv.steps(s)[-1]
+    assert st["path"] is None and np.allclose(st["d"], [0, -1, 0])
+    rep = run(cv.check_assembly, s)
+    assert not rep.fails and "goes in from -Y" in rep.text(), rep.text()

@@ -24,6 +24,8 @@ counted per crankshaft (its two legs share one printed part) and only when posit
 the printed gears).
 
 Usage:  uv run python sim/motor_sizing.py > sim/motor-sizing-result.txt
+        uv run python sim/motor_sizing.py --mass 459 > sim/motor-sizing-result.txt   (design mass from
+        cad/chassis/mass_estimate.py, contingency included, in place of the step-1 table)
 """
 import json
 import os
@@ -328,14 +330,20 @@ def main():
 
     # 1 · mass
     print("1 · ROBOT MASS")
-    rows = mass_table()
-    for name, g, note in rows:
-        print(f"  {name:<44s} {g:6.1f} g   {note}")
-    tot = sum(g for _, g, _ in rows)
-    M = tot * (1 + MARGIN)
-    W = M / 1000 * G
-    print(f"  {'Sum':<44s} {tot:6.1f} g")
-    print(f"  Design mass, +{MARGIN:.0%} margin: {M:.0f} g  → weight W = {W:.2f} N\n")
+    if "--mass" in sys.argv:
+        M = float(sys.argv[sys.argv.index("--mass") + 1])
+        W = M / 1000 * G
+        print(f"  Design mass given with --mass: {M:.0f} g (cad/chassis/mass_estimate.py: CAD masses, contingency "
+              f"by source included)  → weight W = {W:.2f} N\n")
+    else:
+        rows = mass_table()
+        for name, g, note in rows:
+            print(f"  {name:<44s} {g:6.1f} g   {note}")
+        tot = sum(g for _, g, _ in rows)
+        M = tot * (1 + MARGIN)
+        W = M / 1000 * G
+        print(f"  {'Sum':<44s} {tot:6.1f} g")
+        print(f"  Design mass, +{MARGIN:.0%} margin: {M:.0f} g  → weight W = {W:.2f} N\n")
 
     # 2 · crank torque
     p, m, theta, legs = kinematics()
@@ -465,7 +473,7 @@ def main():
     Ft_typ = T_c_typ / EFF[1] / (C.MOD * PINION_T / 2)
     print(f"\n  Teeth at the motor's mesh (it carries the whole train). Worst peak: {Tp:.0f} N·mm on the 12 T pinion → "
           f"{Ft:.0f} N at the pitch circle (typical {Ft_typ:.0f} N). Lewis bending σ = F / (face × m × Y):")
-    for name, face, Y in (("12 T pinion, 3 mm face", C.GEAR_T, LEWIS_Y12), ("12 T pinion, 5 mm face", 5.0, LEWIS_Y12),
+    for name, face, Y in (("12 T pinion, 3 mm face", C.GEAR_T, LEWIS_Y12), ("12 T pinion, 4 mm face (as built)", 4.0, LEWIS_Y12),
                           ("idler 3, 20 T, 2.6 mm face", C.GEAR_T - 0.4, LEWIS_Y20),
                           ("idler 3, 17 T, 2.6 mm face", C.GEAR_T - 0.4, LEWIS_Y17)):
         print(f"    {name:<28s} {Ft / (face * C.MOD * Y):4.0f} MPa worst, {Ft_typ / (face * C.MOD * Y):4.0f} typical")

@@ -123,7 +123,7 @@ def main():
         n = " + ".join(st["names"])
         if n not in notes.get("pasos", {}) and n not in notes.get("comprobar", {}):
             n = st["names"][0]
-        how = figures.WORDS["es"]["first"] if d is None else figures.direction_words(d, "es")
+        how = figures.WORDS["es"]["first"] if d is None else (figures.path_words(st["path"], "es") if st.get("path") else figures.direction_words(d, "es"))
         if st["bench"] is not None:
             how = f"{figures.WORDS['es']['bench']}: {how}"
         name = " + ".join(L(x) for x in st["names"])

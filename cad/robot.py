@@ -206,8 +206,8 @@ INTERFACES = {
            "hardware": "4 × M3 from below into the module's 4 nut traps (positions in chassis/build.py I7_NUTS, "
                        "lengths per nut: chassis README I7 table); deck lip WINDOW (88 mm outline)"},
     "I8": {"between": ("front-block", "chassis", "body"), "fits": ("LOCATOR", "WINDOW"), "hardware": "2 × M3×10"},
-    "I9": {"between": ("body or ballast frame", "chassis"), "fits": ("WINDOW", "STEEL"),
-           "hardware": "M3×12 from below"},
+    "I9": {"between": ("body", "chassis"), "fits": ("WINDOW", "STEEL"),
+           "hardware": "M3×8 from below (shell rear block, tip limit 81.2)"},
     "I10": {"between": ("holder", "cradle", "body"), "fits": ("WINDOW", "LOCATOR"), "hardware": "2 × M3×10"},
     "I11": {"between": ("eyes board", "body"), "fits": ("WINDOW",), "hardware": "1 screw"},
     "I12": {"between": ("wiring",), "fits": (), "hardware": "SS12D00, 2 × JST-XH, 60 mm slack"},

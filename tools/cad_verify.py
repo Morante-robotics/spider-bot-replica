@@ -46,6 +46,8 @@ Spec file (all names optional except PARTS and poses):
     GEARS = [("shaft", "idler")]              # meshing pairs
     RETAIN = {"shaft": {"spin": [1, 0, 0], "slide": None, "play": 1.0}}   # free rotation axis, free slide axis
     ASSEMBLY = [("frame", None), ("shaft", [0, 0, 1])]   # order, and the direction each part comes in from
+                                              # or a PATH: ("body", [[0, 0, -30], [0, 4, 0]]) = lowered 30 mm, then
+                                              # slid 4 mm along +Y into place (moves in mm, in the order it goes in)
                                               # a step may move parts as one body: (("motor", "pinion"), d); and
                                               # take opts: (("pinion",), d, {"bench": ["motor", "jig"],
                                               # "except": {"shaft": "press fit"}, "note": "..."}): done on the bench,
@@ -798,7 +800,10 @@ def check_keep_out(spec, meshes, rep, only=None):
 
 def steps(spec):
     """ASSEMBLY normalised: one dict per step. An entry is (name, d) or (name, d, opts); name is one part or a tuple
-    of parts moved in as one body (a sub-assembly: a motor with its pressed-on pinion). opts: "bench": the parts on
+    of parts moved in as one body (a sub-assembly: a motor with its pressed-on pinion). d is the side the part comes
+    in from (a vector), or a PATH: a list of moves in mm in the order the part moves going in, e.g.
+    [[0, 0, -30], [0, 4, 0]] = lowered 30 mm, then slid 4 mm along +Y into place ("path" holds the moves; "d" is
+    then the side the last move comes from). opts: "bench": the parts on
     the bench in this step (the step is done off the machine: the moving body is checked against these only, and
     the step places nothing in the machine; its parts go in with a later step); "except": {part: why} the moving
     body may pass through (a press fit modelled at zero clearance); "note": what the step means."""
@@ -806,10 +811,14 @@ def steps(spec):
     for e in getattr(spec, "ASSEMBLY", None) or []:
         names, d = e[0], e[1]
         opts = e[2] if len(e) > 2 else {}
+        path = None
+        if d is not None and np.ndim(d) == 2:      # a path: the moves in mm, in the order the part moves going in
+            path = [np.asarray(m, float) for m in d]
+            d = -path[-1]                          # d stays the side the last move comes from, as for a straight step
         names = (names,) if isinstance(names, str) else tuple(names)
         exc = opts.get("except", {})
         exc = exc if isinstance(exc, dict) else {n: "" for n in exc}
-        out.append({"names": names, "d": None if d is None else np.asarray(d, float) / np.linalg.norm(d),
+        out.append({"names": names, "d": None if d is None else np.asarray(d, float) / np.linalg.norm(d), "path": path,
                     "bench": list(opts["bench"]) if opts.get("bench") is not None else None, "except": exc,
                     "note": opts.get("note", "")})
     return out
@@ -836,6 +845,41 @@ def before_step(spec, seq, k):
     return done
 
 
+def move_words(m):
+    """A move in mm, in words: «down 30 mm», «+Y 4 mm»."""
+    m = np.asarray(m, float)
+    i = int(np.argmax(np.abs(m)))
+    ax = "XYZ"[i]
+    w = ("down" if m[i] < 0 else "up") if ax == "Z" else f"{'+' if m[i] > 0 else '-'}{ax}"
+    return f"{w} {abs(m[i]):g} mm" if np.count_nonzero(np.abs(m) > 1e-9) == 1 else f"{name_dir(m)} {np.linalg.norm(m):g} mm"
+
+
+def sweep_path(me, others, path):
+    """Move `me` (at its place) along `path` (moves in mm, in order, ending at the place). Overlap above the one at
+    the place with any of `others` = blocked. Returns (move number, mm into that move) of the first block, or None."""
+    base = [overlap(me, o) for o in others]
+    bme = mbox(me)
+    pos = -sum(path)                          # offset of the start from the place
+    for i, mv in enumerate(path):
+        ln = float(np.linalg.norm(mv))
+        if ln < 1e-9:
+            continue
+        u = mv / ln
+        off = np.array([bme[0] + pos, bme[1] + pos])
+        grid = np.arange(0.0 if i == 0 else 0.25, ln, 0.25).tolist() + [ln]
+        near = [(o, b0, box_span(off, mbox(o), u)) for o, b0 in zip(others, base)]
+        near = [(o, b0, lo, hi) for o, b0, (lo, hi) in near if hi >= 0 and lo <= ln]
+        for s in grid:
+            live = [(o, b0) for o, b0, lo, hi in near if lo - 0.25 <= s <= hi + 0.25]
+            if not live:
+                continue
+            m2 = me.translate(list(pos + u * s))
+            if any(overlap(m2, o) > b0 + EPS_VOL for o, b0 in live):
+                return i + 1, s
+        pos = pos + mv
+    return None
+
+
 def check_assembly(spec, meshes, rep):
     seq = steps(spec)
     rep.head("5 assembly order")
@@ -860,6 +904,17 @@ def check_assembly(spec, meshes, rep):
             me = me + ms[n]
         skip = set(names) | set(st["except"]) | gear_partners(spec, names)
         others = [ms[n] for n in before_step(spec, seq, k) if n not in skip]
+        what = step_label(st) + (" (as one body)" if len(names) > 1 else "")
+        if st["path"] is not None:
+            words = ", then ".join(move_words(m) for m in st["path"])
+            hit = sweep_path(me, others, st["path"])
+            if hit is None:
+                rep.ok(f"{what} goes in: {words}{where}")
+            else:
+                rep.fail(f"{what} cannot go in: {words}{where}: blocked on move {hit[0]} at {hit[1]:.2f} mm")
+            for n, why in st["except"].items():
+                rep.info(f"{what}: not checked against {n}" + (f" ({why})" if why else ""))
+            continue
         bme = mbox(me)
         grid = np.arange(0.25, 60, 0.25)
         # only the travel where the moving part's box crosses an obstacle's box can collide: test those steps only

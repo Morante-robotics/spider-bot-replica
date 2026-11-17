@@ -118,3 +118,15 @@ channel are not modelled (the switch pocket's layout clashes with the crank wind
 | New WARNs (90 → 94) | +5, −1: `clutch-sleeve` 1.5 % and `clutch-collar` 1.9 % of the surface read under 0.8 mm (the D-bore's flat corners, lead-in rims and the dot; the walls are 1.0 and the collar 1.2 thick, none a knife edge that carries load); `clutch-sleeve × n20-shaft` and `clutch-collar × n20-shaft` `DSHAFT` assumed (K1); `pinion × clutch-sleeve` `SLIP_BORE` assumed (CL1); the old `pinion × n20-shaft` DSHAFT WARN is gone. The module's overhang went 837 → 848 mm²: the notch's arc is a roof when the module prints upside down, 11 mm² over the bed, none over the part (287 unchanged) |
 
 Pre-mortem: (1) the collar's 1.2 mm press lets go under the spring and the slip creeps (K1 pull-off decides; fallback: collar longer into the notch's 0.8, or Loctite 638 on the tip); (2) PLA faces glaze or smear during a long stall (CL1-heat; kit rule «humming, legs stopped = switch off»); (3) the wave washer's rate is stiffer than 60 N/mm and one 0.1 shim jumps past the window (two washers in series; the seller's load table is checked before buying); (4) the collar's dot is set the wrong way and the press jams (the thumb test: if it does not go in by thumb, stop and re-align before the vise).
+
+## body-v2 WARNs (B2 fixes, fourth pass, 2026-11-17)
+
+Full check: PASS, 0 failures, 100 warnings (67 are the print warnings of body-v2's own check). The body-v2 ones:
+
+| WARN | Why it stays |
+|---|---|
+| Integrity: 1.9 % of the surface under 0.8 mm (thinnest 0.01 mm) | Seat layers (13 flat layers at the chassis' section, 0.2 clear) and the nut-slot mouths leave knife edges where a cut meets the skirt's slope; none carries a load (the seat bears on the band top at z 93.5). Not new: B1 had the same kind. |
+| Print: 2 upright features thinner than Ø4 at z 94.4-97.2 (x 10.4 and 74.6, y -27.6) | Slopes of the scan-hugging skin seen as a 5.5 / 5.9 mm² section in one slice; they stand in the shell's lee, printed with 3 more loops from the plater's modifier regions (`FEATURE_BOXES`). |
+| Print: 15685 mm² of overhang, 6174 mm² over the part itself | The body prints seat-up with the skirt's underside as the overhang; support «On build plate only» plus the pockets of the nut slots bridging 2.7 mm (open mouths, no support inside). The plater decides (print-plater). |
+
+The fourth pass added three small reliefs (pliers rod r 5.2 along the lug nut slots and the eyes-nut slot; r 3.05 under the cradle block's floor) that remove ≤ 0.6 cm³ in total and touch no outer face.

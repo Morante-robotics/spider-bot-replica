@@ -55,6 +55,13 @@ Geometry stays light: no cut or check runs against the carcass body's scan (102k
 [`tools/stage_cache.py`](../tools/stage_cache.py). A spec may name each interface's parts in `GROUPS`, so
 `--only <group>` checks one interface instead of the whole robot.
 
+## Assembly steps
+
+An `ASSEMBLY` step in `verify.py` is `(part, side)` (the part comes in straight, from that side) or `(part, path)`:
+a list of moves in mm, in the order the part moves going in, e.g. `("body", [[0, 0, -30], [0, 4, 0]])` = lowered
+30 mm, then slid 4 mm along +Y into place. The check starts at the place minus all the moves and sweeps each move
+against the parts already in; it reports «goes in: down 30 mm, then +Y 4 mm» or «blocked on move 2 at 1.75 mm».
+
 ## What is printed and kept in git
 
 - STL and STEP of a part are committed when that version is printed, and at milestones.

@@ -157,9 +157,9 @@ PARTS = {"drive-module": {"stl": "out/drive-module.stl", "fixed": True},
                          "hardware": True, "fixed": True, "label": "M3×12 Allen"},
          "clamp-nut": {"mesh": nut([CX + B.SCREW_CLAMP_X, YM, TOPK - B.CAP_SCREW_L + 0.5], [0, 0, 1]),
                        "hardware": True, "fixed": True, "label": "tuerca M3"},
-         "holder": {"mesh": R.holder(), "hardware": True, "fixed": True,
+         "holder": {"mesh": R.holder(), "hardware": True,
                     "label": "portapilas 4×AAA (catálogo, en el cuerpo)"},
-         "eyes-board": {"mesh": R.eyes_board(), "hardware": True, "fixed": True,
+         "eyes-board": {"mesh": R.eyes_board(), "hardware": True,
                         "label": "placa de los ojos (catálogo, en la cabeza)"}}
 for i in range(4):
     PARTS[f"crankshaft-{i + 1}"] = {"stl": f"../crankshafts/out/crankshaft-{i + 1}.stl"}
@@ -904,7 +904,7 @@ ASSEMBLY += [("motor-leads", None)]
 ASSEMBLY += [(f"cover-screw-{k + 1}", [0, 0, 1]) for k in range(len(COVER_SCREWS))]
 ASSEMBLY += [(NAME, [0, 0, 1], {"note": "step 13: pads down into their lips, over the cap"})]
 ASSEMBLY += [(f"fb-screw-{k + 1}", [0, 0, 1], {"note": "down the access tube, 2.5 hex key"}) for k in range(2)]
-ASSEMBLY += [(f"i7-screw-{k + 1}", [0, 0, -1]) for k in range(4)] + [("holder", None), ("eyes-board", None)]
+ASSEMBLY += [(f"i7-screw-{k + 1}", [0, 0, -1]) for k in range(4)]
 
 ACCESS += [{"at": f"i7-nut-{k + 1}", "tool": tool("pliers", [CX + x + d[0] * 8.0, y + d[1] * 8.0, nz + K.NUT_T / 2],
                                                   [d[0], d[1], 0]),
@@ -1043,3 +1043,263 @@ MEASURE += [
      "points": "depth gauge down the access tube, from the bed face"}]
 SECTIONS += [([FB.FB_SCREWS[0][0], 0, 0], [1, 0, 0]), ([33.7, 0, 0], [1, 0, 0]), ([0, -51.0, 0], [0, 1, 0]),
              ([0, -31.0, 0], [0, 1, 0])]
+
+
+# =====================================================================================================================
+# Part B2: body-v2, holder-cradle, body-lug, and the 6 screws + 6 nuts that hold them (design-plan-b.md «B2 state»)
+# =====================================================================================================================
+import body_v2 as BD  # noqa: E402  (every number of the three parts and their hardware places: one source)
+
+BODY, CRADLE, LUG, ETAB = "body-v2", "holder-cradle", "body-lug", "eyes-tab"
+for _n in (BODY, CRADLE, LUG, ETAB):
+    PARTS[_n] = {"stl": f"out/{_n}.stl"}
+_PL = BD.screw_places()
+_Z = [0, 0, 1]
+# cradle: M3×10 up through the block's floor, the ear and the roof into the nut above the roof (nut slid in from the
+# block's inboard face)
+for _k, (_x, _y, _z) in enumerate(_PL["cradle"]):
+    PARTS[f"cradle-screw-{_k + 1}"] = {"mesh": m3([_x, _y, _z], _Z, BD.CR_SCREW_L), "hardware": True, "fixed": True,
+                                       "label": "M3×10 Allen"}
+    PARTS[f"cradle-nut-{_k + 1}"] = {"mesh": nut([_x, _y, BD.NUTP_Z0 + 0.15], _Z), "hardware": True, "fixed": True,
+                                     "label": "tuerca M3"}
+# eyes board: M3×10 whose head is the board's bottom tab, nut in the boss (slid in from -X)
+_ex, _ey, _ez = _PL["eyes"]
+PARTS["eyes-screw"] = {"mesh": m3([_ex, _ey, _ez], _Z, BD.EB_SCREW_L), "hardware": True, "fixed": True,
+                       "label": "M3×10 Allen"}
+PARTS["eyes-nut"] = {"mesh": nut([_ex, _ey, BD.EB_SCREW_Z + BD.EB_SCREW_L - BD.NUT_H - 0.5 + 0.15], _Z),
+                     "hardware": True, "fixed": True, "label": "tuerca M3"}
+# lug: 2 × M3×10 from below into nuts in the root block; the M3×8 from below (at the shell's screw place) into the
+# lug's own nut
+for _k, (_x, _y, _z) in enumerate(_PL["lug"]):
+    PARTS[f"lug-screw-{_k + 1}"] = {"mesh": m3([_x, _y, _z], _Z, BD.LUG_SCREW_L), "hardware": True, "fixed": True,
+                                    "label": "M3×10 Allen"}
+    PARTS[f"lug-nut-{_k + 1}"] = {"mesh": nut([_x, _y, BD.ROOT_NUT_Z0 + 0.15], _Z), "hardware": True, "fixed": True,
+                                  "label": "tuerca M3"}
+PARTS["rear-screw"] = {"mesh": m3([BD.SX, BD.SY, R.DECK_TOP - 1.8], _Z, 8.0), "hardware": True, "fixed": True,
+                       "label": "M3×8 Allen"}
+PARTS["rear-nut"] = {"mesh": nut([BD.SX, BD.SY, BD.NUT_Z[0] + 0.15], _Z), "hardware": True, "fixed": True,
+                     "label": "tuerca M3"}
+for _n in (BODY, CRADLE, LUG, ETAB):
+    PARTS[_n]["fixed"] = False
+
+# ---- retention: what holds each part ------------------------------------------------------------------------------
+RETAIN[BODY] = {"play": 0.5}       # slide lip (X), tongues in the L-slots (-Y, +Z), the M3×8 (+Y), band top (-Z)
+RETAIN[LUG] = {"play": 0.5}        # 2 screws up into the root block's nuts, the notch's walls 1.0 either side
+RETAIN[CRADLE] = {"play": 1.0}     # the ears in the grooves (WINDOW 0.5 above and below = 1.0 of travel), the screws
+RETAIN["holder"] = {"play": 1.0}   # WINDOW 0.5 each side in the tray = 1.0 of travel; the snap lips under, the frame over
+RETAIN["eyes-board"] = {"play": 1.0, "tilt": 5.0}   # pocket WINDOW 0.5 a side; the printed tab 0.5 under its left edge
+RETAIN[ETAB] = {"play": 0.5}       # the screw's head under it pulls it up against the boss, the slot's walls WINDOW round it
+
+# ---- gaps and contacts ----------------------------------------------------------------------------------------------
+_HW_BODY = [f"cradle-screw-{k + 1}" for k in range(2)] + ["eyes-screw"] + [f"lug-screw-{k + 1}" for k in range(2)]
+for _s, _n in [(f"cradle-screw-{k + 1}", f"cradle-nut-{k + 1}") for k in range(2)] + [("eyes-screw", "eyes-nut"),
+                                                                                      ("rear-screw", "rear-nut")] + \
+        [(f"lug-screw-{k + 1}", f"lug-nut-{k + 1}") for k in range(2)]:
+    ALLOWED_CONTACT[(_s, _n)] = "screw in its nut"
+    PAIR_GAP[(_n, BODY)] = 0.1                        # nut in its pocket (+0.15 a side)
+    PAIR_GAP[(_n, LUG)] = 0.1
+    PAIR_GAP[(_s, BODY)] = 0.1                        # M3 in Ø3.3 (STEEL 0.15)
+PAIR_GAP[("rear-screw", LUG)] = 0.1
+for _f in ("fork-4L", "fork-4R"):
+    PAIR_GAP[(BODY, f"{_f}-screw-up")] = 0.1       # head top 0.2 under the band top (shell: counterbore), the scan's
+                                                   # seat 0.09 into the band top: 0.11 between them, both given
+PAIR_GAP[("rear-screw", "chassis")] = 0.1
+PAIR_GAP[("rear-nut", "chassis")] = 0.1
+for _k in range(2):
+    PAIR_GAP[(f"cradle-screw-{_k + 1}", CRADLE)] = 0.1
+    PAIR_GAP[(f"lug-screw-{_k + 1}", LUG)] = 0.1
+    ALLOWED_CONTACT[(f"cradle-screw-{_k + 1}", BODY)] = "head clamps the block's floor"
+    ALLOWED_CONTACT[(f"lug-screw-{_k + 1}", LUG)] = "head clamps the lug's rear part"
+    ALLOWED_CONTACT[(f"lug-nut-{_k + 1}", BODY)] = "nut pulled down onto its pocket in the root block"
+    ALLOWED_CONTACT[(f"cradle-nut-{_k + 1}", BODY)] = "nut pulled down onto its pocket over the groove's roof"
+ALLOWED_CONTACT[("eyes-screw", BODY)] = "shank through the boss's hole"
+ALLOWED_CONTACT[("eyes-screw", ETAB)] = "head clamps the tab up against the boss, shank through its hole"
+ALLOWED_CONTACT[(ETAB, BODY)] = "the tab pulled up against the boss's underside"
+PAIR_GAP[("eyes-screw", ETAB)] = 0.1
+PAIR_GAP[(ETAB, BODY)] = 0.1
+ALLOWED_CONTACT[("eyes-nut", BODY)] = "nut pulled down onto its pocket in the boss"
+ALLOWED_CONTACT[("rear-screw", "chassis")] = "head clamps the floor shelf from below, shank through its hole"
+ALLOWED_CONTACT[("rear-screw", LUG)] = "shank through the lug and its ring, tip in the nut"
+ALLOWED_CONTACT[("rear-nut", LUG)] = "nut pulled down onto its pocket in the lug"
+ALLOWED_CONTACT[(LUG, "chassis")] = "the lug's Ø7 × 0.5 ring bears on the floor shelf, clamped by the M3×8"
+ALLOWED_CONTACT[(LUG, BODY)] = "the lug's rear part against the root block's underside (2 screws pull it up)"
+ALLOWED_CONTACT[(BODY, "chassis")] = "the body's seat rests on the band top (flat at z BAND_TOP, rear segment relieved 0.3: it bears at " \
+    "the sides and front) and slides on it for the last 4 mm: a designed sliding contact; the path check counts only " \
+    "overlap above the one at the place"
+
+# ---- assembly: on the bench first (body on its own), then the body with everything in it goes on the shell ------------
+# plan B «Assembly order» steps 14-16: nuts slid into the body, lug screwed on, cradle with its holder slid into the
+# grooves and screwed, eyes board into its pocket and held by its screw head; then the whole body lowered 30 mm behind
+# its place, slid 4 mm forward (-Y: tongues to the L-slot ends), and the M3×8 from below with the robot on its back.
+BODY_GROUP = (BODY, LUG, "rear-nut", "lug-screw-1", "lug-screw-2", "lug-nut-1", "lug-nut-2", CRADLE, "holder",
+              "cradle-screw-1", "cradle-screw-2", "cradle-nut-1", "cradle-nut-2", "eyes-board", "eyes-screw", "eyes-nut", ETAB)
+_bb = [BODY]
+
+
+def _bench(names, d, note="", **kw):
+    """One bench step on the body with what is already on it; it joins the bench afterwards."""
+    ent = (names, d, {"bench": list(_bb), "note": note, **kw})
+    _bb.extend([names] if isinstance(names, str) else list(names))
+    return ent
+
+
+_SL = BD.CRADLE_SLIDE
+ASSEMBLY += [
+    _bench("lug-nut-1", [-1, 0, 0], "M3 nut slid into the root block's left pocket from -X (the lug is not on yet)"),
+    _bench("lug-nut-2", [1, 0, 0], "the same, right pocket, from +X"),
+    ((LUG, "rear-nut"), [0, 0, -1], {"bench": list(_bb), "note": "the lug with the M3×8's nut already in it (slid in "
+                                     "from -X on its own, step before) raised against the root block's underside"}),
+]
+_bb.extend([LUG, "rear-nut"])
+ASSEMBLY += [
+    _bench("lug-screw-1", [0, 0, -1], "M3×10 from below through the lug into the root block's nut"),
+    _bench("lug-screw-2", [0, 0, -1], "the same, right"),
+    _bench("cradle-nut-1", [[-20, 0, 0]], "nut slid into the left groove block from its inboard face (+X), before the "
+                                       "cradle: the cradle's wall then closes the slot"),
+    _bench("cradle-nut-2", [[20, 0, 0]], "the same, right block, from -X"),
+    _bench("eyes-nut", [-1, 0, 0], "nut slid into the eyes boss from -X"),
+    ("holder", [0, 0, -1], {"bench": [CRADLE], "except": {CRADLE: "snap lips under the case's long edges flex 1.0 "
+                                                                   "(wall 1.2 × 18: ε 0.56 %)"},
+                            "note": "holder pushed up from below into the tray until the lips snap under its edges"}),
+]
+_bb.append("holder-cradle-pending")
+_bb.pop()
+ASSEMBLY += [
+    ((CRADLE, "holder"), [[0, 0, 30], [0, _SL, 0]], {"bench": list(_bb), "note": "the cradle with its holder up from "
+     "below into the grooves' entry notches 11.5 mm forward of their place, then slid back 11.5 mm to the end stops"}),
+]
+_bb.extend([CRADLE, "holder"])
+ASSEMBLY += [
+    _bench("cradle-screw-1", [0, 0, -1], "M3×10 up through the floor, the ear and the roof into the nut"),
+    _bench("cradle-screw-2", [0, 0, -1], "the same, right"),
+    _bench("eyes-board", [0, 0, -1], "the board up into its pocket from below, its right edge first"),
+    _bench(ETAB, [0, 0, -1], "the printed tab up into its slot under the boss, its end towards the pocket"),
+    _bench("eyes-screw", [0, 0, -1], "M3×10 up through the tab and the boss into the nut: the tab's end clamps the "
+                                     "board's left bottom edge"),
+    (BODY_GROUP, [[0, 0, -30], [0, -BD.SLIDE, 0]], {"note": "step 16: the body with the holder, eyes board, lug and "
+     "all its screws lowered 30 mm behind its place (tongues at the L-slots' entries, the lug into its notch), slid "
+     "4 mm forward"}),
+    ("rear-screw", [0, 0, -1], {"note": "robot on its back: M3×8 up through the shelf and the lug's ring into the "
+                                       "nut, hand tight"}),
+]
+
+_bt = trimesh.load(os.path.join(HERE, "out", f"{BODY}.stl")).bounds[1][2]
+ACCESS += [
+    {"at": "lug-nut-1", "tool": tool("pliers", [BD.LUG_X[0] - 8.0, BD.LUG_SCREW_Y, BD.ROOT_NUT_Z0 + K.NUT_T / 2],
+                                      [-1, 0, 0], reach=20.0), "why": "on the bench: nut pushed along its slot from -X, pliers"},
+    {"at": "lug-nut-2", "tool": tool("pliers", [BD.LUG_X[1] + 8.0, BD.LUG_SCREW_Y, BD.ROOT_NUT_Z0 + K.NUT_T / 2],
+                                      [1, 0, 0], reach=20.0), "why": "on the bench: nut pushed along its slot from +X, pliers"},
+    {"at": (LUG, "rear-nut"), "tool": tool("finger", [BD.SX, BD.SY, BD.LUG_Z0 - 0.5], [0, 0, -1], d=12.0, reach=30.0),
+     "why": "on the bench: the lug (nut in it) pushed up by hand against the root block"},
+    *[{"at": f"lug-screw-{k + 1}", "tool": tool("hex-key", [x, y, z - K.HEAD_H], [0, 0, -1]),
+       "why": "on the bench: M3×10 from below, 2.5 hex key"} for k, (x, y, z) in enumerate(_PL["lug"])],
+    *[{"at": f"cradle-nut-{k + 1}", "tool": tool("pliers", [x + (1 if k == 0 else -1) * 8.0, y,
+                                                            BD.NUTP_Z0 + K.NUT_T / 2], [1 if k == 0 else -1, 0, 0], reach=25.0),
+       "why": "on the bench: nut pushed along its slot from the block's inboard face, pliers"}
+      for k, (x, y, z) in enumerate(_PL["cradle"])],
+    {"at": "eyes-nut", "tool": tool("pliers", [BD.EB_BOSS[0] - 8.0, _ey, BD.EB_SCREW_Z + BD.EB_SCREW_L - BD.NUT_H +
+                                                K.NUT_T / 2 - 0.5], [-1, 0, 0]),
+     "why": "on the bench: nut pushed along its slot from -X, pliers"},
+    {"at": "holder", "tool": tool("finger", [CX, BD.HC[1], BD.H0[2]], [0, 0, -1], d=16.0, reach=30.0),
+     "why": "on the bench: the holder pushed up into the tray by the thumbs (the middle of its bottom is open)"},
+    {"at": (CRADLE, "holder"), "tool": tool("finger", [CX, BD.HC[1], BD.CR_Z0], [0, 0, -1], d=16.0, reach=30.0),
+     "why": "on the bench: the cradle with its holder lifted by hand from below"},
+    *[{"at": f"cradle-screw-{k + 1}", "tool": tool("hex-key", [x, y, z - K.HEAD_H], [0, 0, -1]),
+       "why": "on the bench: M3×10 from below, 2.5 hex key"} for k, (x, y, z) in enumerate(_PL["cradle"])],
+    {"at": "eyes-board", "tool": tool("finger", [CX, _ey, BD.E0[2]], [0, 0, -1], d=8.0, reach=30.0),
+     "why": "on the bench: the board pushed up into its pocket from below by the fingertips"},
+    {"at": ETAB, "tool": tool("finger", [BD.EB_SCREW[0], _ey, BD.EB_SCREW_Z], [0, 0, -1], d=8.0, reach=30.0),
+     "why": "on the bench: the tab pushed up into its slot by a fingertip"},
+    {"at": "eyes-screw", "tool": tool("hex-key", [_ex, _ey, _ez - K.HEAD_H], [0, 0, -1]),
+     "why": "on the bench: M3×10 from below, 2.5 hex key"},
+    {"at": BODY_GROUP, "tool": tool("finger", [CX, 0.0, _bt], [0, 0, 1], d=30.0, reach=40.0),
+     "why": "the whole body held by the hands over it and lowered onto the shell"},
+    {"at": "rear-screw", "tool": tool("hex-key", [BD.SX, BD.SY, R.DECK_TOP - 1.8 - K.HEAD_H], [0, 0, -1]),
+     "why": "robot on its back: M3×8 from below, 2.5 hex key"},
+]
+
+# ---- joints (fits from fits.py; boxes in the robot frame) ----------------------------------------------------------
+_pz = (BD.POST_Z[0] + BD.POST_Z[1]) / 2
+for _sg, _side, _key in ((-1, BD.SIDE_L, (BODY, NAME)), (1, BD.SIDE_R, (NAME, BODY))):
+    _c = _side + _sg * (BD.HOOK_X + BD.FB.TONGUE_OUT) / 2
+    JOINTS[_key] = {"fit": fits.WINDOW, "where": ((_c, (BD.T_Y0 + BD.T_Y1) / 2, (BD.T_Z0 + BD.T_Z1) / 2),
+                                                   (BD.HOOK_X + BD.FB.TONGUE_OUT + 0.4, BD.T_Y1 - BD.T_Y0 + 2 * BD.WIN
+                                                    - 0.1, BD.T_Z1 - BD.T_Z0 + 2 * BD.WIN - 0.1)),
+                    "why": f"I9: the {'left' if _sg < 0 else 'right'} hook tongue in the post's L-slot, WINDOW in Y "
+                           "and Z (1.2 a side in X)"}
+JOINTS[(CRADLE, BODY)] = {"fit": fits.WINDOW, "where": ((BD.CR_X0 - BD.EAR_OUT / 2, BD.EAR_Y[0] + 4.0, (BD.GROOVE_Z[0] +
+                                                         BD.GROOVE_Z[1]) / 2),
+                                                        (BD.EAR_OUT + 2.0, 8.0, BD.GROOVE_Z[1] - BD.GROOVE_Z[0] - 0.2)),
+                          "why": "I10: the left ear in its groove, WINDOW up, down and at its tip"}
+JOINTS[("holder", CRADLE)] = {"fit": fits.WINDOW, "where": ((CX, BD.HC[1], BD.HC[2] + 2.0), (BD.HX + 2.0, BD.HY + 2.0,
+                                                           BD.HZ - 2.0)),
+                              "why": "I10: the holder in its tray: WINDOW all round (the lips are 0.5 under it)"}
+JOINTS[("eyes-board", BODY)] = {"fit": fits.WINDOW, "where": ((CX, (BD.E0[1] + BD.E1[1]) / 2, BD.E1[2] - 4.0),
+                                                              (BD.E1[0] - BD.E0[0] + 2.0, BD.E1[1] - BD.E0[1] + 2.0,
+                                                               8.0)),
+                                "why": "I11: the board in its pocket, WINDOW a side; its top and sides"}
+JOINTS[(ETAB, BODY)] = {"fit": fits.WINDOW, "where": ((BD.P0[0] - 0.6, _ey + BD.TAB_W / 2 + BD.WIN / 2, BD.EB_SCREW_Z + 1.0),
+                                                      (1.0, 1.0, 1.6)),
+                        "why": "I11: the printed tab in its slot under the boss, WINDOW round it"}
+JOINTS[(LUG, "chassis")] = {"fit": fits.WINDOW, "where": ((SHL.NOTCH[0] + 0.5, 38.0, (BD.LUG_Z0 + BD.LUG_TOP) / 2),
+                                                         (1.6, 5.0, 2.0)),
+                            "why": "I9: the tab in the shell's notch, the -X wall (1.0 off; the +X side is open to the "
+                                   "cover's slot)"}
+for _k, (_x, _y, _z) in enumerate(_PL["cradle"]):
+    JOINTS[(f"cradle-screw-{_k + 1}", BODY)] = {"fit": fits.STEEL, "where": ((_x, _y, BD.BLK_Z0 + 1.0), (5.0, 5.0, 1.8)),
+                                                "why": "I10: the screw's shank in the block's Ø3.3 hole"}
+    JOINTS[(f"cradle-screw-{_k + 1}", CRADLE)] = {"fit": fits.STEEL, "where": ((_x, _y, (BD.EAR_Z[0] + BD.EAR_Z[1]) / 2),
+                                                                              (5.0, 5.0, 2.0)),
+                                                  "why": "I10: the screw's shank in the ear's Ø3.3 hole"}
+JOINTS[("eyes-screw", BODY)] = {"fit": fits.STEEL, "where": ((_ex, _ey, BD.EB_HEAD_TOP + 3.0), (5.0, 5.0, 4.0)),
+                                "why": "I11: the screw's shank in the boss's Ø3.3 hole"}
+for _k, (_x, _y, _z) in enumerate(_PL["lug"]):
+    JOINTS[(f"lug-screw-{_k + 1}", LUG)] = {"fit": fits.STEEL, "where": ((_x, _y, BD.LUG_REAR_Z0 + 2.5), (5.0, 5.0, 3.0)),
+                                            "why": "I9: lug screw's shank in the lug's Ø3.3 hole"}
+JOINTS[("rear-screw", "chassis")] = {"fit": fits.STEEL, "where": ((BD.SX, BD.SY, R.DECK_TOP - 0.5), (5.0, 5.0, 1.0)),
+                                     "why": "I9: the M3×8's shank in the shelf's Ø3.3 hole"}
+JOINTS[("rear-screw", LUG)] = {"fit": fits.STEEL, "where": ((BD.SX, BD.SY, BD.LUG_Z0 + 1.0), (5.0, 5.0, 2.0)),
+                               "why": "I9: the M3×8's shank in the lug's Ø3.3 hole"}
+
+# ---- marks, labels, print, measure, sections -----------------------------------------------------------------------
+MARKS[BODY] = ("it fits one way (the hook posts, the lug and the eyes pocket are all asymmetric to a turned body); "
+               "the slide's direction is arrowed by the posts' L-slots; no marking printed")
+MARKS[CRADLE] = ("«insert here» arrows NOT modelled: they are marked by hand with a pen on the cradle's ears (2 "
+                 "arrows, each over a groove block's entry notch, tips +Y); the holder fits one way (the +Y end wall; "
+                 "the crossbar at -Y), the ears fit their grooves one way")
+MARKS[ETAB] = "none needed: it fits one way (the hole at its outboard end, the long end towards the pocket)"
+MARKS[LUG] = "none needed: it fits one way (the nut slot opens on -X, the ring on the bottom, the rear part on +Y)"
+LABELS["es"].update({BODY: "cuerpo v2", CRADLE: "cuna del portapilas", LUG: "pestaña trasera del cuerpo",
+                     **{f"cradle-screw-{k + 1}": f"tornillo de la cuna {k + 1}" for k in range(2)},
+                     **{f"cradle-nut-{k + 1}": f"tuerca de la cuna {k + 1}" for k in range(2)},
+                     "eyes-screw": "tornillo de la placa de los ojos", ETAB: "arandela-pestaña de la placa de los ojos", "eyes-nut": "tuerca de la placa de los ojos",
+                     **{f"lug-screw-{k + 1}": f"tornillo de la pestaña {k + 1}" for k in range(2)},
+                     **{f"lug-nut-{k + 1}": f"tuerca de la pestaña {k + 1}" for k in range(2)},
+                     "rear-screw": "tornillo trasero M3×8 (cuerpo al chasis)", "rear-nut": "tuerca del tornillo trasero"})
+# print: the body upright on the skirt's lip (as built), 1 wall loop + gyroid 10 % (85.5 g bare, S1), «more loops»
+# modifier boxes round every screw and hook (read by the plater; cad_verify does not use them)
+PRINT_ORIENT[BODY] = np.eye(4)
+PRINT_ORIENT[CRADLE] = np.eye(4)        # its floor lips on the bed: top frame up (the lips are 1.2 thick, flat)
+PRINT_ORIENT[ETAB] = np.eye(4)           # flat on the bed
+PRINT_ORIENT[LUG] = trimesh.transformations.rotation_matrix(np.pi / 2, [0, 1, 0])   # on its -X face (the nut slot's walls print as perimeters)
+PRINT_SETTINGS = {BODY: {"wall_loops": 1, "infill": "gyroid 10 %", "top_shell_thickness": "see plater",
+                         "modifiers": {n: {"box": (tuple(map(float, a)), tuple(map(float, b))), "wall_loops": 3,
+                                           "infill": "gyroid 40 %"} for n, (a, b) in BD.FEATURE_BOXES.items()},
+                         "why": "grams from the slicer (85.5 g bare, 93.2 g with the features); more loops where "
+                                "a screw or a hook loads the wall"}}
+MEASURE += [
+    {"part": BODY, "what": "hook post slot width across Z", "nominal": round(BD.SLOT_Z[1] - BD.SLOT_Z[0], 2),
+     "tol": (-0.1, 0.2), "points": "either post, in the horizontal leg"},
+    {"part": BODY, "what": "eyes pocket width across X", "nominal": round(BD.P1[0] - BD.P0[0], 2), "tol": (-0.1, 0.3),
+     "points": "caliper at the pocket's mouth, board's width + 2 WINDOW"},
+    {"part": BODY, "what": "cradle groove height (Z)", "nominal": round(BD.GROOVE_Z[1] - BD.GROOVE_Z[0], 2),
+     "tol": (-0.1, 0.3), "points": "either groove, at its end stop"},
+    {"part": CRADLE, "what": "tray inside width across X", "nominal": round(BD.HX + 2 * BD.CR_IN, 2), "tol": (-0.1, 0.3),
+     "points": "between the walls, mid-height"},
+    {"part": CRADLE, "what": "ear thickness", "nominal": round(BD.EAR_Z[1] - BD.EAR_Z[0], 2), "tol": (-0.1, 0.1),
+     "points": "either ear"},
+    {"part": LUG, "what": "nut pocket across the flats", "nominal": round(BD.NUT_AF, 2), "tol": (-0.1, 0.2),
+     "points": "the M3×8's pocket, from the open slot's side"},
+]
+SECTIONS += [([BD._PL_X, 0, 0], [1, 0, 0]) if False else ([_PL["cradle"][0][0], 0, 0], [1, 0, 0]),
+             ([BD.SX, 0, 0], [1, 0, 0]), ([0, BD.LUG_SCREW_Y, 0], [0, 1, 0]), ([0, _ey, 0], [0, 1, 0])]
