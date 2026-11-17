@@ -28,3 +28,6 @@ cad/chassis/out/*-lite.stl
 # Chassis: coarse STL/STEP written while iterating (front-block-v2.step alone is 48 MB). The fine files that are
 # printed are added at print time with `git add -f`.
 cad/chassis/out/
+
+# N0 mock-up: the body distance field (cad/mockup/n0.py), rebuilt on demand
+cad/mockup/.cache/

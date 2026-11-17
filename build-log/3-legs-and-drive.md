@@ -53,6 +53,9 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
     and curved like the toy's. Three plan rounds gave legs that fit the 478 g ceiling only by being thinner than the
     toy's, and Morante rejected them: the legs are not traded for weight, so every other printed part is audited
     first and the legs come back with the grams it frees.
+13. **Looks first.** The robot is redesigned looks-first in three levels of detail. The first, a mock-up in simple
+    shapes at 60 % of jenscolt's size, draws and checks the whole robot in about 2 seconds, and its look was approved.
+    The real looking parts as light meshes are next.
 
 <img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/drive-attempts.png?raw=true" alt="The three drives tried, from above and from the side">
 
@@ -2121,5 +2124,86 @@ the redesign leaves behind.*
 #### Next
 
 - Measure the original toy (model, cells, mass, size, current), then size motor, cells and scale. See Open items.
+
+### N0 mock-up: the looks robot in simple shapes
+
+**Phase 3 · Mechanisms · 2026-11-18** · Status: ✅ N0 look approved, N1 next
+
+> **In short.** The first level of the redesign is built: a mock-up of the whole robot in simple shapes, with
+> jenscolt's body and base at 60 %, eight legs shaped like his, the toy leg's motion, and the motor, six button cells
+> and switch inside. One run draws four views and checks 24 crank poses in about 2 seconds. Every check is inside the
+> 5 mm tolerance of this level, and the robot reads as the toy: the legs are thick and curved, the body sits low.
+> Next is N1, the real looking parts as light meshes.
+
+The mock-up is the N0 of the [redesign](#redesign-looks-first): a change of shape costs seconds, so the look can be
+settled before any real part is modelled. The scale of 60 % comes from the bottom-up sizing in
+[`cad/mockup/sizing.py`](../cad/mockup/sizing.py): the smallest body that holds the N10 motor and six AG13 cells.
+
+<img src="../cad/mockup/images/n0-mockup.png" alt="The N0 mock-up from four views: three-quarter, front, side and from below">
+
+*Fig. 1 · The mock-up, default parameters, crank pose 0. Look at the thick legs rising level from the base and then
+bending up to the knee, the blade coming down to the foot, and the base standing clear of the ground. The grey frame
+is the ground plane.*
+
+#### Steps
+
+1. Take jenscolt's body and base at 60 % ([`n0.py`](../cad/mockup/n0.py), parameters `P0`).
+2. Model each of the 8 legs as a swept tube (a chain of spheres of varying radius): the inner arm from the crank pin
+   to the pivot, an upper leg that goes out level and then up to the knee, and a blade from just above the knee down
+   to the foot, shaped like jenscolt's `spideybot_L_leg1` and `leg2`.
+3. Move them like the toy leg of [`sim/toy_leg_3d.py`](../sim/toy_leg_3d.py): four lateral crankshafts, the leg
+   sliding at the crank. One change: the leg may bend up at its pivot, so the knees sit high like the toy's.
+4. Put the inside in as boxes: gear strip (module about 0.6) and the four crankshafts, the N10 (12 × 10 × 24 mm plus
+   a 10 mm D-shaft), six AG13 as three stacks of two (2S3P, 3 V) and the SS12D00 switch.
+5. Check over 24 crank poses, in numpy only: the legs against the body, neighbouring legs, the inner arms against the
+   boxes, the boxes inside the wall and apart. Draw four views ([`n0_render.py`](../cad/mockup/n0_render.py)).
+
+The legs are checked against a 2 mm voxel distance field of the real body and base surface (cached in
+`cad/mockup/.cache/`, not in git), not against a convex hull: the dome overhangs the base, and the hull filled the
+room the legs come out under.
+
+<details><summary>How to reproduce</summary>
+
+```
+uv run python cad/mockup/n0.py                              # checks + timing
+uv run python cad/mockup/n0.py --png out.png --lang en      # four views
+uv run python cad/mockup/n0.py --set knee_z=44 foot_r=60    # change parameters
+```
+
+</details>
+
+#### Result
+
+| Measure | Value |
+|---|---|
+| Size with legs | 145 × 113 mm |
+| Base above the ground (lowest foot, 24 poses) | ≈ 13 mm |
+| Body bob over a turn | 4.6 mm |
+| Foot lift | 6.9 mm |
+| Knee below the dome top | 3 mm |
+| Shell window for each leg root | ≈ 10 mm |
+
+| Gap checked | Gap | |
+|---|---|---|
+| Legs ↔ body | −0.8 mm | grazes |
+| Legs ↔ legs | 1.8 mm | ok |
+| Inner arms ↔ boxes | 1.4 mm | ok |
+| Boxes inside the wall | 0.0 mm | grazes |
+| Boxes apart | 0.3 mm | grazes |
+
+All five are inside the 5 mm tolerance of N0; N1 refines them. On Morante's 2-core Mac the checks take 0.5 s, the
+four-view render 1.3 s, and the whole run about 2 s (the first run adds 10 s for the cache). Morante compared the four
+views with his photo of the toy and approved the look: «La imagen me parece bien».
+
+Three faults came up and each was found by the check in seconds: at 60 % the middle notches are only about 8 mm
+apart, so the leg root became Ø6; the rear legs hit the dome overhang, so the legs now go out level first and the
+knees are wider (44 mm); the crankshafts were raised because the base's bowl is narrow below.
+
+#### Decisions
+
+- **Distance field, no mesh booleans.** Mesh booleans are too slow for N0; distance fields and half-spaces in numpy
+  keep every change at seconds.
+- **The look is approved at N0.** The legs stay thick and curved; the body and base give way, not the legs.
+- **Knees 3 mm below the dome top,** about 10 mm of shell window per leg root: both are carried into N1 as targets.
 
 [↑ Contents](../build-log.md#contents)

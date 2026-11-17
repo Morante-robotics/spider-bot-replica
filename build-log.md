@@ -54,6 +54,7 @@ The robot's story in three parts, then what is left to do and a glossary.
    - [Chassis Part E: the looks pass, planned and paused](build-log/3-legs-and-drive.md#chassis-part-e-the-looks-pass-planned-and-paused) · 2026-11-17 · 🔄 paused until the legs are rethought
    - [Legs v2: three plan rounds, paused](build-log/3-legs-and-drive.md#legs-v2-three-plan-rounds-paused) · 2026-11-17 · 🔄 paused, mass audit first
    - [Redesign: looks first](build-log/3-legs-and-drive.md#redesign-looks-first) · 2026-11-17 · 🔄 in progress
+   - [N0 mock-up: the looks robot in simple shapes](build-log/3-legs-and-drive.md#n0-mock-up-the-looks-robot-in-simple-shapes) · 2026-11-18 · ✅ N0 look approved, N1 next
 4. **[Open items](#open-items)**: everything still to do.
 5. **[Glossary](#glossary)**: the terms used in the entries.
 
@@ -76,8 +77,7 @@ once, before printing. Everything before the redesign is in the
 | Pending | Came up in | Phase |
 |---|---|---|
 | Buy the N10 (3 V, ≈ 100–150 rpm) and 6 × AG13, and measure the N10 for the mock-up. Chosen bottom-up from the original Mini Spider-Bot (≈ 10 cm, 6 × AG13, walks on legs): the body holds them at ≈ 60 % (`cad/mockup/sizing.py`) | Redesign, looks first | 3 |
-| The mock-up tool: the whole robot in simple shapes, compared with the toy from the same views, in seconds | Redesign, looks first | 3 |
-| Mock-up of the looks robot (body low like the toy's, legs from jenscolt's shape on the toy leg's motion) until it looks like the toy | Redesign, looks first | 3 |
+| N1: the real looking parts as light meshes with a motion check (minutes per change) | [N0 mock-up](build-log/3-legs-and-drive.md#n0-mock-up-the-looks-robot-in-simple-shapes) | 3 |
 | The real looking parts as light meshes, moving without collisions | Redesign, looks first | 3 |
 | Print detail, one batch of coupons, the workshop kit and the one robot | Redesign, looks first | 4 |
 | Import the parts into Onshape as STEP and assemble them with mates | [Onshape assembly](build-log/3-legs-and-drive.md#onshape-assembly) | 3 |
@@ -128,5 +128,6 @@ Terms used in the entries, in the order they first appear, with a link to that e
 | **Friction clutch** | A joint that transmits torque by friction and slips when the torque is too high, so a jam cannot break a gear. | [Part B1 and the clutch](build-log/3-legs-and-drive.md#chassis-part-b1-part-c-check-and-the-friction-clutch) |
 | **Wave washer** | A thin steel ring bent in waves, used as a spring that presses with a steady force. | [Part B1 and the clutch](build-log/3-legs-and-drive.md#chassis-part-b1-part-c-check-and-the-friction-clutch) |
 | **Shim** | A very thin flat washer added or taken away to set a gap or a spring's force. | [Part B1 and the clutch](build-log/3-legs-and-drive.md#chassis-part-b1-part-c-check-and-the-friction-clutch) |
+| **Mock-up (N0)** | The whole robot drawn and checked in simple shapes (tubes and boxes), so a change costs seconds. | [N0 mock-up](build-log/3-legs-and-drive.md#n0-mock-up-the-looks-robot-in-simple-shapes) |
 
 [↑ Contents](#contents)

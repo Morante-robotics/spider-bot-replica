@@ -37,6 +37,7 @@ repeated. Its contents show where each step stands, and its **Open items** list 
 |---|---|
 | [cad/carcass-jenscolt/](cad/carcass-jenscolt/) | Carcass model by jenscolt, unmodified (CC BY-NC-SA): the looks reference, legs included |
 | [cad/](cad/) | The rules every design follows: axes, folder layout, what is kept in git; [`_template/`](cad/_template/) to start a new design |
+| [cad/mockup/](cad/mockup/) | The N0 mock-up: the whole robot in simple shapes, checked and drawn in seconds |
 | [cad/fits.py](cad/fits.py) | The measured clearances (fits) every design takes its holes, slots and gaps from |
 | [hardware.md](hardware.md) | Screws, pins, motor, batteries: what each design uses and what is in the workshop |
 | [measurements.csv](measurements.csv) | Every caliper measurement of a printed part, the source of the fits |
