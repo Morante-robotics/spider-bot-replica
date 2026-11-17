@@ -36,7 +36,7 @@ https://github.com/user-attachments/assets/948dd098-af7a-4972-a0bd-290c17e0126f
 
 Smooth walls, no visible defects (Fig. 1).
 
-<img src="../images/purge-waste-box-1.jpg" width="360" alt="Purge waste bin">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/images/purge-waste-box-1.jpg?raw=true" width="360" alt="Purge waste bin">
 
 *Fig. 1 · The bin under the printer's purge chute.*
 

@@ -95,7 +95,7 @@ before cutting or drilling the parts.*
    | 4×AA holder, 2×2 stacked | 58 × 32 × 31 | No switch or cover |
 
 2. Measure the free space inside the body and try each part in it with
-   [`tools/fit_check.py`](../tools/fit_check.py). It slices the body every 1 mm upwards from the top of the base, keeps
+   [`tools/fit_check.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/tools/fit_check.py). It slices the body every 1 mm upwards from the top of the base, keeps
    the inside of the wall behind the eye block, and looks for a spot where the part lies flat. The author's screw
    posts are ignored, since the inside is redesigned. The base itself is a near-solid bowl, too shallow at the edges
    to help.
@@ -118,12 +118,12 @@ python3 tools/fit_check.py cad/carcass-jenscolt --scale 1.2 --clearance 2 --box 
 At 100 % the N20 fits with room to spare, but the holders with a switch do not (Fig. 1). The flat 4×AA holder
 would need 137 %. With 2 mm clearance the 4×AAA holder needs 118 %, and at 120 % it fits (Fig. 2).
 
-<img src="../cad/layout/images/fit-100.png" alt="What fits at 100 %">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/layout/images/fit-100.png?raw=true" alt="What fits at 100 %">
 
 *Fig. 1 · The free space inside the body at 100 % (grey), seen from above, with each holder tried in it. Only the
 stacked 4×AA (no switch) and the 2×AA fit.*
 
-<img src="../cad/layout/images/fit-120.png" width="640" alt="4×AAA holder and N20 at 120 %">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/layout/images/fit-120.png?raw=true" width="640" alt="4×AAA holder and N20 at 120 %">
 
 *Fig. 2 · At 120 %: the 4×AAA holder and the N20 motor fit, each with 2 mm clearance (dashed).*
 
@@ -195,7 +195,7 @@ Bambu Studio before: body 9 non-manifold edges; eye, small eye and sensor 3 each
 
 <table>
 <tr>
-<td width="50%"><img src="../cad/carcass-120/images/bambu-studio-import.png" alt="Repaired body in Bambu Studio"></td>
+<td width="50%"><img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/carcass-120/images/bambu-studio-import.png?raw=true" alt="Repaired body in Bambu Studio"></td>
 <td width="50%"><img src="../cad/carcass-jenscolt/images/bambu-studio-import.png" alt="Original body in Bambu Studio"></td>
 </tr>
 <tr>
@@ -204,7 +204,7 @@ Bambu Studio before: body 9 non-manifold edges; eye, small eye and sensor 3 each
 </tr>
 </table>
 
-<img src="../cad/carcass-120/images/parts.png" alt="Repaired parts at 120 %">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/carcass-120/images/parts.png?raw=true" alt="Repaired parts at 120 %">
 
 *Fig. 3 · The 5 repaired parts at 120 %, with their print sizes.*
 

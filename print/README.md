@@ -5,13 +5,13 @@ Basic, 0.20 mm Standard). Open one in Bambu Studio, check it and send it: **Slic
 
 | Plate | Parts | Time | PLA |
 |---|---|---|---|
-| [`test-leg-plate.3mf`](test-leg-plate.3mf) | [Test frame](../cad/test-frame/), middle leg (right), fork, crankshaft 2, [clearance block and pin](../cad/clearance-test/) | 1 h 28 min | 29.6 g |
-| [`test-frame-v2.3mf`](test-frame-v2.3mf) | Test frame v2 with a keeper for the crankshaft, the fork on M3 pins, and the leg, with the clearances from the block | 1 h 18 min | 25.6 g |
-| [`gear-train-test.3mf`](gear-train-test.3mf) | First gear train test: [spine](../cad/gear-train-test/) on its own, the 4 crankshafts and the 3 idlers (made with the earlier parts; the STLs it was built from have changed) | 47 min | 16.5 g |
-| [`gear-train-test-v2.3mf`](gear-train-test-v2.3mf) | Gear train test v2: spine on a foot, test cap, the 4 crankshafts and the 3 idlers | 1 h 19 min | 33.5 g |
-| [`test-cap-v2.3mf`](test-cap-v2.3mf) | The gear train test's cap on its own (upside down), to reprint just the cap | 13 min | 6.7 g |
-| [`base-v1.3mf`](base-v1.3mf) | [Base v1](../cad/base/), its cap (upside down) and the front block | 7 h 57 min | 140.4 g |
-| [`legs-forks-v1.3mf`](legs-forks-v1.3mf) | The 8 legs (front, middle × 2 and rear, right and left) and the 8 forks for base v1 | 2 h 30 min | 46.9 g |
+| [`test-leg-plate.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/test-leg-plate.3mf) | [Test frame](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/test-frame), middle leg (right), fork, crankshaft 2, [clearance block and pin](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/clearance-test) | 1 h 28 min | 29.6 g |
+| [`test-frame-v2.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/test-frame-v2.3mf) | Test frame v2 with a keeper for the crankshaft, the fork on M3 pins, and the leg, with the clearances from the block | 1 h 18 min | 25.6 g |
+| [`gear-train-test.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/gear-train-test.3mf) | First gear train test: [spine](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/gear-train-test) on its own, the 4 crankshafts and the 3 idlers (made with the earlier parts; the STLs it was built from have changed) | 47 min | 16.5 g |
+| [`gear-train-test-v2.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/gear-train-test-v2.3mf) | Gear train test v2: spine on a foot, test cap, the 4 crankshafts and the 3 idlers | 1 h 19 min | 33.5 g |
+| [`test-cap-v2.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/test-cap-v2.3mf) | The gear train test's cap on its own (upside down), to reprint just the cap | 13 min | 6.7 g |
+| [`base-v1.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/base-v1.3mf) | [Base v1](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/base), its cap (upside down) and the front block | 7 h 57 min | 140.4 g |
+| [`legs-forks-v1.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/legs-forks-v1.3mf) | The 8 legs (front, middle × 2 and rear, right and left) and the 8 forks for base v1 | 2 h 30 min | 46.9 g |
 
 ## Standard settings
 
@@ -25,9 +25,9 @@ with the reason, in its section below. A plate is committed once, for the versio
 
 One run with everything needed to turn one leg by hand and to learn which hole clearance this printer needs.
 
-![Prepare](images/prepare.png)
+![Prepare](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/images/prepare.png?raw=true)
 
-![Preview with supports](images/preview-supports.png)
+![Preview with supports](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/images/preview-supports.png?raw=true)
 
 **Settings changed from the presets:** supports on, **tree(auto)**, **On build plate only**. Build-plate-only keeps
 supports out of the holes and the leg's bore. Bambu Studio then warns about 2 regions of the leg it cannot support:
@@ -48,7 +48,7 @@ the top of the bore and the flared mouth inside the tube. Both are short bridges
    build plate only** ticked (checked on `test-frame-v2.3mf`: the GUI keeps them). **Slice plate**, check the preview,
    and save (⌘S).
 
-**Hardware for the test:** see [cad/test-frame/](../cad/test-frame/), plus a few spare M3 screws for the
+**Hardware for the test:** see [cad/test-frame/](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/test-frame), plus a few spare M3 screws for the
 clearance block's bottom row and its 3 tap holes.
 
 **After printing:** remove the supports. Then try the clearance block: the journal through the top holes, the
@@ -58,7 +58,7 @@ rebuild the parts before printing them.
 
 ## Gear train test
 
-The four crankshafts and three idler gears in the loose [spine](../cad/gear-train-test/), to check by hand that the gears mesh
+The four crankshafts and three idler gears in the loose [spine](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/gear-train-test), to check by hand that the gears mesh
 and all four shafts turn together, before printing [base v1](#base-v1). Same settings as the other plates; the
 crankshafts get tree supports.
 
@@ -66,7 +66,7 @@ crankshafts get tree supports.
 other, through the idler.
 
 **Assembly:** each idler between the walls on its screw (11 teeth at the front, 20 at the rear), then the
-crankshafts into their slots, front to rear, with the cranks as printed (see [cad/crankshafts/](../cad/crankshafts/)). The slots
+crankshafts into their slots, front to rear, with the cranks as printed (see [cad/crankshafts/](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/crankshafts)). The slots
 are open at the top, so hold the shafts down with a finger while turning crankshaft 1.
 
 ```
@@ -85,11 +85,11 @@ the cap prints upside down.
 **Hardware:** 5 × M3×12 socket head screws and 5 M3 nuts (3 as idler axles, 2 for the cap). 3 mm steel pins work
 better than screws as idler axles, if you have them.
 
-![Assembly of the gear train test v2](../cad/gear-train-test/images/gear-train-test-v2-assembly.png)
+![Assembly of the gear train test v2](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/gear-train-test/images/gear-train-test-v2-assembly.png?raw=true)
 
 *Left: the parts pulled apart, numbered by assembly step. Right: seen from the +X side with every crank level; the
 arrows show where each +X crank points. Made by
-[`cad/gear-train-test/assembly_figure.py`](../cad/gear-train-test/assembly_figure.py).*
+[`cad/gear-train-test/assembly_figure.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/gear-train-test/assembly_figure.py).*
 
 **Assembly:**
 
@@ -122,7 +122,7 @@ python3 ../tools/bambu_plate.py print/test-cap-v2.3mf cad/gear-train-test/out/te
 
 ## Base v1
 
-Base, cap and front block of [base v1](../cad/base/) on one plate, with the same settings as the test leg plate
+Base, cap and front block of [base v1](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/base) on one plate, with the same settings as the test leg plate
 (tree supports, on the build plate only).
 
 ```
@@ -136,7 +136,7 @@ The 8 legs and the 8 forks for [base v1](#base-v1), on one plate, with the same 
 supports, on the build plate only). The legs lie on their flat side, as on the test leg plate; the forks stand as
 modelled.
 
-<img src="images/legs-forks-v1-top.png" width="400" alt="The legs and forks plate seen from above">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/images/legs-forks-v1-top.png?raw=true" width="400" alt="The legs and forks plate seen from above">
 
 *The plate from above: the L-shaped legs nested into each other, the forks in a row at the back.*
 

@@ -6,9 +6,10 @@ robotics one robot at a time.
 Replica of the Spider-Bot from Avengers Campus: 8 legs moved by a single motor, LED eyes, and it walks as soon
 as it is switched on (no remote control).
 
-**Hardware plan:** no microcontroller. An N20 gear motor drives the leg mechanism and the LED eyes (on their own
-perfboard) light up, both powered by 4×AAA NiMH batteries in a holder with a built-in switch. 3D-printed in PLA at
-120 % of the base model's size.
+**Hardware plan:** no microcontroller. One small gear motor drives the leg mechanism and the LED eyes light up.
+Since 2026-11-17 the robot is being redesigned looks-first, with the toy as the reference: a smaller motor and
+smaller batteries (button cells, like the toy's) so the whole robot can shrink. The earlier design (N20 motor,
+4×AAA, 120 % scale) is kept in the [archive tag](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17).
 
 <img src="cad/carcass-jenscolt/images/jenscolt-photo-2.jpg" width="480" alt="Spidey-Bot by jenscolt, the model this replica starts from">
 
@@ -34,23 +35,15 @@ repeated. Its contents show where each step stands, and its **Open items** list 
 
 | Folder | What |
 |---|---|
-| [cad/carcass-jenscolt/](cad/carcass-jenscolt/) | Carcass base model by jenscolt, unmodified (CC BY-NC-SA) |
-| [cad/carcass-120/](cad/carcass-120/) | Carcass parts repaired (watertight) and scaled to 120 %: the base for cuts and holes (CC BY-NC-SA) |
-| [cad/layout/](cad/layout/) | What fits inside the body: battery holder and motor, print scale |
-| [cad/legs/](cad/legs/) | Legs and pivot forks, modelled in code (build123d), and the whole drive placed by the simulator's kinematics with a collision check over a full turn |
-| [cad/crankshafts/](cad/crankshafts/) | Four crankshafts with gears and the idlers that link them, with a 2D check of every mesh |
-| [cad/gear-train-test/](cad/gear-train-test/) | Gear train test: a stand-alone spine and cap for the crankshafts and idlers, with its `cad_verify` spec |
-| [cad/test-frame/](cad/test-frame/) | Test frame: a desk stand for one leg, its fork and a crankshaft, and the Onshape tutorial |
-| [cad/base/](cad/base/) | Base v1: the carcass base with a band that lifts the body, the spine built in, fork pockets and a cap over the crankshafts (CC BY-NC-SA) |
-| [cad/chassis/](cad/chassis/) | Chassis (base v2): the plan for the whole robot (motor seat, battery holder in the body, coupons), the drive module that carries the crankshafts and the motor, its bench tools and its `cad_verify` spec, with the layout, mass and figure scripts |
-| [cad/clearance-test/](cad/clearance-test/) | Block and pin to find the hole clearance this printer needs for turning and sliding fits |
-| [cad/](cad/) | The rules every design follows: axes, folder layout, what is kept in git; [`_template/`](cad/_template/) to start a new design; [`robot.py`](cad/robot.py), the robot master model (reference heights, carcass envelope, interfaces between designs, bought parts' sizes) |
+| [cad/carcass-jenscolt/](cad/carcass-jenscolt/) | Carcass model by jenscolt, unmodified (CC BY-NC-SA): the looks reference, legs included |
+| [cad/](cad/) | The rules every design follows: axes, folder layout, what is kept in git; [`_template/`](cad/_template/) to start a new design |
 | [cad/fits.py](cad/fits.py) | The measured clearances (fits) every design takes its holes, slots and gaps from |
 | [hardware.md](hardware.md) | Screws, pins, motor, batteries: what each design uses and what is in the workshop |
 | [measurements.csv](measurements.csv) | Every caliper measurement of a printed part, the source of the fits |
-| [print/](print/) | Bambu Studio projects ready to print, with time and filament |
-| [sim/](sim/) | Leg simulators: 2D foot paths of three leg types, the toy leg in 3D on the whole robot, and the N20 motor sizing |
-| [tools/](tools/) | Scripts: `cad_verify.py` checks a printed mechanism before it is printed (collisions, fits against the measured clearances, whether every part is held, whether a finger or tool reaches every pin and screw); `figures.py` draws assembly and measuring diagrams; `workshop_kit.py` makes the one-page assembly sheet for the bench; `bambu_plate.py` lays out and slices plates; `print_report.py` measures support per part; previews, mesh repair and figure scripts. Each explains itself in its docstring; `tools/tests/` keeps the checks honest |
+| [print/](print/) | Print settings for this printer |
+| [sim/](sim/) | The toy leg in 3D (`toy_leg_3d.py`, the chosen geometry in `toy_leg_3d_rows_cad.json`), 2D foot paths and the motor sizing |
+| [tools/](tools/) | Scripts: `cad_verify.py` checks a mechanism before it is printed; `figures.py` draws assembly and measuring diagrams; `workshop_kit.py` makes the assembly sheet for the bench; `bambu_plate.py` lays out and slices plates; `print_report.py` measures support per part; mesh repair and previews. `tools/tests/` keeps the checks honest |
+| [Archive](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17) | Everything up to the redesign: base v1, test rigs, gear train tests, chassis A–E, legs v1–v2, print plates. The build log links there |
 
 ## Run the code
 

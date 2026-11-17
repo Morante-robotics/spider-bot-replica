@@ -2,7 +2,7 @@
 
 Unmodified files of [Spidey-Bot](https://www.thingiverse.com/thing:5196618) by **jenscolt** (Thingiverse, January 2022), a
 static display model of the Avengers Campus Spider-Bot with room inside the body for lights. It is the starting point
-for the carcass. Repaired and scaled versions: [../carcass-120/](../carcass-120/).
+for the carcass. Repaired and scaled versions: [../carcass-120/](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/carcass-120).
 
 **License:** Creative Commons Attribution-NonCommercial-ShareAlike ([CC BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/4.0/)),
 see [LICENSE.txt](LICENSE.txt). Unlike the rest of the repo, these files and anything derived from them are
@@ -14,7 +14,7 @@ non-commercial and must keep this license.
 
 ![Assembled turntable](images/assembled-turntable.gif)
 
-Assembled with [`assemble_jenscolt.py`](../../tools/assemble_jenscolt.py): 224 × 154 × 118 mm. Body, base, sensor and
+Assembled with [`assemble_jenscolt.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/tools/assemble_jenscolt.py): 224 × 154 × 118 mm. Body, base, sensor and
 front legs are where the author placed them; eyes moved into their sockets; the other 6 legs placed approximately.
 
 ![All parts](images/parts.png)
@@ -36,11 +36,11 @@ Sizes at 100 % scale. For the full robot print 4 of each leg file (L and R) and 
 ## Notes
 
 - Every file has some mesh errors (non-manifold edges, reversed faces); Bambu Studio flags them on import. Repaired
-  versions (body, base, eyes, sensor) are in [../carcass-120/](../carcass-120/); the legs are not repaired.
+  versions (body, base, eyes, sensor) are in [../carcass-120/](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/carcass-120); the legs are not repaired.
 - The legs are static: no joints to move. They are a reference for the outer shape of the walking legs.
 - STL files are meshes: Onshape can import them as a reference but not edit them. Cuts and holes go in Bambu Studio
   (cut tool and negative parts); new parametric parts (chassis, crank, linkages) are designed in Onshape.
 - Thingiverse rejects scripted downloads (HTTP 403). Download by hand with **Download all files** on the thing page.
 - Images regenerated with [`../../tools/stl_preview.py`](../../tools/stl_preview.py):
   `python3 stl_preview.py images/parts.png *.stl` and `--elev -70` for the underside; turntable with
-  [`stl_turntable.py`](../../tools/stl_turntable.py) `images/assembled-turntable.gif spideybot_assembled.stl`.
+  [`stl_turntable.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/tools/stl_turntable.py) `images/assembled-turntable.gif spideybot_assembled.stl`.

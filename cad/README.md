@@ -9,7 +9,7 @@ the same axes and the same clearances. Set up the Python environment once from t
 | What | Rule |
 |---|---|
 | Units | Millimetres, degrees in arguments, radians inside the maths |
-| Axes | As the carcass ([carcass-120](carcass-120/)) and the [simulator](../sim/): **Z up**, **forward = −Y**, **+X = the robot's right** (the right legs' side) |
+| Axes | As the carcass ([carcass-120](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/carcass-120)) and the [simulator](../sim/): **Z up**, **forward = −Y**, **+X = the robot's right** (the right legs' side) |
 | Origin | The carcass's origin at 120 %; every design places its parts in this frame (`poses()` in its spec), and exports each part in its own print frame |
 | Crank angle | 0° = every crank level; it turns positive about +X |
 | Left and right | Seen from behind the robot, looking forward: as the robot's own right and left |
@@ -47,7 +47,7 @@ Designs that use another design's parameters import its `build.py` as a module (
 copy a value: with the repo root on `sys.path`, `from cad import design` and `C = design("crankshafts")`
 ([`__init__.py`](__init__.py)); a design loads its own `build.py` the same way. What several designs share (the
 simulator's geometry, hardware sizes, build123d helpers) is in [`common.py`](common.py). The robot master model,
-[`robot.py`](robot.py), holds the datums, the carcass envelope, the interfaces between designs and the bought parts'
+[`robot.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/robot.py), holds the datums, the carcass envelope, the interfaces between designs and the bought parts'
 sizes (catalogue values until they are measured): a design takes these numbers from it, never a copy.
 
 Geometry stays light: no cut or check runs against the carcass body's scan (102k triangles); `robot.carcass_proxy()`

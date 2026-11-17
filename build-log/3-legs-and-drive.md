@@ -54,13 +54,13 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
     toy's, and Morante rejected them: the legs are not traded for weight, so every other printed part is audited
     first and the legs come back with the grams it frees.
 
-<img src="../sim/images/drive-attempts.png" alt="The three drives tried, from above and from the side">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/drive-attempts.png?raw=true" alt="The three drives tried, from above and from the side">
 
 *The three drives tried, from above (top) and from the side (bottom). The grey box is the body; the grey stubs are
 the cranks; the loops are the paths of the feet. In 1, the inner arms cross the cranks of the other legs. In 2, the
 loops seen from the side are thin and upright: the feet go up and down but hardly forward. In 3, every arm reaches
 only its own crank and the loops lie along the ground. Made by
-[`tools/drive_attempts_figure.py`](../tools/drive_attempts_figure.py).*
+[`tools/drive_attempts_figure.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/tools/drive_attempts_figure.py).*
 
 ### Leg simulator and comparison
 
@@ -101,12 +101,12 @@ crank-rocker, so its crank turns fully. Jansen: crank = 15.
 
 #### Result
 
-<img src="../sim/images/foot-paths.png" alt="Foot paths">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/foot-paths.png?raw=true" alt="Foot paths">
 
 *Fig. 1 · The three legs at one crank angle (black squares are the fixed pivots) and the path of each foot over a
 full turn. The flat bottom of each loop is where the foot pushes the robot; the higher the loop, the higher the step.*
 
-<img src="../sim/images/legs.gif" alt="Legs animated">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/legs.gif?raw=true" alt="Legs animated">
 
 *Fig. 2 · The same three legs turning.*
 
@@ -178,7 +178,7 @@ pins half a turn apart.
 <details>
 <summary>How to reproduce</summary>
 
-Pivot centres ([cad/carcass-120/](../cad/carcass-120/) coordinates: z = height above the ground, forward = −Y), right
+Pivot centres ([cad/carcass-120/](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/carcass-120) coordinates: z = height above the ground, forward = −Y), right
 side, front to rear: (89.5, −32.2), (95.9, −12.6), (96.1, 2.9), (82.6, 31.1). The left ones are their mirror about
 x = 42.7 (the body axis). Measured by slicing `spideybot_base.stl` at z = 71 and 73 and subtracting the slice from
 its convex hull.
@@ -195,18 +195,18 @@ python3 sim/toy_leg_3d.py --search 3000 --only lateral/crank --json lateral-cran
 python3 sim/toy_leg_3d.py --params sim/toy_leg_3d.json --png sim/images/toy-3d-comparison.png --gif sim/images/toy-3d.gif
 ```
 
-The 6 best geometries are in [`sim/toy_leg_3d.json`](../sim/toy_leg_3d.json).
+The 6 best geometries are in [`sim/toy_leg_3d.json`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/toy_leg_3d.json).
 
 </details>
 
 #### Result
 
-<img src="../sim/images/toy-3d-comparison.png" alt="Toy leg in 3D, best geometry of each combination">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/toy-3d-comparison.png?raw=true" alt="Toy leg in 3D, best geometry of each combination">
 
 *Fig. 1 · The best robot for each combination, from above (top row) and from the side (bottom row). The grey box is
 the body and the loops are the foot paths. The two colours are the two sides.*
 
-<img src="../sim/images/toy-3d.gif" alt="Toy leg in 3D, animated">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/toy-3d.gif?raw=true" alt="Toy leg in 3D, animated">
 
 *Fig. 2 · The six combinations walking.*
 
@@ -275,7 +275,7 @@ Lateral axle, leg sliding at the crank (taken in the next entry, once one motor 
    its 4 cranks per side in any order, mirrored on the left. The two gait groups are pins half a turn apart on the
    same shaft.
 2. Keep the crankshaft below the battery holder and inside the base. The holder (64 × 49 × 16 mm) fills almost the
-   whole body ([cad/layout/](../cad/layout/)), so the cranks must stay below it, inside the base with a 2 mm wall.
+   whole body ([cad/layout/](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/layout)), so the cranks must stay below it, inside the base with a 2 mm wall.
 3. Use stricter rules: legs are 5 mm thick, so every pair of legs on a side keeps 6 mm between centre lines,
    including inside the body. Footprint at least 240 × 165 mm, close to the original's look.
 4. Search again: the shaft with the leg sliding at the crank (3 seeds) and at the body, plus, for reference, one
@@ -293,7 +293,7 @@ python3 sim/toy_leg_3d.py --strict --search 3000 --seed 3 --only shaft/crank --j
 python3 sim/toy_leg_3d.py --params sim/toy_leg_3d_strict.json --png sim/images/toy-3d-strict.png --gif sim/images/toy-3d-strict.gif
 ```
 
-Best results: [`sim/toy_leg_3d_strict.json`](../sim/toy_leg_3d_strict.json). Best crankshaft geometry (sliding at
+Best results: [`sim/toy_leg_3d_strict.json`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/toy_leg_3d_strict.json). Best crankshaft geometry (sliding at
 crank): r 5.1, Y0 −12.9, H −6.4 (crank axle 60 mm above the ground), cranks at 6, 16, 26 and 36 mm from the body
 axis (front leg innermost), arm 67.4, bend 114°, sweep −15°, shin 77.1 mm. Slide 10 mm, pivot swing 15° each way,
 crank pin 2–17° off the leg's axis. The other two seeds gave strides of 9 and 7 mm.
@@ -302,12 +302,12 @@ crank pin 2–17° off the leg's axis. The other two seeds gave strides of 9 and
 
 #### Result
 
-<img src="../sim/images/toy-3d-strict.png" alt="Toy leg on one crankshaft">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/toy-3d-strict.png?raw=true" alt="Toy leg on one crankshaft">
 
 *Fig. 1 · The best layouts with real leg thickness, from above and from the side. In the top view, notice how the
 inner arms converge from the notches towards the shaft: that is where they get too close.*
 
-<img src="../sim/images/toy-3d-strict.gif" alt="Toy leg on one crankshaft, animated">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/toy-3d-strict.gif?raw=true" alt="Toy leg on one crankshaft, animated">
 
 *Fig. 2 · The same, walking.*
 
@@ -379,13 +379,13 @@ python3 sim/toy_leg_3d.py --strict --search 3000 --seed 1 --only shaft/crank --j
 python3 sim/toy_leg_3d.py --params sim/toy_leg_3d_shaft_check.json --png sim/images/toy-3d-shaft-check.png
 ```
 
-Results: [`sim/toy_leg_3d_shaft_check.json`](../sim/toy_leg_3d_shaft_check.json).
+Results: [`sim/toy_leg_3d_shaft_check.json`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/toy_leg_3d_shaft_check.json).
 
 </details>
 
 #### Result
 
-<img src="../sim/images/toy-3d-shaft-check.png" alt="Crankshaft searches with the arm-to-crankshaft rule">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/toy-3d-shaft-check.png?raw=true" alt="Crankshaft searches with the arm-to-crankshaft rule">
 
 *Fig. 1 · The five searches with the new rule. To avoid the cranks, the search shrinks the stride to almost
 nothing, and still fails.*
@@ -436,18 +436,18 @@ python3 sim/toy_leg_3d.py --strict --search 3000 --seed 1 --only sides/crank --j
 python3 sim/toy_leg_3d.py --params sim/toy_leg_3d_sides.json --png sim/images/toy-3d-sides.png --gif sim/images/toy-3d-sides.gif
 ```
 
-The best three: [`sim/toy_leg_3d_sides.json`](../sim/toy_leg_3d_sides.json).
+The best three: [`sim/toy_leg_3d_sides.json`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/toy_leg_3d_sides.json).
 
 </details>
 
 #### Result
 
-<img src="../sim/images/toy-3d-sides.png" alt="Two side crankshafts">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/toy-3d-sides.png?raw=true" alt="Two side crankshafts">
 
 *Fig. 1 · Two side crankshafts. In the side view the foot loops are thin vertical lines: the feet go up and down
 but hardly move forward.*
 
-<img src="../sim/images/toy-3d-sides.gif" alt="Two side crankshafts, animated">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/toy-3d-sides.gif?raw=true" alt="Two side crankshafts, animated">
 
 *Fig. 2 · The same, walking: the legs move in and out instead of forward.*
 
@@ -513,18 +513,18 @@ python3 sim/toy_leg_3d.py --strict --search 3000 --seed 1 --only rows/crank --js
 python3 sim/toy_leg_3d.py --params sim/toy_leg_3d_rows.json --png sim/images/toy-3d-rows.png --gif sim/images/toy-3d-rows.gif
 ```
 
-The best three: [`sim/toy_leg_3d_rows.json`](../sim/toy_leg_3d_rows.json).
+The best three: [`sim/toy_leg_3d_rows.json`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/toy_leg_3d_rows.json).
 
 </details>
 
 #### Result
 
-<img src="../sim/images/toy-3d-rows.png" alt="Four lateral crankshafts">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/toy-3d-rows.png?raw=true" alt="Four lateral crankshafts">
 
 *Fig. 1 · Four lateral crankshafts. In the side view the foot loops lie along the ground: the feet move forward.
 The cranks (short stubs near the body axis in the top view) stay clear of the other legs.*
 
-<img src="../sim/images/toy-3d-rows.gif" alt="Four lateral crankshafts, animated">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/toy-3d-rows.gif?raw=true" alt="Four lateral crankshafts, animated">
 
 *Fig. 2 · The same, walking.*
 
@@ -553,12 +553,12 @@ The cranks (short stubs near the body axis in the top view) stay clear of the ot
 #### Decisions
 
 **Four lateral crankshafts, leg sliding at the crank, keeping the 3 mm bob limit:** the best geometry above (the
-first entry in [`sim/toy_leg_3d_rows.json`](../sim/toy_leg_3d_rows.json)). The three options compared:
+first entry in [`sim/toy_leg_3d_rows.json`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/toy_leg_3d_rows.json)). The three options compared:
 
-<img src="../sim/images/drive-options.gif" width="640" alt="The three options compared">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/drive-options.gif?raw=true" width="640" alt="The three options compared">
 
 *Fig. 3 · Side view of one leg for each option, with the parts each needs. A and B are simulated; C is a sketch
-([`tools/drive_options_gif.py`](../tools/drive_options_gif.py)).*
+([`tools/drive_options_gif.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/tools/drive_options_gif.py)).*
 
 | | A · Four shafts, 3 mm bob (chosen) | B · Four shafts, 6 mm bob | C · Cam toy |
 |---|---|---|---|
@@ -588,10 +588,10 @@ fallback. The simulator cannot represent it (its feet slide), so it would be tes
 2. **Make the geometry buildable.** In the chosen geometry a shaft's two cranks were 12 mm apart, with no room for a
    gear and two bearing walls between them. The shafts were also so high that a gear could only be 4 mm in radius
    under the battery holder. A new search with these limits gives 10 mm per half turn and 4.6 mm of bob (Fig. 1).
-3. **Model the parts** in `cad/drive/build.py` (since split into [`cad/legs/`](../cad/legs/), [`cad/crankshafts/`](../cad/crankshafts/), [`cad/gear-train-test/`](../cad/gear-train-test/) and [`cad/test-frame/`](../cad/test-frame/)): the leg (3 lengths × 2 sides), the pivot fork,
+3. **Model the parts** in `cad/drive/build.py` (since split into [`cad/legs/`](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/legs), [`cad/crankshafts/`](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/crankshafts), [`cad/gear-train-test/`](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/gear-train-test) and [`cad/test-frame/`](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/test-frame)): the leg (3 lengths × 2 sides), the pivot fork,
    one-piece crankshafts (gear, journals, cranks and balls), idler gears, the spine that holds them, and a test
    frame. The gears are standard involute gears, module 1.
-4. **Check collisions** with [`cad/legs/check.py`](../cad/legs/check.py): it places every part as the simulator
+4. **Check collisions** with [`cad/legs/check.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/legs/check.py): it places every part as the simulator
    moves it, every 30°, and measures how much each pair overlaps. Fix and repeat (table below).
 5. **Make the STLs watertight.** The CAD kernel leaves a hairline gap where a sphere meets a box; `build.py` closes
    it. Bambu Studio: `manifold = yes` for all 17 files.
@@ -608,11 +608,11 @@ python3 sim/toy_leg_3d.py --strict --search 3000 --seed 2 --only rows/crank --js
 Limits added to the `rows` search: cranks at least 12 mm from the body axis (XC ≥ 12) and shafts at least 8 mm
 below the pivots (H ≤ −8). 4 seeds; seed 2 (legs 5.9 mm apart, 30 mm under the base) is in
 [`sim/toy_leg_3d_rows_cad.json`](../sim/toy_leg_3d_rows_cad.json). Parts and how they fit:
-[cad/legs/](../cad/legs/) and [cad/crankshafts/](../cad/crankshafts/).
+[cad/legs/](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/legs) and [cad/crankshafts/](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/crankshafts).
 
 </details>
 
-<img src="../sim/images/toy-3d-rows-cad.png" width="480" alt="Geometry used for the CAD">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/toy-3d-rows-cad.png?raw=true" width="480" alt="Geometry used for the CAD">
 
 *Fig. 1 · The geometry used for the CAD, with room for the gears.*
 
@@ -629,12 +629,12 @@ What the collision check found, in order:
 
 #### Result
 
-<img src="../cad/legs/images/parts.png" width="560" alt="Parts">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/legs/images/parts.png?raw=true" width="560" alt="Parts">
 
 *Fig. 2 · The drive parts: three leg lengths, the pivot fork, a crankshaft, an idler gear, the spine, the test
 frame, and the whole robot assembled.*
 
-<img src="../cad/legs/images/assembly.gif" width="480" alt="Assembly">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/legs/images/assembly.gif?raw=true" width="480" alt="Assembly">
 
 *Fig. 3 · All eight legs turning over a full crank turn, with no collisions.*
 
@@ -658,12 +658,12 @@ frame, and the whole robot assembled.*
 
 > **In short.** One leg on its test frame was assembled in Onshape from the exported STEP files, with joints
 > («mates») that let it move as the real one will, and animated through a full turn. It moves as expected. A
-> step-by-step tutorial with pictures is in [cad/test-frame/onshape.md](../cad/test-frame/onshape.md).
+> step-by-step tutorial with pictures is in [cad/test-frame/onshape.md](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/test-frame/onshape.md).
 
 #### Steps
 
-Full tutorial, with a picture of the edges to click for each mate: [cad/test-frame/onshape.md](../cad/test-frame/onshape.md)
-(pictures made by [`cad/test-frame/onshape_figures.py`](../cad/test-frame/onshape_figures.py)). In short:
+Full tutorial, with a picture of the edges to click for each mate: [cad/test-frame/onshape.md](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/test-frame/onshape.md)
+(pictures made by [`cad/test-frame/onshape_figures.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/test-frame/onshape_figures.py)). In short:
 
 1. Import `test-frame`, `crankshaft-2`, `leg-middle-right` and `pivot` (STEP) into one document. Insert the test
    frame at the origin and **Fix** it, so the assembly uses the robot's coordinates.
@@ -677,7 +677,7 @@ Document (public): [Spider-Bot drive](https://cad.onshape.com/documents/07632681
 
 #### Result
 
-<img src="../cad/test-frame/images/onshape-animation.gif" width="640" alt="The assembly animated in Onshape">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/test-frame/images/onshape-animation.gif?raw=true" width="640" alt="The assembly animated in Onshape">
 
 *Fig. 1 · The assembly animated in Onshape: turning the crankshaft moves the fork, the leg and the ball together.*
 
@@ -696,7 +696,7 @@ Document (public): [Spider-Bot drive](https://cad.onshape.com/documents/07632681
 
 #### Steps
 
-1. **Clearance test** ([`cad/clearance-test/`](../cad/clearance-test/), `build.py`): a block with sideways holes for
+1. **Clearance test** ([`cad/clearance-test/`](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/clearance-test), `build.py`): a block with sideways holes for
    the journal (Ø4.0), the ball (Ø3.6) and an M3 screw (Ø3.0), each 0.1, 0.2, 0.3 and 0.4 mm larger. It also has
    3 holes for M3 screws to cut their own thread (Ø2.3 / 2.5 / 2.7), and a pin with a Ø4.0 journal and a Ø3.6 ball,
    printed lying down like a crankshaft (Fig. 1).
@@ -711,7 +711,7 @@ Document (public): [Spider-Bot drive](https://cad.onshape.com/documents/07632681
    Supports are tree supports on the build plate only, so none go into the holes or the leg's bore. Then open it in
    Bambu Studio, check the support settings, slice and save. Details: [print/README.md](../print/README.md).
 
-<img src="../cad/clearance-test/images/parts.png" width="560" alt="Clearance test">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/clearance-test/images/parts.png?raw=true" width="560" alt="Clearance test">
 
 *Fig. 1 · The clearance block and its test pin.*
 
@@ -719,8 +719,8 @@ Document (public): [Spider-Bot drive](https://cad.onshape.com/documents/07632681
 
 <table>
 <tr>
-<td width="50%"><img src="../print/images/prepare.png" alt="Plate in Bambu Studio"></td>
-<td width="50%"><img src="../print/images/preview-supports.png" alt="Sliced, with supports"></td>
+<td width="50%"><img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/images/prepare.png?raw=true" alt="Plate in Bambu Studio"></td>
+<td width="50%"><img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/images/preview-supports.png?raw=true" alt="Sliced, with supports"></td>
 </tr>
 <tr>
 <td><em>Fig. 2 · The plate in Bambu Studio: test frame, leg, fork, crankshaft, clearance block and pin.</em></td>
@@ -728,7 +728,7 @@ Document (public): [Spider-Bot drive](https://cad.onshape.com/documents/07632681
 </tr>
 </table>
 
-- [`print/test-leg-plate.3mf`](../print/test-leg-plate.3mf): 1 h 28 min, 29.6 g of PLA (2.5 g of it support).
+- [`print/test-leg-plate.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/test-leg-plate.3mf): 1 h 28 min, 29.6 g of PLA (2.5 g of it support).
 - Bambu Studio warns about 2 areas of the leg it cannot support. Both are the top of the 3.8 mm bore and its flared
   mouth inside the tube (9.8 mm²). They print as bridges.
 - The collision check of the whole robot with the reshaped leg finds no collisions over a full turn.
@@ -758,16 +758,16 @@ each 0.1–0.4 mm larger, to find out which one turns freely.
 
 #### Steps
 
-1. Print [`print/test-leg-plate.3mf`](../print/test-leg-plate.3mf). This was the first version, with the leg 5.6 mm wide.
+1. Print [`print/test-leg-plate.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/test-leg-plate.3mf). This was the first version, with the leg 5.6 mm wide.
 2. Remove the supports, which are on the crankshaft and on one side of the leg (Fig. 2–3).
-3. Assemble following the [diagram](../cad/test-frame/README.md): the leg in the fork on an M3×16 and a nut, the fork between
+3. Assemble following the [diagram](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/test-frame/README.md): the leg in the fork on an M3×16 and a nut, the fork between
    the frame's two arms, and the crankshaft in its slots with the ball inside the leg's tube (Fig. 4).
 4. Push the clearance pin into each hole of the block and note how it turns (Fig. 6).
 
 <table>
 <tr>
-<td width="50%"><img src="../images/test-leg-print-timelapse.gif" alt="Timelapse of the test plate printing"></td>
-<td width="50%"><img src="../images/test-leg-print-1.jpg" alt="Printed parts on the bed"></td>
+<td width="50%"><img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/images/test-leg-print-timelapse.gif?raw=true" alt="Timelapse of the test plate printing"></td>
+<td width="50%"><img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/images/test-leg-print-1.jpg?raw=true" alt="Printed parts on the bed"></td>
 </tr>
 <tr>
 <td><em>Fig. 1 · Printing <a href="../print/test-leg-plate.3mf"><code>print/test-leg-plate.3mf</code></a> (1 h 28 min,
@@ -776,8 +776,8 @@ each 0.1–0.4 mm larger, to find out which one turns freely.
 leg lying flat.</em></td>
 </tr>
 <tr>
-<td width="50%"><img src="../images/test-leg-print-2.jpg" alt="Printed parts off the bed, supports still on"></td>
-<td width="50%"><img src="../images/test-leg-print-3.jpg" alt="First assembly"></td>
+<td width="50%"><img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/images/test-leg-print-2.jpg?raw=true" alt="Printed parts off the bed, supports still on"></td>
+<td width="50%"><img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/images/test-leg-print-3.jpg?raw=true" alt="First assembly"></td>
 </tr>
 <tr>
 <td><em>Fig. 3 · Off the bed, supports still on. On the frame, the two thin walls hold the crankshaft and the tall
@@ -786,8 +786,8 @@ post on the right holds the fork between its arms.</em></td>
 On the left, the clearance pin in its block.</em></td>
 </tr>
 <tr>
-<td width="50%"><img src="../images/test-leg-print-4.jpg" alt="The fork and the half-open arm"></td>
-<td width="50%"><img src="../cad/clearance-test/images/result-1.jpg" alt="Clearance block"></td>
+<td width="50%"><img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/images/test-leg-print-4.jpg?raw=true" alt="The fork and the half-open arm"></td>
+<td width="50%"><img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/clearance-test/images/result-1.jpg?raw=true" alt="Clearance block"></td>
 </tr>
 <tr>
 <td><em>Fig. 5 · The fork has to be held by hand. The frame's upper arm (top left) ends in a half-open «C», so the
@@ -819,7 +819,7 @@ used for every hole was far too tight for the printed ones.
 
 #### Decisions and fixes
 
-All of these are changes to `cad/drive/build.py` (since split into [`cad/legs/`](../cad/legs/), [`cad/crankshafts/`](../cad/crankshafts/), [`cad/gear-train-test/`](../cad/gear-train-test/) and [`cad/test-frame/`](../cad/test-frame/)):
+All of these are changes to `cad/drive/build.py` (since split into [`cad/legs/`](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/legs), [`cad/crankshafts/`](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/crankshafts), [`cad/gear-train-test/`](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/gear-train-test) and [`cad/test-frame/`](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/test-frame)):
 
 - **Two clearances instead of one.** `CLR` = 0.5 mm for a printed part in a printed hole (journals, ball in the
   bore) and `CLR_STEEL` = 0.3 mm for a steel screw or pin in a printed hole. 0.5 is one step past the block's
@@ -831,10 +831,10 @@ All of these are changes to `cad/drive/build.py` (since split into [`cad/legs/`]
   A **keeper** (green in Fig. 7) now closes the slots from above and is held by two M3×12 into nuts.
 - **Nylon lock nut** on the leg's M3×16, so the knocks do not loosen it.
 
-<img src="../cad/test-frame/images/test-frame-screws.png" alt="Where every screw goes">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/test-frame/images/test-frame-screws.png?raw=true" alt="Where every screw goes">
 
 *Fig. 7 · The redesigned test frame, exploded. Grey: frame. Orange: fork. Red: leg. Blue: crankshaft. Green: the
-new keeper. Made by [`cad/test-frame/screws_figure.py`](../cad/test-frame/screws_figure.py).*
+new keeper. Made by [`cad/test-frame/screws_figure.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/test-frame/screws_figure.py).*
 
 <details>
 <summary>Collision check of the new parts</summary>
@@ -855,15 +855,15 @@ than the bore's 0.25 mm a side: to look into before printing the rear legs.
 
 #### Steps
 
-1. Print [`print/test-frame-v2.3mf`](../print/test-frame-v2.3mf): frame, keeper, fork and leg (Fig. 1). The crankshaft
+1. Print [`print/test-frame-v2.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/test-frame-v2.3mf): frame, keeper, fork and leg (Fig. 1). The crankshaft
    from the first print is kept.
-2. Assemble following the [diagram](../cad/test-frame/README.md) (Fig. 7 of the [previous entry](#test-leg-first-assembly-and-clearance-result)).
+2. Assemble following the [diagram](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/test-frame/README.md) (Fig. 7 of the [previous entry](#test-leg-first-assembly-and-clearance-result)).
 3. Turn the crankshaft by hand (Fig. 2).
 
 <table>
 <tr>
-<td width="50%"><img src="../images/test-leg-v2-print-timelapse.gif" alt="Timelapse of the v2 plate printing"></td>
-<td width="50%"><img src="../images/test-leg-v2-turning.gif" alt="The leg turning by hand on the new frame"></td>
+<td width="50%"><img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/images/test-leg-v2-print-timelapse.gif?raw=true" alt="Timelapse of the v2 plate printing"></td>
+<td width="50%"><img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/images/test-leg-v2-turning.gif?raw=true" alt="The leg turning by hand on the new frame"></td>
 </tr>
 <tr>
 <td><em>Fig. 1 · Printing <a href="../print/test-frame-v2.3mf"><code>print/test-frame-v2.3mf</code></a> (1 h 18 min,
@@ -922,7 +922,7 @@ the carcass base's own mesh, by adding and cutting solids in code.
 4. **Choose a way out.** Three options were drawn: a new fork open at the top on a single screw from below, with
    the base 4 mm taller; a taller band that keeps the fork already tested; or eight notches cut into the body's lower
    edge. Morante chose the band.
-5. **Model base v1** in [`cad/base/build.py`](../cad/base/build.py), from the carcass base:
+5. **Model base v1** in [`cad/base/build.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/base/build.py), from the carcass base:
    - the bowl hollowed to 2 mm walls under a 2 mm deck at the old seam;
    - the **band**: the base's outline, with a lobe round each fork, up to the body's new height. The body, the front
      block inside its face and the two pegs that locate it go up 18.7 mm. The side lips (now inside the band) and
@@ -933,7 +933,7 @@ the carcass base's own mesh, by adding and cutting solids in code.
    - the legs' path cut with 0.8 mm of room;
    - an opening in the deck over the spine, closed by a **cap** whose tongues hold the crankshafts in their slots
      (Fig. 3).
-6. **Check over a full turn** with [`cad/base/check.py`](../cad/base/check.py): legs, forks, crankshafts and idlers
+6. **Check over a full turn** with [`cad/base/check.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/base/check.py): legs, forks, crankshafts and idlers
    against the base, the cap, the front block and the lifted body, every 10°. Fix and repeat (table below).
 7. **Print plate** with [`tools/bambu_plate.py`](../tools/bambu_plate.py): base, cap (upside down) and front block,
    tree supports on the build plate only.
@@ -956,7 +956,7 @@ python3 ../tools/bambu_plate.py print/base-v1.3mf cad/base/out/base-v1.stl cad/b
 
 Band height: the upper screw (M3×10) goes 3 mm into the fork and its head (3.2 mm) sits flush with the band's top:
 fork top (z 83.0) − 3 + 10 + 3.2, plus 0.25 mm, is z 93.5, 18.7 mm above the old seam (z 74.8). Parts and assembly:
-[cad/base/](../cad/base/).
+[cad/base/](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/base).
 
 </details>
 
@@ -971,23 +971,23 @@ What the check found, in order:
 
 #### Result
 
-<img src="../cad/base/images/section-leg.png" alt="Cut through a middle leg, before and after">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/base/images/section-leg.png?raw=true" alt="Cut through a middle leg, before and after">
 
 *Fig. 1 · Cut through a middle leg, along it. Left: the carcass as downloaded: the fork (green) goes into the body
 (red). Right: base v1, with the body on the band. The two swivel screws are purple: the upper one comes down through
 the band and the lower one up through the boss. Black: the leg at its highest and lowest.*
 
-<img src="../cad/base/images/base-v1.png" alt="Base v1 from above and below">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/base/images/base-v1.png?raw=true" alt="Base v1 from above and below">
 
 *Fig. 2 · Base v1. From above: the band with a pocket for each fork, the deck and the cap (blue). From below: the
 bowl, the keel along the middle and the bosses under the forks.*
 
-<img src="../cad/base/images/section-spine.png" alt="Cut along the spine">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/base/images/section-spine.png?raw=true" alt="Cut along the spine">
 
 *Fig. 3 · Cut along the spine. The gears (red) turn in pockets in the bowl. The 20-tooth idler goes 2.4 mm below the
 original bowl, inside the keel. The cap (blue) has a tongue down each journal slot.*
 
-<img src="../cad/base/images/band.png" alt="The robot before and after">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/base/images/band.png?raw=true" alt="The robot before and after">
 
 *Fig. 4 · From the side: the carcass as downloaded, and with the body on the band. The front block (the face
 behind the eyes) sits inside the body in both. Base v1 is not shaped for looks yet: the band does not follow the
@@ -997,10 +997,10 @@ body's outline, and the screws and fork bosses show.*
 |---|---|
 | Overlaps over a full turn (every 10°) | None |
 | Closest pairs | Journals in their slots 0.25 mm a side, idlers 0.45 mm, legs 0.65 mm or more: the designed clearances |
-| [`print/base-v1.3mf`](../print/base-v1.3mf) | 7 h 57 min, 140.4 g of PLA (keel rebuilt for [gear train v2](#gear-train-v2-in-cad), cap for [the test cap fix](#gear-train-test-v2-the-cap)) |
+| [`print/base-v1.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/base-v1.3mf) | 7 h 57 min, 140.4 g of PLA (keel rebuilt for [gear train v2](#gear-train-v2-in-cad), cap for [the test cap fix](#gear-train-test-v2-the-cap)) |
 | Hardware | 16 × M3×10 + nuts (fork swivels), 3 × M3×10 + nuts (cap) |
 
-Full list: [`cad/base/check-result.txt`](../cad/base/check-result.txt).
+Full list: [`cad/base/check-result.txt`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/base/check-result.txt).
 
 #### Decisions
 
@@ -1035,15 +1035,15 @@ this test, without the base's cap, and the idlers turn on M3 screws used as axle
 
 #### Steps
 
-1. Print [`print/gear-train-test.3mf`](../print/gear-train-test.3mf): spine, 4 crankshafts, 3 idlers (Fig. 1).
+1. Print [`print/gear-train-test.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/gear-train-test.3mf): spine, 4 crankshafts, 3 idlers (Fig. 1).
 2. Put each idler between the spine's walls and push its screw through both walls and the idler.
 3. Drop the crankshafts into their slots from above, with the cranks as printed.
 4. Turn one crankshaft by hand (Fig. 2).
 
 <table>
 <tr>
-<td width="50%"><img src="../images/gear-train-test-print-timelapse.gif" alt="Timelapse of the gear train test printing"></td>
-<td width="50%"><img src="../images/gear-train-test-turning.gif" alt="Turning the gear train by hand"></td>
+<td width="50%"><img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/images/gear-train-test-print-timelapse.gif?raw=true" alt="Timelapse of the gear train test printing"></td>
+<td width="50%"><img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/images/gear-train-test-turning.gif?raw=true" alt="Turning the gear train by hand"></td>
 </tr>
 <tr>
 <td><em>Fig. 1 · Printing <a href="../print/gear-train-test.3mf"><code>print/gear-train-test.3mf</code></a>: the spine
@@ -1061,7 +1061,7 @@ when the teeth push against each other. The three screws sticking up are the idl
 | Crankshafts in their slots | Stay in | Lift out: the slots are open at the top and nothing closes them in this test |
 
 **Why.** A new, general check, [`tools/cad_verify.py`](../tools/cad_verify.py), was run on this exact test
-([spec](../cad/gear-train-test/verify.py), [full report](../cad/gear-train-test/verify-result.txt)). It turns every gear at its
+([spec](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/gear-train-test/verify.py), [full report](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/gear-train-test/verify-result.txt)). It turns every gear at its
 real angle and pushes every moving part in 26 directions to see what stops it. It found three faults:
 
 1. **Nothing holds the crankshafts down.** All four can rise 3 mm or more. In the robot the base's cap closes the
@@ -1074,14 +1074,14 @@ real angle and pushes every moving part in 26 directions to see what stops it. I
 3. **No backlash.** The gears sit exactly at their theoretical distance, so even meshing teeth touch on both sides
    (0.00 mm gap). Printed teeth are never exact, and teeth without play bind.
 
-<img src="../cad/crankshafts/images/gear-phase.png" alt="Each idler at its best angle between its two crankshafts">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/crankshafts/images/gear-phase.png?raw=true" alt="Each idler at its best angle between its two crankshafts">
 
 *Fig. 3 · Top row: each idler (yellow) turned to the angle that fits best between its two crankshafts (blue), with
 the cranks at their designed angles. Red: tooth inside tooth. Idlers 1 and 2 cannot fit both neighbours; idler 3
 can. The bottom row is the fix, in [Gear train v2 in CAD](#gear-train-v2-in-cad). Made by
-[`cad/crankshafts/gear_phase_figure.py`](../cad/crankshafts/gear_phase_figure.py).*
+[`cad/crankshafts/gear_phase_figure.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/crankshafts/gear_phase_figure.py).*
 
-**Why the earlier check missed it.** [`cad/legs/check.py`](../cad/legs/check.py) skipped every pair of gears, as
+**Why the earlier check missed it.** [`cad/legs/check.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/legs/check.py) skipped every pair of gears, as
 «touching on purpose», and left the idlers at one angle while the crankshafts turned. It never asked what holds
 each part in place either.
 
@@ -1132,7 +1132,7 @@ of both neighbours line up with the idler's gaps.
 #### Steps
 
 1. Gear offsets: 0°, 28.1°, 21.5° and 1.3° for crankshafts 1 to 4, computed in `gear_offsets()` in
-   [`cad/crankshafts/build.py`](../cad/crankshafts/build.py).
+   [`cad/crankshafts/build.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/crankshafts/build.py).
 2. Idlers: 12, 12 and 20 teeth (were 11, 10 and 20). Fewer than 12 teeth would need a modified tooth shape.
    Idlers 1 and 2 are now the same part.
 3. Backlash: every pair of gears 0.275 mm further apart than in theory (`BACKLASH` = 0.2 mm). The crankshaft gears
@@ -1148,7 +1148,7 @@ of both neighbours line up with the idler's gaps.
 8. Check with [`tools/cad_verify.py`](../tools/cad_verify.py) every 5°, and a 2D gear check every 1°, then the
    whole drive against base v1, its cap and the body every 10°.
 
-<img src="../cad/gear-train-test/images/gear-train-test-v2-parts.png" alt="The parts of the gear train test v2">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/gear-train-test/images/gear-train-test-v2-parts.png?raw=true" alt="The parts of the gear train test v2">
 
 *Fig. 1 · The parts of the test. The spine has a foot and an M3 nut slot at each end; the cap's tongues go down the
 journal slots. Each crankshaft is different: look at where its cranks point compared with its gear teeth. Made by
@@ -1160,11 +1160,11 @@ The bottom row of Fig. 3 in [Gear train test](#gear-train-test) shows every idle
 
 | Check | Result |
 |---|---|
-| [`verify-result.txt`](../cad/gear-train-test/verify-result.txt): integrity, motion, gears, what holds each part, assembly order | PASS, 0 failures, 0 warnings |
-| [`check-gear-train.txt`](../cad/crankshafts/check-gear-train.txt): every mesh, every 1° | No tooth in tooth; backlash 0.21–0.22 mm |
+| [`verify-result.txt`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/gear-train-test/verify-result.txt): integrity, motion, gears, what holds each part, assembly order | PASS, 0 failures, 0 warnings |
+| [`check-gear-train.txt`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/crankshafts/check-gear-train.txt): every mesh, every 1° | No tooth in tooth; backlash 0.21–0.22 mm |
 | Crankshafts and idlers held | Only spin is free; at most 0.25 mm play (journals), 0.45 mm (idlers along their axle) |
-| [Base v1](../cad/base/check-result.txt) and [whole drive](../cad/legs/check-result.txt) over a full turn | No overlaps; closest pairs are the designed clearances |
-| [`print/gear-train-test-v2.3mf`](../print/gear-train-test-v2.3mf) | 1 h 20 min, 33.7 g of PLA (1 h 19 min, 33.5 g with [the new cap](#gear-train-test-v2-the-cap)) |
+| [Base v1](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/base/check-result.txt) and [whole drive](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/legs/check-result.txt) over a full turn | No overlaps; closest pairs are the designed clearances |
+| [`print/gear-train-test-v2.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/gear-train-test-v2.3mf) | 1 h 20 min, 33.7 g of PLA (1 h 19 min, 33.5 g with [the new cap](#gear-train-test-v2-the-cap)) |
 
 <details>
 <summary>How to reproduce</summary>
@@ -1209,20 +1209,20 @@ as an overlap.
 
 #### Steps
 
-1. Print [`print/gear-train-test-v2.3mf`](../print/gear-train-test-v2.3mf) and assemble it as in
+1. Print [`print/gear-train-test-v2.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/gear-train-test-v2.3mf) and assemble it as in
    [print/README](../print/README.md#gear-train-test-v2) (Fig. 1).
 2. Turn crankshaft 1 by its crank, first without the cap, then with it.
 3. With the cap jamming the train, measure the printed parts with a caliper. The journals came out 3.9–4.0 mm
    (designed 4.0), so the slots were not the problem.
-4. Redesign the cap (below) and print it on its own: [`print/test-cap-v2.3mf`](../print/test-cap-v2.3mf), 13 min,
+4. Redesign the cap (below) and print it on its own: [`print/test-cap-v2.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/test-cap-v2.3mf), 13 min,
    6.7 g. The full plate now carries the new cap.
 5. Fit the new cap and turn crankshaft 1 by its crank (Fig. 2).
 
-<img src="../cad/gear-train-test/images/gear-train-test-v2-assembly.png" alt="Exploded view of the gear train test v2 and the view from the +X side">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/gear-train-test/images/gear-train-test-v2-assembly.png?raw=true" alt="Exploded view of the gear train test v2 and the view from the +X side">
 
 *Fig. 1 · Left: the parts pulled apart along the way each one goes in, numbered by assembly step. Right: the test
 seen from the +X side (the side with the dots) with every crank level; the arrows show where each +X crank points
-(front, rear, front, rear). Made by [`cad/gear-train-test/assembly_figure.py`](../cad/gear-train-test/assembly_figure.py).*
+(front, rear, front, rear). Made by [`cad/gear-train-test/assembly_figure.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/gear-train-test/assembly_figure.py).*
 
 #### Result
 
@@ -1232,7 +1232,7 @@ seen from the +X side (the side with the dots) with every crank level; the arrow
 | Train with the first cap | Turns | Does not turn at all, even with the cap half pushed in or with one tongue broken off |
 | Train with the new cap | Turns | The four shafts turn together, smoothly (Fig. 2) |
 
-<img src="../images/gear-train-test-v2-turning.gif" width="440" alt="The gear train test v2 turning with the new cap">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/images/gear-train-test-v2-turning.gif?raw=true" width="440" alt="The gear train test v2 turning with the new cap">
 
 *Fig. 2 · Seen from the +X side with the new cap on: the cranks of the four shafts go round together. The
 three bright washers are the idlers' axle screws.*
@@ -1243,17 +1243,17 @@ one side; the crankshafts can also slide 0.25 mm along their axis. At the worst 
 of a turning gear and braked it. The check had placed every part only at its nominal position, saw a quarter of a
 millimetre free and passed.
 
-**The fix** (`test_cap()` in [`cad/gear-train-test/build.py`](../cad/gear-train-test/build.py)):
+**The fix** (`test_cap()` in [`cad/gear-train-test/build.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/gear-train-test/build.py)):
 
 - **Tongues only over the outer part of each wall**, 1.1 mm wide instead of 2.5. With the cap and the shafts at
   their worst positions, they stay 0.9 mm from the gear faces.
 - **Four skirts** at the ends of the cap come down outside the walls, 0.2 mm off each side, so the cap sits centred
   on the spine and cannot slide onto the gears. They are by the end blocks, away from everything that turns.
 - **The check poses loose parts at their extremes now.** [`tools/cad_verify.py`](../tools/cad_verify.py) has a
-  keep-out zone around each gear face (its play plus 0.8 mm), and [the spec](../cad/gear-train-test/verify.py) turns
+  keep-out zone around each gear face (its play plus 0.8 mm), and [the spec](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/gear-train-test/verify.py) turns
   the train with the cap shifted 0.2 mm either way. The first cap fails it in three places; the new one passes
-  ([report](../cad/gear-train-test/verify-result.txt)).
-- **Base v1's cap** had the same tongues and now has the same narrow ones ([`cad/base/build.py`](../cad/base/build.py)).
+  ([report](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/gear-train-test/verify-result.txt)).
+- **Base v1's cap** had the same tongues and now has the same narrow ones ([`cad/base/build.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/base/build.py)).
 
 <details>
 <summary>How to reproduce</summary>
@@ -1296,13 +1296,13 @@ This entry closes the open item «Print the gear train test v2 and turn it by ha
 
 #### Steps
 
-1. Print [`print/base-v1.3mf`](../print/base-v1.3mf): the base, the cap upside down and the front block, tree
+1. Print [`print/base-v1.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/base-v1.3mf): the base, the cap upside down and the front block, tree
    supports on the build plate only (Fig. 1).
 2. Remove the supports.
 3. Try the parts in the base: the cap over the spine (pressed in by hand), the front block, the gears and the
    idlers' 3 mm steel pins.
 
-<img src="../images/base-v1-print-timelapse.gif" width="440" alt="Timelapse of base v1 printing">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/images/base-v1-print-timelapse.gif?raw=true" width="440" alt="Timelapse of base v1 printing">
 
 *Fig. 1 · The plate printing: the base on tree supports (left), the front block (right) and the cap with its four
 pairs of tongues (front).*
@@ -1330,8 +1330,8 @@ The plate and its settings: [print/README](../print/README.md#base-v1).
 
 <table>
 <tr>
-<td width="50%"><img src="../images/base-v1-print-1.jpg" alt="Base v1 from above"></td>
-<td width="50%"><img src="../images/base-v1-print-2.jpg" alt="Base v1 from below"></td>
+<td width="50%"><img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/images/base-v1-print-1.jpg?raw=true" alt="Base v1 from above"></td>
+<td width="50%"><img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/images/base-v1-print-2.jpg?raw=true" alt="Base v1 from below"></td>
 </tr>
 <tr>
 <td><em>Fig. 2a · From above: the band with the fork pockets, the two tall round pegs that locate the body, and the
@@ -1339,8 +1339,8 @@ spine down the middle.</em></td>
 <td><em>Fig. 2b · From below: the bowl with the eight fork bosses and the keel along the middle.</em></td>
 </tr>
 <tr>
-<td width="50%"><img src="../images/base-v1-print-3.jpg" alt="Base v1 from the rear"></td>
-<td width="50%"><img src="../images/base-v1-print-4.jpg" alt="Base v1 with the front block and the cap"></td>
+<td width="50%"><img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/images/base-v1-print-3.jpg?raw=true" alt="Base v1 from the rear"></td>
+<td width="50%"><img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/images/base-v1-print-4.jpg?raw=true" alt="Base v1 with the front block and the cap"></td>
 </tr>
 <tr>
 <td><em>Fig. 2c · From the rear. Branches of tree support are still inside the bowl, at the top left of the
@@ -1350,11 +1350,11 @@ spine.</em></td>
 </tr>
 </table>
 
-<img src="../images/base-v1-cap-failure.png" alt="The cap as designed and as printed, with the broken tongues circled">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/images/base-v1-cap-failure.png?raw=true" alt="The cap as designed and as printed, with the broken tongues circled">
 
 *Fig. 3 · The cap as designed (left) and as printed (right). Its tongues go down the journal slots of the spine;
 the cap went in only when pressed hard, and six of the eight broke off at their root while it was pressed in. Made by
-[`cad/base/cap_failure_figure.py`](../cad/base/cap_failure_figure.py).*
+[`cad/base/cap_failure_figure.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/base/cap_failure_figure.py).*
 
 | What | What happened | In the photos |
 |---|---|---|
@@ -1409,13 +1409,13 @@ screwed on, so a fix reprints a few grams, not the base.
    [3D toy leg](#toy-leg-in-3d) model), the speed for a desk-toy walk, and Pololu's N20 data scaled to the battery
    voltage. A motor passes if its stall torque is at least 3 times the worst working torque (a **margin** of 3,
    with the printed gears taken at 50 % efficiency) on flat batteries (4.0 V), and if the robot still walks at
-   1.8 cm/s or more on 4.8 V. Output: [`sim/motor-sizing-result.txt`](../sim/motor-sizing-result.txt).
-2. **Plan the whole robot** in [`cad/chassis/design-plan.md`](../cad/chassis/design-plan.md): where the motor,
+   1.8 cm/s or more on 4.8 V. Output: [`sim/motor-sizing-result.txt`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/motor-sizing-result.txt).
+2. **Plan the whole robot** in [`cad/chassis/design-plan.md`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/design-plan.md): where the motor,
    the battery holder, the switch and the eyes board go, how each part is held and assembled, which fits are still
    untested and which coupon tests each. A design review checked it twice; each pass asked for changes, which went
    into revisions 3 and 4. Morante approved revision 4.
 3. **Estimate the mass** of the final robot and of v0 with
-   [`cad/chassis/mass_estimate.py`](../cad/chassis/mass_estimate.py), adding a contingency to each mass by how
+   [`cad/chassis/mass_estimate.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/mass_estimate.py), adding a contingency to each mass by how
    sure it is.
 4. **Work out what breaks if a leg jams**: the motor can push harder than its own gearbox can take, so something
    printed must give first (Fig. 5).
@@ -1454,36 +1454,36 @@ and the motor needs 57 / 0.5 = 113 N·mm at its shaft. Of Pololu's N20s, only th
 | Chosen motor: [Pololu Micro Metal Gearmotor HP 6 V 380:1](https://www.pololu.com/product/4794) | 84 rpm and 5.5 kg·cm stall at 6 V, 1.6 A stall |
 | With it | Margin 3.8 at 4.8 V and 3.1 at 4.0 V; 1.9 cm/s at 4.8 V; 2.5–3 h on 800 mAh |
 
-*Table 1 · The motor sizing ([full output](../sim/motor-sizing-result.txt)).*
+*Table 1 · The motor sizing ([full output](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/motor-sizing-result.txt)).*
 
-<img src="../sim/images/motor-sizing.png" alt="N20 candidates: margin at 4.0 V against walking speed at 4.8 V">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/motor-sizing.png?raw=true" alt="N20 candidates: margin at 4.0 V against walking speed at 4.8 V">
 
 *Fig. 1 · Each N20 that could fit, by its margin on flat batteries (up) and its walking speed (right). Only the HP
 380:1 lands in the green zone. The HP 298:1 is faster but has a margin of 2.3; the medium- and low-power (MP, LP)
 motors are too weak at the same ratio; the HP 1000:1 is strong but walks at 0.7 cm/s. Generic N20s sold as
 «1:298, 50 rpm» use a slower motor of the MP and LP class, and fail too. Made by
-[`sim/motor_sizing_figure.py`](../sim/motor_sizing_figure.py).*
+[`sim/motor_sizing_figure.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/motor_sizing_figure.py).*
 
 **Where the motor goes.** The sizing found no room under the deck between the legs' arms: a pinion meshing with
 idler 3 sits above the deck. So the N20 lies along X over idler 3, partly through the deck, held by a clamp from
 above (Fig. 2, 3). Over a full turn every 10°, it stays 1.5–2.0 mm from the legs, 2.0–2.5 mm from the crankshafts,
 and its pinion's teeth 2.28 mm from the gears of crankshafts 3 and 4.
 
-<img src="../cad/chassis/images/plan-side.png" alt="Plan, side cut through the body axis">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/images/plan-side.png?raw=true" alt="Plan, side cut through the body axis">
 
 *Fig. 2 · Side cut through the middle of the robot. The pinion (red circle) sits on idler 3, partly through the
 deck. The battery holder (purple box) rides in the body. The arrows show how the body goes on: down, 4 mm forward
 onto two hooks, then one M3 screw from below at the rear. The switch (green) is recessed at the rear. The eyes
 board (orange) goes in a pocket cut into the head. Orange and blue fills: everything the legs and the
-crankshafts sweep over a turn. Made by [`cad/chassis/plan_figure.py`](../cad/chassis/plan_figure.py), which also
-draws the [view from above](../cad/chassis/images/plan-top.png).*
+crankshafts sweep over a turn. Made by [`cad/chassis/plan_figure.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/plan_figure.py), which also
+draws the [view from above](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/images/plan-top.png?raw=true).*
 
-<img src="../cad/chassis/images/plan-front.png" alt="Plan, front cut through idler 3 and the motor">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/images/plan-front.png?raw=true" alt="Plan, front cut through idler 3 and the motor">
 
 *Fig. 3 · Front cut through idler 3 and the motor. The N20 (red box) lies along X with its pinion at the gear
 plane; the clamp (blue bar) and its screws are above the deck, away from the legs' paths.*
 
-**The plan's main choices** ([plan](../cad/chassis/design-plan.md)):
+**The plan's main choices** ([plan](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/design-plan.md)):
 
 - **Drive module.** The spine with the crankshafts and idlers, the motor seat, the clamp and the cap are one
   separate part, assembled on the bench and lowered into the chassis with 4 screws. Idler 3 is reprinted 5 mm wide
@@ -1506,11 +1506,11 @@ The margin here is scaled from the sizing as 1/mass, a first approximation; both
 are modelled and their contingency drops. The plan lists ways out if it is still over (lighter printed parts, a
 measured gear efficiency, another ratio); none is chosen.
 
-<img src="../cad/chassis/images/plan-mass.png" alt="Mass table of the final robot and the v0 test">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/images/plan-mass.png?raw=true" alt="Mass table of the final robot and the v0 test">
 
 *Fig. 4 · Mass of each part of the final robot and of v0, with where each number comes from. The ballast row is
 what v0 carries so that it weighs and balances like the final robot. Made by
-[`cad/chassis/mass_estimate.py`](../cad/chassis/mass_estimate.py); the figure is made again as parts are modelled,
+[`cad/chassis/mass_estimate.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/mass_estimate.py); the figure is made again as parts are modelled,
 so it shows the latest values ([Chassis Part A](#chassis-part-a-master-model-and-drive-module)).*
 
 **If a leg jams.** The motor then pushes up to its stall torque, 360–503 N·mm (4.0–5.6 V), more than any printed
@@ -1518,12 +1518,12 @@ tooth and more than the gearbox's own limit, 245 N·mm (Pololu's figure for the 
 the motor's D-shaped shaft and cannot slip, so a printed tooth must break first, below 245. Estimated with PLA at
 50 MPa, the teeth of idlers 1 and 2 break at about 191 N·mm and those of the crank gears at about 220 (Fig. 5).
 
-<img src="../sim/images/stall-protection.png" alt="Estimated break torque of the weakest printed tooth for a jam at each crankshaft">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/stall-protection.png?raw=true" alt="Estimated break torque of the weakest printed tooth for a jam at each crankshaft">
 
 *Fig. 5 · For a jam at each crankshaft, the torque at the motor at which the weakest printed tooth in the path
 breaks (estimate). Green band: where the plain D-bore pinion is kept. A jam at the front cranks breaks a tooth
 inside the band; at the rear cranks (3 and 4) the estimate is above it, still under the gearbox's limit. Made by
-[`sim/motor_sizing_figure.py`](../sim/motor_sizing_figure.py).*
+[`sim/motor_sizing_figure.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/motor_sizing_figure.py).*
 
 **Coupons.** Each untested fit gets a small test piece cut from the robot's own geometry, printed in one batch
 once the whole robot passes (about 40 g, 3 h 15 min in all):
@@ -1575,11 +1575,11 @@ the model until they are measured.
 
 #### Steps
 
-1. **Master model** ([`cad/robot.py`](../cad/robot.py)): the reference heights (ground z 15.6, leg pivots 72.0,
+1. **Master model** ([`cad/robot.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/robot.py)): the reference heights (ground z 15.6, leg pivots 72.0,
    deck 72.8–74.8, body seat 93.5), the carcass as the envelope everything must fit in, the twelve interfaces I1–I12
    between designs (which fit and which screws join them), and the envelopes of the bought parts. Every design
    takes these numbers from here instead of copying them.
-2. **The drive module and its parts** in [`cad/chassis/build.py`](../cad/chassis/build.py) (Fig. 1, 2):
+2. **The drive module and its parts** in [`cad/chassis/build.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/build.py) (Fig. 1, 2):
 
    | Part | What it does | g |
    |---|---|---|
@@ -1596,7 +1596,7 @@ the model until they are measured.
    and the walls, 0.45 mm for an idler. Five are assumed, each with the coupon that will measure it: the pinion's
    D-bore at the shaft's size (K1), the motor's seat and clamp cheeks at 0.2 mm and the clamp pad pressed 0.3 mm
    into the gearbox (K2), the cap's tongues at 0.3 mm a side and 0.5 mm round every gear tip in its pocket (K3).
-4. **The check** ([`cad/chassis/verify.py`](../cad/chassis/verify.py), the start of the whole-robot check): every
+4. **The check** ([`cad/chassis/verify.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/verify.py), the start of the whole-robot check): every
    part turned over a full crank turn in 10° steps with the 8 legs swept past the module, the gears over one tooth
    in 1° steps, also with the motor lifted 0.2 mm under its clamp; what holds each part; the assembly order with the
    finger or tool for each screw and nut; and every part kept inside the carcass.
@@ -1609,7 +1609,7 @@ the model until they are measured.
    | 3 | Small points: the keep-in check measured the front against the head instead of the carcass top; a measurement that could not be taken; the jig did not square the motor; a 0.31 mm skin over one screw hole; the numbering of the exploded view | All fixed |
 
 6. **Mass** rerun with the module, cap and small parts from their CAD files
-   ([`mass_estimate.py`](../cad/chassis/mass_estimate.py)).
+   ([`mass_estimate.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/mass_estimate.py)).
 
 <details>
 <summary>How to reproduce</summary>
@@ -1625,8 +1625,8 @@ cd ../.. && .venv/bin/python -m pytest tools/tests
 ```
 
 `build.py` writes every part to `out/` (STEP and STL); the parts, hardware, screw lengths and the bench assembly are
-in the folder's [README](../cad/chassis/README.md), and the answers of the last review, each with its number, in
-[`design-review.md`](../cad/chassis/design-review.md). The keep-in check takes the carcass inset by 2 mm (the
+in the folder's [README](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/README.md), and the answers of the last review, each with its number, in
+[`design-review.md`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/design-review.md). The keep-in check takes the carcass inset by 2 mm (the
 chassis shell's wall) below the deck, with three named exceptions, each with a bound: the keel (lowest point
 z ≥ 42.7, base v1's keel), the rear end (inside the carcass's outer face), and the band under the head where the
 carcass's top dips below the deck (at most 4.38 mm out, where Part B's flat deck replaces the carcass top).
@@ -1635,21 +1635,21 @@ carcass's top dips below the deck (at most 4.38 mm out, where Part B's flat deck
 
 #### Result
 
-<img src="../cad/chassis/images/part-a-in-robot.png" alt="The drive module in the robot, seen from the right with the near half of the carcass cut away">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/images/part-a-in-robot.png?raw=true" alt="The drive module in the robot, seen from the right with the near half of the carcass cut away">
 
 *Fig. 1 · The drive module in the robot. The four crankshafts sit in its slots under the cap (blue); the motor lies
 along the module behind the clamp (yellow), over idler 3. The module's top is level with the deck, so it fills the
 deck's opening; the chassis around it is Part B. Made by
-[`cad/chassis/part_a_figures.py`](../cad/chassis/part_a_figures.py), as Fig. 2–5.*
+[`cad/chassis/part_a_figures.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/part_a_figures.py), as Fig. 2–5.*
 
-<img src="../cad/chassis/images/part-a-exploded.png" alt="The drive module exploded, every part and fastener numbered by its assembly step">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/images/part-a-exploded.png?raw=true" alt="The drive module exploded, every part and fastener numbered by its assembly step">
 
 *Fig. 2 · Every part and fastener of the module, pulled out the way it goes in and numbered by its assembly step.
 Nuts first (2–5), then the idlers on their steel pins from the right (6–13), the crankshafts and the cap from above
 (14–19), the motor with its pinion (24) and the clamp (25–27). All 27 steps, one panel each:
-[`images/verify/assembly-steps.png`](../cad/chassis/images/verify/assembly-steps.png).*
+[`images/verify/assembly-steps.png`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/images/verify/assembly-steps.png?raw=true).*
 
-| Check ([`verify-result.txt`](../cad/chassis/verify-result.txt)) | Result |
+| Check ([`verify-result.txt`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/verify-result.txt)) | Result |
 |---|---|
 | Whole check | PASS, 0 failures, 39 warnings |
 | Gears | Every crank–idler mesh keeps a 0.10 mm gap between teeth; pinion on idler 3 v2 0.10–0.18 mm, also with the motor lifted |
@@ -1670,7 +1670,7 @@ without support. Their points hung far below the carcass (Fig. 3). Cut flat at t
 they print as short bridges instead (10.7 mm under idler 3), and the module's lowest point is z 42.77, where base
 v1's keel was: 27.2 mm above the table, against 20.3 mm with the points.
 
-<img src="../cad/chassis/images/part-a-keel.png" alt="Side section through the gear plane: carcass, drive module, and the pointed pockets of rev 4 hatched">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/images/part-a-keel.png?raw=true" alt="Side section through the gear plane: carcass, drive module, and the pointed pockets of rev 4 hatched">
 
 *Fig. 3 · Side section through the gear plane. Beige: the carcass; red: the module. Hatched: what the first
 version's pointed pockets added below today's module (redrawn from the same pockets). The arrows are the height
@@ -1680,7 +1680,7 @@ above the table under the carcass, under the module now and under the first vers
 room, ends at the carcass's rear face (Fig. 4). Part B's shell bulges about 2 mm there and covers it, about
 8.5 × 18 mm.
 
-<img src="../cad/chassis/images/part-a-rear.png" alt="Rear end of the module against the carcass, and the 2 mm bump of Part B">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/images/part-a-rear.png?raw=true" alt="Rear end of the module against the carcass, and the 2 mm bump of Part B">
 
 *Fig. 4 · The rear end, in the same section. The circle is crankshaft 4's gear, the dotted circle its room. The
 module's thin rear wall reaches the carcass's rear face; the dashed blue box is the bump Part B adds.*
@@ -1690,7 +1690,7 @@ is in the module nothing can reach that gap. So the press is done on the bench (
 squares the motor, and a 0.8 mm fork between them stops the press. The fork must come out and go back in snug
 before the motor goes in.
 
-<img src="../cad/chassis/images/part-a-bench-press.png" alt="The pinion pressed on the motor in the press jig, then the motor dropped into the module">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/images/part-a-bench-press.png?raw=true" alt="The pinion pressed on the motor in the press jig, then the motor dropped into the module">
 
 *Fig. 5 · Pressing the pinion on the bench, as it is done by hand: the jig stands on the table with its open side
 towards you. Grey: what is already there; in colour: the part going in, with its arrow; the pink cylinders are the
@@ -1755,7 +1755,7 @@ shell it screws into (B1), the whole-robot check (C, step 1) and a torque limite
 
 #### Steps
 
-1. **Chassis shell B1 and its mass.** [`mass_estimate.py`](../cad/chassis/mass_estimate.py) now takes the masses of
+1. **Chassis shell B1 and its mass.** [`mass_estimate.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/mass_estimate.py) now takes the masses of
    the shell, the crank cover and the front block from the STL files in `out/` instead of from estimates:
 
    | Part | Built mass | Budget or estimate |
@@ -1769,9 +1769,9 @@ shell it screws into (B1), the whole-robot check (C, step 1) and a torque limite
    (decision Q5, option A1b). It closes the weight worry of [Part A](#chassis-part-a-master-model-and-drive-module);
    the weight and size review still comes (Part D), because every gram under the ceiling is margin.
 2. **One check for the walking robot (Part C, step 1).** `verify_b1.py` and `verify_fb.py` are merged into
-   [`cad/chassis/verify.py`](../cad/chassis/verify.py), which now checks the drive module, the chassis shell, the
-   front block and the clutch together. Full check: PASS ([`verify-result.txt`](../cad/chassis/verify-result.txt)). This closes the open item «One `cad_verify` spec for the whole robot».
-3. **The clutch plan** ([`design-plan-clutch.md`](../cad/chassis/design-plan-clutch.md)). A jam of the legs would
+   [`cad/chassis/verify.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/verify.py), which now checks the drive module, the chassis shell, the
+   front block and the clutch together. Full check: PASS ([`verify-result.txt`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/verify-result.txt)). This closes the open item «One `cad_verify` spec for the whole robot».
+3. **The clutch plan** ([`design-plan-clutch.md`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/design-plan-clutch.md)). A jam of the legs would
    push the motor past what its gearbox tolerates (stall is 360–503 N·mm, the gearbox's limit 245), so something
    must slip first. Three places and three candidates were compared with numbers (Fig. 1). The design reviewer asked
    for changes on revision 1 (8 objections: a PTC fuse does not separate a slip from walking, the pinion was not
@@ -1787,21 +1787,21 @@ shell it screws into (B1), the whole-robot check (C, step 1) and a torque limite
 4. **The clutch in CAD.** A sleeve pressed on the motor's D-shaft carries the pinion, which turns on it; a steel wave
    washer (DIN 137 B M3) presses the pinion against the sleeve's shoulder through steel shims (DIN 988 3 × 6, 0.1 mm
    steps), and a collar pressed on the shaft's tip holds the stack. Slip torque is set on the bench by adding or
-   taking away a shim. Modelled in [`build.py`](../cad/chassis/build.py), the interface I6 of
-   [`robot.py`](../cad/robot.py) and a new assumed fit, `SLIP_BORE` (0.1 mm a side) in
+   taking away a shim. Modelled in [`build.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/build.py), the interface I6 of
+   [`robot.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/robot.py) and a new assumed fit, `SLIP_BORE` (0.1 mm a side) in
    [`fits.py`](../cad/fits.py). Full check: `cad_verify: PASS (0 failures, 94 warnings)`; the four warnings it added (90 to 94) are
-   explained in [`design-review.md`](../cad/chassis/design-review.md). One change from the plan: the sleeve and the
+   explained in [`design-review.md`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/design-review.md). One change from the plan: the sleeve and the
    collar are pressed in one push in the jig (step 6 of the README), not one after the other.
 5. **Coupons.** CL1 (the clutch on the real shaft), CL1-heat (60 s with the crank blocked), CL2 and CL3 (two
    other ways to get the same slip, kept as fair alternatives: a printed detent and O-rings) and K1 (the pinion's
    D-bore, now also the collar's pull-off) are updated in
-   [`coupons_clutch.py`](../cad/chassis/coupons_clutch.py); they print in the one coupon batch.
+   [`coupons_clutch.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/coupons_clutch.py); they print in the one coupon batch.
 6. **Hardware** added to [`hardware.md`](../hardware.md), bought with the motor: the wave washer, the shims and the
    O-rings.
 
 #### Result
 
-<img src="../cad/chassis/images/clutch-plan.png" alt="Half section of the clutch along the motor shaft: sleeve, pinion, wave washer, shims, collar">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/images/clutch-plan.png?raw=true" alt="Half section of the clutch along the motor shaft: sleeve, pinion, wave washer, shims, collar">
 
 *Fig. 1 · The clutch in half section along the motor's shaft. Yellow: sleeve and collar, pressed on the steel shaft;
 green: the pinion, which turns on the sleeve; red: wave washer and shims; the two red bars are the friction faces.
@@ -1845,7 +1845,7 @@ are printed.
 every gram below it is margin. The review looked at each part for a lighter wall, a hollow or a ribbed section, and
 ranked the levers in three sets (safe, moderate, aggressive).
 
-<img src="../cad/chassis/images/plan-d.png" alt="The shell from below coloured by the set that thins each region, and the design mass of each set">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/images/plan-d.png?raw=true" alt="The shell from below coloured by the set that thins each region, and the design mass of each set">
 
 *Fig. 1 · The plan. Left: the shell from below; green is thinned in the safe set, yellow in the moderate one, red in
 the aggressive one, grey stays. Right: design mass of each set against the 478 g ceiling; the margins printed are the
@@ -1853,7 +1853,7 @@ plan's estimates.*
 
 #### Steps
 
-1. **The plan** ([`design-plan-d.md`](../cad/chassis/design-plan-d.md)): infill and wall-loop changes, or hollowing
+1. **The plan** ([`design-plan-d.md`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/design-plan-d.md)): infill and wall-loop changes, or hollowing
    the thick parts, save under 1.5 g in all, so they were rejected. Sets: safe 459 g, moderate 456 g (3.6 g more
    than safe, but a recut coupon, new hardware and stiffness risk), aggressive 427 g (needs aluminium screws, no side
    lips and windows in the belly). A bug turned up: the stage cache in [`tools/stage_cache.py`](../tools/stage_cache.py)
@@ -1868,12 +1868,12 @@ plan's estimates.*
    [`tools/tests/test_stage_cache.py`](../tools/tests/test_stage_cache.py)). The shell was rebuilt round the 4 mm
    pinion and the clutch, which removes the old 5 mm pinion's cut (Part C leftover), with the bowl skin 1.6 → 1.2 mm;
    the crank cover is 1.2 mm on its free span; the front block was rebuilt against the new cover. The screws were
-   recounted in [`mass_estimate.py`](../cad/chassis/mass_estimate.py), and the shell's export retries other
+   recounted in [`mass_estimate.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/mass_estimate.py), and the shell's export retries other
    tolerances if its STL reads back open.
 
 #### Result
 
-<img src="../cad/chassis/images/plan-mass.png" alt="Mass table of the robot after Part D">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/images/plan-mass.png?raw=true" alt="Mass table of the robot after Part D">
 
 *Fig. 2 · The mass table after the review, from the built parts.*
 
@@ -1887,7 +1887,7 @@ plan's estimates.*
 | Margin (ceiling 478 g) | 3.08 | 3.12 |
 
 The full check of the whole robot passes: `cad_verify: PASS (0 failures, 94 warnings)`, the same warnings as before
-([`verify-result.txt`](../cad/chassis/verify-result.txt)). It proves the lighter parts exist and still fit and clear
+([`verify-result.txt`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/verify-result.txt)). It proves the lighter parts exist and still fit and clear
 each other in CAD. The thinner skin's strength and printability are predictions until the coupons.
 
 #### Decisions
@@ -1917,14 +1917,14 @@ every screw reachable by a tool, every part able to go in by hand.
 
 #### Steps
 
-1. **The first check.** The spec of the looks parts went into [`verify.py`](../cad/chassis/verify.py) and the full
+1. **The first check.** The spec of the looks parts went into [`verify.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/verify.py) and the full
    check ran: 13 failures. The eyes screw's nut touched the board, one bench assembly could not be done and some
    tools could not reach a nut.
 2. **Pass 1.** A new part, the **eyes tab** (a 2 mm plate under the eyes boss that carries the screw), and wider nut
    slots (open mouths 25 mm long) took the failures from 13 to 7.
 3. **Pass 2 and 3.** The body was first cut 0.2 mm clear of the shell where it rests, then lifted further sideways;
    each made the build slower (4 minutes) and left slivers. The coordinator stopped it: the approved plan says the
-   body **bears** on the band's top at the sides and front ([design-plan-b.md](../cad/chassis/design-plan-b.md)).
+   body **bears** on the band's top at the sides and front ([design-plan-b.md](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/design-plan-b.md)).
    The seat was trimmed flat at the band top (z = 93.5 mm) with 13 flat layers carried 4 mm along the slide, and
    declared a **designed sliding contact** in the spec. The body builds in 8 s and its way in (down 30 mm, then 4 mm
    toward the front) passes.
@@ -1933,18 +1933,18 @@ every screw reachable by a tool, every part able to go in by hand.
    its slot), and a cylinder of r 3.05 mm under the cradle block's floor (the hex key's room). Together they remove
    at most 0.6 cm³ and touch no outer face.
 
-<img src="../cad/chassis/images/part-b2-body.png" alt="Body v2, translucent, on the chassis with the seat and the three reliefs marked">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/images/part-b2-body.png?raw=true" alt="Body v2, translucent, on the chassis with the seat and the three reliefs marked">
 
 *Fig. 1 · Body v2 (purple, translucent) on the chassis from behind and the left. The seat is the band top the body
 rests on. The coloured rods are the reliefs cut inside the body: red, the lug's nut slots; orange, the eyes nut slot;
 green, under the cradle block (the cylinders show the cut's extent). Made by
-[`part_b2_figure.py`](../cad/chassis/part_b2_figure.py).*
+[`part_b2_figure.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/part_b2_figure.py).*
 
 #### Result
 
-`cad_verify: PASS (0 failures, 100 warnings)` ([`verify-result.txt`](../cad/chassis/verify-result.txt)). Most of the
+`cad_verify: PASS (0 failures, 100 warnings)` ([`verify-result.txt`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/verify-result.txt)). Most of the
 extra warnings are body v2's own print warnings; each is explained in
-[`design-review.md`](../cad/chassis/design-review.md).
+[`design-review.md`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/design-review.md).
 
 | | Part D | Now |
 |---|---|---|
@@ -1954,7 +1954,7 @@ extra warnings are body v2's own print warnings; each is explained in
 | Margin (3.0 needed) | 3.12 | 3.14 |
 
 `sim/motor_sizing.py` on the final masses: PASS, R 1.0 with the HP 1:380
-([`motor-sizing-result.txt`](../sim/motor-sizing-result.txt)). This proves the looks parts exist, fit and can be
+([`motor-sizing-result.txt`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/motor-sizing-result.txt)). This proves the looks parts exist, fit and can be
 assembled and reached by hand in CAD. The body's strength, its printed weight (about 93 g is the slicer's estimate)
 and its print are predictions until it is printed.
 
@@ -1989,8 +1989,8 @@ and its print are predictions until it is printed.
 #### Small items closed
 
 - **Body v2 strip:** the strip at z 99.25 to 101.25 is a scan-skin ring boss under the cradle block. It is harmless
-  and no geometry changes ([design-review.md](../cad/chassis/design-review.md)).
-- **Gear train test:** [`verify.py`](../cad/gear-train-test/verify.py) now meets the spec standard, full check PASS
+  and no geometry changes ([design-review.md](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/design-review.md)).
+- **Gear train test:** [`verify.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/gear-train-test/verify.py) now meets the spec standard, full check PASS
   (0 failures, 12 print warnings). The cap that went on with 0.15 mm a side per tongue gave a measured fit,
   `TONGUE_SHORT` in [`fits.py`](../cad/fits.py), with its row in [`measurements.csv`](../measurements.csv). It is
   valid for short tongues only; base v1's 70 mm cap keeps its 0.3 mm.
@@ -2002,7 +2002,7 @@ and its print are predictions until it is printed.
 
 #### Part E
 
-[Plan E](../cad/chassis/design-plan-e.md) (rev 1, then rev 2 after the reviewer's 7 objections) proposed a skin on the
+[Plan E](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/design-plan-e.md) (rev 1, then rev 2 after the reviewer's 7 objections) proposed a skin on the
 base, a face wall on the front block, a separate dome and shells over the legs. Morante's decisions after rev 2:
 
 - **Legs:** rethought as a new step, thicker and curved as in the photo. The black legs are straight 5 × 6 mm bars
@@ -2026,8 +2026,8 @@ base, a face wall on the front block, a separate dome and shells over the legs. 
 > every other printed part is audited for grams, and the legs come back with what that frees. Nothing is modelled
 > or printed.
 
-The plan is in [`design-plan-v2.md`](../cad/legs/design-plan-v2.md); the figure and its geometry are in
-[`plan_v2_figure.py`](../cad/legs/plan_v2_figure.py) and [`plan_v2_geom.py`](../cad/legs/plan_v2_geom.py). The
+The plan is in [`design-plan-v2.md`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/legs/design-plan-v2.md); the figure and its geometry are in
+[`plan_v2_figure.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/legs/plan_v2_figure.py) and [`plan_v2_geom.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/legs/plan_v2_geom.py). The
 reference photo of the toy is private and is not in the repo. The probe scripts (clearance sweeps, grams, levers,
 gait) are kept outside the repo.
 
@@ -2050,7 +2050,7 @@ gait) are kept outside the repo.
 
 #### Result
 
-<img src="../cad/legs/images/plan-v2.png" alt="Today's legs and three B candidates in four views">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/legs/images/plan-v2.png?raw=true" alt="Today's legs and three B candidates in four views">
 
 *Fig. 1 · Today's 5 × 6 mm bar legs (top) and the three B candidates, shin raised 1 mm, in the four standard views;
 the bars show printed leg + fork in grams. All three are visibly thinner than the toy's legs.*
@@ -2082,5 +2082,44 @@ the middle gap. None meets the mass ceiling and the looks together.
 #### Next
 
 - Mass and purpose audit, then legs v3, then the motor side only if needed. See Open items.
+
+### Redesign: looks first
+
+**Phase 3 · Mechanisms · 2026-11-17** · Status: 🔄 in progress
+
+> **In short.** The robot had drifted away from the toy: the dome sat on a tall black base with the gear box under it,
+> and the legs hung like stilts. Every design change also took days, because the checks chased under a millimetre and
+> a degree on shapes that were not yet decided. So the design restarts looks-first, with three levels of detail so a
+> change costs seconds, and the size is worked out again from the smallest motor and the button cells that can feed
+> it. A coarse estimate puts the scale at 60 to 80 %, not 120 %. The next step is to measure the original toy.
+
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/images/plan-e.png?raw=true" alt="Part E mock-up of the robot, archived">
+
+*Fig. 1 · The archived Part E mock-up. Look at the tall black base under the dome and at the thin legs: this is what
+the redesign leaves behind.*
+
+#### Decisions
+
+- **Why.** Morante: the robot no longer looks like the toy. The dome sits on a tall black base (the gear box under
+  it) and the legs hang like stilts.
+- **Looks first.** The toy and jenscolt's model, legs included, are the specification. Only parts with their final
+  looks are modelled. The walking legs stay.
+- **Three levels of detail**, with the times measured on Morante's Mac:
+  - **N0, mock-up in simple shapes.** 8 legs × 24 poses collision check: 1.8 s; 4-view render: 0.8 s.
+  - **N1, the real body mesh** simplified to 25k triangles, 24 poses: 4 s per check. It uses manifold3d's `min_gap`
+    instead of build123d.
+  - **N2, build123d and the full `cad_verify`**, once per part, just before printing.
+- **Sizing reopened from the bottom up:** the smallest motor, then the button cells that can feed it, then the
+  smallest robot they allow, then back to the motor. Morante's own Spider-Bot runs on button cells; LiPo is ruled out.
+  A coarse estimate puts the scale between 60 and 80 % (about 100 to 170 g, peak crank torque 6 to 14 N·mm), against
+  457 g and 56 N·mm at 120 %. The limit is the cells' current and the motor's no-load current, not the torque.
+- **Cleanup.** 319 tracked files became 56. Everything earlier is kept in the tag
+  [`pre-redesign-2026-11-17`](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17),
+  and every link to it now points there.
+- This reverses the direction of the Part A to Part E entries above; they stay as the record of what was built.
+
+#### Next
+
+- Measure the original toy (model, cells, mass, size, current), then size motor, cells and scale. See Open items.
 
 [↑ Contents](../build-log.md#contents)
