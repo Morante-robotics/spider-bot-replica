@@ -80,6 +80,7 @@ once, before printing. Everything before the redesign is in the
 | Buy the N10 (3 V, ≈ 100–150 rpm) and 6 × AG13, and measure it (body, shaft, mounting) to replace the mock-up's box at N2. Chosen bottom-up from the original Mini Spider-Bot (≈ 10 cm, 6 × AG13, walks on legs): the body holds them at ≈ 60 % (`cad/mockup/sizing.py`) | Redesign, looks first | 3 |
 | Resolve at 0.1 mm the leg-root windows (≈ 20 × 12 mm, target was 10) and legs ↔ base (−0.4 mm) | [N1 form](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) | 3 |
 | Rebuild the base rim (ragged after emptying the base) | [N1 form](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) | 3 |
+| N2 plan: Morante's decisions are in (scale 65 %, motor along Y with a crown, cells as two 3-cell packs on edge, Ø2 steel pivot pins in notches in the base, eyes with the LED as the pupil, module 0.6 gears), see [`cad/robot/design-plan.md`](cad/robot/design-plan.md). Next: a review of the changed plan, then model N2 | Redesign, looks first | 3 |
 | Print detail, one batch of coupons, the workshop kit and the one robot | Redesign, looks first | 4 |
 | Import the parts into Onshape as STEP and assemble them with mates | [Onshape assembly](build-log/3-legs-and-drive.md#onshape-assembly) | 3 |
 | Count the hardware in the workshop (the **Have** column) | [Hardware](hardware.md) | 3 |
