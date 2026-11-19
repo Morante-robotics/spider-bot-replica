@@ -56,6 +56,9 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
 13. **Looks first.** The robot is redesigned looks-first in three levels of detail. The first, a mock-up in simple
     shapes at 60 % of jenscolt's size, draws and checks the whole robot in about 2 seconds, and its look was approved.
     The real looking parts as light meshes are next.
+14. **The real parts as meshes.** N1 puts jenscolt's own body, base, eyes and legs into the same check, with the legs
+    warped onto the mock-up's path, and cuts one window per leg root. The check passes within 1 mm and the look was
+    approved. The print detail (N2) is next.
 
 <img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/drive-attempts.png?raw=true" alt="The three drives tried, from above and from the side">
 
@@ -2205,5 +2208,98 @@ knees are wider (44 mm); the crankshafts were raised because the base's bowl is 
   keep every change at seconds.
 - **The look is approved at N0.** The legs stay thick and curved; the body and base give way, not the legs.
 - **Knees 3 mm below the dome top,** about 10 mm of shell window per leg root: both are carried into N1 as targets.
+
+### N1 form: the real looking parts as light meshes
+
+**Phase 3 · Mechanisms · 2026-11-19** · Status: ✅ N1 look approved, N2 next
+
+> **In short.** The second level of the redesign is built: jenscolt's real body, eyes, base and legs at 60 %, simplified
+> to light meshes, moving on the N0 motion with the motor, cells and switch inside. The legs are his own, stretched to
+> reach N0's knee path, and each leg root has a window in the body and base. The 24-pose check passes within 1 mm
+> (the legs graze the base by 0.4 mm), a run takes about 10 seconds, and Morante compared the views with his photo of
+> the toy and approved the look. Next is N2, the print detail.
+
+N1 is the second of the [three levels](#redesign-looks-first). It keeps everything N0 decided
+([`P0`](../cad/mockup/n0.py): scale, leg path, crank, boxes) and swaps the simple shapes for the real parts, so the
+look can be judged on the real surfaces and the collisions checked against them before any part is modelled for print.
+
+<img src="../cad/mockup/images/n1-mockup.png" alt="The N1 mock-up from four views: three-quarter, front, side and from below">
+
+*Fig. 1 · The N1 mock-up, crank pose 0. Look at the real dome with its two eyes, two small eyes and front dome, at
+the thick curved legs that now have jenscolt's shape, and at the base standing 12 mm off the ground. The windows are
+hidden behind the legs. The grey frame is the ground plane.*
+
+#### Steps
+
+1. Load jenscolt's body (with two eyes, two small eyes and the front dome) and base, scale them to 60 % and
+   vertex-cluster each to at most 25k triangles ([`n1.py`](../cad/mockup/n1.py)).
+2. Take the legs from his `L_leg2` (hub, inner arm, upper leg) and `L_leg1` (blade) and warp them onto N0's leg path,
+   the left legs mirrored from the right. Against his 60 % size the parts are stretched ×1.53 (inner arm), ×2.86
+   (upper leg) and ×1.20 (blade), so the knee stays high as approved at N0. The hub and inner arm are thinned
+   (scale 0.20 across and 0.15 in the plane) because the middle pivots are only 7.7 mm apart; the thin root grows into
+   the upper leg over 14 mm.
+3. Empty the base. His base is a solid display base: inner posts, mounts for his lights and 8 tabs inside the rim
+   that hold his static legs. All of that is removed, keeping the bowl skin and the rim notches. The rim top is a bit
+   ragged at this level and is rebuilt at N2.
+4. Cut one window per leg root in the body and base: the hull of the leg within 9 mm of its pivot, swept over the 24
+   poses, plus 1 mm.
+5. Move the motor 1 mm up (N10 centre z 21 → 22 mm) so the crank hubs clear it. Raising the crank axis too made the
+   legs hit the base, so the axis stays.
+6. Check the 24 poses on the meshes (surfaces sampled at 0.6 mm for body and base, 1.0 mm for the legs, 0.4 mm of
+   sampling slack taken off every gap) and draw four views ([`n1_render.py`](../cad/mockup/n1_render.py)).
+
+<details><summary>How to reproduce</summary>
+
+```
+uv run python cad/mockup/n1.py                              # checks + timing (first run builds the cache)
+uv run python cad/mockup/n1.py --png out.png --lang en      # four views
+uv run python cad/mockup/n1.py --set COLLAR=12              # change a parameter
+```
+
+The body, base and legs are third party (CC BY-NC-SA, see [`cad/carcass-jenscolt/`](../cad/carcass-jenscolt/)).
+
+</details>
+
+#### Result
+
+| Measure | N1 | N0 |
+|---|---|---|
+| Size with legs | 141 × 105 × 68 mm | 145 × 113 mm |
+| Base above the ground (24 poses) | 11.7 mm | ≈ 13 mm |
+| Body bob over a turn | 4.5 mm | 4.6 mm |
+| Foot lift | 6.7 mm | 6.9 mm |
+| Knee below the dome top | 2.4 mm | 3 mm |
+
+| Gap checked | Gap | |
+|---|---|---|
+| Legs ↔ body | +0.4 mm | ok |
+| Legs ↔ base | −0.4 mm | grazes, within 1 mm |
+| Legs ↔ legs | +1.4 mm | ok |
+| Inner arms ↔ parts inside | +1.6 mm | ok |
+| Parts inside the wall | +0.4 mm | ok |
+| Parts apart | +0.5 mm | ok |
+
+| Window for each leg root (front to rear) | Size |
+|---|---|
+| Legs 1 to 4 | 16×12×12, 20×8×12, 20×10×12, 19×13×13 mm |
+
+Triangles: body 24.7k, base 2.7k, eyes 6.9k, legs 30.7k. The check takes about 6 s and the run with the drawing about
+10 s on Morante's Mac; the first run builds a cache.
+
+The windows missed the target of about 10 mm from N0: their size is set by how far the root swings, not by its
+thickness. A collar of 12 mm gave windows of 21 to 25 mm; 9 mm gives about 20 mm; 7 mm makes the legs hit the base
+(−1.6 mm). They are hidden behind the legs in the views. Eye positions are estimated from the socket rings of the
+body. Morante compared the four views with his photo of the toy and approved: «Sí, apruebo N1». On the eyes he said
+«está ok».
+
+#### Decisions
+
+- **The look is approved at N1.** The real parts, the thick curved legs and the high knees stay.
+- **Windows of about 20 × 12 mm, not 10.** Kept at COLLAR 9 mm: smaller makes the legs hit the base. To be resolved
+  at 0.1 mm at N2.
+- **Legs ↔ base −0.4 mm** is accepted at this level (within 1 mm); N2 settles it.
+- **Base emptied of all jenscolt's supports and pillars.** Morante: «quita todos esos soportes y pilares que tenía
+  jenscolt. No los necesitamos».
+- **Motor 1 mm higher** instead of a higher crank axis.
 
 [↑ Contents](../build-log.md#contents)

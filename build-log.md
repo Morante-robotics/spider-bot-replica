@@ -55,6 +55,7 @@ The robot's story in three parts, then what is left to do and a glossary.
    - [Legs v2: three plan rounds, paused](build-log/3-legs-and-drive.md#legs-v2-three-plan-rounds-paused) · 2026-11-17 · 🔄 paused, mass audit first
    - [Redesign: looks first](build-log/3-legs-and-drive.md#redesign-looks-first) · 2026-11-17 · 🔄 in progress
    - [N0 mock-up: the looks robot in simple shapes](build-log/3-legs-and-drive.md#n0-mock-up-the-looks-robot-in-simple-shapes) · 2026-11-18 · ✅ N0 look approved, N1 next
+   - [N1 form: the real looking parts as light meshes](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) · 2026-11-19 · ✅ N1 look approved, N2 next
 4. **[Open items](#open-items)**: everything still to do.
 5. **[Glossary](#glossary)**: the terms used in the entries.
 
@@ -76,9 +77,9 @@ once, before printing. Everything before the redesign is in the
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| Buy the N10 (3 V, ≈ 100–150 rpm) and 6 × AG13, and measure the N10 for the mock-up. Chosen bottom-up from the original Mini Spider-Bot (≈ 10 cm, 6 × AG13, walks on legs): the body holds them at ≈ 60 % (`cad/mockup/sizing.py`) | Redesign, looks first | 3 |
-| N1: the real looking parts as light meshes with a motion check (minutes per change) | [N0 mock-up](build-log/3-legs-and-drive.md#n0-mock-up-the-looks-robot-in-simple-shapes) | 3 |
-| The real looking parts as light meshes, moving without collisions | Redesign, looks first | 3 |
+| Buy the N10 (3 V, ≈ 100–150 rpm) and 6 × AG13, and measure it (body, shaft, mounting) to replace the mock-up's box at N2. Chosen bottom-up from the original Mini Spider-Bot (≈ 10 cm, 6 × AG13, walks on legs): the body holds them at ≈ 60 % (`cad/mockup/sizing.py`) | Redesign, looks first | 3 |
+| Resolve at 0.1 mm the leg-root windows (≈ 20 × 12 mm, target was 10) and legs ↔ base (−0.4 mm) | [N1 form](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) | 3 |
+| Rebuild the base rim (ragged after emptying the base) | [N1 form](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) | 3 |
 | Print detail, one batch of coupons, the workshop kit and the one robot | Redesign, looks first | 4 |
 | Import the parts into Onshape as STEP and assemble them with mates | [Onshape assembly](build-log/3-legs-and-drive.md#onshape-assembly) | 3 |
 | Count the hardware in the workshop (the **Have** column) | [Hardware](hardware.md) | 3 |
@@ -129,5 +130,7 @@ Terms used in the entries, in the order they first appear, with a link to that e
 | **Wave washer** | A thin steel ring bent in waves, used as a spring that presses with a steady force. | [Part B1 and the clutch](build-log/3-legs-and-drive.md#chassis-part-b1-part-c-check-and-the-friction-clutch) |
 | **Shim** | A very thin flat washer added or taken away to set a gap or a spring's force. | [Part B1 and the clutch](build-log/3-legs-and-drive.md#chassis-part-b1-part-c-check-and-the-friction-clutch) |
 | **Mock-up (N0)** | The whole robot drawn and checked in simple shapes (tubes and boxes), so a change costs seconds. | [N0 mock-up](build-log/3-legs-and-drive.md#n0-mock-up-the-looks-robot-in-simple-shapes) |
+| **N1 form** | The real looking parts (body, base, eyes, legs) as light meshes of at most 25k triangles, checked over 24 crank poses. | [N1 form](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) |
+| **Window** | The opening cut in the body and base where a leg root passes, sized by the root's swing over a turn. | [N1 form](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) |
 
 [↑ Contents](#contents)
