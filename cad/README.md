@@ -25,13 +25,49 @@ what to run and where the result is:
 |---|---|
 | `datasheet.md` | The one page read first: status, where each topic lives (file and section), the commands |
 | `README.md` | What the design is, its parts and hardware, how to print and assemble it (no status: that is in the build log) |
-| `design-plan.md` | Part list, joint table, assembly sequence, alternatives, diagram: written before modelling |
+| `spec.json` | The request: level (N0/N1/N2), purpose, pass criterion, must-haves, dimensions with their sources, references, gates, views, judge, how many refine rounds. Written once (`rounds.py init`) |
+| `plan.json` | The plan: parts, joints, assembly, alternatives, acceptance items, open questions. Written before modelling, checked by `rounds.py validate` |
+| `design-plan.md` | The plan as tables, generated from `plan.json` by `validate` (never edited by hand) |
+| `rounds/rNN/` | One round: the source snapshot, gates, views, the judge's brief and answer, the score. Local, not in git |
 | `build.py` | The parametric model. Parameters at the top, each with its source; `--part <name>` rebuilds one part |
 | `out/` | STEP (for Onshape) and STL (for printing) of every part, written by `build.py` |
 | `verify.py` | The [`cad_verify`](../tools/cad_verify.py) spec: every part, motion, joints with their fits, marks, assembly, access, measurements |
 | `verify-result.txt` | The last full verification (`PASS`, not `PARTIAL`) |
 | `design-review.md` | Fits, strength, retention, assembly, seats, print, marks, carry-over, pre-mortem: each with the number or picture that shows it |
 | `images/` | Figures made by scripts (`verify/` from `cad_verify --render`, others from [`tools/figures.py`](../tools/figures.py)) |
+
+## Rounds
+
+A design is worked in rounds, a method adapted from
+[3dcodeverse's harness](https://github.com/gaoypeng/3dcodeverse/tree/main/harness) (Apache-2.0):
+[`tools/rounds.py`](../tools/rounds.py) runs it, from the repo root.
+
+1. **Request** (`init`) and **plan** (`plan.json`, then `validate` until `PASS`). The validator catches, in
+   code, what a review round used to: a part never assembled, a joint held by «gravity», a fit that is not in
+   `fits.py`, a placeholder, a must-have with no acceptance item. A plan that changes after it validated is a
+   re-plan: the rounds start over.
+2. **Round 0**: the code is written from the plan, `check` runs every gate (`cad_verify` at N2, the level's own
+   check at N0 and N1) until no `FAIL`, then `round WS 0` snapshots the source, renders the views and writes the
+   judge's brief.
+3. **Blind judge**: a fresh agent that never sees the code reads only the brief and the pictures (the design next to
+   the reference, the toy), scores the rubric's criteria ([`tools/rubrics/looks.json`](../tools/rubrics/looks.json))
+   and answers each acceptance item. `score WS 0` turns that into a number with explicit caps (a gate `FAIL` caps it
+   at 0.60, an unverified must item at 0.60–1.00) and one improvement list, gate failures first.
+4. **Refine rounds**: exactly as many as were asked for in `spec.json`. Each one makes the last score's
+   improvement list and nothing else, then packs and scores again. Rounds stop when they are done, when the score
+   passes with nothing left to improve, or when it fell two rounds running; the deliverable is the best round
+   (`best` restores its source).
+
+```bash
+uv run python tools/rounds.py validate cad/<design>
+uv run python tools/rounds.py check cad/<design>
+uv run python tools/rounds.py round cad/<design> 0      # prints the JUDGE INSTRUCTION
+uv run python tools/rounds.py score cad/<design> 0
+uv run python tools/rounds.py status cad/<design>
+```
+
+Reference images are private (a product photo): `spec.json` names them as `{refs}/<file>` and `CAD_REFS` points at
+the folder that holds them, outside the repo.
 
 Commands, from the design folder:
 

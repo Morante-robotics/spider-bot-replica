@@ -125,6 +125,7 @@ import argparse
 import hashlib
 import importlib.util
 import itertools
+import json
 import os
 import re
 import sys
@@ -239,6 +240,27 @@ class Report:
         verdict = ("PASS" if not self.fails else "FAIL") if not self.partial else \
             ("PARTIAL PASS" if not self.fails else "PARTIAL FAIL")
         return "\n".join([f"cad_verify: {verdict} ({self.fails} failures, {self.warns} warnings)"] + self.lines) + "\n"
+
+    def to_dict(self):
+        """The report as data, for tools/rounds.py: the verdict, and per check its ok / WARN / FAIL counts and lines."""
+        checks, sec = {}, None
+        for ln in self.lines:
+            if ln.startswith("== "):
+                sec = checks.setdefault(re.sub(r"^\d+\s+", "", re.split(r"[:(]", ln[3:])[0].strip()),
+                                        {"ok": 0, "warn": 0, "fail": 0, "fails": [], "warns": []})
+            elif sec is not None:
+                if ln.startswith("  ok "):
+                    sec["ok"] += 1
+                elif ln.startswith("  WARN"):
+                    sec["warn"] += 1
+                    sec["warns"].append(ln.strip()[6:])
+                elif ln.startswith("  FAIL"):
+                    sec["fail"] += 1
+                    sec["fails"].append(ln.strip()[6:])
+        verdict = self.text().splitlines()[0].split(": ", 1)[1].split(" (")[0]
+        return {"verdict": verdict, "partial": self.partial, "fails": self.fails, "warns": self.warns,
+                "checks": checks, "fail_lines": [ln.strip()[6:] for ln in self.lines if ln.startswith("  FAIL")],
+                "warn_lines": [ln.strip()[6:] for ln in self.lines if ln.startswith("  WARN")]}
 
     def summary(self, full_path, n_gaps=5, width=300):
         """What is printed on screen (the full report goes to a file): the verdict, every FAIL, a count per check,
@@ -1356,6 +1378,7 @@ def main():
     ap.add_argument("--out", help="write the full report here (default: .verify-last.txt next to the spec)")
     ap.add_argument("--full", action="store_true",
                     help="print the full report; by default only a summary is printed (verdict, FAILs, closest gaps)")
+    ap.add_argument("--json", metavar="PATH", help="also write the report as data (for tools/rounds.py)")
     ap.add_argument("--render", metavar="DIR", help="write assembly.png and section-N.png here")
     ap.add_argument("--quick", action="store_true", help="skip wall thickness; retention at the first step only")
     ap.add_argument("--smoke", action="store_true",
@@ -1406,6 +1429,9 @@ def main():
     with open(full_path, "w") as f:
         f.write(txt)
     print(txt if args.full else rep.summary(full_path, n_gaps=3 if args.smoke else 5))
+    if args.json:
+        with open(args.json, "w") as f:
+            json.dump(rep.to_dict(), f, indent=1, ensure_ascii=False)
     if args.render:
         render(spec, meshes, args.render)
     sys.exit(1 if rep.fails else 0)

@@ -17,7 +17,9 @@ changes the design, in the same change.
 ## Commands (from this folder)
 
 ```bash
+(cd ../.. && uv run python tools/rounds.py validate cad/<design>)   # after every plan edit, until PASS
 ../../.venv/bin/python build.py --part <name>
 ../../.venv/bin/python ../../tools/cad_verify.py verify.py --smoke --only <part>   # after every fix (seconds)
 ../../.venv/bin/python ../../tools/cad_verify.py verify.py --out verify-result.txt --render images/verify   # once, at the end
+(cd ../.. && uv run python tools/rounds.py round cad/<design> <n>)   # pack round n for the judge; then score
 ```

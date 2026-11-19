@@ -1,0 +1,20 @@
+{
+ "design": "_template",
+ "level": "N2",
+ "purpose": "Demo: a block held in a window of a frame",
+ "pass_criterion": "the block drops into its window and lifts out by hand",
+ "must_have": [],
+ "must_not": [],
+ "dims": {
+  "block_w": {"value": 10.0, "unit": "mm", "source": "build.py EXAMPLE_W"}
+ },
+ "references": [],
+ "src": ["build.py", "verify.py"],
+ "gates": [
+  {"name": "cad_verify", "kind": "cad_verify", "spec": "verify.py", "args": ["--smoke"]}
+ ],
+ "views": {},
+ "judge": {"enabled": false, "rubric": "looks"},
+ "refine_rounds": 0,
+ "asked": "Morante, 2026-11-19"
+}

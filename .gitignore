@@ -31,3 +31,7 @@ cad/chassis/out/
 
 # N0 mock-up: the body distance field (cad/mockup/n0.py), rebuilt on demand
 cad/mockup/.cache/
+
+# Design rounds (tools/rounds.py): snapshots, gates, views, judge briefs and scores are local; the build log keeps
+# the round table (rounds.py status)
+cad/*/rounds/

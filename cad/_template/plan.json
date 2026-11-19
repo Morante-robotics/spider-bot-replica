@@ -1,0 +1,132 @@
+{
+ "summary": "A 30 × 30 mm frame with a 10 mm block held in its window by a ledge and a screwed cap; nothing moves.",
+ "parts": [
+  {
+   "name": "frame",
+   "role": "the ground part, holds the block",
+   "why_separate": "prints flat, the block prints on its own",
+   "grams": 4,
+   "print_orient": "flat face down"
+  },
+  {
+   "name": "example",
+   "role": "block in the frame's window",
+   "why_separate": "goes in after the frame",
+   "grams": 1,
+   "print_orient": "flat face down"
+  },
+  {
+   "name": "cap",
+   "role": "stops the block lifting out",
+   "why_separate": "screwed on, so a fix reprints a gram",
+   "grams": 1,
+   "print_orient": "flat face down"
+  },
+  {
+   "name": "screw-m3",
+   "role": "holds the cap",
+   "hardware": true
+  }
+ ],
+ "joints": [
+  {
+   "name": "block-in-window",
+   "a": "example",
+   "b": "frame",
+   "type": "slide",
+   "fit": "fits.WINDOW",
+   "held": {
+    "+x": "window wall",
+    "-x": "window wall",
+    "+y": "window wall",
+    "-y": "window wall",
+    "+z": "cap",
+    "-z": "ledge at the window's foot"
+   },
+   "in_from": "+z",
+   "apart_by": "unscrew the cap, lift out"
+  },
+  {
+   "name": "cap-on-frame",
+   "a": "cap",
+   "b": "frame",
+   "type": "screw",
+   "fit": "fits.STEEL",
+   "held": {
+    "+x": "screw",
+    "-x": "screw",
+    "+y": "screw",
+    "-y": "screw",
+    "+z": "screw head",
+    "-z": "frame top face"
+   },
+   "in_from": "+z",
+   "apart_by": "unscrew"
+  }
+ ],
+ "assembly": [
+  {
+   "part": "frame",
+   "from": null,
+   "tool": "hand",
+   "check": "flat on the table"
+  },
+  {
+   "part": "example",
+   "from": "+z",
+   "tool": "hand",
+   "already": "frame",
+   "check": "sits on the ledge, flush with the top"
+  },
+  {
+   "part": "cap",
+   "from": "+z",
+   "tool": "hand",
+   "already": "frame, example",
+   "check": "covers the block's edge"
+  },
+  {
+   "part": "screw-m3",
+   "from": "+z",
+   "tool": "2.5 mm hex key",
+   "already": "cap",
+   "check": "head flush, cap does not turn"
+  }
+ ],
+ "alternatives": [
+  {
+   "topic": "what holds the block in +Z",
+   "options": [
+    "a cap screwed on top",
+    "a pin across"
+   ],
+   "choice": "a cap screwed on top",
+   "why": "a fix reprints a gram"
+  }
+ ],
+ "acceptance": [
+  {
+   "id": "a1",
+   "text": "the block is held in every direction",
+   "how": "verify",
+   "check": "retention",
+   "priority": "must"
+  },
+  {
+   "id": "a2",
+   "text": "the block fits its window with the WINDOW fit",
+   "how": "verify",
+   "check": "joints",
+   "priority": "must"
+  },
+  {
+   "id": "a3",
+   "text": "the block drops into its window and lifts out by hand",
+   "how": "print",
+   "priority": "must"
+  }
+ ],
+ "open_questions": [],
+ "diagram": "",
+ "_validated": "dac7757d7cacd30a:406c9b254d15"
+}
