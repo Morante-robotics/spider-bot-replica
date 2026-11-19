@@ -119,3 +119,23 @@ def test_silhouette_iou_ignores_framing(tmp_path):
 def test_eval_map():
     m = {"0.27": 0.1, "0.85": 1.0}
     assert r.eval_map(m, 0.1) == 0.1 and r.eval_map(m, 0.9) == 1.0 and abs(r.eval_map(m, 0.56) - 0.55) < 1e-9
+
+
+def test_exit_code_is_the_verdict(tmp_path):
+    """validate/check print FAIL and must also exit non-zero, so `validate WS && ...` stops on a bad plan."""
+    import json
+    import subprocess
+    ws, tool = tmp_path / "t", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "rounds.py")
+    ws.mkdir()
+
+    def run(*args):
+        return subprocess.run([sys.executable, tool, *args, str(ws)], capture_output=True, text=True).returncode
+
+    assert run("validate") == 2  # no spec.json: it could not run
+    (ws / "spec.json").write_text(json.dumps({**SPEC2, "level": "N1"}))  # N2 also needs a cad_verify gate
+    (ws / "plan.json").write_text(json.dumps(plan2(summary="TODO")))
+    assert run("validate") == 1
+    (ws / "plan.json").write_text(json.dumps(plan2()))
+    assert run("validate") == 0
+    assert run("check") == 0  # no gates
+    assert run("best") == 2  # no scored round

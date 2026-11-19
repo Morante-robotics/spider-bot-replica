@@ -27,7 +27,8 @@ Commands (from the repo root; WS is the design folder, e.g. cad/robot):
     uv run python tools/rounds.py status WS            # every round's score, caps and verdict; the best round
     uv run python tools/rounds.py best WS              # copy the best round's src back (then run check again)
 
-Every command prints its verdict first (PASS / FAIL / ERROR), then the numbers and what to fix. Exit 0 = it ran.
+Every command prints its verdict first (PASS / FAIL / ERROR), then the numbers and what to fix. The exit code is the
+verdict, so `validate WS && ...` stops on a bad plan: 0 = PASS, 1 = FAIL, 2 = ERROR (it could not run).
 """
 import argparse
 import datetime
@@ -120,7 +121,7 @@ def cmd_init(a):
     path = os.path.join(ws, "spec.json")
     if os.path.exists(path):
         print(f"ERROR {path} exists: spec.json is written once (a new request is a new design or a re-plan)")
-        return 0
+        return 2
     spec = {"design": os.path.basename(ws), "level": a.level, "purpose": a.purpose,
             "pass_criterion": a.pass_criterion or "", "must_have": a.must_have or [], "must_not": a.must_not or [],
             "dims": {}, "references": [{"image": r, "label": "toy (reference)"} for r in (a.ref or [])],
@@ -323,10 +324,10 @@ def cmd_validate(a):
     spec, plan = jload(os.path.join(ws, "spec.json")), jload(os.path.join(ws, "plan.json"))
     if spec is None:
         print(f"ERROR no spec.json in {ws}: run init first")
-        return 0
+        return 2
     if plan is None:
         print(f"ERROR no plan.json in {ws}: copy cad/_template/plan.json and fill it")
-        return 0
+        return 2
     e1, w1 = check_spec(spec, ws)
     e2, w2, norm = check_plan(plan, spec)
     err, warn = e1 + e2, w1 + w2
@@ -345,7 +346,7 @@ def cmd_validate(a):
         with open(os.path.join(ws, "design-plan.md"), "w") as f:
             f.write(plan_md(plan, spec))
         print(f"  wrote {os.path.join(ws, 'design-plan.md')}")
-    return 0
+    return 1 if err else 0
 
 
 def plan_is_valid(ws):
@@ -496,15 +497,15 @@ def cmd_round(a):
     spec, plan = jload(os.path.join(ws, "spec.json")), jload(os.path.join(ws, "plan.json"))
     if spec is None or plan is None:
         print("ERROR spec.json and plan.json first")
-        return 0
+        return 2
     if not plan_is_valid(ws):
         print("ERROR plan.json is not validated as it stands: run validate until PASS (a changed plan is a re-plan: "
               "the rounds start over)")
-        return 0
+        return 2
     d = rdir(ws, n)
     if os.path.exists(os.path.join(d, "judgment.json")) and not a.force:
         print(f"ERROR {d} is already judged: the next round is r{n + 1:02d} (--force repacks it)")
-        return 0
+        return 2
     os.makedirs(d, exist_ok=True)
     srcd = os.path.join(d, "src")
     shutil.rmtree(srcd, ignore_errors=True)
@@ -518,14 +519,14 @@ def cmd_round(a):
         snaps.append({"path": os.path.relpath(p, ROOT), "snap": snap})
     gates = cmd_check(a, out_dir=d)
     if gates is None:
-        return 0
+        return 2
     if gates["verdict"] == "ERROR":
         print(f"ERROR round r{n:02d} stopped: a gate could not run; fix it and run round {n} again")
-        return 0
+        return 2
     if gates["verdict"] == "FAIL" and spec.get("judge", {}).get("enabled") and not a.force:
         print(f"FAIL round r{n:02d} not packed for the judge: fix the gate failures above first (each caps the score "
               f"at 0.60; a judge call on them is wasted). --force packs it anyway")
-        return 0
+        return 1
     images, measured = [], {}
     for i, r in enumerate(spec.get("references", [])):
         p = expand(r["image"], ws)
@@ -541,7 +542,7 @@ def cmd_round(a):
         made = [x.replace("{out}", out).replace("{dir}", d) for x in v.get("images", ["{out}"])]
         if p.returncode or not all(os.path.exists(x) for x in made):
             print(f"ERROR views command failed:\n{(p.stdout + p.stderr)[-1500:]}")
-            return 0
+            return 2
         images += [(f"VIEW {k}: {os.path.basename(x)}", x) for k, x in enumerate(made)]
         for k, m in enumerate(v.get("masks", [])):
             mp, ref = m["mask"].replace("{dir}", d), spec["references"][m.get("ref", 0)].get("mask")
@@ -666,12 +667,12 @@ def cmd_score(a):
     gates, rnd = jload(os.path.join(d, "gates.json")), jload(os.path.join(d, "round.json"))
     if None in (spec, plan, gates, rnd):
         print(f"ERROR round r{n:02d} is not packed: run round {n}")
-        return 0
+        return 2
     judged = spec.get("judge", {}).get("enabled")
     judgment = jload(os.path.join(d, "judgment.json")) if judged else None
     if judged and judgment is None:
         print(f"ERROR no judgment.json in {d}: hand the JUDGE INSTRUCTION to a fresh looks-judge first")
-        return 0
+        return 2
     rub = rubric(spec.get("judge", {}).get("rubric", "looks")) if judged else {"pass_threshold": 0.75}
     res = score_round(spec, plan, gates, rub, judgment, rnd.get("measured", {}))
     jsave(os.path.join(d, "score.json"), res)
@@ -690,7 +691,7 @@ def cmd_score(a):
     for x in res["improvement"]:
         print(f"  - {x}")
     print(f"  images: " + ", ".join(p for _, p in rnd.get("images", [])))
-    return 0
+    return 0 if res["passed"] else 1
 
 
 # ---------------------------------------------------------------- status and best
@@ -745,7 +746,7 @@ def cmd_best(a):
     b = best_round(rounds_of(ws))
     if b is None:
         print("ERROR no scored round")
-        return 0
+        return 2
     rnd = jload(os.path.join(rdir(ws, b), "round.json"))
     back = []
     for f in rnd["files"]:
@@ -781,8 +782,11 @@ def main():
     a = ap.parse_args()
     fn = {"init": cmd_init, "validate": cmd_validate, "check": cmd_check, "round": cmd_round, "score": cmd_score,
           "status": cmd_status, "best": cmd_best}[a.cmd]
-    fn(a)
+    rc = fn(a)
+    if a.cmd == "check":  # cmd_check returns the gates (cmd_round reuses them), or None when it could not run
+        rc = 2 if rc is None or rc["verdict"] == "ERROR" else 1 if rc["verdict"] == "FAIL" else 0
+    return rc
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
