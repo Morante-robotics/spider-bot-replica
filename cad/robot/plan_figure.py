@@ -1,63 +1,91 @@
-"""N2 plan diagram: exploded view of the looks robot on N1's meshes plus boxes for the parts not modelled yet.
-Not a check: positions are N0/N1's (cad/mockup), boxes are the plan's envelopes. Usage (repo root):
+"""N2 plan diagram (rev 4): exploded view of the looks robot on N1's meshes at S 0.65 plus boxes for the parts not
+modelled yet, placed by `probes.py layouts4` (cad/robot/out/.cache/layouts4_0.650.json). Labels in Spanish (for
+Morante). Not a check: boxes are the plan's envelopes. Usage (repo root):
     uv run python cad/robot/plan_figure.py cad/robot/images/plan-exploded.png
 """
-import os, sys
+import os, sys, json
 import numpy as np, trimesh, matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path[:0] = [os.path.join(ROOT, "cad", "mockup"), os.path.join(ROOT, "tools")]
-import n0, n1, figures as Fg  # noqa: E402
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(os.path.dirname(HERE))
+sys.path[:0] = [HERE, os.path.join(ROOT, "cad", "mockup"), os.path.join(ROOT, "tools")]
+import n1, figures as Fg  # noqa: E402
+import probes as P  # noqa: E402
 
-R = n1.run()
-st, legs, bx = R["st"], R["legs"], R["bx"]
-UP = dict(body=46, eyes=46, keeper=24, cells=34, drive=12, legs=0, base=0)    # exploded lift (mm)
+R = n1.run(P.p_at(P.S_FIX))
+st, legs = R["st"], R["legs"]
+UP = dict(body=50, eyes=50, keeper=26, cells=36, drive=14, legs=0, base=0)    # exploded lift (mm)
+LAY = json.load(open(os.path.join(HERE, "out", ".cache", f"layouts4_{P.S_FIX:.3f}.json")))
+best = max(LAY, key=lambda r: r["least"])
 
 
-def box(c, s, dz):
-    m = trimesh.creation.box(extents=s); m.apply_translation(np.array(c, float) + [0, 0, dz]); return m
+def box(lo, hi, dz):
+    lo, hi = np.array(lo, float), np.array(hi, float)
+    m = trimesh.creation.box(extents=hi - lo)
+    m.apply_translation((lo + hi) / 2 + [0, 0, dz])
+    return m
 
 
 items, notes = [], []
-add = lambda m, col, txt=None, at=None: (items.append(dict(mesh=m, color=col)), txt and notes.append((at, txt)))
+
+
+def add(m, col, txt=None, at=None):
+    items.append(dict(mesh=m, color=col))
+    if txt:
+        notes.append((at, txt))
+
+
 body = trimesh.Trimesh(st["body_v"] + [0, 0, UP["body"]], st["body_f"])
-add(body, "#c0392b", "1 body (dome + eyes, mesh)", body.vertices[body.vertices[:, 2].argmax()])
-eyes = trimesh.Trimesh(st["eyes_v"] + [0, 0, UP["eyes"]], st["eyes_f"]); add(eyes, "#2e86c1")
+add(body, "#c0392b", "1 cuerpo (cúpula, ojos del color del cuerpo)", body.vertices[body.vertices[:, 2].argmax()])
+add(trimesh.Trimesh(st["eyes_v"] + [0, 0, UP["eyes"]], st["eyes_f"]), "#2e86c1")
 base = trimesh.Trimesh(st["base_v"], st["base_f"])
-add(base, "#7f8c8d", "2 base (bowl, ground part)", base.vertices[base.vertices[:, 1].argmin()])
+add(base, "#7f8c8d", "2 base (pieza fija, muescas de las patas)", base.vertices[base.vertices[:, 1].argmin()])
 for i, lg in enumerate(legs):
     W = n1.carry(lg["loc"], lg["g"])[0]
-    m = trimesh.Trimesh(W, lg["F"]); add(m, "#e2b007", "leg ×8 (3 arm + 4 outer leg)" if i == 1 else None,
-                                         m.vertices[m.vertices[:, 0].argmax()])
-lo, hi = bx["engranajes"]; c, s = (lo + hi) / 2, hi - lo
-add(box(c, s, UP["drive"]), "#27ae60", "5 spine + 6 cap + gears", c + [0, 0, UP["drive"] + s[2] / 2])
-for k, (lo, hi) in bx.items():
-    if k.startswith("cigüeñal"):
-        add(box((lo + hi) / 2, hi - lo, UP["drive"]), "#16a085",
-            "7 crankshaft ×4 (balls in the arms)" if k.endswith("1") else None, (lo + hi) / 2 + [0, 0, UP["drive"]])
-# motor and cell holder: the best layout of `probes.py layouts` at S 0.65 (cad/robot/out/.cache/layouts_0.650.json)
-import json
-LAY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "out", ".cache", "layouts_0.650.json")
-best = max(json.load(open(LAY)), key=lambda r: r["least"])
+    m = trimesh.Trimesh(W, lg["F"])
+    add(m, "#e2b007", "3 brazo + 4 pata (×8)" if i == 1 else None, m.vertices[m.vertices[:, 0].argmax()])
+c = P._ctx(P.S_FIX, P.BALL_D2, P.CRANK_DY_65)
+lo, hi = c["strip"]
+add(box(lo, hi, UP["drive"]), "#27ae60", "5 espina + 6 tapa + 8 engranajes locos", (lo + hi) / 2 + [0, 0, UP["drive"] + 8])
+for k, (lo, hi) in enumerate(c["sweeps"][:4]):
+    add(box(lo, hi, UP["drive"]), "#16a085", "7 cigüeñal ×4 (bolas Ø2 en los brazos)" if k == 0 else None,
+        (lo + hi) / 2 + [0, 0, UP["drive"]])
+TXT = {"motor": ("#8e44ad", "drive", "9 motor N10 + 10 abrazadera (2 × M3)"),
+       "motor crown": ("#9b59b6", "drive", "16 corona 20T + piñón recto 10T (una pieza)"),
+       "motor idler": ("#a569bd", "drive", "17 loco de transmisión a la tira"),
+       "holderA": ("#e67e22", "cells", "11 portapilas: 2 paquetes 3P de canto + 12 tapas"),
+       "eyes board": ("#2e86c1", "body", "15 placa de ojos (2 LED de 5 mm, resistencias)"),
+       "switch": ("#4d4d4d", "drive", "interruptor SS12D00 + 14 retén"),
+       "bossF body": ("#c0392b", "body", "tetones del cuerpo (2 × M3 desde abajo)"),
+       "jst1": ("#34495e", "cells", "2 conectores JST-XH")}
 for nm, lo, hi in best["boxes"]:
-    lo, hi = np.array(lo), np.array(hi); c, s_ = (lo + hi) / 2, hi - lo
-    if nm.startswith("holder"):
-        add(box(c, s_, UP["cells"]), "#e67e22", "11 cell holder (3P pack ×2, on edge) + 12 lid" if nm.endswith("A") else None,
-            c + [0, 0, UP["cells"] + s_[2] / 2])
-    else:
-        add(box(c, s_, UP["drive"]), "#8e44ad", "9 N10 motor + 10 clamp" if nm == "motor" else None,
-            c + [0, 0, UP["drive"] + s_[2] / 2])
+    key = nm if nm in TXT else None
+    grp = nm.split()[0]
+    col, up, txt = TXT.get(nm, (None, None, None))
+    if col is None:
+        col = {"motor": "#8e44ad", "holderA": "#e67e22", "holderB": "#e67e22", "LEDL": "#5dade2",
+               "LEDR": "#5dade2", "eyes": "#2e86c1", "bossF": "#c0392b", "bossR": "#c0392b",
+               "jst2": "#34495e"}.get(grp, "#95a5a6")
+        up = {"holderA": "cells", "holderB": "cells", "LEDL": "body", "LEDR": "body", "eyes": "body",
+              "bossF": "body", "bossR": "body", "jst2": "cells"}.get(grp, "drive")
+    if "column" in nm:
+        up = "base"
+    dz = UP[up]
+    m = box(lo, hi, dz)
+    add(m, col, txt, (np.array(lo) + np.array(hi)) / 2 + [0, 0, dz + (np.array(hi) - np.array(lo))[2] / 2])
 for sx in (1, -1):
-    add(box([sx * 24, 1.5, 16.2], [6, 36, 2], UP["keeper"]), "#d35400",
-        "13 pivot keeper ×2" if sx > 0 else None, np.array([sx * 24, 1.5, 17.2 + UP["keeper"]]))
-lo, hi = bx["interruptor"]; add(box((lo + hi) / 2, hi - lo, UP["drive"]), "#4d4d4d", "SS12D00 switch + 14 retainer",
-                                (lo + hi) / 2 + [0, 0, UP["drive"]])
-add(box([0, -24, 28], [20, 2, 8], UP["body"]), "#2e86c1", "15 eyes board (perfboard, LEDs)",
-    np.array([0, -24, 32 + UP["body"]]))
+    Lg = [L for L in c["L"] if L["side"] == ("R" if sx > 0 else "L")]
+    ys = [L["P"][1] for L in Lg]
+    x = np.mean([L["P"][0] for L in Lg])
+    z = Lg[0]["P"][2] + 2.4 + P.F.WINDOW.side
+    add(box([x - 3, min(ys) - 6, z], [x + 3, max(ys) + 3, z + 2.4], UP["keeper"]), "#d35400",
+        "13 retén de los pasadores ×2 (2 × M3 + gancho bajo el labio del borde)" if sx > 0 else None,
+        np.array([x, np.mean(ys), z + 2.4 + UP["keeper"]]))
 fig, ax = plt.subplots(figsize=(13, 10))
 proj = Fg.draw(ax, items, view=(22, -62))
 Fg.side_labels(ax, [(proj(np.atleast_2d(p))[0], t) for p, t in notes])
-ax.set_title("Spider-Bot N2 plan: exploded view (N1 meshes; boxes = parts not modelled yet). Numbers = part list",
-             fontsize=Fg.FONT + 2)
-fig.savefig(sys.argv[1], dpi=110, bbox_inches="tight"); print("wrote", sys.argv[1])
+ax.set_title(f"Spider-Bot N2, plan rev 4: vista despiezada (escala 0,65; cajas = piezas aún sin modelar; "
+             f"holgura mínima {best['least']:+.2f} mm). Números = lista de piezas", fontsize=Fg.FONT + 1)
+fig.savefig(sys.argv[1], dpi=110, bbox_inches="tight")
+print("wrote", sys.argv[1])

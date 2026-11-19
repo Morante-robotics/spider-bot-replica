@@ -35,7 +35,7 @@ BASE_WALL = 1.2                  # N1 WALL_BASE
 GEAR_W = 3.0                     # spur face width (gear train v2)
 ARM_R = 1.4                      # arm bar half-thickness (2.8 mm: ≥ 2 mm tongue rule, loaded)
 BALLS = {"Ø3 ball": 3.0, "Ø2 ball": 2.0}
-CRANK_DY = (-1.5, -0.5, 2.5, 0.0)  # per-crank Y offset from N0 (mm at S 0.60): set from pr_arms (c7)
+CRANK_DY = (-1.5, -0.5, 2.5, 0.0)  # rev 2 only (Ø3 balls, mm at S 0.60, rescaled by S/0.6 in pr_inside)
 SLIDE = 1.0                      # ball travel in its bore over a turn (pr1 arm length 17.5-18.3 → ≤ 1.0)
 
 
@@ -265,7 +265,8 @@ def crank_sweeps(L):
     """Stationary keep-outs round each crank's moving web + ball (r + 1.5 radius, x from wall to ball end)."""
     out = []
     for Lg in L:
-        O, r = Lg["O"], p_at(0.6)["r"]
+        O = Lg["O"]
+        r = float(np.linalg.norm(Lg["A"][0] - O))         # the crank radius at this S (rev 3 used S 0.60's)
         x0, x1 = sorted((np.sign(O[0]) * 3.4, O[0] + np.sign(O[0]) * 1.5))
         R = r + 1.5 + F.LEG_PATH.side
         out.append((np.array([x0, O[1] - R, O[2] - R]), np.array([x1, O[1] + R, O[2] + R])))
@@ -355,21 +356,27 @@ def pr_inside(scales=(0.60, 0.62, 0.65), dy=CRANK_DY, ball=3.0, walls=(3.0,), to
 
 # ---------------------------------------------------------------- inside layouts (rev 3: S fixed, Ø2 balls)
 BALL_D2 = 2.0                       # Morante, 2026-11-19: Ø2 balls at S 0.65
-CRANK_DY_D2 = (0.0, 0.0, 2.0, 0.0)  # crank offsets used with Ø2 balls (coordinator's pr_inside run, S 0.60 mm)
+CRANK_DY_D2 = (0.0, 0.0, 2.0, 0.0)  # rev 3 only: mm at S 0.60 (rescaled to 0, 0, 2.17, 0 at S 0.65)
+S_FIX = 0.65                        # Morante, 2026-11-19
+STALL = 40.0                        # N10 stall torque at 3 V, N·mm (assumed ≈ 0.4 kg·cm, typical N10 listing; measure)
+CROWN = dict(z_pinion=10, z_crown=20, z_spur=10, m=0.6, x=0.42, r_in=5.4, r_out=6.9, disc=1.6)  # B1, see pr_crown
+LEDS = {5.0: (5.8, 8.6), 3.0: (3.8, 5.3)}   # LED Ø: (flange Ø, dome tip to flange back), datasheet
+JST_XH = (17.0, 8.0, 6.0)           # mated 2-pin JST-XH wire pair (hardware.md; datasheet, measure on arrival)
+M3_HEAD, M3_NUT = (5.5, 3.0), (5.5, 2.4)   # socket head Ø × h, nut AF × t (hardware.md)
+CRANK_DY_65 = (0.0, 0.0, 2.0, 0.0)  # rev 4, frozen: per-crank Y offsets in mm AT S 0.65 (no rescale), pr_arms(0.65)
 _ARMF = {}
 
 
 def arm_field(S, ball, dy):
     """Room (mm) from grid points to the swept arms (ends and bars, all legs, a full turn), LEG_PATH taken off;
     same grid as room_grid; cached on disk per S, ball, offsets."""
-    key = (S, ball, tuple(dy))
+    key = (S, ball, tuple(dy))          # dy in mm at S (rev 4; rev 3 files without «mmS» were rescaled)
     if key not in _ARMF:
-        path = os.path.join(CACHE, f"arms_{S:.3f}_{ball}_{'_'.join(f'{d:g}' for d in dy)}_{ROOM_PITCH}.npz")
+        path = os.path.join(CACHE, f"arms_{S:.3f}_{ball}_{'_'.join(f'{d:g}' for d in dy)}_{ROOM_PITCH}_mmS.npz")
         if os.path.exists(path):
             _ARMF[key] = dict(np.load(path))
         else:
-            k = S / 0.6
-            L = legs_ax(p_at(S), poses=24, dy=tuple(d * k for d in dy))
+            L = legs_ax(p_at(S), poses=24, dy=tuple(dy))
             X, R = arm_cloud(L, ball, step=1)
             G = room_grid(S, 3.0)
             ax = [G["lo"][i] + ROOM_PITCH * np.arange(G["g"].shape[i]) for i in range(3)]
@@ -464,8 +471,7 @@ def drives(p, g, z0):
 
 def _ctx(S, ball, dy):
     p = p_at(S)
-    k = S / 0.6
-    dyk = tuple(d * k for d in dy)
+    dyk = tuple(dy)                       # mm at S (rev 4)
     L = legs_ax(p, poses=24, dy=dyk)
     g, z0 = train(p, dy=dyk)
     X, R = arm_cloud(L, ball)
@@ -502,24 +508,26 @@ def eval_layout(c, boxes, wall, exact=True):
     S = c["S"]
     res = {}
     memo = c.setdefault("_memo", {})
-    for nm, lo, hi, ex in boxes:
-        mk = (tuple(np.round(lo, 3)), tuple(np.round(hi, 3)), wall, exact)
+    for b in boxes:                      # (name, lo, hi, exempt from strip[, shell check])
+        nm, lo, hi, ex = b[:4]
+        shl = b[4] if len(b) > 4 else True   # False: passes through the shell by design (LED in its eye bore)
+        mk = (tuple(np.round(lo, 3)), tuple(np.round(hi, 3)), wall, exact, shl)
         if mk not in memo:
-            memo[mk] = (inside_gap(box_pts(lo, hi), S, wall, exact),
+            memo[mk] = (inside_gap(box_pts(lo, hi), S, wall, exact) if shl else 9.0,
                         (n0.pt_box(c["X"], lo, hi) - c["R"]).min() - F.LEG_PATH.side)
         res[f"{nm}↔shell"], res[f"{nm}↔arms"] = memo[mk]
         res[f"{nm}↔cranks"] = min(box_sep((lo, hi), s) for s in c["sweeps"])
         if not ex:
             res[f"{nm}↔strip"] = box_sep((lo, hi), c["strip"])
-    for i, (n1_, l1, h1, _) in enumerate(boxes):
-        for n2_, l2, h2, _ in boxes[i + 1:]:
+    for i, (n1_, l1, h1, *_) in enumerate(boxes):
+        for n2_, l2, h2, *_ in boxes[i + 1:]:
             if n1_.split()[0] != n2_.split()[0]:          # motor + its own crown / worm are one sub-assembly
                 res[f"{n1_}↔{n2_}"] = box_sep((l1, h1), (l2, h2))
     k = min(res, key=res.get)
     return res[k], k, res
 
 
-def search_layouts(S=0.65, ball=BALL_D2, dy=CRANK_DY_D2, walls=(3.0, 1.6), refine=6, only=None):
+def search_layouts(S=0.65, ball=BALL_D2, dy=CRANK_DY_65, walls=(3.0, 1.6), refine=6, only=None):
     """(only = [(wall, drive[:6], holder[:3])] limits the rows.) Every drive × holder × body wall: coarse search on the room grids (box min filters, 0.5 mm steps), the best
     `refine` combinations re-checked exactly and hill-climbed (0.5 mm moves). Returns rows for the table."""
     c = _ctx(S, ball, dy)
@@ -628,106 +636,131 @@ def _climb(c, boxes, wall, dn, steps=4):
     return sc, kk, res, boxes
 
 
-def pr_arms(margin=0.2):
-    """Item 2: arm end ↔ arm (real ends, 24 poses) per side; per-crank Y offsets searched pair by pair (a chain),
-    least total shift with every pair ≥ LEG_PATH 0.8 + margin; crank gears ≥ 8.45 apart (tips 7.45 + 2 × GEAR_TIP)."""
+def pr_arms(S=S_FIX, ball=BALL_D2, margin=0.2):
+    """Item 2 / B4 (rev 4): arm end ↔ arm at scale S (real ends, 24 poses) per side; per-crank Y offsets (mm at S)
+    searched pair by pair, least total shift with every pair ≥ LEG_PATH 0.8 + margin (ties: largest least pair);
+    crank gears ≥ 8.45 apart (tips 7.45 + 2 × GEAR_TIP: the module does not scale). Also the ball's swivel."""
     import itertools
-    print("== arm ↔ arm (pr6): least gap − LEG_PATH 0.8, mm; ≥ 0 passes ==")
-    p = p_at(0.60)
+    print(f"== arm ↔ arm (pr6, S {S}, Ø{ball:g} ball, end Ø{2 * end_r(ball):.1f}): least gap − LEG_PATH 0.8, mm ==")
+    p = p_at(S)
     L0 = legs_ax(p, poses=24)
     ys = [L0[i]["O"][1] for i in range(4)]
     D = np.arange(-3, 3.01, 0.5)
-    for ball in BALLS.values():
-        def pair(i, a, b, xc=None):
-            dy = [0.0] * 4
-            dy[i], dy[i + 1] = a, b
-            if ys[i + 1] + b - ys[i] - a < 8.45:
-                return -9
-            L = legs_ax(p, poses=24, dy=dy, xc=xc)
-            return min(capsule_gap(c1, c2) - F.LEG_PATH.side for k in range(24)
-                       for c1 in arm_parts(L[i], k, ball) for c2 in arm_parts(L[i + 1], k, ball))
-        c0 = [pair(i, 0, 0) if ys[i + 1] - ys[i] >= 8.45 else pair_raw(p, i, ball) for i in range(3)]
-        print(f"c0 as N1, Ø{ball:.0f} ball (end Ø{2 * end_r(ball):.1f}): pairs 1-2/2-3/3-4 "
-              f"{c0[0]:+.2f} / {c0[1]:+.2f} / {c0[2]:+.2f}; cranks 2-3 {ys[2] - ys[1]:.1f} apart (< 8.45: gears clash)")
-        T = [{(a, b): pair(i, a, b) for a in D for b in D} for i in range(3)]
-        ok = [(sum(abs(c) for c in cb), cb) for cb in itertools.product(D, repeat=4)
-              if min(T[i][(cb[i], cb[i + 1])] for i in range(3)) >= margin]
-        if ok:
-            cost, cb = min(ok)
-            gp = [T[i][(cb[i], cb[i + 1])] for i in range(3)]
-            Lc = legs_ax(p, poses=24, dy=cb)
-            yaw = [math.degrees(math.atan2(Lc[i]["u"][6][1], Lc[i]["u"][6][0]) -
-                                math.atan2(L0[i]["u"][6][1], L0[i]["u"][6][0])) for i in range(4)]
-            sw = [np.ptp(np.degrees(np.arctan2(Lc[i]["u"][:, 1], Lc[i]["u"][:, 0]))) for i in range(4)]
-            print(f"c7 crank Y offsets {tuple(float(c) for c in cb)}, Ø{ball:.0f}: pairs {gp[0]:+.2f} / {gp[1]:+.2f} / "
-                  f"{gp[2]:+.2f}; spacing {[round(ys[i + 1] + cb[i + 1] - ys[i] - cb[i], 1) for i in range(3)]}; "
-                  f"arm yaw change {[round(y, 1) for y in yaw]}° (absorbed by the arm-leg key, D3a); "
-                  f"swing p-p {[round(s, 1) for s in sw]}°")
-        else:
-            print(f"Ø{ball:.0f}: no Y offsets within ±3 give ≥ {margin}")
-    for name, xc in (("c1 crank 3 XC 11", (6, 6, 11, 6)), ("c8 cranks 2, 4 XC 9 (alternate)", (6, 9, 6, 9))):
-        g = [pair_raw(p, i, 3.0, xc=xc) for i in range(3)]
-        print(f"{name}, Ø3: pairs {g[0]:+.2f} / {g[1]:+.2f} / {g[2]:+.2f}")
+
+    def pair(i, a, b):
+        dy = [0.0] * 4
+        dy[i], dy[i + 1] = a, b
+        if ys[i + 1] + b - ys[i] - a < 8.45:
+            return -9
+        L = legs_ax(p, poses=24, dy=dy)
+        return min(capsule_gap(c1, c2) - F.LEG_PATH.side for k in range(24)
+                   for c1 in arm_parts(L[i], k, ball) for c2 in arm_parts(L[i + 1], k, ball))
+    for nm, cb in (("as N1", (0, 0, 0, 0)), ("rev 3 (0, 0, 2, 0) at S 0.60, rescaled",
+                                             tuple(d * S / 0.6 for d in CRANK_DY_D2))):
+        gp = [pair(i, cb[i], cb[i + 1]) for i in range(3)]
+        print(f"  {nm} {tuple(round(c, 2) for c in cb)}: pairs 1-2/2-3/3-4 {gp[0]:+.2f} / {gp[1]:+.2f} / {gp[2]:+.2f}")
+    T = [{(a, b): pair(i, a, b) for a in D for b in D} for i in range(3)]
+    ok = [(sum(abs(c) for c in cb), -min(T[i][(cb[i], cb[i + 1])] for i in range(3)), cb)
+          for cb in itertools.product(D, repeat=4) if min(T[i][(cb[i], cb[i + 1])] for i in range(3)) >= margin]
+    if not ok:
+        print(f"  no offsets within ±3 give ≥ {margin}")
+        return None
+    # rev 4 rule: total shift ≤ 2 mm, then the largest least pair (rev 3's «least shift» left 2-3 at +0.38)
+    cost, _, cb = min(ok, key=lambda t: (t[0] > 2.0 + 1e-9, t[1], t[0]))
+    cb = tuple(float(c) for c in cb)
+    gp = [T[i][(cb[i], cb[i + 1])] for i in range(3)]
+    Lc = legs_ax(p, poses=24, dy=cb)
+    yaw = [math.degrees(math.atan2(Lc[i]["u"][6][1], Lc[i]["u"][6][0]) -
+                        math.atan2(L0[i]["u"][6][1], L0[i]["u"][6][0])) for i in range(4)]
+    sw = [np.ptp(np.degrees(np.arctan2(Lc[i]["u"][:, 1], Lc[i]["u"][:, 0]))) for i in range(4)]
+    tilt = [np.degrees(np.arccos(np.clip(np.abs(Lc[i]["u"][:, 0]), 0, 1))).max() for i in range(4)]
+    print(f"  FROZEN offsets (mm at S {S}) {tuple(float(c) for c in cb)}: pairs {gp[0]:+.2f} / {gp[1]:+.2f} / "
+          f"{gp[2]:+.2f} (margin ≥ {margin}); crank spacing "
+          f"{[round(float(ys[i + 1] + cb[i + 1] - ys[i] - cb[i]), 2) for i in range(3)]}; arm yaw change "
+          f"{[round(float(y), 1) for y in yaw]}° (D3a key); swing p-p {[round(float(s), 1) for s in sw]}°; ball "
+          f"swivel off the crank axis ≤ {[round(float(t), 1) for t in tilt]}°")
+    return cb, max(tilt)
+
+
+def pr_neck(S=S_FIX, ball=BALL_D2, neck=1.6, sigma=40.0):
+    """B4: printed Ø2 ball on its neck. The neck runs along the crank axis X (crank printed lying down, so the neck
+    lies in the bed plane: perimeters run along it and a bending load pulls along the lines, not across layers).
+    Lever = ball centre to the web face (the arm end tube needs ball/2 + slide/2 + 0.8 wall + LEG_PATH)."""
+    print(f"== crank ball neck (B4, S {S}) ==")
+    p = p_at(S)
+    lever = ball / 2 + SLIDE / 2 + W_MIN + F.LEG_PATH.side
+    Z = math.pi * neck ** 3 / 32                      # section modulus, round neck
+    flat = 0.3                                        # the bed-side flat (item 5) takes 0.3 off one side
+    Zf = Z * (1 - 1.7 * flat / neck)                  # ≈ loss of a 0.3 chord on a Ø1.6 section (conservative)
+    Fmax = sigma * Zf / lever
+    Fstall = STALL / (CROWN["z_spur"] / CROWN["z_crown"] * CROWN["z_pinion"] / CROWN["z_spur"]) / p["r"]
+    walk = 1.2 * 9.81 * 0.100 / 4 * (30 / 18)         # 100 g robot, 4 legs in stance, foot/ball lever 30/18, ×1.2
+    tilt_ok = (F.bore(ball, F.TURN) / 2 + 0.5 - neck / 2) / (ball / 2)   # tan of the swivel the 0.5 × 45° mouth allows
+    print(f"neck Ø{neck} (4 lines of 0.4), lever {lever:.1f} mm, Z {Zf:.3f} mm³ after the 0.3 flat; PLA along the "
+          f"lines {sigma:.0f} MPa → breaks at ≈ {Fmax:.1f} N at the ball. Walking ≈ {walk:.2f} N (×{Fmax / walk:.0f}); "
+          f"motor stall {STALL:.0f} N·mm (assumed) × 2 (crank:motor 1:2) / r {p['r']:.2f} = {Fstall:.0f} N: a jammed "
+          f"leg can break a neck before the motor stalls → the neck is the weak link on purpose (a crankshaft "
+          f"reprints in 0.4 g). Swivel the bore mouth (0.5 × 45°) passes: {math.degrees(math.atan(tilt_ok)):.0f}°")
+
+
+def pr_pivot(S=S_FIX, dy=CRANK_DY_65, pin=2.0):
+    """Items 3-4 / B2 (rev 4): root block swept in plan at the rim; rim left between notches (Ø2 steel pin, D2e),
+    the lands an M3 needs, the rim past legs 1 and 4 (keeper end screws), the pin's retention and length."""
+    print(f"== pivot (pr2/pr4 rev 4, S {S}, offsets {dy}): swept root block at the rim ==")
+    p = p_at(S)
+    L = legs_ax(p, poses=72, dy=dy)
+    w = F.bore(pin, F.STEEL) + 2 * W_LOAD
+    lb = w + 1.0
+    hulls = []
+    for i in range(4):
+        P = L[i]["P"][:2]
+        pts = []
+        for k in range(72):
+            u = L[i]["u"][k]
+            e = n0.unit(np.array([u[0], u[1]]))
+            n = np.array([-e[1], e[0]])
+            for sa in (-1, 1):
+                for sb in (-1, 1):
+                    pts.append(P + e * sa * lb / 2 + n * sb * w / 2)
+        pts = np.array(pts)
+        h = pts[ConvexHull(pts).vertices]
+        hulls.append(np.vstack([seg_pts(h[j], h[(j + 1) % len(h)], 0.05) for j in range(len(h))]))
+    land_s = F.bore(3.0, F.STEEL) + 2 * W_LOAD                    # M3 shank hole + walls (screw into a nut below)
+    land_n = F.bore(5.5, F.STEEL) + 2 * W_LOAD                    # M3 nut pocket (5.5 AF) + walls
+    out = {}
+    for a in range(3):
+        d = cKDTree(hulls[a]).query(hulls[a + 1])[0].min()
+        rim = d - 2 * F.LEG_PATH.side
+        out[f"{a + 1}-{a + 2}"] = rim
+        print(f"  notches {a + 1}-{a + 2}: pivots {np.linalg.norm(L[a]['P'][:2] - L[a + 1]['P'][:2]):.1f} apart, rim "
+              f"left {rim:+.2f} → M3 screw land {land_s:.1f} {'fits' if rim >= land_s else 'no'}, nut land "
+              f"{land_n:.1f} {'fits' if rim >= land_n else 'no'}")
+    R = n1.run(p)
+    V = R["st"]["base_v"]
+    z = L[0]["P"][2]
+    rimv = V[(np.abs(V[:, 2] - z) < 1.5) & (V[:, 0] > 5)]
+    front = hulls[0][:, 1].min() - F.LEG_PATH.side - rimv[:, 1].min()
+    rear = rimv[:, 1].max() - hulls[3][:, 1].max() - F.LEG_PATH.side
+    print(f"  rim past the swept blocks (base mesh at z {z:.1f} ± 1.5, along Y): front of leg 1 {front:.1f}, rear of "
+          f"leg 4 {rear:.1f} (the rim curves in there: the keeper end lands sit on the curve)")
+    floor, seat, eyes, play, kt, pocket = 2.0, 1.2, 2 * 2.4, F.WINDOW.side, 2.4, 1.5
+    ln = seat + eyes + play + pocket
+    print(f"  Ø{pin:g} pin: blind seat {seat} in the {floor} notch floor (Ø{F.bore(pin, F.STEEL):.2f}, STEEL) on a "
+          f"step with a Ø1.5 push-out hole; stack {eyes}; play {play}; keeper {kt} with a {pocket} pocket → "
+          f"{ln:.1f} → stock Ø2 × 8; {8 - seat - eyes:.1f} proud above the stack with the keeper off (pull with "
+          f"pliers, or push from below through the Ø1.5 hole with the 1.5 hex key)")
+    pitch = [np.ptp(np.degrees(np.arcsin(L[i]["u"][:, 2]))) / 2 for i in range(4)]
+    pm = max(pitch)
+    edge = (w / 2) * math.tan(math.radians(pm))
+    print(f"  pitch ±{', ±'.join(f'{x:.1f}' for x in pitch)}°: flare ±{pm + 2:.0f}°; block {w:.1f} × {lb:.1f}; flat-face "
+          f"edge travel {edge:.2f} ≤ WINDOW {F.WINDOW.side}; crown R ≈ {(w / 2) ** 2 / (2 * edge):.0f} mm")
+    return out, front, rear
 
 
 def pair_raw(p, i, ball, xc=None, dy=(0, 0, 0, 0)):
     L = legs_ax(p, poses=24, dy=dy, xc=xc)
     return min(capsule_gap(c1, c2) - F.LEG_PATH.side for k in range(24)
                for c1 in arm_parts(L[i], k, ball) for c2 in arm_parts(L[i + 1], k, ball))
-
-
-def pr_pivot():
-    """Items 3-4: root block swept in plan at the rim, rim left between notches 2-3, per pin; flare and crown."""
-    print("== pivot (pr2/pr4 rev 2): swept root block at the rim and what is left between notches ==")
-    p = p_at(0.60)
-    L = legs_ax(p, poses=72)
-    for name, pin in (("D2a Ø3 steel pin", 3.0), ("D2b M2 screw", 2.0), ("D2e Ø2 steel pin", 2.0)):
-        w = F.bore(pin, F.STEEL) + 2 * W_LOAD                       # block across the leg
-        lb = w + 1.0                                                 # along the leg, round the bore
-        gaps = {}
-        for a, b in ((0, 1), (1, 2), (2, 3)):
-            poly = []
-            for i in (a, b):
-                P = L[i]["P"][:2]
-                pts = []
-                for k in range(72):
-                    u = L[i]["u"][k]
-                    yaw = math.atan2(u[1], u[0])
-                    e = np.array([math.cos(yaw), math.sin(yaw)])
-                    n = np.array([-e[1], e[0]])
-                    for sa in (-1, 1):
-                        for sb in (-1, 1):
-                            pts.append(P + e * sa * lb / 2 + n * sb * w / 2)
-                poly.append(np.array(pts))
-            # gap between the swept blocks measured across the line joining the pivots
-            d = cKDTree(poly[0]).query(poly[1])[0].min()
-            c = np.linalg.norm(L[a]["P"][:2] - L[b]["P"][:2])
-            # convex sweeps: least distance between the hulls (sample hull edges)
-            h0 = poly[0][ConvexHull(poly[0]).vertices]
-            h1 = poly[1][ConvexHull(poly[1]).vertices]
-            e0 = np.vstack([seg_pts(h0[j], h0[(j + 1) % len(h0)], 0.05) for j in range(len(h0))])
-            e1 = np.vstack([seg_pts(h1[j], h1[(j + 1) % len(h1)], 0.05) for j in range(len(h1))])
-            d = cKDTree(e0).query(e1)[0].min()
-            gaps[f"{a + 1}-{b + 1}"] = (c, d, d - 2 * F.LEG_PATH.side)
-        swept = np.ptp(poly[0], 0)
-        print(f"{name}: block {w:.1f} × {lb:.1f}; " + "; ".join(
-            f"notches {k}: pivots {c:.1f} apart, blocks {d:.2f}, rim left {r:+.2f}" for k, (c, d, r) in gaps.items()))
-    # pitch: one flare across the stack, crowned faces
-    pitch = []
-    for i in range(4):
-        u = L[i]["u"]
-        el = np.degrees(np.arcsin(u[:, 2]))
-        pitch.append(np.ptp(el) / 2)
-    pm = max(pitch)
-    print(f"pitch amplitude per leg ±{', ±'.join(f'{x:.1f}' for x in pitch)}°: flare ±{pm + 2:.0f}° (+2° margin)")
-    for pin in (3.0, 2.0):
-        w = F.bore(pin, F.STEEL) + 2 * W_LOAD
-        hstack = 2 * 2.4                                             # arm eye 2.4 + leg eye 2.4, one flare
-        edge = (w / 2) * math.tan(math.radians(pm))
-        rc = (w / 2) ** 2 / (2 * edge) if edge else 0
-        print(f"Ø{pin:.0f}: stack {hstack:.1f} high, block {w:.1f} wide: flat face edge travel {edge:.2f} a side at "
-              f"±{pm:.1f}°; crown R ≈ {rc:.0f} mm keeps the contact at the centre; play floor+keeper = "
-              f"WINDOW {F.WINDOW.side:.1f} ≥ {edge:.2f}; key along the block 2 × {w + 1.0:.1f} long")
 
 
 def pr_gear():
@@ -898,11 +931,11 @@ def pr_figure(path):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     import figures as Fg
-    R = n1.run()
+    R = n1.run(p_at(S_FIX))
     st = R["st"]
     p = R["p"]
-    L = legs_ax(p, poses=24)
-    w, lb = F.bore(3.0, F.STEEL) + 2 * W_LOAD, F.bore(3.0, F.STEEL) + 2 * W_LOAD + 1.0
+    L = legs_ax(p, poses=24, dy=CRANK_DY_65)
+    w, lb = F.bore(2.0, F.STEEL) + 2 * W_LOAD, F.bore(2.0, F.STEEL) + 2 * W_LOAD + 1.0      # D2e Ø2 pin
     keep = {k: np.ones(len(st[k + "_f"]), bool) for k in ("body", "base")}
     for Lg in L:
         pts = []
@@ -926,15 +959,18 @@ def pr_figure(path):
                 ins &= V[:, 2] >= Lg["P"][2] - 2.4 - F.LEG_PATH.side - W_LOAD
             keep[kk] &= ~ins[Fc].any(1)
     fig, axs = plt.subplots(1, 2, figsize=(16, 8))
-    for ax, (title, kp) in zip(axs, (("N1 (approved look): hull of the 9 mm collar", R["keep"]),
-                                     ("N2 rev 2: notch per leg at LEG_PATH 0.8, skirt slots open at the bottom", keep))):
+    for ax, (title, kp) in zip(axs, (("N1 (aspecto aprobado): ventanas del collar de 9 mm", R["keep"]),
+                                     ("N2 rev 4: una muesca por pata (holgura 0,8), ranuras del faldón\n"
+                                      "abiertas por abajo; borde libre entre muescas 1-2 3,2 / 2-3 1,4 / 3-4 9,0 mm",
+                                      keep))):
         items = []
         for kk, col in (("base", "#7f8c8d"), ("body", "#c0392b")):
             items.append(dict(mesh=trimesh.Trimesh(st[kk + "_v"], st[kk + "_f"][kp[kk]]), color=col))
         items.append(dict(mesh=trimesh.Trimesh(st["eyes_v"], st["eyes_f"]), color="#2e86c1"))
         Fg.draw(ax, items, view=(8, 0), edge_angle=75.0)
         ax.set_title(title, fontsize=Fg.FONT + 1)
-    fig.suptitle("Right side, legs off: windows and rim between notches (S 0.60, Ø3 pin, D2a)", fontsize=Fg.FONT + 2)
+    fig.suptitle("Lado derecho, sin patas: ventanas y borde entre muescas (escala 0,65, pasador de acero Ø2)",
+                 fontsize=Fg.FONT + 2)
     fig.savefig(path, dpi=100, bbox_inches="tight")
     print("wrote", path)
 
@@ -945,7 +981,7 @@ def pr_layouts(S=0.65, only=None):
     Writes out/.cache/layouts_<S>.json for the plan figure."""
     import time
     t = time.time()
-    print(f"== inside layouts (S {S}, Ø{BALL_D2:g} balls, offsets {CRANK_DY_D2}): least room, mm (≥ 0 fits) ==")
+    print(f"== inside layouts (S {S}, Ø{BALL_D2:g} balls, offsets {CRANK_DY_65} mm at S): least room, mm (≥ 0 fits) ==")
     rows, c = search_layouts(S, only=only)
     keep = [dict(wall=r["wall"], drive=r["drive"], holder=r["holder"], least=float(r["least"]), bind=r["bind"],
                  boxes=[(n, list(map(float, lo)), list(map(float, hi))) for n, lo, hi, _ in r["boxes"]]) for r in rows]
@@ -959,8 +995,361 @@ def pr_layouts(S=0.65, only=None):
               + "; ".join(f"{n} {np.round(lo, 1).tolist()}..{np.round(hi, 1).tolist()}" for n, lo, hi in b["boxes"]))
     print(f"({time.time() - t:.0f} s)")
 
+# ---------------------------------------------------------------- rev 4: crown pair (B1) and the full inside (B3)
+def _teeth(name):
+    return int([t for t in name.split() if t.endswith("T")][0][:-1])
+
+
+def crown_drive(c, ym, zm):
+    """B1: D1b motor along Y (axis x 0, y ym, z zm), 10T pinion (x +0.42) on its D-shaft at the front, meshing a
+    20T face (crown) gear whose axis is X at the motor's height; the crown part carries a 10T spur (x +0.42) in the
+    strip plane x 0, nested inside the crown's tooth ring, which drives one strip gear through one transfer idler
+    (−0.42, zero-sum). Returns (boxes, info) or None. Envelopes: real gears + GEAR_TIP, walls W_LOAD, fits."""
+    m, Cw = CROWN["m"], CROWN
+    mw = np.array(MOTOR) + 2 * (F.MOTOR_SEAT.side + CLAMP_W)
+    lo = np.array([-mw[1] / 2, ym - mw[0] / 2, zm - mw[2] / 2])
+    hi = lo + [mw[1], mw[0], mw[2]]
+    tip_p = m * (Cw["z_pinion"] + 2 + 2 * Cw["x"]) / 2               # 3.85
+    yp = lo[1] - 3.1                     # pinion centre: seat wall, 1.6 of free shaft, half the 3 mm face
+    R0 = m * Cw["z_crown"] / 2           # 6.0: the pinion meshes the crown face at R0 from its axis
+    yC = yp - R0
+    xf = -(m * Cw["z_pinion"] / 2 + m * Cw["x"])                      # crown pitch plane (pinion pitch line)
+    xback = xf - 1.25 * m - Cw["disc"]                                # tooth root, then the disc
+    xl = xback - F.GEAR_THRUST_IDLER.side - W_LOAD                    # left spine wall outer face
+    xr = GEAR_W / 2 + F.GEAR_THRUST_IDLER.side + W_LOAD               # right wall (spur 3 wide at x 0)
+    rc = Cw["r_out"] + F.GEAR_TIP.side
+    rs, tip_s = m * Cw["z_spur"] / 2, tip_p
+    boxes = [("motor", lo, hi, False),
+             ("motor pinion", np.array([-tip_p - .5, yp - 2.0, zm - tip_p - .5]),
+              np.array([tip_p + .5, lo[1], zm + tip_p + .5]), False),
+             ("motor crown", np.array([xl, yC - rc, zm - rc]), np.array([xr, yC + rc, zm + rc]), False),
+             ("motor terminals", np.array([-4.0, hi[1], zm - 4.0]), np.array([4.0, hi[1] + 3.0, zm + 4.0]), False),
+             ("motor wires", np.array([-lo[0] * -1, hi[1] + 3.0, zm - 6.0]) * [1, 1, 1] + [0, 0, 0],
+              np.array([-lo[0], hi[1] + 6.0, zm + 6.0]), False)]
+    boxes[-1] = ("motor wires", np.array([lo[0], hi[1] + 3.0, zm - 6.0]), np.array([hi[0], hi[1] + 6.0, zm + 6.0]),
+                 False)                  # solder joints, series link A → B, leads down to the switch (4 × 4 bundle)
+    ear = F.bore(M3_HEAD[0], F.STEEL)                                  # 5.8 head pocket = ear width
+    for nm, sx, y0 in (("motor clamp ear L", -1, lo[1] + 1.0), ("motor clamp ear R", 1, hi[1] - 1.0 - ear)):
+        x0 = hi[0] if sx > 0 else lo[0] - ear
+        boxes.append((nm, np.array([x0, y0, zm - M3_NUT[1] - W_LOAD - 0.4]),
+                      np.array([x0 + ear, y0 + ear, hi[2] + M3_HEAD[1]]), False))
+    # transfer idler: crown spur (yC, zm) → idler → one strip gear
+    strip = [(n, y, z, t, m * _teeth(n) / 2) for n, y, z, t in c["g"]]
+    pin_rect = (yp - 1.5, yp + 1.5, zm - tip_p, zm + tip_p)
+    mot_rect = (lo[1], hi[1], lo[2], hi[2])
+    rect_d = lambda q, r: math.hypot(max(r[0] - q[0], 0, q[0] - r[1]), max(r[2] - q[1], 0, q[1] - r[3]))
+    best = None
+    for n_t, y_t, z_t, t_t, r_t in strip:
+        for zi in range(10, 25):
+            ri, tip_i = m * zi / 2, m * (zi + 2 - 2 * Cw["x"]) / 2
+            for up in (False, True):
+                q = idler_pos((yC, zm), (y_t, z_t), rs, r_t, ri, up)
+                if q is None:
+                    continue
+                cl = [q[1] - tip_i - F.GEAR_TIP.side - BASE_WALL,
+                      rect_d(q, pin_rect) - tip_i - F.GEAR_TIP.side, rect_d(q, mot_rect) - tip_i - F.GEAR_TIP.side]
+                cl += [math.hypot(q[0] - y, q[1] - z) - tip_i - t - F.GEAR_TIP.side
+                       for n, y, z, t, _ in strip if n != n_t]
+                cl += [math.hypot(yC - y, zm - z) - tip_s - t - F.GEAR_TIP.side for n, y, z, t, _ in strip]
+                sc = min(cl)
+                # smallest idler with ≥ 0.3 in-plane clearance (rev 4 first run preferred clearance: 23T idlers)
+                if sc >= 0.3 and (best is None or zi < best[2] or (zi == best[2] and sc > best[0])):
+                    best = (sc, n_t, zi, q, tip_i)
+    if best is None:
+        return None
+    sc, n_t, zi, q, tip_i = best
+    e = tip_i + F.GEAR_TIP.side
+    boxes.append(("motor idler", np.array([-xr, q[0] - e, q[1] - e]), np.array([xr, q[0] + e, q[1] + e]), True))
+    return boxes, dict(target=n_t, idler=zi, idler_c=q, crown_c=(yC, zm), pinion_y=yp, clear=sc, xf=xf, xl=xl,
+                       xr=xr, rc=rc)
+
+
+def fixed_boxes(c, led=5.0, eyes_mode="vertical"):
+    """B3 boxes that the shell places (not the motor or cells): eyes board + LEDs + ledge + its M3 head, the front
+    and rear body bosses (body → base, M3 from below, nut in the body boss, column in the base), the switch +
+    retainer at the rear. Positions: LEDs on the N1 eye axes; bosses and switch at the extreme with room ≥ 0.3 on
+    the shell + arms + strip + crank-sweep field (placed one after the other)."""
+    S = c["S"]
+    R = n1.run(c["p"])
+    import trimesh
+    eyes = sorted(trimesh.Trimesh(R["st"]["eyes_v"], R["st"]["eyes_f"]).split(only_watertight=False),
+                  key=lambda q: -q.area)[:2]
+    ec = [q.bounds.mean(0) for q in eyes]
+    ytip = min(q.bounds[0][1] for q in eyes)                       # pupil = LED dome at the eye's front
+    xe, ze = abs(ec[0][0]), float(np.mean([q[2] for q in ec]))
+    fl, ln = LEDS[led]
+    yb = ytip + ln + 2.0                                            # 2 mm of leads before the board
+    out = []
+    for sx in (-1, 1):
+        out.append((f"LED{'LR'[sx > 0]}", np.array([sx * xe - fl / 2, ytip, ze - fl / 2]),
+                    np.array([sx * xe + fl / 2, yb, ze + fl / 2]), False, False))
+    if eyes_mode == "flat":     # R1 (c): board lying flat above the LEDs (leads bend up 0.4), 11 deep, M3 head on top
+        zb = ze + fl / 2 + 0.4
+        y0 = ytip + ln
+        out.append(("eyes board", np.array([-xe - 3.5, y0, zb]), np.array([xe + 3.5, y0 + 11.0, zb + 4.1]), False))
+        out.append(("eyes screw", np.array([-3.1, y0 + 2.4, zb + 4.1]),
+                    np.array([3.1, y0 + 8.6, zb + 4.1 + M3_HEAD[1] + .2]), False))
+    else:
+        out.append(("eyes board", np.array([-xe - 3.5, yb, ze - 5.5 - W_LOAD]), np.array([xe + 3.5, yb + 4.1, ze + 5.5]),
+                    False))                                         # 1.6 board + 2.5 resistors / solder; ledge 1.2
+        out.append(("eyes screw", np.array([-3.1, yb + 4.1, ze - 3.1]),
+                    np.array([3.1, yb + 4.1 + M3_HEAD[1] + .2, ze + 3.1]), False))
+    G = room_grid(S, c["wall"])
+    A = arm_field(S, c["ball"], c["dy"])
+    fld = np.minimum(np.minimum(G["g"], A["g"]), _mech_field(c, G, False))
+    ax = [G["lo"][i] + ROOM_PITCH * np.arange(G["g"].shape[i]) for i in range(3)]
+    Cg = np.stack(np.meshgrid(*ax, indexing="ij"), -1)
+
+    def add_field(f, lo, hi):
+        Q = Cg.reshape(-1, 3)
+        return np.minimum(f, (n0.pt_box(Q, lo, hi) - np.all((Q >= lo) & (Q <= hi), 1) * 0.5).reshape(f.shape))
+    for b in out:
+        fld = add_field(fld, b[1], b[2])
+
+    placed = []
+
+    def place(nm, size, key, x0=None, zmin=None, zmax=None):
+        nonlocal fld
+        mf = _boxmin(fld, size)
+        cons = np.ones(mf.shape, bool)
+        for plo, phi in placed:          # a box placed earlier is not free room: never on top of it
+            cons &= np.max(np.maximum(Cg - np.array(size) / 2 - phi, plo - Cg - np.array(size) / 2), -1) >= 0.3
+        if x0 is not None:
+            cons &= np.abs(Cg[..., 0] - x0) < 0.26
+        if zmin is not None:
+            cons &= Cg[..., 2] - size[2] / 2 >= zmin
+        if zmax is not None:
+            cons &= Cg[..., 2] - size[2] / 2 <= zmax
+        ok = cons & (mf >= 0.3)
+        if not ok.any():                 # no room: keep it where it must be, at its best (the eval reports it)
+            top_ = np.where(cons, mf, -99)
+            near = cons & (mf >= top_.max() - 0.3)       # best room, within 0.3: then the key (front / rear)
+            j = np.unravel_index(np.argmax(np.where(near, key(Cg), -1e9)), mf.shape)
+        else:
+            sc = np.where(ok, key(Cg), -1e9)
+            j = np.unravel_index(np.argmax(sc), sc.shape)
+        ctr = Cg[j]
+        lo, hi = ctr - np.array(size) / 2, ctr + np.array(size) / 2
+        fld = add_field(fld, lo, hi)
+        placed.append((lo, hi))
+        return (nm, lo, hi, False)
+    boss = (F.bore(M3_NUT[0], F.STEEL) + 2 * W_LOAD,) * 2 + (8.0,)  # body boss: nut pocket + walls, 8 tall
+    # body bosses sit on the skirt band (bottom z 9-13), the M3 comes up through a lug of the base wall there
+    out.append(place("bossR body", boss, lambda C: C[..., 1], x0=0.0, zmin=9.0, zmax=13.0))
+    out.append(place("bossF body", boss, lambda C: -C[..., 1], zmin=9.0, zmax=13.0))   # front: off the axis (option e)
+    sw = (SWITCH[0] + 2 * W_LOAD + 6.5, SWITCH[1] + W_LOAD + 5.0, SWITCH[2] + 2 * W_LOAD)   # + retainer M3 boss, tabs
+    out.append(place("switch", sw, lambda C: C[..., 1] - 0.2 * np.abs(C[..., 2] - 12)))
+    return out, fld, Cg
+
+
+def h3e_boxes(cA, cB, hook=False):
+    """H3e pack (two 3P packs on edge) + the inner tongue on the motor seat (2 + 2 × TONGUE) + the rear end boss of
+    the lid screw (1 × M3 through lid and pack into a nut in the seat's lug): head on the lid, nut lug under."""
+    boss_y = 0.0 if hook else 6.2        # R2 (d): lid screw in the hook, inside the 41.8 pack length: no end boss
+    hs = np.array(holders()["H3e two 3P packs on edge, rows along Y"][0]) + [2 + 2 * F.TONGUE.side, boss_y, 0]
+    out = []
+    for q, cc in (("A", cA), ("B", cB)):
+        lo, hi = cc - hs / 2, cc + hs / 2
+        hx = (cc[0] - 3.1, cc[0] + 3.1)
+        out += [(f"holder{q}", lo, hi, False),
+                (f"holder{q} lid screw", np.array([hx[0], hi[1] - 6.2, hi[2]]), np.array([hx[1], hi[1], hi[2] + 3.2]),
+                 False),
+                (f"holder{q} nut lug", np.array([lo[0], hi[1] - 6.2, lo[2] - M3_NUT[1] - W_LOAD]),
+                 np.array([hi[0], hi[1], lo[2]]), False)]
+    return out, hs
+
+
+def search_b3(S=S_FIX, wall=3.0, led=5.0, ball=BALL_D2, dy=CRANK_DY_65, steps=10, eyes="vertical", hook=False):
+    """B3: D1b + crown (crown_drive) + H3e with every B3 box; coarse search on min-filtered room grids, then an exact
+    hill-climb of (motor y, z) and both pack centres (0.5 mm). JSTs placed last in the room left."""
+    c = _ctx(S, ball, dy)
+    c["wall"] = wall
+    fixed, fld, Cg = fixed_boxes(c, led, eyes)
+    G = room_grid(S, wall)
+    fex = np.minimum(np.minimum(G["g"], arm_field(S, ball, dy)["g"]), _mech_field(c, G, True))
+    Qg = Cg.reshape(-1, 3)
+    for b in fixed:
+        fex = np.minimum(fex, (n0.pt_box(Qg, b[1], b[2]) - np.all((Qg >= b[1]) & (Qg <= b[2]), 1) * .5).reshape(fex.shape))
+    cand = []
+    for ym in np.arange(-24, 24.1, 1.0):
+        for zm in np.arange(18, 40.1, 1.0):
+            r = crown_drive(c, ym, zm)
+            if r is None:
+                continue
+            s = 9.0
+            for nm, lo, hi, ex in r[0]:
+                ctr = (lo + hi) / 2
+                ii = tuple(int(round((ctr[k] - Cg[0, 0, 0][k]) / ROOM_PITCH)) for k in range(3))
+                if not all(0 <= ii[k] < fld.shape[k] for k in range(3)):
+                    s = -9
+                    break
+                s = min(s, float(_boxmin_cached(fex if ex else fld, tuple(np.round(hi - lo, 1)))[ii]))
+            cand.append((s, ym, zm))
+    cand.sort(key=lambda t: -t[0])
+    print(f"  crown drive valid at {len(cand)} motor places; coarse best {cand[0][0]:+.2f}", flush=True)
+    _, hs = h3e_boxes(np.zeros(3), np.zeros(3), hook)
+    H = _boxmin_cached(fld, tuple(np.round(hs, 1)))
+    best = None
+    for s_m, ym, zm in cand[:8]:
+        mb = crown_drive(c, ym, zm)[0]
+        sc = np.minimum(H, s_m)
+        for nm, lo, hi, ex in mb:
+            sc = np.minimum(sc, np.max(np.maximum(Cg - hs / 2 - hi, lo - Cg - hs / 2), -1))
+        # packs as a mirrored pair (A at x < 0, B = A mirrored in x = 0): no overlap by construction, not two clusters
+        ixm = np.clip(np.round((-Cg[:, 0, 0, 0] - Cg[0, 0, 0, 0]) / ROOM_PITCH).astype(int), 0, fld.shape[0] - 1)
+        tot = np.minimum(sc, sc[ixm])
+        tot = np.where(Cg[..., 0] <= -hs[0] / 2 + 0.01, tot, -99)
+        flat = tot.ravel()
+        top = np.argpartition(-flat, 60)[:60]
+        P = Cg.reshape(-1, 3)[top[np.argsort(-flat[top])]]
+        picks = []
+        for q in P:
+            if all(np.abs(q - r).max() > 2.0 for r in picks):
+                picks.append(q)
+            if len(picks) == 3:
+                break
+        for q in picks:
+            st = dict(ym=ym, zm=zm, A=q.copy())
+            sc2, kk, res = _eval_b3(c, st, fixed, wall, hook)
+            if best is None or sc2 > best[0]:
+                best = (sc2, kk, res, st)
+    sc, kk, res, st = best
+    for _ in range(steps):
+        better = False
+        moves = [("ym", None, d) for d in (-.5, .5)] + [("zm", None, d) for d in (-.5, .5)]
+        moves += [("A", a, d) for a in range(3) for d in (-.5, .5)]
+        for q, a, d in moves:
+            n = dict(st, A=st["A"].copy())
+            if a is None:
+                n[q] += d
+            else:
+                n[q][a] += d
+            s2, k2, r2 = _eval_b3(c, n, fixed, wall, hook)
+            if s2 > sc + 1e-3:
+                sc, kk, res, st, better = s2, k2, r2, n, True
+        if not better:
+            break
+    boxes = crown_drive(c, st["ym"], st["zm"])[0] + h3e_boxes(st["A"], _mir(st["A"]), hook)[0] + fixed
+    # JSTs: two mated pairs on their leads, placed in the room that is left (best of 3 orientations each)
+    Q = Cg.reshape(-1, 3)
+    for nm, lo, hi, *_ in boxes[:len(boxes) - len(fixed)]:
+        fld = np.minimum(fld, (n0.pt_box(Q, lo, hi) - np.all((Q >= lo) & (Q <= hi), 1) * 0.5).reshape(fld.shape))
+    for j in range(2):
+        cbest = None
+        for perm in ((0, 1, 2), (1, 0, 2), (2, 1, 0)):
+            sz = tuple(np.array(JST_XH)[list(perm)])
+            mf = _boxmin(fld, sz)
+            ii = np.unravel_index(np.argmax(mf), mf.shape)
+            if cbest is None or mf[ii] > cbest[0]:
+                cbest = (mf[ii], Cg[ii], np.array(sz))
+        lo, hi = cbest[1] - cbest[2] / 2, cbest[1] + cbest[2] / 2
+        boxes.append((f"jst{j + 1}", lo, hi, False))
+        fld = np.minimum(fld, (n0.pt_box(Q, lo, hi) - np.all((Q >= lo) & (Q <= hi), 1) * 0.5).reshape(fld.shape))
+    sc, kk, res = eval_layout(c, boxes, wall)
+    return dict(least=sc, bind=kk, res=res, st=st, boxes=boxes, c=c, fixed=fixed,
+                info=crown_drive(c, st["ym"], st["zm"])[1])
+
+
+_BMC = {}
+
+
+def _boxmin_cached(fld, size):
+    k = (id(fld), size)
+    if k not in _BMC:
+        _BMC[k] = _boxmin(fld, size)
+    return _BMC[k]
+
+
+def _mir(a):
+    return a * np.array([-1.0, 1.0, 1.0])
+
+
+def _eval_b3(c, st, fixed, wall, hook=False):
+    r = crown_drive(c, st["ym"], st["zm"])
+    if r is None:
+        return -9.0, "crown drive invalid", {}
+    return eval_layout(c, r[0] + h3e_boxes(st["A"], _mir(st["A"]), hook)[0] + fixed, wall)
+
+
+def pr_crown(info=None):
+    """B1 numbers that do not need the layout: tooth counts, ratio, crown tooth print."""
+    m = CROWN["m"]
+    s_tip = math.pi * m / 2 - 2 * m * math.tan(ALPHA)              # crown tooth top land at R0 (rack-like)
+    print(f"== crown pair (B1) ==\npinion {CROWN['z_pinion']}T x +{CROWN['x']} on the N10 shaft (axis Y) → crown "
+          f"{CROWN['z_crown']}T (axis X, R0 {m * CROWN['z_crown'] / 2:.1f}, teeth R {CROWN['r_in']}–{CROWN['r_out']}, "
+          f"face {CROWN['r_out'] - CROWN['r_in']:.1f} = {(CROWN['r_out'] - CROWN['r_in']) / m:.1f} m) + spur "
+          f"{CROWN['z_spur']}T x +{CROWN['x']} on the same part → idler (−{CROWN['x']}) → strip. crank:motor = "
+          f"{CROWN['z_pinion']}/{CROWN['z_crown']} × {CROWN['z_spur']}/10 = 1:{CROWN['z_crown'] // CROWN['z_pinion']} "
+          f"(0.50); crown tooth at R0: thickness {math.pi * m / 2:.2f}, top land {s_tip:.2f} "
+          f"({s_tip / 0.4:.1f} lines of 0.4), height {2.25 * m:.2f} = {2.25 * m / 0.2:.0f} layers of 0.2 "
+          f"({2.25 * m / 0.12:.0f} at 0.12, variable layer height on the crown part)")
+    if info:
+        print(f"layout: crown centre y {info['crown_c'][0]:.1f} z {info['crown_c'][1]:.1f}, pinion y "
+              f"{info['pinion_y']:.1f}; spur → {info['idler']}T idler at y {info['idler_c'][0]:.1f} z "
+              f"{info['idler_c'][1]:.1f} → {info['target']}; in-plane clearance {info['clear']:+.2f}; crown pitch "
+              f"plane x {info['xf']:.2f}, spine walls x {info['xl']:.2f} / +{info['xr']:.2f}")
+
+
+def pr_motor_only(walls=(3.0, 1.6), led=5.0, S=S_FIX, ball=BALL_D2, dy=CRANK_DY_65, eyes="vertical"):
+    """B3 bound: the motor group (motor, seat, clamp ears, terminals, wires, pinion, crown, idler) with the fixed B3
+    boxes and NO cells, exact at the 12 best coarse places: if this is < 0 no cell layout can be ≥ 0."""
+    for wall in walls:
+        c = _ctx(S, ball, dy)
+        c["wall"] = wall
+        fixed, fld, Cg = fixed_boxes(c, led, eyes)
+        best = None
+        cand = []
+        for ym in np.arange(-24, 24.1, 1.0):
+            for zm in np.arange(18, 40.1, 1.0):
+                r = crown_drive(c, ym, zm)
+                if r is not None:
+                    cand.append((ym, zm, r[0]))
+        sco = []
+        for ym, zm, bx in cand:
+            s_, k_, _ = eval_layout(c, bx + fixed, wall, exact=False)
+            sco.append((s_, ym, zm))
+        sco.sort(key=lambda t: -t[0])
+        for _, ym, zm in sco[:12]:           # exact on the 12 best coarse places (coarse and exact can disagree)
+            s_, k_, _ = eval_layout(c, crown_drive(c, ym, zm)[0] + fixed, wall)
+            if best is None or s_ > best[0]:
+                best = (s_, k_, ym, zm)
+        s_, k_, res = eval_layout(c, crown_drive(c, best[2], best[3])[0] + fixed, wall)
+        nxt = sorted(res.items(), key=lambda kv: kv[1])[:5]
+        print(f"D4 {wall}: motor group + B3 boxes, no cells: least {s_:+.2f} ({k_}) at motor y {best[2]} z {best[3]}; "
+              + ", ".join(f"{k} {v:+.2f}" for k, v in nxt[1:]))
+        for b in fixed:
+            print(f"    {b[0]:12s} {np.round(b[1], 1).tolist()} .. {np.round(b[2], 1).tolist()}")
+
+
+def pr_layouts4(walls=(3.0,), led=5.0, also_led=3.0, eyes="vertical", hook=False):
+    """B3: one search per body wall for D1b + crown + H3e with every B3 box; the 3 mm LED re-checked exactly on the
+    5 mm layout (eyes board moved, no new search). Writes out/.cache/layouts4_0.650.json for the plan figure."""
+    import time
+    t = time.time()
+    keep = []
+    for wall in walls:
+        r = search_b3(wall=wall, led=led, eyes=eyes, hook=hook)
+        pairs = sorted(r["res"].items(), key=lambda kv: kv[1])[:6]
+        print(f"D4 {wall}: least {r['least']:+.2f} ({r['bind']}); next " + ", ".join(f"{k} {v:+.2f}" for k, v in pairs[1:]))
+        pr_crown(r["info"])
+        fx3, _, _ = fixed_boxes(r["c"], also_led, eyes)
+        b3 = [b for b in r["boxes"] if not b[0].startswith(("LED", "eyes"))] + [b for b in fx3 if b[0].startswith(("LED", "eyes"))]
+        s3, k3, _ = eval_layout(r["c"], b3, wall)
+        print(f"  same layout with {also_led:g} mm LEDs: least {s3:+.2f} ({k3})")
+        for nm, lo, hi, *_ in r["boxes"]:
+            print(f"    {nm:22s} {np.round(lo, 1).tolist()} .. {np.round(hi, 1).tolist()}")
+        keep.append(dict(wall=wall, least=float(r["least"]), bind=r["bind"], led3=float(s3),
+                         boxes=[(b[0], list(map(float, b[1])), list(map(float, b[2]))) for b in r["boxes"]],
+                         info={k: (list(map(float, v)) if hasattr(v, "__len__") and not isinstance(v, str) else
+                                   (v if isinstance(v, str) else float(v))) for k, v in r["info"].items()}))
+    if eyes == "vertical" and not hook:      # R0 only: the plan figure reads this file
+        with open(os.path.join(CACHE, f"layouts4_{S_FIX:.3f}.json"), "w") as f:
+            json.dump(keep, f, indent=1)
+    print(f"({time.time() - t:.0f} s)")
+
+
 if __name__ == "__main__":
-    a = sys.argv[1:] or ["gear", "cell", "pins", "pivot", "arms", "asm", "inside", "layouts"]
+    a = sys.argv[1:] or ["gear", "cell", "pins", "pivot", "arms", "neck", "crown", "asm"]
     if a[0] == "layouts3":     # best rows only, at the S given: probes.py layouts3 0.70
         O = [(3.0, "D1b al", "H3e"), (1.6, "D1b al", "H3e"), (1.6, "D1b al", "H3 ")]
         pr_layouts(float(a[1]), only=O)
@@ -968,7 +1357,14 @@ if __name__ == "__main__":
     if a[0] == "figure":
         pr_figure(a[1])
         sys.exit()
+    if a[0] == "motoronly":
+        pr_motor_only(eyes="flat" if "flat" in a[1:] else "vertical")
+        sys.exit()
+    if a[0] == "layouts4":     # B3: probes.py layouts4 [3.0 [1.6]]
+        pr_layouts4(tuple(float(w) for w in a[1:] if w[0].isdigit()) or (3.0,),
+                    eyes="flat" if "flat" in a[1:] else "vertical", hook="hook" in a[1:])
+        sys.exit()
     for name in a:
-        {"inside": pr_inside, "arms": pr_arms, "pivot": pr_pivot, "gear": pr_gear, "cell": pr_cell,
+        {"crown": pr_crown, "neck": pr_neck, "inside": pr_inside, "arms": pr_arms, "pivot": pr_pivot, "gear": pr_gear, "cell": pr_cell,
          "pins": pr_pins, "asm": pr_asm, "slice": pr_slice, "layouts": pr_layouts,
          "inside65": lambda: pr_inside((0.65,), dy=CRANK_DY_D2, ball=BALL_D2, walls=(3.0, 1.6))}[name]()
