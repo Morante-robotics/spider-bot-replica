@@ -1,7 +1,8 @@
 {
  "name": "looks",
  "about": "Does the design look like its reference (the toy)? Adapted from 3dcodeverse's reference and static_object rubrics (github.com/gaoypeng/3dcodeverse, Apache-2.0) for a 3D-printed robot judged at N0, N1 or N2.",
- "pass_threshold": 0.75,
+ "pass_threshold": 0.70,
+ "pass_threshold_why": "Morante, 2026-11-19: the N1 mock-up he approved scored 0.73 (the judge: clearly the same robot, legs smooth blades instead of the toy's segments); 0.70 is the rubric's own «clearly the same robot» anchor.",
  "gate_fail_cap": 0.6,
  "gate_partial_cap": 0.85,
  "floor_cap": 0.6,
