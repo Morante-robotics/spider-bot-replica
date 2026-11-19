@@ -45,7 +45,8 @@ uv run python cad/robot/plan_figure.py cad/robot/images/plan-exploded.png [F2s 3
 uv run python cad/robot/probes.py layouts5 F2s 3.0   # one rev 5 candidate at one body wall (≈ 1-3 min)
 uv run python cad/robot/probes.py layouts5 table     # every rev 5 result found in the cache
 uv run python cad/robot/probes.py real F2s-sw 3.0     # cached layout re-measured with real shapes (manifold3d, ≈ 2.5 min)
-uv run python cad/robot/probes.py sweep 0.65 0.70 …  # smallest S: F2s-1b re-searched per S, every box, gaps ≥ 1.0, paths, tools, train (→ out/.cache/sweep_<S>.json, sweep_boxes_<S>.txt)
+uv run python cad/robot/probes.py sweep 0.65 0.70 …  # smallest S: F2s-1b re-searched per S, every box, gaps ≥ 1.0, paths, tools, train (→ out/.cache/sweep_<S>.json, sweep_boxes_<S>.txt); stops early on a box↔box pair under 1.0 (--full: measure everything)
+uv run python cad/robot/probes.py sweep bisect 0.65 1.00 0.05   # same, by bisection on the 0.05 grid (≈ 4 S instead of 8; prints every S tried)
 uv run python tools/rounds.py validate cad/robot     # plan.json → design-plan.md
 uv run python cad/robot/probes.py                 # quick probes: gear cell pins pivot arms neck crown asm (≈ 20 s)
 uv run python cad/robot/probes.py layouts4 3.0    # B3 inside fit, one body wall (≈ 70 s)

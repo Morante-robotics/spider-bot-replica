@@ -360,6 +360,13 @@ def pr_inside(scales=(0.60, 0.62, 0.65), dy=CRANK_DY, ball=3.0, walls=(3.0,), to
 BALL_D2 = 2.0                       # Morante, 2026-11-19: Ø2 balls at S 0.65
 CRANK_DY_D2 = (0.0, 0.0, 2.0, 0.0)  # rev 3 only: mm at S 0.60 (rescaled to 0, 0, 2.17, 0 at S 0.65)
 S_FIX = 0.65                        # Morante, 2026-11-19
+
+
+def sweep_pitch(S):
+    """Room-grid pitch for the sweep: 0.5 at S_FIX, scaled with S above it, so every S costs the grid of S_FIX
+    (2.25 M points). Only the coarse search reads the grid; eval_layout re-checks exactly (optimisation report
+    2026-11-19-2318 #3)."""
+    return round(0.5 * max(S, S_FIX) / S_FIX, 3)
 STALL = 40.0                        # N10 stall torque at 3 V, N·mm (assumed ≈ 0.4 kg·cm, typical N10 listing; measure)
 CROWN = dict(z_pinion=10, z_crown=20, z_spur=10, m=0.6, x=0.42, r_in=5.4, r_out=6.9, disc=1.6)  # B1, see pr_crown
 LEDS = {5.0: (5.8, 8.6), 3.0: (3.8, 5.3)}   # LED Ø: (flange Ø, dome tip to flange back), datasheet
@@ -1693,9 +1700,9 @@ def search_b5(name, wall=3.0, S=S_FIX, ball=BALL_D2, dy=CRANK_DY_65, steps=12):
     for b in fixed:
         fex = np.minimum(fex, (n0.pt_box(Qg, b[1], b[2]) - np.all((Qg >= b[1]) & (Qg <= b[2]), 1) * .5).reshape(fex.shape))
     c["fex"], c["fex_lo"] = fex, Cg[0, 0, 0]
-    step = 1.0 if o["nidl"] == 1 else 2.0
-    cand = []
     ks = S / S_FIX                       # sweep: the motor search box scales with the look (1 at S 0.65)
+    step = (1.0 if o["nidl"] == 1 else 2.0) * max(ks, 1.0)   # so does its step: same candidate count at every S
+    cand = []
     for ym in np.arange(-24 * ks, 24 * ks + 0.1, step):
         for zm in np.arange(16 * ks, 40 * ks + 0.1, step):
             r = drive5(c, ym, zm)
@@ -2262,8 +2269,12 @@ def sweep_checks(c, boxes, zrim, wall):
     return res, tres
 
 
-def sweep_S(S, wall=3.0, name="F2s-1b"):
+def sweep_S(S, wall=3.0, name="F2s-1b", full=False):
+    """full=False: stop as soon as a box↔box pair is under SW_GAP (no real shape can lift it: the box is the
+    shape), before real shapes, paths and tools; full=True measures everything to diagnose."""
     import contextlib, io, time
+    global ROOM_PITCH
+    ROOM_PITCH = sweep_pitch(S)
     t0 = time.time()
     with contextlib.redirect_stdout(io.StringIO()):
         a = pr_arms(S, BALL_D2)
@@ -2294,6 +2305,22 @@ def sweep_S(S, wall=3.0, name="F2s-1b"):
     low = {k: v for k, v in res.items() if v < SW_GAP}
     real_names = ("motor", "motor pinion", "motor crown", "motor idler", "motor idler 2", "motor idler (strip)",
                   "motor idler 2 (strip)", "bossR body", "bossF body", "LEDL", "LEDR")
+    boxbox = lambda k: (k.split("↔")[0] not in real_names and k.split("↔")[1] not in real_names
+                        and k.split("↔")[1] not in ("shell", "arms", "cranks", "strip"))
+    early = {k: v for k, v in low.items() if boxbox(k)}
+    if early and not full:               # already a fail: skip real shapes, paths, tools
+        bind = min(early, key=early.get)
+        out = dict(S=S, wall=wall, name=name, dy=dy, train=bool(tr), early=True,
+                   train_gears=[(n, float(y), float(z), float(t)) for n, y, z, t in g],
+                   least=float(early[bind]), bind=bind,
+                   under=sorted(((k, float(v)) for k, v in res.items() if v < SW_GAP), key=lambda t: t[1]),
+                   paths=[], tools=[], path_ok=None, tool_ok=None, pitch=ROOM_PITCH,
+                   block_rot=BLOCK_ROT[r["st"].get("rot", 0)], motor=(float(r["st"]["ym"]), float(r["st"]["zm"])),
+                   boxes=[(b[0], [float(v) for v in b[1]], [float(v) for v in b[2]]) for b in boxes],
+                   secs=round(time.time() - t0), **{"pass": False})
+        os.makedirs(CACHE, exist_ok=True)
+        json.dump(out, open(os.path.join(CACHE, f"sweep_{S:.2f}.json"), "w"), indent=1)
+        return out
     if low:
         flags = [[b[0], bool(b[3]), bool(b[4]) if len(b) > 4 else True, bool(b[5]) if len(b) > 5 else True] for b in boxes]
         need = {k.split("↔")[0] for k in low} | {k.split("↔")[1] for k in low}
@@ -2305,7 +2332,7 @@ def sweep_S(S, wall=3.0, name="F2s-1b"):
         trees = {rr: cKDTree(c["X"][c["R"] == rr]) for rr in np.unique(c["R"])}
         for k, v in low.items():
             a_, b_ = k.split("↔")
-            if a_ not in real_names and b_ not in real_names and b_ not in ("shell", "arms", "cranks", "strip"):
+            if boxbox(k):
                 continue                     # box against box: the box is the shape
             Xs = np.vstack(dens[a_])
             if b_ == "shell":
@@ -2329,7 +2356,7 @@ def sweep_S(S, wall=3.0, name="F2s-1b"):
                path_ok=bool(min(v for _, v in paths) >= 0), tool_ok=bool(min(v for _, v in tools) >= 0),
                block_rot=BLOCK_ROT[r["st"].get("rot", 0)], motor=(float(r["st"]["ym"]), float(r["st"]["zm"])),
                boxes=[(b[0], [float(v) for v in b[1]], [float(v) for v in b[2]]) for b in boxes],
-               secs=round(time.time() - t0))
+               pitch=ROOM_PITCH, secs=round(time.time() - t0))
     out["pass"] = bool(out["train"] and least >= SW_GAP and out["path_ok"] and out["tool_ok"])
     os.makedirs(CACHE, exist_ok=True)
     json.dump(out, open(os.path.join(CACHE, f"sweep_{S:.2f}.json"), "w"), indent=1)
@@ -2382,13 +2409,19 @@ def sweep_box_list(r, path):
             sz = " × ".join(f"{h - l:.1f}" for l, h in zip(lo, hi))
             fh.write(f"{nm}; {sz}; {[round(v, 1) for v in lo]}; {d}\n")
 
-def pr_sweep(scales):
+def pr_sweep(scales, full=False):
+    out = {}
     for S in scales:
-        r = sweep_S(S)
+        r = out[S] = sweep_S(S, full=full)
         if "boxes" in r:
             sweep_box_list(r, os.path.join(CACHE, f"sweep_boxes_{S:.2f}.txt"))
         if "least" not in r:
             print(f"S {S:.2f}: {r.get('why')} (train {r.get('train')})", flush=True)
+            continue
+        if r.get("early"):
+            print(f"S {S:.2f}: box↔box {r['least']:+.2f} ({r['bind']}); fail (stopped early: no real shapes, paths, "
+                  f"tools; --full for them); train {'ok' if r['train'] else 'NO'}; {len(r['under'])} pairs < {SW_GAP}; "
+                  f"{r['secs']} s", flush=True)
             continue
         wp = min(r["paths"], key=lambda t: t[1])
         wt = min(r["tools"], key=lambda t: t[1])
@@ -2396,6 +2429,30 @@ def pr_sweep(scales):
               f"({wp[0]} {wp[1]:+.2f}); tool {'ok' if r['tool_ok'] else 'NO'} ({wt[0]} {wt[1]:+.2f}); "
               f"train {'ok' if r['train'] else 'NO'}; {'PASS' if r['pass'] else 'fail'}; "
               f"{len(r['under'])} pairs < {SW_GAP}; block {r['block_rot']}; {r['secs']} s", flush=True)
+    return out
+
+
+def pr_sweep_bisect(lo, hi, step, full=False):
+    """Smallest passing S on the grid lo, lo+step … hi by bisection (assumes fitting improves with S; the train's
+    whole teeth may break that, so the grid S just under the answer is always confirmed and every S tried is
+    printed). ≈ log2(n) + 1 evaluations instead of n (optimisation report 2026-11-19-2318 #2)."""
+    grid = [round(lo + i * step, 2) for i in range(int(round((hi - lo) / step)) + 1)]
+    tried, a, b, best = {}, 0, len(grid) - 1, None
+
+    def run(i):
+        if i not in tried:
+            tried[i] = bool(pr_sweep([grid[i]], full)[grid[i]].get("pass", False))
+        return tried[i]
+    while a <= b:
+        m = (a + b) // 2
+        if run(m):
+            best, b = m, m - 1
+        else:
+            a = m + 1
+    if best is not None and best > 0 and run(best - 1):
+        print(f"S {grid[best - 1]:.2f} passes too: fitting is not monotonic here; run the grid below it", flush=True)
+    print("bisect: " + ", ".join(f"{grid[i]:.2f} {'PASS' if p else 'fail'}" for i, p in sorted(tried.items())), flush=True)
+    print(f"smallest passing S: {grid[best]:.2f}" if best is not None else f"no S up to {hi:.2f} passes", flush=True)
 
 if __name__ == "__main__":
     a = sys.argv[1:] or ["gear", "cell", "pins", "pivot", "arms", "neck", "crown", "asm"]
@@ -2406,8 +2463,10 @@ if __name__ == "__main__":
     if a[0] == "real":         # probes.py real [NAME [WALL [PACK_R]]]: cached layout re-measured with real shapes
         pr_real(a[1] if len(a) > 1 else "F2s-sw", float(a[2]) if len(a) > 2 else 3.0, pack_r=float(a[3]) if len(a) > 3 else PACK_R)
         sys.exit()
-    if a[0] == "sweep":        # probes.py sweep 0.65 0.70 ... : smallest S where everything fits (≈ 2-4 min per S)
-        pr_sweep([float(v) for v in a[1:]])
+    if a[0] == "sweep":        # probes.py sweep [--full] 0.65 0.70 ... | sweep [--full] bisect LO HI STEP: smallest S that fits
+        full = "--full" in a
+        v = [x for x in a[1:] if x != "--full"]
+        pr_sweep_bisect(*map(float, v[1:4]), full=full) if v[0] == "bisect" else pr_sweep([float(x) for x in v], full)
         sys.exit()
     if a[0] == "figure":
         pr_figure(a[1])
