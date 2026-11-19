@@ -1,0 +1,827 @@
+{
+ "summary": "Rev 5 (2026-11-19): the approved N1 look at S 0.65 walking on one N10; the N10 lies along Y high in the dome in a closed sleeve (one screw behind), a crown pair turns the drive 90 degrees at the front and two gears bring it down in front of crank 1 into the spine strip, which turns the 4 crankshafts that swing the 8 legs on steel pins; the switch sits under the base (pressed into a floor pocket from inside, closed below by a 0.8 mm skin with a slot for the lever; no cover, no screw). Probe status: does not fit yet, best layout F2s-sw least -1.75 mm with every box placed and the strip gear counted against the arms (-1.64 crown vs shell if that gear is exempt as the strip; probes.py layouts5). Measured again with real shapes on that layout (probes.py real): least -1.74 (strip gear 2 vs arms), 20 pairs still overlap, does not fit.",
+ "parts": [
+  {
+   "name": "body",
+   "role": "looks shell: dome, eyes with two 5 mm LED bores, two body bosses, skirt band lugs",
+   "why_separate": "lifts off for the cells and the legs' keepers",
+   "grams": 22.6,
+   "print_orient": "open side down, support only inside the crown and under the eyes (D8, slicer on the N2 mesh)"
+  },
+  {
+   "name": "base",
+   "role": "ground part: bowl, 8 leg notches with steel-pin seats, rim lip, nut lands, spine lugs, switch pocket in the floor (open to the inside, closed below by a 0.8 mm skin with a slot for the lever, 2 wire holes)",
+   "why_separate": "the ground every other part is held to",
+   "grams": 11.7,
+   "print_orient": "rim up (default D8), notch floors face up"
+  },
+  {
+   "name": "leg-arm",
+   "role": "inner arm x8: eye on the pivot pin, bar, end tube on the crank ball",
+   "why_separate": "flat part keyed into the leg, prints with no support",
+   "grams": 0.4,
+   "print_orient": "flat, ball bore along the bed"
+  },
+  {
+   "name": "leg",
+   "role": "outer leg x8 with the key groove",
+   "why_separate": "looks part, curved",
+   "grams": 2.3,
+   "print_orient": "on its side"
+  },
+  {
+   "name": "spine",
+   "role": "drive frame: strip walls, idler bores, front tower (crown walls, drop-idler walls, motor sleeve seat)",
+   "why_separate": "one frame screwed to the base carries every gear",
+   "grams": 5.0,
+   "print_orient": "walls up"
+  },
+  {
+   "name": "spine-cap",
+   "role": "closes the journal slots and holds the idler pins down",
+   "why_separate": "off for the crankshafts",
+   "grams": 1.5,
+   "print_orient": "flat"
+  },
+  {
+   "name": "crankshaft",
+   "role": "x4: 10T gear, two webs, two 2 mm balls on 1.6 mm necks, 180 degrees apart",
+   "why_separate": "moving",
+   "grams": 0.4,
+   "print_orient": "lying down, 0.3 flat"
+  },
+  {
+   "name": "strip-idler",
+   "role": "x3 idlers between the cranks (13T, 13T, 16T) on 3 mm pins",
+   "why_separate": "moving",
+   "grams": 0.2,
+   "print_orient": "flat"
+  },
+  {
+   "name": "front-strip-gear",
+   "role": "13T fifth strip gear in front of crank 1 (y -24.6, z 13.9), meshes crank 1",
+   "why_separate": "moving",
+   "grams": 0.2,
+   "print_orient": "flat"
+  },
+  {
+   "name": "drop-idler",
+   "role": "18T gear in the clear channel in front of crank 1 (y -25.2, z 22.9): crown spur to the front strip gear",
+   "why_separate": "moving",
+   "grams": 0.3,
+   "print_orient": "flat"
+  },
+  {
+   "name": "crown-part",
+   "role": "20T face gear and 10T spur on one part, axis X, at the motor height (y -23.0, z 31.0)",
+   "why_separate": "turns the drive 90 degrees",
+   "grams": 0.6,
+   "print_orient": "face up, 0.12 mm layers on the teeth"
+  },
+  {
+   "name": "pinion",
+   "role": "10T x +0.42 with a D-bore on the N10 shaft",
+   "why_separate": "pressed on the bought shaft",
+   "grams": 0.1,
+   "print_orient": "flat, D-bore up"
+  },
+  {
+   "name": "motor-sleeve",
+   "role": "closed sleeve round the N10 can on the spine tower, front lip, rear cap with 1 x M3 on the axis: no clamp ears",
+   "why_separate": "the motor slides in from the rear; a fix reprints 1 g",
+   "grams": 1.2,
+   "print_orient": "standing, axis vertical, no support"
+  },
+  {
+   "name": "cell-pack",
+   "role": "x2: three AG13 on edge (3P), tongue into the sleeve's side rail",
+   "why_separate": "cells replaceable",
+   "grams": 2.0,
+   "print_orient": "open side up"
+  },
+  {
+   "name": "pack-lid",
+   "role": "x2: hook at the front end, 1 x M3 at the rear inside the pack length",
+   "why_separate": "access to the cells",
+   "grams": 0.5,
+   "print_orient": "flat"
+  },
+  {
+   "name": "pivot-keeper",
+   "role": "x2, one per side: 2 x M3 and 2 hooks under the rim lip hold the 8 pivot pins down",
+   "why_separate": "holds the pins, off for a leg",
+   "grams": 1.0,
+   "print_orient": "flat, hooks up"
+  },
+  {
+   "name": "n10-motor",
+   "role": "N10 3 V gear motor (datasheet, measure on arrival)",
+   "hardware": true
+  },
+  {
+   "name": "ag13-cell",
+   "role": "6 x AG13 wired 2S3P (3 V)",
+   "hardware": true
+  },
+  {
+   "name": "ss12d00-switch",
+   "role": "slide switch, under the base (pressed into the floor pocket from inside, lever down through the pocket's slot; 5.5 mm below the base at the lowest point, 3.4 mm left of the 8.9 mm ground height; 4.8 mm from the legs' sweep; glue optional)",
+   "hardware": true
+  },
+  {
+   "name": "led-5mm",
+   "role": "2 x 5 mm LEDs from the Arduino kit, the pupils; Morante wires them",
+   "hardware": true
+  },
+  {
+   "name": "pin-2mm",
+   "role": "8 x steel pin 2 x 8, leg pivots",
+   "hardware": true
+  },
+  {
+   "name": "pin-3mm",
+   "role": "steel pins 3 mm: strip idlers, front strip gear, drop idler, crown part",
+   "hardware": true
+  },
+  {
+   "name": "screw-m3",
+   "role": "M3 Allen: spine (2), keepers (4), packs (2), sleeve cap (1), body (2)",
+   "hardware": true
+  },
+  {
+   "name": "nut-m3",
+   "role": "M3 nuts in pockets",
+   "hardware": true
+  },
+  {
+   "name": "cell-spring",
+   "role": "conical spring 5 mm, negative contact, 6 (to buy, datasheet)",
+   "hardware": true
+  },
+  {
+   "name": "jst-xh",
+   "role": "2 mated 2-pin JST-XH: cells to motor, body LEDs",
+   "hardware": true
+  }
+ ],
+ "joints": [
+  {
+   "name": "spine-on-base",
+   "a": "spine",
+   "b": "base",
+   "type": "screw",
+   "fit": "fits.LOCATOR",
+   "held": {
+    "+x": "locating pins",
+    "-x": "locating pins",
+    "+y": "locating pins",
+    "-y": "locating pins",
+    "+z": "2 x M3 from below into nuts",
+    "-z": "base floor lugs"
+   },
+   "in_from": "+z",
+   "apart_by": "2 screws from below"
+  },
+  {
+   "name": "crank-in-spine",
+   "a": "crankshaft",
+   "b": "spine",
+   "type": "revolute X",
+   "fit": "fits.TURN",
+   "held": {
+    "+x": "webs on the walls (GEAR_THRUST_CRANK)",
+    "-x": "webs on the walls",
+    "+y": "journal slot",
+    "-y": "journal slot",
+    "+z": "spine-cap tongue (TONGUE_SHORT)",
+    "-z": "slot floor"
+   },
+   "in_from": "+z",
+   "apart_by": "cap off, lift"
+  },
+  {
+   "name": "gears-on-pins",
+   "a": "strip-idler",
+   "b": "spine",
+   "type": "revolute X",
+   "fit": "fits.GEAR_THRUST_IDLER",
+   "held": {
+    "+x": "spine wall",
+    "-x": "spine wall",
+    "+y": "3 mm pin",
+    "-y": "3 mm pin",
+    "+z": "3 mm pin, pin held by the cap",
+    "-z": "3 mm pin"
+   },
+   "in_from": "+z",
+   "apart_by": "cap off, pin out"
+  },
+  {
+   "name": "front-gears-on-pins",
+   "a": "front-strip-gear",
+   "b": "spine",
+   "type": "revolute X",
+   "fit": "fits.GEAR_THRUST_IDLER",
+   "held": {
+    "+x": "tower wall",
+    "-x": "tower wall",
+    "+y": "3 mm pin",
+    "-y": "3 mm pin",
+    "+z": "3 mm pin pressed in the walls (STEEL)",
+    "-z": "3 mm pin"
+   },
+   "in_from": "+x",
+   "apart_by": "push the pin out along X"
+  },
+  {
+   "name": "drop-idler-on-pin",
+   "a": "drop-idler",
+   "b": "spine",
+   "type": "revolute X",
+   "fit": "fits.GEAR_THRUST_IDLER",
+   "held": {
+    "+x": "tower wall",
+    "-x": "tower wall",
+    "+y": "3 mm pin",
+    "-y": "3 mm pin",
+    "+z": "3 mm pin pressed in the walls (STEEL)",
+    "-z": "3 mm pin"
+   },
+   "in_from": "+x",
+   "apart_by": "push the pin out along X"
+  },
+  {
+   "name": "crown-on-pin",
+   "a": "crown-part",
+   "b": "spine",
+   "type": "revolute X",
+   "fit": "fits.STEEL",
+   "held": {
+    "+x": "tower wall (GEAR_THRUST_IDLER)",
+    "-x": "tower wall",
+    "+y": "3 mm pin",
+    "-y": "3 mm pin",
+    "+z": "3 mm pin",
+    "-z": "3 mm pin"
+   },
+   "in_from": "+x",
+   "apart_by": "push the pin out along X"
+  },
+  {
+   "name": "pinion-on-shaft",
+   "a": "pinion",
+   "b": "n10-motor",
+   "type": "press",
+   "fit": "fits.DSHAFT",
+   "held": {
+    "+x": "D-flat",
+    "-x": "D-flat",
+    "+y": "press (DSHAFT_N10 to add as assumed, coupon K1)",
+    "-y": "press",
+    "+z": "D-flat",
+    "-z": "D-flat"
+   },
+   "in_from": "-y",
+   "apart_by": "pull with pliers"
+  },
+  {
+   "name": "motor-in-sleeve",
+   "a": "n10-motor",
+   "b": "motor-sleeve",
+   "type": "slide",
+   "fit": "fits.MOTOR_SEAT",
+   "held": {
+    "+x": "sleeve wall",
+    "-x": "sleeve wall",
+    "+y": "rear cap and its M3",
+    "-y": "front lip on the gearbox face",
+    "+z": "sleeve wall",
+    "-z": "sleeve wall"
+   },
+   "in_from": "+y",
+   "apart_by": "cap screw out, slide back"
+  },
+  {
+   "name": "sleeve-on-spine",
+   "a": "motor-sleeve",
+   "b": "spine",
+   "type": "slide",
+   "fit": "fits.WINDOW",
+   "held": {
+    "+x": "tower rail",
+    "-x": "tower rail",
+    "+y": "rear cap M3 into the tower lug",
+    "-y": "rail stop",
+    "+z": "rail lips",
+    "-z": "tower floor"
+   },
+   "in_from": "+y",
+   "apart_by": "cap screw out, slide back"
+  },
+  {
+   "name": "pack-on-sleeve",
+   "a": "cell-pack",
+   "b": "motor-sleeve",
+   "type": "slide",
+   "fit": "fits.TONGUE",
+   "held": {
+    "+x": "tongue in the sleeve rail",
+    "-x": "tongue",
+    "+y": "lid M3 into the sleeve lug",
+    "-y": "rail stop",
+    "+z": "tongue",
+    "-z": "tongue"
+   },
+   "in_from": "+y",
+   "apart_by": "lid screw out, slide back"
+  },
+  {
+   "name": "lid-on-pack",
+   "a": "pack-lid",
+   "b": "cell-pack",
+   "type": "hook and screw",
+   "fit": "fits.LOCATOR",
+   "held": {
+    "+x": "pack rim",
+    "-x": "pack rim",
+    "+y": "hook",
+    "-y": "hook",
+    "+z": "hook and M3",
+    "-z": "pack rim"
+   },
+   "in_from": "+z",
+   "apart_by": "screw out, tip off the hook"
+  },
+  {
+   "name": "leg-on-arm",
+   "a": "leg",
+   "b": "leg-arm",
+   "type": "key",
+   "fit": "fits.PRESS",
+   "held": {
+    "+x": "key",
+    "-x": "key",
+    "+y": "key",
+    "-y": "key",
+    "+z": "pivot-keeper over the pin",
+    "-z": "notch floor"
+   },
+   "in_from": "+z",
+   "apart_by": "lift off the arm"
+  },
+  {
+   "name": "leg-pivot",
+   "a": "leg-arm",
+   "b": "base",
+   "type": "revolute Z and pitch on a 2 mm pin",
+   "fit": "fits.LEG_PATH",
+   "held": {
+    "+x": "pin",
+    "-x": "pin",
+    "+y": "pin",
+    "-y": "pin",
+    "+z": "pivot-keeper (0.5 play)",
+    "-z": "notch floor"
+   },
+   "in_from": "+z",
+   "apart_by": "keeper off, pin out"
+  },
+  {
+   "name": "keeper-on-base",
+   "a": "pivot-keeper",
+   "b": "base",
+   "type": "hook and screw",
+   "fit": "fits.WINDOW",
+   "held": {
+    "+x": "rim lip",
+    "-x": "rim lip",
+    "+y": "hooks and 2 x M3",
+    "-y": "2 x M3",
+    "+z": "hooks under the lip and screws",
+    "-z": "rim top"
+   },
+   "in_from": "+y",
+   "apart_by": "2 screws, slide back"
+  },
+  {
+   "name": "switch-in-pocket",
+   "a": "ss12d00-switch",
+   "b": "base",
+   "type": "press",
+   "fit": "fits.PRESS",
+   "held": {
+    "+x": "pocket wall",
+    "-x": "pocket wall",
+    "+y": "pocket wall",
+    "-y": "pocket wall",
+    "+z": "press fit in the pocket (glue optional)",
+    "-z": "pocket floor, a 0.8 mm skin (slot for the lever)"
+   },
+   "in_from": "+z",
+   "apart_by": "pull up from inside with tweezers (if glued: a drop of solvent, or cut the pocket)"
+  },
+  {
+   "name": "body-on-base",
+   "a": "body",
+   "b": "base",
+   "type": "lip and screws",
+   "fit": "fits.WINDOW",
+   "held": {
+    "+x": "skirt lip inside the rim",
+    "-x": "skirt lip",
+    "+y": "skirt lip",
+    "-y": "skirt lip",
+    "+z": "2 x M3 up into the body bosses",
+    "-z": "rim"
+   },
+   "in_from": "+z",
+   "apart_by": "2 screws, unplug JST 2"
+  }
+ ],
+ "assembly": [
+  {
+   "part": "base",
+   "from": null,
+   "tool": "hand",
+   "check": "flat on the bench"
+  },
+  {
+   "part": "pinion",
+   "from": "-y",
+   "tool": "pliers, shaft supported",
+   "already": "n10-motor on the bench",
+   "check": "flush with the shaft mark"
+  },
+  {
+   "part": "n10-motor",
+   "from": "+y",
+   "tool": "hand",
+   "already": "pinion",
+   "check": "gearbox face on the sleeve lip"
+  },
+  {
+   "part": "motor-sleeve",
+   "from": "+y",
+   "tool": "2.5 mm hex key",
+   "already": "spine on the bench, n10-motor in the sleeve",
+   "check": "cap screw home, pinion turns the crown"
+  },
+  {
+   "part": "crown-part",
+   "from": "+x",
+   "tool": "hand, pin pushed with the hex key",
+   "already": "spine",
+   "check": "crown turns on its pin"
+  },
+  {
+   "part": "drop-idler",
+   "from": "+x",
+   "tool": "hand",
+   "already": "crown-part",
+   "check": "phase mark on the crown spur's mark"
+  },
+  {
+   "part": "front-strip-gear",
+   "from": "+x",
+   "tool": "hand",
+   "already": "drop-idler",
+   "check": "phase mark on the drop idler's mark"
+  },
+  {
+   "part": "pin-3mm",
+   "from": "+x",
+   "tool": "pliers",
+   "already": "the tower gears",
+   "check": "pins flush with the walls"
+  },
+  {
+   "part": "spine",
+   "from": "+z",
+   "tool": "2.5 mm hex key, finger on the nut",
+   "already": "base",
+   "check": "no rock"
+  },
+  {
+   "part": "strip-idler",
+   "from": "+z",
+   "tool": "hand",
+   "already": "spine",
+   "check": "on their pins, marks up"
+  },
+  {
+   "part": "crankshaft",
+   "from": "+z",
+   "tool": "hand",
+   "already": "strip-idler",
+   "check": "phase marks on the idler marks"
+  },
+  {
+   "part": "spine-cap",
+   "from": "+z",
+   "tool": "2.5 mm hex key",
+   "already": "crankshaft",
+   "check": "the train turns by the motor shaft"
+  },
+  {
+   "part": "leg-arm",
+   "from": "+z",
+   "tool": "hand",
+   "already": "spine-cap",
+   "check": "end tube on the crank ball"
+  },
+  {
+   "part": "leg",
+   "from": "+z",
+   "tool": "hand",
+   "already": "leg-arm keyed in",
+   "check": "eye holes over the seat"
+  },
+  {
+   "part": "pin-2mm",
+   "from": "+z",
+   "tool": "fingers",
+   "already": "leg",
+   "check": "2.0 mm proud of the stack"
+  },
+  {
+   "part": "pivot-keeper",
+   "from": "+y",
+   "tool": "2.5 mm hex key",
+   "already": "pin-2mm",
+   "check": "legs swing, pins cannot lift"
+  },
+  {
+   "part": "ss12d00-switch",
+   "from": "+z",
+   "tool": "tweezers",
+   "already": "base",
+   "check": "base open side up: switch pressed into the pocket from inside until it sits on the floor skin; lever through the slot, wires through the 2 floor holes; it does not fall out when the base is turned over"
+  },
+  {
+   "part": "cell-spring",
+   "from": "+z",
+   "tool": "tweezers",
+   "already": "cell-pack on the bench",
+   "check": "seated in the ring"
+  },
+  {
+   "part": "cell-pack",
+   "from": "+y",
+   "tool": "hand",
+   "already": "motor-sleeve",
+   "check": "tongue home in the rail"
+  },
+  {
+   "part": "jst-xh",
+   "from": "+z",
+   "tool": "soldering iron",
+   "already": "cell-pack, switch",
+   "check": "3.0 V across JST 1"
+  },
+  {
+   "part": "ag13-cell",
+   "from": "+z",
+   "tool": "hand",
+   "already": "cell-pack",
+   "check": "+ mark on each bay"
+  },
+  {
+   "part": "pack-lid",
+   "from": "+z",
+   "tool": "hand",
+   "already": "ag13-cell",
+   "check": "hook engaged"
+  },
+  {
+   "part": "screw-m3",
+   "from": "+z",
+   "tool": "2.5 mm hex key",
+   "already": "pack-lid",
+   "check": "lid flat, pack does not slide"
+  },
+  {
+   "part": "nut-m3",
+   "from": "-z",
+   "tool": "finger in the pocket",
+   "already": "each screw's part",
+   "check": "nut flush in its pocket"
+  },
+  {
+   "part": "led-5mm",
+   "from": "-y",
+   "tool": "hand, Morante's own wiring",
+   "already": "body on the bench",
+   "check": "dome flush in the eye"
+  },
+  {
+   "part": "body",
+   "from": "+z",
+   "tool": "hand, then 2.5 mm hex key from below",
+   "already": "everything",
+   "check": "JST 2 plugged first, lip seated all round"
+  }
+ ],
+ "alternatives": [
+  {
+   "topic": "where the drive comes down to the strip",
+   "options": [
+    "R4: crown in front, 12T idler over crank 1 (-2.74 at D4a)",
+    "F1: one idler chosen for room (-2.74)",
+    "F2: two idlers down in front of crank 1 (-2.74)",
+    "B1: crown at the rear (-5.10)",
+    "B2: two idlers behind crank 4 (-3.14)",
+    "T1: toy-style motor across, 30T layshaft, ratio 0.40 (-9.00)",
+    "F2s: F2 + sleeve + free bosses + strip rule (-1.64)",
+    "F2s-sw: F2s + switch under the base, strip gear counted against the arms (-1.75; -1.64 with it exempt)"
+   ],
+   "choice": "F2s-sw",
+   "why": "the least overlap of every layout tried; ratio 0.50 kept; the switch under the base frees the rear of the dome (wires vs switch gone) but the binds are at the front (crown, strip gear vs shell), so it does not fit yet"
+  },
+  {
+   "topic": "how the motor is held",
+   "options": [
+    "clamp with 2 x M3 ears beside the can (rev 4)",
+    "closed sleeve, front lip, rear cap with 1 x M3 on the axis"
+   ],
+   "choice": "closed sleeve",
+   "why": "the ears took 5.8 mm a side at the packs' height (ear vs pack -1.76)"
+  },
+  {
+   "topic": "body wall",
+   "options": [
+    "D4a 3.0 mm (-1.75 F2s-sw)",
+    "D4b 1.6 mm (-1.78 F2s, -1.77 R4)"
+   ],
+   "choice": "D4a 3.0 mm",
+   "why": "the thin wall gains nothing: the binds are not at the wall"
+  },
+  {
+   "topic": "pivot keeper",
+   "options": [
+    "one per side, 2 screws and 2 hooks",
+    "one per leg pair"
+   ],
+   "choice": "one per side",
+   "why": "2 parts and 4 screws, rev 4 probe pivot"
+  },
+  {
+   "topic": "where the switch goes",
+   "options": [
+    "inside at the rear skirt, in a slot with a retainer boss (rev 4)",
+    "under the base: body in the floor, lever from below, only the wires inside"
+   ],
+   "choice": "under the base",
+   "why": "Morante 2026-11-19; 4.9 mm below the base at the lowest point against 8.9 mm of ground height in the approved N1 walk (4.0 mm left), 4.8 mm from the legs' sweep"
+  }
+ ],
+ "acceptance": [
+  {
+   "id": "a1",
+   "text": "It walks on its 8 legs inside the approved look, with every part inside the body (no box left out) and min gap >= 0 over the 24 poses",
+   "how": "verify",
+   "check": "motion",
+   "priority": "must"
+  },
+  {
+   "id": "a2",
+   "text": "the approved N1 look at S 0.65: jenscolt body, eyes and base, his legs on N0's path, high knees",
+   "how": "visual",
+   "priority": "must"
+  },
+  {
+   "id": "a3",
+   "text": "one N10 3 V gear motor and 6 x AG13 wired 2S3P (3 V), a switch, no microcontroller",
+   "how": "verify",
+   "check": "keep-in",
+   "priority": "must"
+  },
+  {
+   "id": "a4",
+   "text": "two eye bores for the 5 mm LEDs from the Arduino kit; no eyes board (Morante wires them)",
+   "how": "measure",
+   "priority": "must"
+  },
+  {
+   "id": "a5",
+   "text": "every part fits inside with every box placed: motor, clamp, gears, cell packs, switch, wires",
+   "how": "verify",
+   "check": "keep-in",
+   "priority": "must"
+  },
+  {
+   "id": "a6",
+   "text": "every part prints with <= 10 % support and none on a functional face (Bambu P2S, PLA)",
+   "how": "verify",
+   "check": "print",
+   "priority": "must"
+  },
+  {
+   "id": "a7",
+   "text": "not a scale above S 0.65 to solve a fit (ceiling S 0.70; change placement, toy's own layout first)",
+   "how": "visual",
+   "priority": "must"
+  },
+  {
+   "id": "a8",
+   "text": "not jenscolt's inner posts",
+   "how": "visual",
+   "priority": "must"
+  },
+  {
+   "id": "a9",
+   "text": "every part held in all six directions",
+   "how": "verify",
+   "check": "retention",
+   "priority": "must"
+  },
+  {
+   "id": "a10",
+   "text": "the train turns by hand from the motor shaft with every gear in mesh",
+   "how": "verify",
+   "check": "gears",
+   "priority": "must"
+  },
+  {
+   "id": "a11",
+   "text": "every screw reachable with the 2.5 mm hex key in assembly order",
+   "how": "verify",
+   "check": "access",
+   "priority": "must"
+  },
+  {
+   "id": "a12",
+   "text": "the gear meshing crank 1 is the 5th strip gear and runs beside crank 1's arm ends with the strip's clearance (coupon K3c, accepted by Morante 2026-11-19)",
+   "how": "print",
+   "priority": "must"
+  },
+  {
+   "id": "a13",
+   "text": "the switch under the base keeps at least 3 mm of the approved N1 walk's 8.9 mm minimum base height and clear of the legs' sweep",
+   "how": "verify",
+   "check": "motion",
+   "priority": "must"
+  }
+ ],
+ "open_questions": [
+  {
+   "q": "No layout reaches min gap ≥ 0 at S 0.65 with every box placed (best F2s-sw -1.75: strip gear vs arms; -1.64 crown vs shell, -1.40 crown vs front body boss, -1.32 packs vs LEDs). The switch is already under the base. Which way to go?",
+   "options": [
+    "F2s-sw, and round r00 places the remaining boxes by hand on the N2 shapes (no S change)",
+    "drop the body bosses: the body clips onto the base rim (frees the front and rear skirt)",
+    "cells as one 2S3P pack across the top of the motor (new search)"
+   ],
+   "default": "F2s-sw, then a new search with the shell shapes before r00"
+  },
+  {
+   "q": "LEDs",
+   "options": [
+    "5 mm from the Arduino kit",
+    "3 mm"
+   ],
+   "default": "5 mm"
+  },
+  {
+   "q": "Base print",
+   "options": [
+    "rim up",
+    "rim down"
+   ],
+   "default": "rim up"
+  }
+ ],
+ "diagram": "images/plan-exploded.png",
+ "_validated": "4ff89fdda16b228b:929f6ba1ad4f",
+ "decisions": [
+  {
+   "date": "2026-11-19",
+   "decision": "switch held by its pocket alone: pressed in from inside (+z), pocket closed below by a 0.8 mm skin with a slot for the lever, glue optional; no cover and no screw (5.5 mm below the base, 3.4 mm of the 8.9 mm ground height left)"
+  },
+  {
+   "date": "2026-11-19",
+   "decision": "switch under the base: body in the floor, lever from below; keeps the ground clearance of the approved N1 walk and clear of the legs' sweep; the inside switch box and its retainer boss leave the interior"
+  },
+  {
+   "date": "2026-11-19",
+   "decision": "motor in a closed sleeve with one screw behind (no clamp ears)"
+  },
+  {
+   "date": "2026-11-19",
+   "decision": "strip rule accepted: the gear meshing crank 1 is a 5th strip gear, proven by coupon K3c"
+  },
+  {
+   "date": "2026-11-19",
+   "decision": "the toy cannot be opened: no teardown data; T1 stays the inferred toy-style candidate"
+  },
+  {
+   "date": "2026-11-19",
+   "decision": "defaults kept: LEDs 5 mm, base rim up, one keeper per side"
+  }
+ ],
+ "coupons": [
+  {
+   "id": "K3c",
+   "what": "the gear meshing crank 1 beside the arm ends: strip clearance, strip rule",
+   "for": "front-strip-gear"
+  }
+ ]
+}

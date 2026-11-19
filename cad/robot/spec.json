@@ -1,0 +1,71 @@
+{
+ "design": "robot",
+ "level": "N2",
+ "purpose": "Print detail of the looks robot approved at N1: the mechanism re-laid out to fit inside the unchanged look at S 0.65",
+ "pass_criterion": "It walks on its 8 legs inside the approved look, with every part inside the body (no box left out) and min gap >= 0 over the 24 poses",
+ "must_have": [
+  "the approved N1 look at S 0.65: jenscolt body, eyes and base, his legs on N0's path, high knees",
+  "one N10 3 V gear motor and 6 x AG13 wired 2S3P (3 V), a switch, no microcontroller",
+  "two eye bores for the 5 mm LEDs from the Arduino kit; no eyes board (Morante wires them)",
+  "every part fits inside with every box placed: motor, clamp, gears, cell packs, switch, wires",
+  "every part prints with <= 10 % support and none on a functional face (Bambu P2S, PLA)"
+ ],
+ "must_not": [
+  "a scale above S 0.65 to solve a fit (ceiling S 0.70; change placement, toy's own layout first)",
+  "jenscolt's inner posts"
+ ],
+ "dims": {
+  "S": {
+   "value": 0.65,
+   "unit": "scale of jenscolt",
+   "source": "Morante 2026-11-19, cad/robot/design-plan.md «Fixed by Morante»"
+  },
+  "S_max": {
+   "value": 0.7,
+   "unit": "scale",
+   "source": "Morante 2026-11-19: ceiling, never grown to fix a fit"
+  },
+  "body_wall": {
+   "value": 3.0,
+   "unit": "mm",
+   "source": "D4a, cad/robot/design-plan.md (1.6 = D4b still a candidate)"
+  },
+  "crank_dy": {
+   "value": "probes.CRANK_DY_65",
+   "unit": "mm",
+   "source": "cad/robot/probes.py CRANK_DY_65 (frozen rev 4)"
+  }
+ },
+ "references": [
+  {
+   "image": "{refs}/spider-bot-juguete.jpg",
+   "label": "toy (reference)"
+  }
+ ],
+ "src": [
+  "build.py",
+  "verify.py",
+  "views.py"
+ ],
+ "gates": [
+  {
+   "name": "cad_verify",
+   "kind": "cad_verify",
+   "spec": "verify.py"
+  }
+ ],
+ "views": {
+  "cmd": "uv run python cad/robot/views.py {out}",
+  "images": [
+   "{out}"
+  ],
+  "timeout": 900,
+  "note": "views.py is written by the cad-designer: the N2 meshes in n1_render's four views (3/4, front, side, below-front), no labels on the robot"
+ },
+ "judge": {
+  "enabled": true,
+  "rubric": "looks"
+ },
+ "refine_rounds": 0,
+ "asked": "Morante, 2026-11-19"
+}

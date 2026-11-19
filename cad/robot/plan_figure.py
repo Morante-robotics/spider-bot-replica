@@ -1,7 +1,8 @@
-"""N2 plan diagram (rev 4): exploded view of the looks robot on N1's meshes at S 0.65 plus boxes for the parts not
-modelled yet, placed by `probes.py layouts4` (cad/robot/out/.cache/layouts4_0.650.json). Labels in Spanish (for
-Morante). Not a check: boxes are the plan's envelopes. Usage (repo root):
-    uv run python cad/robot/plan_figure.py cad/robot/images/plan-exploded.png
+"""N2 plan diagram (rev 5): exploded view of the looks robot on N1's meshes at S 0.65 plus boxes for the parts not
+modelled yet, placed by `probes.py layouts5 <DEFAULT> 3.0` (cad/robot/out/.cache/layouts5_<DEFAULT>_3.0.json).
+Labels in Spanish (for Morante); the title carries the layout's real least gap. Not a check: boxes are the plan's
+envelopes. Usage (repo root):
+    uv run python cad/robot/plan_figure.py cad/robot/images/plan-exploded.png [candidate] [wall]
 """
 import os, sys, json
 import numpy as np, trimesh, matplotlib
@@ -16,8 +17,16 @@ import probes as P  # noqa: E402
 R = n1.run(P.p_at(P.S_FIX))
 st, legs = R["st"], R["legs"]
 UP = dict(body=50, eyes=50, keeper=26, cells=36, drive=14, legs=0, base=0)    # exploded lift (mm)
-LAY = json.load(open(os.path.join(HERE, "out", ".cache", f"layouts4_{P.S_FIX:.3f}.json")))
-best = max(LAY, key=lambda r: r["least"])
+DEFAULT = sys.argv[2] if len(sys.argv) > 2 else "F2s-sw"        # plan rev 5 default layout
+WALL = float(sys.argv[3]) if len(sys.argv) > 3 else 3.0
+best = json.load(open(os.path.join(HERE, "out", ".cache", f"layouts5_{DEFAULT}_{WALL:.1f}.json")))
+ES = [("holder", "portapilas "), ("shell", "cuerpo"), ("arms", "brazos"), ("motor idler", "loco"), ("switch", "interruptor"),
+      ("motor crown", "corona"), ("body", ""), ("boss", "tetón "), ("motor", "motor"), ("nut lug", "orejeta de tuerca"),
+      ("lid screw", "tornillo de tapa"), ("cranks", "cigüeñales"), ("strip", "tira")]
+real = json.load(open(os.path.join(HERE, "out", ".cache", f"real_{DEFAULT}_{WALL:.1f}.json")))   # probes.py real
+bind, rbind = best["bind"], real["bind"]
+for a, b in ES:
+    bind, rbind = bind.replace(a, b), rbind.replace(a, b)
 
 
 def box(lo, hi, dz):
@@ -51,16 +60,16 @@ add(box(lo, hi, UP["drive"]), "#27ae60", "5 espina + 6 tapa + 8 engranajes locos
 for k, (lo, hi) in enumerate(c["sweeps"][:4]):
     add(box(lo, hi, UP["drive"]), "#16a085", "7 cigüeñal ×4 (bolas Ø2 en los brazos)" if k == 0 else None,
         (lo + hi) / 2 + [0, 0, UP["drive"]])
-TXT = {"motor": ("#8e44ad", "drive", "9 motor N10 + 10 abrazadera (2 × M3)"),
+TXT = {"motor": ("#8e44ad", "drive", "9 motor N10 en su funda cerrada (10, sin orejas)"),
        "motor crown": ("#9b59b6", "drive", "16 corona 20T + piñón recto 10T (una pieza)"),
-       "motor idler": ("#a569bd", "drive", "17 loco de transmisión a la tira"),
+       "motor idler": ("#a569bd", "drive", "17 loco de bajada (por delante del cigüeñal 1)"),
+       "motor idler 2 (strip)": ("#a569bd", "drive", "18 quinto engranaje de la tira (engrana el cigüeñal 1)"),
        "holderA": ("#e67e22", "cells", "11 portapilas: 2 paquetes 3P de canto + 12 tapas"),
-       "eyes board": ("#2e86c1", "body", "15 placa de ojos (2 LED de 5 mm, resistencias)"),
-       "switch": ("#4d4d4d", "drive", "interruptor SS12D00 + 14 retén"),
+       "LEDL": ("#5dade2", "body", "2 LED de 5 mm en sus taladros (sin placa)"),
+       "switch leads": ("#4d4d4d", "base", "cables del interruptor (2 agujeros en el suelo)"),
        "bossF body": ("#c0392b", "body", "tetones del cuerpo (2 × M3 desde abajo)"),
        "jst1": ("#34495e", "cells", "2 conectores JST-XH")}
 for nm, lo, hi in best["boxes"]:
-    key = nm if nm in TXT else None
     grp = nm.split()[0]
     col, up, txt = TXT.get(nm, (None, None, None))
     if col is None:
@@ -74,6 +83,9 @@ for nm, lo, hi in best["boxes"]:
     dz = UP[up]
     m = box(lo, hi, dz)
     add(m, col, txt, (np.array(lo) + np.array(hi)) / 2 + [0, 0, dz + (np.array(hi) - np.array(lo))[2] / 2])
+slo, shi, _ = P.sw_box(np.asarray(st["base_v"]), P.SW_UNDER)         # switch under the base (Morante 2026-11-19)
+add(box(slo, shi, 0), "#4d4d4d", "14 interruptor SS12D00 metido a presión desde dentro en su hueco del suelo (palanca hacia abajo por una ranura; sin tapa ni tornillo)",
+    (slo + shi) / 2 + [0, 0, -1])
 for sx in (1, -1):
     Lg = [L for L in c["L"] if L["side"] == ("R" if sx > 0 else "L")]
     ys = [L["P"][1] for L in Lg]
@@ -85,7 +97,9 @@ for sx in (1, -1):
 fig, ax = plt.subplots(figsize=(13, 10))
 proj = Fg.draw(ax, items, view=(22, -62))
 Fg.side_labels(ax, [(proj(np.atleast_2d(p))[0], t) for p, t in notes])
-ax.set_title(f"Spider-Bot N2, plan rev 4: vista despiezada (escala 0,65; cajas = piezas aún sin modelar; "
-             f"holgura mínima {best['least']:+.2f} mm). Números = lista de piezas", fontsize=Fg.FONT + 1)
+ax.set_title(f"Spider-Bot N2, plan rev 5 ({DEFAULT}, pared {WALL:.1f}): vista despiezada, escala 0,65; cajas = piezas "
+             f"aún sin modelar.\nHolgura mínima con formas reales {real['least']:+.2f} mm ({rbind}); con cajas {best['least']:+.2f} mm "
+             f"({bind}). Números = lista de piezas",
+             fontsize=Fg.FONT + 1)
 fig.savefig(sys.argv[1], dpi=110, bbox_inches="tight")
 print("wrote", sys.argv[1])

@@ -2302,4 +2302,89 @@ body. Morante compared the four views with his photo of the toy and approved: «
   jenscolt. No los necesitamos».
 - **Motor 1 mm higher** instead of a higher crank axis.
 
+### N2 rev 5: the inside does not fit at 65 %
+
+**Phase 3 · Mechanisms · 2026-11-19** · Status: 🔄 paused for Morante's decision
+
+> **In short.** The N2 robot now runs on the design-rounds harness, and its plan was laid out again inside the
+> unchanged look at 65 %. Nine layouts were tried and none fits: the best has its tightest pair 1.75 mm too close, and
+> with real shapes instead of boxes 20 pairs still overlap. A sweep for the one scale at which everything fits and can
+> be assembled found a second problem at 65 %: the motor sits over the spine cap, so the cap, its screws and the
+> crankshafts cannot go in after it. Scale does not fix that, so N2 is paused until Morante decides how to change
+> the assembly order.
+
+The N1 look is fixed (scale ceiling S 0.70, «never grown» to fix a fit). N2 puts the mechanism inside it: motor, gears,
+two cell packs, switch, wires. This entry is the fourth plan revision's fit check, and the setup that will be used for
+the rest of N2.
+
+<img src="../cad/robot/images/plan-exploded.png" alt="Exploded view of the N2 plan, rev 5: body, eyes, base, motor, gears, cell holders, switch and legs, with numbered labels (Spanish)">
+
+*Fig. 1 · The plan, rev 5, exploded (labels in Spanish). Coloured blocks are parts not yet modelled; the grey bowl is
+the base and the yellow shapes the legs. Look at the purple and green blocks crowded between the crankshafts and the
+dome: that is where the fit fails.*
+
+#### Steps
+
+1. **Rounds harness.** The N2 robot got a [`spec.json`](../cad/robot/spec.json) (level N2, S 0.65, the toy photo as the
+   looks judge's reference, 0 refine rounds) and a [`plan.json`](../cad/robot/plan.json) that validates
+   (`tools/rounds.py validate` PASS; the readable plan [`design-plan.md`](../cad/robot/design-plan.md) is generated from
+   it). `rounds.py validate` and `check` now exit with their verdict, 0 PASS, 1 FAIL, 2 ERROR. No round has run yet.
+2. **Nine layouts.** The inside was laid out again nine ways ([`probes.py layouts5`](../cad/robot/probes.py)), each
+   with every box placed (body wall 3.0 mm; one also at 1.6) and the least gap measured over the 24 poses.
+3. **Real shapes.** The best layout was measured again with real shapes instead of boxes (`probes.py real`).
+4. **Sweep at S 0.65.** A sweep (`probes.py sweep`) checks one scale completely: every screw, pin, keeper, contact and
+   wire, +1.0 mm margin, the assembly paths, access for a Ø6 × 30 mm tool, and the gear train with 17–60 tooth idlers.
+   The cells as one block of 2 × 3 (layout F2s-1b) were used. It was run at S 0.65 only and then stopped.
+
+#### Result
+
+| Layout (wall 3.0) | Least gap | Tightest pair |
+|---|---|---|
+| T1 · toy-style, motor across (a guess: the toy cannot be opened) | −9.00 mm | cell holder nut lug ↔ shell |
+| R4 · rev 4 as fixed | −2.74 mm | cell holder A ↔ shell |
+| F2s · motor in a closed sleeve, strip gear for crank 1 | −1.64 mm | motor crown ↔ shell |
+| **F2s-sw · F2s + switch under the base** | **−1.75 mm** | strip gear 2 ↔ arms |
+
+With the strip gear exempt from the arms (as the strip itself is), F2s-sw gives −1.64 mm, crown ↔ shell. With real
+shapes F2s-sw is −1.74 mm and 20 pairs still overlap; only the curved pairs improve (crown ↔ shell −1.64 → −0.53 mm).
+**No layout fits.** The sweep at S 0.65 gave −5.25 mm (cells block ↔ spine cap screw) and the assembly order fails:
+the motor sits over the strip, so the spine cap, its screws and the crankshafts cannot be inserted from +z once the
+motor is in. A larger scale makes room but does not change the order.
+
+<details>
+<summary>All nine layouts and the files that hold the numbers</summary>
+
+| Layout | Wall | Least gap (mm) | Tightest pair |
+|---|---|---|---|
+| B1 · crown at the rear, 1 transfer idler | 3.0 | −5.10 | motor ↔ switch |
+| B2 · B1 with 2 transfer idlers | 3.0 | −3.14 | motor clamp ear ↔ shell |
+| B2s · B2 + sleeve seat, strip gear | 3.0 | −2.60 | motor ↔ switch |
+| F1 · crown in front, 1 transfer idler | 3.0 | −2.74 | holder A ↔ shell |
+| F2 · crown in front, 2 transfer idlers | 3.0 | −2.74 | holder A ↔ shell |
+| R4 · rev 4 as fixed | 1.6 | −1.77 | motor idler ↔ arms |
+| R4s · R4 + sleeve seat, free bosses | 3.0 | −2.96 | motor crown ↔ boss body |
+| F2s | 1.6 | −1.78 | holder B ↔ shell |
+
+Results are in `cad/robot/out/.cache/layouts5_<name>_<wall>.json` (`probes.py layouts5 table` lists them), the real-shape
+run in `real_F2s-sw_3.0.json` and the sweep in `sweep_0.65.json`; the cache is not in git.
+
+</details>
+
+#### Decisions
+
+- **Switch under the base**, pressed in from inside into a pocket closed below except the lever slot (glue
+  optional). It protrudes 5.52 mm, leaving 3.37 mm to the ground at the lowest walk height; the lever is the
+  shortest, recessed in the slot.
+- **Motor in a closed sleeve**, no clamp ears.
+- **The gear meshing crank 1 is a fifth strip gear** (coupon K3c).
+- **LEDs 5 mm**, base rim up, one keeper per side.
+- **The scale is to be the definitive one:** the scale at which everything fits and can be assembled, never grown
+  later. The ceiling S 0.70 stands.
+
+#### Next
+
+Fix the assembly order, either the motor off the spine cap's column or the cap before the motor, then run
+`probes.py sweep 0.65 0.70 …` as an overnight batch (about 1.5–2 h) to get the definitive S. Or another direction
+Morante chooses.
+
 [↑ Contents](../build-log.md#contents)
