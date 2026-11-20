@@ -35,6 +35,15 @@ def test_clean_plan_passes_and_gets_must_have_items():
     assert any(x["id"] == "m1" and x["text"] == "two eyes" for x in p["acceptance"])
 
 
+def test_reworded_must_have_updates_its_item_never_a_twin_id():
+    p = plan2()
+    r.check_plan(p, SPEC2)
+    p["acceptance"][-1].update(how="measure", gate="g")
+    err, _, norm = r.check_plan(p, {**SPEC2, "must_have": ["three eyes"]})
+    m = [x for x in p["acceptance"] if x["id"] == "m1"]
+    assert not err and len(m) == 1 and m[0]["text"] == "three eyes" and m[0]["how"] == "measure", (err, m)
+    assert any("updated" in n for n in norm)
+
 def test_gravity_unknown_fit_missing_step_and_placeholder_fail():
     p = plan2()
     p["joints"][0]["held"]["+z"] = "gravity"

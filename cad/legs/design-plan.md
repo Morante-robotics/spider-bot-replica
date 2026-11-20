@@ -52,7 +52,7 @@ Level N1 · purpose: jenscolt's leg (left and right) as parameters: the blade's 
 | n1 | not build.py never reads an STL or uses trimesh: the meshes are read only by the gates and by the designer's probes (scratchpad) | measure |  | must |
 | n2 | not no warp or morph of mesh vertices | measure |  | must |
 | m1 | leg-blade's skin from a spine curve (BLADE_SPINE, ≤ 5 control points) and ≤ 8 control sections interpolated along it (≤ 60 numbers in all for the skin); the seam grooves, socket and eye placed relative to the spine so they follow a bend | measure |  | must |
-| m2 | leg-arm unchanged from v1 (same fidelity gate) | measure |  | must |
+| m2 | leg-arm's neck on a spine of ≤ 5 points (hub, gears and tab rigid at its start), so it bends onto N0's inner and upper leg path; same fidelity gate (Morante, 2026-11-20: N1 bends both parts) | measure |  | must |
 | m3 | build.py --edit writes out/edit-*.stl and images/edit-demo.png: (a) the blade bent onto N0's right-front blade curve (cad/mockup/n0.py leg_shape with P0, imported, never copied) in N0's frame at its S, (b) length +10 %, (c) bow +3 mm; prints FAIL for any variant that is not one valid closed solid or, for (a), whose spine is more than 0.5 mm from N0's curve | measure |  | must |
 | m4 | build.py --sweep as in v1 (S 0.65, thickness and arm section 0.8x / 1.2x) | measure |  | must |
 | m5 | a fidelity-vs-sections table in datasheet.md: blade p95/max with 4, 6, 8 control sections (and v1's 26), so Morante sees the trade-off | morante |  | must |

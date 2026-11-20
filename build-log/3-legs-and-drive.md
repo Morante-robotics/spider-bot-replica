@@ -2558,8 +2558,8 @@ The four conversions against the new limits (both ways; max on the 99.9th percen
 |---|---|---|---|
 | Eyes (eye, small eye, sensor) | 0.5 / 1.0 | 0.35 / 0.40 | ✅ pass |
 | Leg blade (left and right) | 0.91 / 1.83 | 0.56 / 0.96 | ✅ pass |
-| Leg arm (left and right) | 0.5 / 1.0 | 0.59 / 1.22 | ❌ fails |
-| Base (bowl) | 1.01 / 2.02 | 1.79 / 3.09 | ❌ fails |
+| Leg arm (left and right) | 0.5 / 1.0 → 0.6 / 1.25 (exception) | 0.59 / 1.22 | ❌ fails → ✅ pass |
+| Base (bowl) | 1.01 / 2.02 → 1.8 / 3.1 (exception) | 1.79 / 3.09 | ❌ fails → ✅ pass |
 | Body | 2.1 / 6.0 (exception) | 2.08 / 5.56 | ✅ pass |
 
 #### Decisions
@@ -2567,6 +2567,10 @@ The four conversions against the new limits (both ways; max on the 99.9th percen
 - N0, N1 and the N2 plan are removed rather than rebuilt: N2 starts from scratch on the parametric parts.
 - Collisions stay on the exported mesh (fast); an STL older than its model is refused.
 - The git history is not rewritten: the old meshes stay in it, and the archive tags keep the links working.
+- The arm and the base get an exception each rather than a refine round (Morante: «Excepción para ambos»):
+  their own limits just above what they measure, recorded with `rounds.py except`; both gates pass again.
+- `rounds.py validate` used to add a reworded request item a second time under the same id (the legs plan's
+  two m2): it now updates the item in place, with a test.
 
 #### Next
 

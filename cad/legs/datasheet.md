@@ -11,7 +11,11 @@ parameter block at the top of `build.py` (each with the probe or section it came
 | leg-blade-r | `spideybot_R_leg1.stl` | leg-blade mirrored about x = 35.45 (`side="R"`; jenscolt's R meshes are the L ones mirrored there to 0.0000 mm, probe) | 30.0 × 29.5 × 90.5 | 15.8 cm³ | 2.8 MB | coarse |
 | leg-arm-r | `spideybot_R_leg2.stl` | leg-arm mirrored the same way | 36.4 × 39.9 × 48.5 | 5.6 cm³ | 3.6 MB | coarse |
 
-## Fidelity (`tools/mesh_ref.py compare`, the default: p95 ≤ 2.0, max ≤ 4.0 mm on p99.9)
+## Fidelity (`tools/mesh_ref.py compare`, max on p99.9)
+
+Limits: the blade has the size-relative default (p95 ≤ 0.91, max ≤ 1.83 mm). The arm (left and right) has its own,
+p95 ≤ 0.6 / max ≤ 1.25 mm: an exception Morante approved on 2026-11-20 (`spec.json` → `exceptions`), since it
+misses the default 0.5 / 1.0 mm by 0.09 / 0.22 mm.
 
 | Part | part → ref max / p99.9 / p95 | ref → part max / p99.9 / p95 |
 |---|---|---|

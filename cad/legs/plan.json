@@ -218,7 +218,7 @@
   },
   {
    "id": "m2",
-   "text": "leg-arm unchanged from v1 (same fidelity gate)",
+   "text": "leg-arm's neck on a spine of ≤ 5 points (hub, gears and tab rigid at its start), so it bends onto N0's inner and upper leg path; same fidelity gate (Morante, 2026-11-20: N1 bends both parts)",
    "how": "measure",
    "priority": "must",
    "from": "spec.must_have",
@@ -268,5 +268,5 @@
  ],
  "open_questions": [],
  "diagram": "BLADE_SPINE (5 pts) + BLADE_CTRL (6 sections) --loft--> leg-blade skin; socket, eye, grooves carried in the spine's frame; ARM_SPINE (5 pts: pin, root, pivot, middle, knee): hub rigid at the pin, neck lofted along it, rings / flare / block carried; leg(side, blade_spine, arm_spine, S) -> (blade, arm); side R = mirror (x = 35.45)",
- "_validated": "5512384708e33e27:2eb5603107a5"
+ "_validated": "5a3a8c3b385c61d0:f808baa002a2"
 }

@@ -58,7 +58,7 @@
    "kind": "command",
    "fail_regex": "^FAIL",
    "timeout": 600,
-   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py compare {ws}/out/base.stl cad/carcass-jenscolt/spideybot_base_bowl.stl --view below --png {ws}/images/fidelity-base.png --json {ws}/out/fidelity-base.json",
+   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py compare {ws}/out/base.stl cad/carcass-jenscolt/spideybot_base_bowl.stl --p95 1.8 --max 3.1 --view below --png {ws}/images/fidelity-base.png --json {ws}/out/fidelity-base.json",
    "note": "visible from below and the sides only: the body covers the base's top; the bowl's inside is ours (N2)"
   }
  ],
@@ -74,5 +74,18 @@
   "rubric": "looks"
  },
  "refine_rounds": 1,
- "asked": "Morante, 2026-11-20"
+ "asked": "Morante, 2026-11-20",
+ "exceptions": [
+  {
+   "part": "base",
+   "reason": "Excepción para ambos (brazo y base, a la fidelidad relativa del 2026-11-20)",
+   "by": "Morante",
+   "date": "2026-11-20",
+   "kind": "fidelity",
+   "value": {
+    "p95": 1.8,
+    "max": 3.1
+   }
+  }
+ ]
 }

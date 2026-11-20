@@ -14,7 +14,10 @@ N1 conversion of cad/carcass-jenscolt/spideybot_base_bowl.stl (derived reference
 |---|---|---|---|---|
 | base | skin: plan superellipses (exponent N_FOOT 1.6 at the foot to N_TOP 2.0 at the ledge) whose half-widths follow two smooth meridian curves w(z) = W (1 - ((ZE - z)/H)^P)^(1/P), one across x, one along y (front = back); 14 loft stations are sampled from those numbers. Band: the ledge section grown by LEDGE, straight up. Wall: the same table shrunk by WALL, cut from the outer skin (no offset, no sewn faces). Rim: one ear per side wall, a side-view polyline RIM_EAR beyond EAR_DX. Back: vertical cylinder scoop with its wall kept as the back sheet. Front leg windows: arch + walled pocket (cheek face, flat front face, floor) + post, one parameter set mirrored. Wall windows (4 angles) and rim slot: one list, mirrored. All cutters in one boolean. | 51 (17 skin/band/wall) | 2.9 MB | 13 s |
 
-## Fidelity (mesh_ref.py compare --view below, limits p95 2.0 / max 4.0; 2026-11-20, r01)
+## Fidelity (mesh_ref.py compare --view below; 2026-11-20, r01)
+
+Limits: this design's own, p95 ≤ 1.8 / max ≤ 3.1 mm, an exception Morante approved on 2026-11-20 (`spec.json` →
+`exceptions`); the size-relative default would be 1.01 / 2.02 mm.
 
 | Part | part to ref max (p99.9) / p95 | ref to part max (p99.9) / p95 |
 |---|---|---|

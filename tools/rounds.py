@@ -377,6 +377,11 @@ def check_plan(plan, spec):
     lower = " ".join(x.get("text", "").lower() for x in acc)
     for k, m in enumerate(spec.get("must_have") or []):
         if m.lower() not in lower:
+            old = next((x for x in acc if x.get("id") == f"m{k + 1}" and x.get("from") == "spec.must_have"), None)
+            if old is not None:                        # the request's item was reworded: update it, never a twin id
+                old["text"] = m
+                norm.append(f"acceptance: m{k + 1}'s text updated from spec.must_have ({m!r}); check its 'how'")
+                continue
             acc.append({"id": f"m{k + 1}", "text": m, "how": "visual", "priority": "must", "from": "spec.must_have"})
             norm.append(f"acceptance: added m{k + 1} from spec.must_have ({m!r}); give it the right 'how'")
     for k, m in enumerate(spec.get("must_not") or []):
