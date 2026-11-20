@@ -5,7 +5,7 @@ The method is adapted from 3dcodeverse's harness (github.com/gaoypeng/3dcodevers
 plan are data validated before any code, deterministic gates run in code, a judge in a fresh context sees only a
 brief and pictures, the score is arithmetic on the judge's answers with explicit caps, and every round is a snapshot
 that can be compared and restored. Here the CAD is build123d, the gates are tools/cad_verify.py (or a level's own
-check), the reference is the toy, and nothing is committed: commits stay Morante's call.
+check), the reference is the model the design reproduces, and nothing is committed: commits stay Morante's call.
 
 A design folder is the workspace:
 
@@ -19,7 +19,7 @@ A design folder is the workspace:
 
 Commands (from the repo root; WS is the design folder, e.g. cad/legs):
 
-    uv run python tools/rounds.py init WS --level N2 --purpose "..." [--must-have ...] [--ref toy.jpg] [--rounds 1]
+    uv run python tools/rounds.py init WS --level N2 --purpose "..." [--must-have ...] [--ref reference.jpg] [--rounds 1]
     uv run python tools/rounds.py init WS --level N1 --purpose "..." --mesh PART=ref.stl [--mesh ...] [--edit]
                                          --rounds 1      # a conversion from reference meshes (mesh-to-cad agent)
     uv run python tools/rounds.py except WS PART --reason "..." [--p95 MM] [--max MM] [--judge 0.69] [--drop "..."]
@@ -130,7 +130,7 @@ def cmd_init(a):
         return 2
     spec = {"design": os.path.basename(ws), "level": a.level, "purpose": a.purpose,
             "pass_criterion": a.pass_criterion or "", "must_have": a.must_have or [], "must_not": a.must_not or [],
-            "dims": {}, "references": [{"image": r, "label": "toy (reference)"} for r in (a.ref or [])],
+            "dims": {}, "references": [{"image": r, "label": "reference"} for r in (a.ref or [])],
             "src": ["build.py", "verify.py"] if a.level == "N2" else ["*.py"],
             "gates": [{"name": "cad_verify", "kind": "cad_verify", "spec": "verify.py"}] if a.level == "N2" else [],
             "views": {}, "judge": {"enabled": bool(a.ref), "rubric": "looks"},
@@ -996,7 +996,7 @@ def main():
     p.add_argument("--pass-criterion")
     p.add_argument("--must-have", action="append")
     p.add_argument("--must-not", action="append")
-    p.add_argument("--ref", action="append", help="reference image, e.g. {refs}/spider-bot-juguete.jpg")
+    p.add_argument("--ref", action="append", help="reference image, e.g. {root}/cad/carcass-jenscolt/images/jenscolt-photo-1.jpg")
     p.add_argument("--rounds", type=int, default=0, help="refine rounds Morante asked for (default 0: one round)")
     p.add_argument("--mesh", action="append", help="a conversion: PART=reference.stl (repo-relative), once per part")
     p.add_argument("--edit", action="store_true", help="conversion of an organic part: also the build.py --edit gate")

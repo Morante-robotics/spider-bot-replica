@@ -1,0 +1,120 @@
+{
+ "design": "robot",
+ "level": "N2",
+ "purpose": "The whole looks Spider-Bot as one assembly: the parametric legs (8), eyes, base and body placed with cad/motion.py, and the drive fitted inside them: N10 gear motor, gear train to the crankshafts, 6 x AG13 wired 2S3P with contacts, slide switch, two 5 mm LED eye bores. The scale S starts at 0.60; a larger S (0.75, 0.8) is an alternative put to Morante, not a limit.",
+ "pass_criterion": "full cad_verify PASS with every part inside (no collision over the 24 poses, each part's assembly path) at the chosen S, and the judge >= 0.60 against jenscolt's model (his photos and his assembled meshes in the same views as the robot)",
+ "must_have": [
+  "the parts are imported from cad/legs, cad/eyes, cad/base, cad/body; scale, crank and leg path from cad/motion.py, never copied",
+  "the parametric parts may be reshaped where the inside needs it (surfaces moved, stretched or opened), as long as the robot's look passes the judge",
+  "every part, screw, contact and wire is in the code that counts the fit; a fit that leaves something out is reported as partial",
+  "assembly order and each part's path checked before the scale",
+  "the motor's fit is a separate, screwed part (the motor is bought later and measured; a fix reprints grams)",
+  "Morante can change the cells; the switch is reached from outside",
+  "two 5 mm LED bores in the eyes, wired by Morante (no eyes board)",
+  "the views command renders the robot and jenscolt's assembled meshes in the same views and framing, written as images/reference.png next to the photos",
+  "fasteners: start with M2 self-tapping screws or snap fits; M3 where it solves a problem",
+  "margins, walls and clearances: the standard values of cad/fits.py; changed only where they cause a problem, and put to Morante",
+  "print support as little as possible; up to 20-30 % on a part is accepted when a valid solution needs it",
+  "screwdriver access: where it blocks a solution, it is put to Morante before the solution is dropped",
+  "when something does not fit, alternatives in this order: clamshell split like the toy -> cells in the abdomen with a lid below -> mechanism first, shell reshaped -> one crankshaft + side bars -> a larger S (0.75, 0.8); before dropping one, find what binds"
+ ],
+ "must_not": [
+  "a probe that leaves parts out reported as a fit",
+  "jenscolt's inner posts in the body or base"
+ ],
+ "dims": {
+  "S_start": {
+   "value": 0.6,
+   "unit": "scale vs jenscolt",
+   "source": "N0 (cad/motion.py P0); Morante, 2026-11-20: larger (0.75, 0.8) only as an alternative"
+  },
+  "motor_n10": {
+   "value": [
+    12.0,
+    10.0,
+    21.0
+   ],
+   "unit": "mm (w, h, length without shaft)",
+   "source": "nominal micro metal gear motor N10 (motor 12 + gearbox 9 mm); not bought: to be measured on arrival (hardware.md)"
+  },
+  "motor_shaft": {
+   "value": [
+    3.0,
+    10.0
+   ],
+   "unit": "mm (D-shaft diameter, length)",
+   "source": "nominal N10 datasheet; hardware.md"
+  },
+  "cell_ag13": {
+   "value": [
+    11.6,
+    5.4
+   ],
+   "unit": "mm (diameter, height)",
+   "source": "hardware.md (AG13 / LR44); 6 cells wired 2S3P"
+  },
+  "switch": {
+   "value": [
+    12.0,
+    6.0,
+    6.0
+   ],
+   "unit": "mm",
+   "source": "hardware.md, SS12D00 mini slide switch (approx.)"
+  },
+  "led": {
+   "value": 5.0,
+   "unit": "mm",
+   "source": "Morante, 2026-11-19: two 5 mm LEDs from the Arduino kit, eye bores only"
+  },
+  "support_max": {
+   "value": 30,
+   "unit": "% of a part",
+   "source": "Morante, 2026-11-20: as little as possible; 20-30 % accepted when a valid solution needs it"
+  }
+ },
+ "references": [
+  {
+   "image": "{root}/cad/carcass-jenscolt/images/jenscolt-photo-1.jpg",
+   "label": "jenscolt's print (reference)"
+  },
+  {
+   "image": "{root}/cad/carcass-jenscolt/images/jenscolt-photo-2.jpg",
+   "label": "jenscolt's print, eyes lit (reference)"
+  },
+  {
+   "image": "{ws}/images/reference.png",
+   "label": "jenscolt's assembled meshes, same views and framing as the robot"
+  }
+ ],
+ "src": [
+  "build.py",
+  "verify.py"
+ ],
+ "gates": [
+  {
+   "name": "cad_verify",
+   "kind": "cad_verify",
+   "spec": "verify.py"
+  }
+ ],
+ "views": {},
+ "judge": {
+  "enabled": true,
+  "rubric": "looks",
+  "pass_threshold": 0.6,
+  "pass_threshold_why": "exception for robot: Morante, 2026-11-20: «en aspecto general nos podemos permitir que se parezca desde un 0.6»"
+ },
+ "refine_rounds": 1,
+ "asked": "Morante, 2026-11-20",
+ "exceptions": [
+  {
+   "part": "robot",
+   "reason": "Morante, 2026-11-20: «en aspecto general nos podemos permitir que se parezca desde un 0.6»",
+   "by": "Morante",
+   "date": "2026-11-20",
+   "kind": "judge",
+   "value": 0.6
+  }
+ ]
+}
