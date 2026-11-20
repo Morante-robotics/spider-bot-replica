@@ -139,3 +139,65 @@ def test_exit_code_is_the_verdict(tmp_path):
     assert run("validate") == 0
     assert run("check") == 0  # no gates
     assert run("best") == 2  # no scored round
+
+
+# ---------------------------------------------------------------- ready to print
+
+READY_SPEC = '''
+PARTS = {"frame": {"mesh": None}, "pin": {"mesh": None, "hardware": True, "label": "pasador"}}
+JOINTS = {("pin", "frame"): {"fit": None}}
+MARKS = {}
+LABELS = {"es": {"frame": "marco"}}
+MEASURE = [("pin bore", 3.3)]
+'''
+
+
+def ready_score(**kw):
+    s = {"overall": 0.9, "passed": True, "improvement": [], "caps": [],
+         "acceptance": [("a1", "must", "verify", "verified", "held"), ("m1", "must", "morante", "pending", "looks")]}
+    s.update(kw)
+    return s
+
+
+def ready(tmp_path, spec_src=READY_SPEC, rs=None, verify="cad_verify: PASS (0 failures, 1 warnings)\n",
+          kit="<p>ok</p>", status=None, coupons=False):
+    f = tmp_path / "verify.py"
+    f.write_text(spec_src)
+    names, unl = r.spec_names(str(f))
+    rs = [(0, ready_score(), None)] if rs is None else rs
+    return r.ready_items(plan2(), rs, verify, names, unl, status or {"WINDOW": "measured"}, kit, coupons)
+
+
+def fails(items):
+    return [t for st, t in items if st == "FAIL"]
+
+
+def test_ready_passes_a_complete_design_and_leaves_the_hand_items(tmp_path):
+    items = ready(tmp_path)
+    assert not fails(items), fails(items)
+    assert sum(st == "HAND" for st, _ in items) == 2
+
+
+def test_ready_fails_partial_verify_missing_kit_and_falta(tmp_path):
+    assert any("verify-result" in t for t in fails(ready(tmp_path, verify="cad_verify: PARTIAL PASS (0, 0)\n")))
+    assert any("verify-result" in t for t in fails(ready(tmp_path, verify=None)))
+    assert any("kit" in t for t in fails(ready(tmp_path, kit=None)))
+    assert any("FALTA: 2" in t for t in fails(ready(tmp_path, kit="FALTA: a FALTA: b")))
+
+
+def test_ready_fails_spec_gaps_unlabelled_hardware_and_assumed_fits(tmp_path):
+    src = READY_SPEC.replace(', "label": "pasador"', "").replace('MEASURE = [("pin bore", 3.3)]', "MEASURE = []")
+    f = fails(ready(tmp_path, spec_src=src.replace('"es"', '"en"')))
+    assert any("MEASURE empty" in t for t in f) and any("LABELS" in t for t in f)
+    assert any("without a label: 1" in t for t in f)
+    assert any("WINDOW" in t for t in fails(ready(tmp_path, status={"WINDOW": "assumed"})))
+    assert not any("WINDOW" in t for t in fails(ready(tmp_path, status={"WINDOW": "assumed"}, coupons=True)))
+
+
+def test_ready_fails_when_the_best_round_is_not_the_last_or_has_open_items(tmp_path):
+    rs = [(0, ready_score(overall=0.9), None), (1, ready_score(overall=0.8), None)]
+    assert any("not the last" in t for t in fails(ready(tmp_path, rs=rs)))
+    s = ready_score(improvement=["[gate/cad_verify] x"],
+                    acceptance=[("a1", "must", "verify", "failed", "held")])
+    f = fails(ready(tmp_path, rs=[(0, s, None)]))
+    assert any("gate items in its score: 1" in t for t in f) and any("a1" in t for t in f)

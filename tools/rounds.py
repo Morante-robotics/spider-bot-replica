@@ -26,11 +26,13 @@ Commands (from the repo root; WS is the design folder, e.g. cad/robot):
     uv run python tools/rounds.py score WS 0           # after the judge wrote judgment.json
     uv run python tools/rounds.py status WS            # every round's score, caps and verdict; the best round
     uv run python tools/rounds.py best WS              # copy the best round's src back (then run check again)
+    uv run python tools/rounds.py ready WS --kit K     # the ready-to-print checklist from the files (N2 only)
 
 Every command prints its verdict first (PASS / FAIL / ERROR), then the numbers and what to fix. The exit code is the
 verdict, so `validate WS && ...` stops on a bad plan: 0 = PASS, 1 = FAIL, 2 = ERROR (it could not run).
 """
 import argparse
+import ast
 import datetime
 import glob
 import hashlib
@@ -759,6 +761,95 @@ def cmd_best(a):
     return 0
 
 
+# ---------------------------------------------------------------- ready to print
+
+def spec_names(path):
+    """What a cad_verify spec declares at module level, read without running it (building is slow): name -> AST
+    value, and how many literal {"hardware": True, ...} parts lack a "label"."""
+    tree = ast.parse(open(path).read())
+    names = {t.id: node.value for node in tree.body if isinstance(node, ast.Assign)
+             for t in node.targets if isinstance(t, ast.Name)}
+    unlabelled = 0
+    for d in ast.walk(tree):
+        if isinstance(d, ast.Dict):
+            pairs = [(k.value, v) for k, v in zip(d.keys, d.values) if isinstance(k, ast.Constant)]
+            hw = any(k == "hardware" and isinstance(v, ast.Constant) and v.value is True for k, v in pairs)
+            unlabelled += hw and "label" not in [k for k, _ in pairs]
+    return names, unlabelled
+
+
+def ready_items(plan, rs, verify_txt, names, unlabelled, fit_status, kit_html, coupons):
+    """The ready-to-print checklist as (state, text): PASS, FAIL, or HAND (only a person or an agent's reply can
+    tell). Pure: the tests feed it the files' contents."""
+    out = []
+    b = best_round(rs)
+    if b is None:
+        out.append(("FAIL", "no scored round: run round and score first"))
+    else:
+        s, last = {n: sc for n, sc, _ in rs}[b], rs[-1][0]
+        out.append(("PASS" if b == last else "FAIL", f"r{b:02d} is the best round" +
+                    ("" if b == last else f", not the last (r{last:02d}): run best, then check")))
+        gate = [x for x in s["improvement"] if x.startswith("[gate/")]
+        out.append(("FAIL" if gate else "PASS", f"gate items in its score: {len(gate)}"))
+        musts = [i for i, pr, how, st, _ in s["acceptance"]
+                 if pr == "must" and how not in ("morante", "print") and st != "verified"]
+        out.append(("FAIL" if musts else "PASS", "must acceptance unverified: " + (", ".join(musts) or "none")))
+    first = (verify_txt or "").splitlines()[:1]
+    out.append(("PASS" if first and first[0].startswith("cad_verify: PASS") else "FAIL", "verify-result.txt: " +
+                (first[0] if first else "missing (full run with --out <design>/verify-result.txt)")))
+    for k, need, may_be_empty in (("JOINTS", "every joint of the joint table", False),
+                                  ("MARKS", "every gear and phased part", True),
+                                  ("MEASURE", "what to check with the caliper", False)):
+        v = names.get(k)
+        empty = isinstance(v, ast.Dict) and not v.keys or isinstance(v, ast.List) and not v.elts
+        out.append(("FAIL" if v is None or (empty and not may_be_empty) else "PASS",
+                    f"{k} " + ("missing" if v is None else "empty" if empty else "declared") + f" ({need})"))
+    lab = names.get("LABELS")
+    es = isinstance(lab, ast.Dict) and any(isinstance(k, ast.Constant) and k.value == "es" for k in lab.keys)
+    out.append(("PASS" if es else "FAIL", 'LABELS["es"] ' + ("declared" if es else "missing")))
+    out.append(("FAIL" if unlabelled else "PASS", f"hardware parts without a label: {unlabelled}"))
+    used = sorted({j["fit"].split(".")[-1] for j in plan.get("joints", []) if j.get("fit")})
+    assumed = [f for f in used if fit_status.get(f) == "assumed"]
+    out.append(("PASS" if not assumed else "HAND" if coupons else "FAIL",
+                "assumed fits: " + (", ".join(assumed) or "none") +
+                (" (this print is their coupon)" if assumed and coupons else
+                 " (print their coupons first, or pass --coupons)" if assumed else "")))
+    out.append(("FAIL", "kit: not given or not found (--kit .../Montaje/<step>/kit.html)") if kit_html is None
+               else ("FAIL" if "FALTA:" in kit_html else "PASS", f"kit FALTA: {kit_html.count('FALTA:')}"))
+    out.append(("HAND", "design-reviewer APPROVE at the pre-print gate; every WARN explained in design-review.md"))
+    out.append(("HAND", "print-plater PASS, grams and hours known"))
+    return out
+
+
+def cmd_ready(a):
+    ws = os.path.abspath(a.ws)
+    spec, plan = jload(os.path.join(ws, "spec.json")), jload(os.path.join(ws, "plan.json"))
+    if spec is None or plan is None:
+        print(f"ERROR {ws} has no spec.json or plan.json")
+        return 2
+    gate = next((g for g in spec.get("gates", []) if g.get("kind") == "cad_verify"), None)
+    if gate is None:
+        print("ERROR no cad_verify gate in spec.json: N0 and N1 are not printed")
+        return 2
+    try:
+        names, unlabelled = spec_names(expand(gate["spec"], ws))
+    except (OSError, SyntaxError) as e:
+        print(f"ERROR cannot read the verify spec: {e}")
+        return 2
+    sys.path.insert(0, ROOT)
+    from cad import fits
+    status = {k: v.status for k, v in vars(fits).items() if type(v).__name__ == "Fit"}
+    vt = os.path.join(ws, "verify-result.txt")
+    items = ready_items(plan, rounds_of(ws), open(vt).read() if os.path.exists(vt) else None, names, unlabelled,
+                        status, open(a.kit).read() if a.kit and os.path.exists(a.kit) else None, a.coupons)
+    fails = sum(st == "FAIL" for st, _ in items)
+    print(("FAIL" if fails else "PASS") + f" ready to print: {fails} missing" +
+          ("" if fails else "; confirm the HAND items, then «imprime»"))
+    for st, t in items:
+        print(f"  {st:4s}  {t}")
+    return 1 if fails else 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -779,9 +870,13 @@ def main():
         p.add_argument("n")
         if name == "round":
             p.add_argument("--force", action="store_true")
+    p = sub.add_parser("ready", help="the ready-to-print checklist, from the files")
+    p.add_argument("ws")
+    p.add_argument("--kit", help="the workshop kit.html for this print")
+    p.add_argument("--coupons", action="store_true", help="this print is the coupons for the assumed fits")
     a = ap.parse_args()
     fn = {"init": cmd_init, "validate": cmd_validate, "check": cmd_check, "round": cmd_round, "score": cmd_score,
-          "status": cmd_status, "best": cmd_best}[a.cmd]
+          "status": cmd_status, "best": cmd_best, "ready": cmd_ready}[a.cmd]
     rc = fn(a)
     if a.cmd == "check":  # cmd_check returns the gates (cmd_round reuses them), or None when it could not run
         rc = 2 if rc is None or rc["verdict"] == "ERROR" else 1 if rc["verdict"] == "FAIL" else 0

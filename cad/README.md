@@ -64,6 +64,7 @@ uv run python tools/rounds.py check cad/<design>
 uv run python tools/rounds.py round cad/<design> 0      # prints the JUDGE INSTRUCTION
 uv run python tools/rounds.py score cad/<design> 0
 uv run python tools/rounds.py status cad/<design>
+uv run python tools/rounds.py ready cad/<design> --kit <kit.html>   # N2: the ready-to-print checklist
 ```
 
 Reference images are private (a product photo): `spec.json` names them as `{refs}/<file>` and `CAD_REFS` points at
