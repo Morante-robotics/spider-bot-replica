@@ -107,5 +107,5 @@
  ],
  "open_questions": [],
  "diagram": "SKIN_CTRL (8 sections, 40 numbers) --loft--> outer skin; same table eroded by WALL --loft--> inner skin; outer - inner = shell open at Z_RIM; + eye block, rings, nose, small eyes, bridge, scoops, rear lip, tab, bosses; - bores, chin arch, boss holes, panel lines",
- "_validated": "68b42bafb48cad2f:5750cccd97f1"
+ "_validated": "14d2d4ffb6788763:5750cccd97f1"
 }

@@ -8,17 +8,16 @@ reference's, both ways, so «it looks like it» becomes a figure in mm. The `mes
 
     uv run python tools/mesh_ref.py info REF.stl
     uv run python tools/mesh_ref.py sections REF.stl --axis z --n 12 [--json out.json] [--png out.png]
-    uv run python tools/mesh_ref.py compare PART.stl REF.stl [--p95 1.0] [--max 2.5] [--png heat.png]
+    uv run python tools/mesh_ref.py compare PART.stl REF.stl [--p95 MM] [--max MM] [--png heat.png]
                                             [--samples 20000] [--view all|above|below]
     uv run python tools/mesh_ref.py source BUILD.py      # FAIL if the build script reads a mesh
     uv run python tools/mesh_ref.py views OUT.png --ref A.stl [B.stl ...] [--parts a.stl [b.stl ...]]
                                           [--edits OUT2.png x.stl[=label] ...]
 
-Fidelity limits (defaults of compare): p95 ≤ 2.0 mm and max ≤ 4.0 mm both ways, at the reference's scale
-(≈ 1.3 / 2.6 mm printed at S 0.65). Morante, 2026-11-20: first 1.0 / 2.5, relaxed the same day after seeing the
-body at p95 2.2 («a nivel aspecto general lo veo bien») and asking for a max of 3–4 mm, which still catches a local
-defect such as an eye not joined to the shell. The gate guards the form; the looks judge and Morante decide the
-look. A spec may set other limits per part, with Morante's reason.
+Fidelity limits (defaults of compare): relative to the part's size, both ways, at the reference's scale: p95 ≤ 1 %
+and max ≤ 2 % of the reference's largest extent, never below 0.5 / 1.0 mm (Morante, 2026-11-20: a fixed 2 / 4 mm
+was 13 % of a 15 mm eye and 1 % of the body). The gate guards the form; the looks judge and Morante decide the look.
+Other limits for one part only as an exception Morante approved, with his reason (`rounds.py except`).
 
 `compare` samples both surfaces evenly and measures each sample's distance to the other surface (the «max» limit
 is checked on the 99.9th percentile, so a single stray sample does not decide; the true max is printed too):
@@ -40,7 +39,14 @@ import numpy as np
 import trimesh
 
 
-P95, MAX = 2.0, 4.0          # mm, the default fidelity limits (Morante, 2026-11-20: see the docstring)
+P95_REL, MAX_REL = 0.01, 0.02   # default fidelity limits: fractions of the reference's largest extent (docstring)
+P95_MIN, MAX_MIN = 0.5, 1.0     # mm, the floors (a small part is not held to less than a print can show)
+
+
+def limits(ref):
+    """Default (p95, max) limits in mm for a reference mesh (or its largest extent in mm)."""
+    size = float(ref if np.isscalar(ref) else np.max(ref.extents))
+    return round(max(P95_REL * size, P95_MIN), 2), round(max(MAX_REL * size, MAX_MIN), 2)
 # A build script that reads a mesh: trimesh, build123d's mesh import, or a load/open/read of an .stl/.obj/.3mf/.ply
 READS_MESH = re.compile(r"^[^#]*(import trimesh|trimesh\.|import_stl|import_mesh|Mesher|"
                         r"(load|open|read)\(.*\.(stl|obj|3mf|ply)\b)", re.I)
@@ -221,8 +227,8 @@ def main(argv=None):
     c = sub.add_parser("compare")
     c.add_argument("part")
     c.add_argument("ref")
-    c.add_argument("--max", type=float, default=MAX, help="limit on the largest distance either way (mm)")
-    c.add_argument("--p95", type=float, default=P95, help="limit on the 95th percentile either way (mm)")
+    c.add_argument("--max", type=float, help="limit on the largest distance either way (mm; default: limits())")
+    c.add_argument("--p95", type=float, help="limit on the 95th percentile either way (mm; default: limits())")
     c.add_argument("--samples", type=int, default=20000)
     c.add_argument("--view", choices=["all", "above", "below"],
                    help="compare only what a viewer outside sees (both meshes): «above» for a part on its base")
@@ -280,6 +286,9 @@ def main(argv=None):
                 fig.savefig(a.png, dpi=110)
         else:
             part, ref = load(a.part), load(a.ref)
+            dp, dm = limits(ref)
+            src = "" if a.p95 or a.max else f", {P95_REL:.0%} / {MAX_REL:.0%} of {np.max(ref.extents):.0f} mm"
+            a.p95, a.max = a.p95 or dp, a.max or dm
             res = compare(part, ref, a.samples, a.view)
             fails = []
             for way in ("part_to_ref", "ref_to_part"):
@@ -293,7 +302,7 @@ def main(argv=None):
                                 for w in ("part_to_ref", "ref_to_part"))
             vr = res["volume_ratio"]
             vw = f", visible from {a.view}" if a.view else ""
-            print("\n".join(fails) if fails else f"PASS fidelity (max ≤ {a.max}, p95 ≤ {a.p95} mm{vw})")
+            print("\n".join(fails) if fails else f"PASS fidelity (max ≤ {a.max}, p95 ≤ {a.p95} mm{src}{vw})")
             print(f"  {summary}" + (f"  volume part/ref {vr:.3f}" if vr else ""))
             if a.png:
                 heat_png(res, a.png)

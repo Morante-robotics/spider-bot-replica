@@ -41,7 +41,7 @@ own (the section fit, the simplified grooves and tip steps), not the interpolati
 ## Edit test (`build.py --edit`)
 
 The spines' 5 points change, nothing else. Blade: sections, socket, eye and grooves sit at the same arc-length fraction in
-the spine's frame (cad/mockup/n1.py warp()'s convention: side vector made normal to the tangent, offsets in that
+the spine's frame (N1's warp() convention, archived at the tag n2-on-meshes-2026-11-20: side vector made normal to the tangent, offsets in that
 frame, scaled by the cross-section scale). Picture: `images/edit-demo.png`.
 
 | Variant | Spine | Result |

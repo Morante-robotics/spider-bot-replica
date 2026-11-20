@@ -46,7 +46,7 @@ BLADE_ORIGIN = (109.72, -68.46, 47.53)                      # mm, global; probe:
 BLADE_X = (0.76797, 0.64047, -0.0042)                       # probe: 2nd principal axis (width)
 BLADE_Z = (-0.21594, 0.26509, 0.93973)                      # probe: 1st principal axis (length, tip at -z)
 
-# The skin: a spine and a few control sections (SKIN_NUMBERS numbers in all). Convention of cad/mockup/n1.py warp():
+# The skin: a spine and a few control sections (SKIN_NUMBERS numbers in all). Convention of N1's warp() (cad/mockup/n1.py, archived at the tag n2-on-meshes-2026-11-20):
 # a section lies in the plane normal to the spine; its x axis is the «side» vector made normal to the tangent
 # (b = side - (t.side) t), its y axis T x b with T the tangent toward the top; side = local x here, cross(z, rd)
 # on N0's leg. Source: least-squares fit of every number at once to v1's 26-section skin (scratch probe fit.py:
@@ -328,7 +328,7 @@ GEAR_RISE = 0.8                   # above the back plane; probe: back height map
 # section x axis = ARM_SIDE made normal to the tangent). Knot 0 is the axle hole, the crank pin: the hub, its ring
 # and gears, the tab tube and the static-leg tab hang rigidly from the spine's frame there. Every other feature sits
 # at its own z of this original spine, i.e. at an arc length mapped knot to knot onto a new spine (Carry by_knot):
-# knot 2 is the pivot at the body's rim (z 61: cad/mockup/n1.py build_leg's breakpoint), knot 4 the knee (the block).
+# knot 2 is the pivot at the body's rim (z 61: N1's build_leg breakpoint, tag n2-on-meshes-2026-11-20), knot 4 the knee (the block).
 # Source: the v1 neck stations' centres (z sections of L_leg2, probe), the hub hole HOLE_C.
 ARM_SPINE = [(90.0, 33.6, 40.0),       # knot 0: axle hole (crank pin), mid-plate (fitted planes: w 31.0-36.9)
              (99.5, 32.7, 50.0),       # knot 1: the neck's root in the hub (v1 station z 50)
@@ -525,45 +525,32 @@ def _leg(side, bsp, asp, S, across, thick, sec):
 
 # ============================================================================================================
 # EDIT TEST (--edit): both parts changed through their spines only. Variants: (a) the blade's spine on N0's
-# right-front blade curve (cad/mockup/n0.py leg_shape with P0, imported) in N0's frame, sections at N0's S;
+# right-front blade curve (cad/motion.py leg_shape with P0, imported) in N0's frame, sections at N0's S;
 # (b) length +EDIT_LENGTH; (c) bow EDIT_BOW mm outward (toward -y, the flat face) at the middle; (d) the arm's
 # spine on N0's right-front inner arm + upper leg (crank pin A0 -> pivot P -> knee K), at N0's S.
 # ============================================================================================================
-MOCKUP = os.path.join(os.path.dirname(HERE), "mockup")
-N0_LEG = 0                        # n0 P0["angles"][0]: the right-front leg
+N0_LEG = 0                        # motion.P0["angles"][0]: the right-front leg
 EDIT_LENGTH = 1.10                # (b) spine stretched along z about its top end
 EDIT_BOW = 3.0                    # mm, (c) spine's middle moved outward (-y) by this, sin(pi u) along it
 EDIT_SPINE_DEV = 0.5              # mm, (a) pass limit: spine to N0's curve, both ways (spec)
 
 
 def n0_blade(n):
-    """N0's right-front blade curve, foot to top (n + 4 points), its S and radial direction."""
-    if MOCKUP not in sys.path:
-        sys.path.insert(0, MOCKUP)
-    import n0                                         # noqa: E402  (N0's numbers stay in n0.py)
-    TL, p = n0.TL, dict(n0.P0)
-    c = np.array([TL.CENTER[0] * n0.K120, TL.CENTER[1] * n0.K120, TL.BASE_BOTTOM * n0.K120])   # as n0.body()
-    x, y = TL.NOTCHES_RIGHT[N0_LEG]
-    P = n0.to_frame((x * n0.K120, y * n0.K120, TL.NOTCH_Z * n0.K120), {"c": c}, p)
-    A0 = np.array([p["XC"], P[1] + p["DY"], P[2] + p["H"]]) + p["r"] * np.array([0, -1.0, 0])   # crank level
-    ang = math.radians(p["angles"][N0_LEG])
-    pts, _, ni = n0.leg_shape(P, A0, ang, p, n=n)
+    """N0's right-front blade curve, foot to top (n + 4 points), its S and radial direction (cad/motion.py)."""
+    sys.path.insert(0, os.path.dirname(HERE)) if os.path.dirname(HERE) not in sys.path else None
+    import motion                                     # noqa: E402  (the approved motion stays in cad/motion.py)
+    p = motion.P0
+    _, _, ang, pts, _, ni = motion.neutral_leg(N0_LEG, p, n=n)
     return pts[ni + n:][::-1], p["S"], np.array([math.cos(ang), math.sin(ang), 0.0])
 
 
 def n0_upper(n):
     """N0's right-front inner arm + upper leg (crank pin A0 -> pivot P -> knee K): the 5 arm spine points (A0, the
     neck root at the original's knot 1 fraction of A0 -> P, P, the upper curve's middle, K) and a dense polyline."""
-    if MOCKUP not in sys.path:
-        sys.path.insert(0, MOCKUP)
-    import n0                                         # noqa: E402
-    TL, p = n0.TL, dict(n0.P0)
-    c = np.array([TL.CENTER[0] * n0.K120, TL.CENTER[1] * n0.K120, TL.BASE_BOTTOM * n0.K120])
-    x, y = TL.NOTCHES_RIGHT[N0_LEG]
-    P = n0.to_frame((x * n0.K120, y * n0.K120, TL.NOTCH_Z * n0.K120), {"c": c}, p)
-    A0 = np.array([p["XC"], P[1] + p["DY"], P[2] + p["H"]]) + p["r"] * np.array([0, -1.0, 0])
-    ang = math.radians(p["angles"][N0_LEG])
-    pts, _, ni = n0.leg_shape(P, A0, ang, p, n=n)     # upper = pts[ni:ni + n], P .. K
+    sys.path.insert(0, os.path.dirname(HERE)) if os.path.dirname(HERE) not in sys.path else None
+    import motion                                     # noqa: E402
+    p = motion.P0
+    P, A0, ang, pts, _, ni = motion.neutral_leg(N0_LEG, p, n=n)     # upper = pts[ni:ni + n], P .. K
     up = pts[ni:ni + n]
     sp0 = arm_spine_local()
     f = sp0.knots[1] / sp0.knots[2]

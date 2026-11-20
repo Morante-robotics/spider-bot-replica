@@ -23,7 +23,6 @@ dependencies = [
 [dependency-groups]
 dev = ["pytest>=8"]
 office = ["openpyxl>=3.1", "python-docx>=1.2"]   # private Plan (.docx) and Seguimiento (.xlsx), outside the repo
-mesh-repair = ["pymeshlab>=2023.12"]               # tools/repair_stl.py only: uv sync --group mesh-repair
 
 [tool.uv]
 package = false

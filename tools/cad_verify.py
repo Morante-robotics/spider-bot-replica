@@ -1357,8 +1357,38 @@ def render(spec, meshes, outdir):
 
 # ---------------------------------------------------------------- main
 
+CAD = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "cad")
+SHARED = [os.path.join(CAD, f) for f in ("common.py", "fits.py", "motion.py")]   # imported by every build.py
+
+
+def stale(stl):
+    """The sources an exported STL is older than: its design's build.py (the folder that holds its out/) and the shared
+    modules every build imports. Checks measure the parametric model through its export, so an export older than its
+    model would measure a design that no longer exists (Morante, 2026-11-20)."""
+    d = os.path.dirname(os.path.dirname(os.path.abspath(stl)))
+    build = os.path.join(d, "build.py")
+    if not os.path.exists(build):
+        return []
+    t = os.path.getmtime(stl)
+    return [os.path.relpath(f, d) for f in [build] + SHARED if os.path.exists(f) and os.path.getmtime(f) > t]
+
+
 def load_meshes(spec, path):
+    """Every part's mesh: the STL its build.py exported (or an in-memory mesh). FAIL, before any check, if an STL is
+    missing or older than the model it comes from: rebuild it with build.py."""
     base = os.path.dirname(os.path.abspath(path))
+    bad = []
+    for name, p in spec.PARTS.items():
+        if "mesh" in p:
+            continue
+        f = os.path.join(base, p["stl"])
+        if not os.path.exists(f):
+            bad.append(f"{name}: {p['stl']} missing")
+        elif stale(f):
+            bad.append(f"{name}: {p['stl']} is older than {', '.join(stale(f))}")
+    if bad:
+        print("FAIL stale or missing STL (run build.py first):\n  " + "\n  ".join(bad))
+        sys.exit(1)
     return {name: p["mesh"] if "mesh" in p else trimesh.load(os.path.join(base, p["stl"]), force="mesh")
             for name, p in spec.PARTS.items()}
 

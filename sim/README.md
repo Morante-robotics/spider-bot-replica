@@ -23,8 +23,8 @@ carcass, two gait groups, a quasi-static walk over one crank turn. It compares 3
 step height, foot slip, stability, gap between legs, ground clearance and footprint. Best geometries:
 [`toy_leg_3d.json`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/toy_leg_3d.json). Results: [build log](../build-log/3-legs-and-drive.md#toy-leg-in-3d).
 
-`--strict` adds 6 mm between every pair of legs (inner arms too) and a minimum footprint; `--only shaft/crank` puts
-all 8 cranks on one lateral crankshaft inside the base (needs trimesh and shapely to read the base). Results:
+`--strict` adds 6 mm between every pair of legs (inner arms too) and a minimum footprint; the `shaft` axle (archived, see
+above) put all 8 cranks on one lateral crankshaft inside the base. Results:
 [toy_leg_3d_strict.json](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/toy_leg_3d_strict.json), [build log](../build-log/3-legs-and-drive.md#toy-leg-on-one-crankshaft). With a
 crankshaft, `--strict` also keeps every inner arm 1 mm clear of the cranks and shaft it does not ride on; no layout
 passes ([toy_leg_3d_shaft_check.json](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/toy_leg_3d_shaft_check.json),
@@ -41,7 +41,9 @@ python3 toy_leg_3d.py --search 3000 --only lateral/crank --json lateral-crank.js
 python3 toy_leg_3d.py --params toy_leg_3d.json --png images/toy-3d-comparison.png --gif images/toy-3d.gif
 ```
 
-Needs numpy, scipy, matplotlib and pillow (plus trimesh and shapely for `shaft`).
+Needs numpy, scipy, matplotlib and pillow. The `shaft` axle (one crankshaft for all 8 legs) and the check that the
+cranks stay inside the base read the 120 % carcass mesh and are archived at
+[pre-redesign-2026-11-17](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/toy_leg_3d.py): that fit is N2's, on the parametric parts.
 
 ![Toy leg in 3D](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/toy-3d-comparison.png?raw=true)
 
@@ -49,23 +51,9 @@ Needs numpy, scipy, matplotlib and pillow (plus trimesh and shapely for `shaft`)
 
 ## N20 motor sizing
 
-[`motor_sizing.py`](motor_sizing.py) sizes the gear motor from the robot's mass and the 3D toy leg's kinematics: the
-crank torque over one turn (lifting the body, the feet slipping on the ground, friction in the printed joints), the
-crank speed for a walking speed, where the motor can mesh with the gear train, and Pololu's N20s scaled to 4.8 V and
-4.0 V. A motor passes with a margin of 3 (worst working torque ≤ 1/3 of stall, gear efficiency 0.5) at 4.0 V and
-at least 1.8 cm/s at 4.8 V. Output: [`motor-sizing-result.txt`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/motor-sizing-result.txt).
-[`motor_sizing_figure.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/motor_sizing_figure.py) draws the candidates against that zone and the break torque of
-the printed teeth if a leg jams. Results: [build log](../build-log/3-legs-and-drive.md#whole-robot-first-motor-sizing-and-chassis-plan).
-
-```
-../.venv/bin/python motor_sizing.py > motor-sizing-result.txt
-../.venv/bin/python motor_sizing_figure.py
-../.venv/bin/python motor_sizing.py --mass 478 --leg-g 7.9 --sweep 5,5,-5,-5   # a candidate leg
-```
-
-Two flags try a different leg without editing the code. `--leg-g G` is the printed mass of one leg plus its fork in
-grams, in place of 5.9 (without `--mass`, the legs' row of the step-1 table becomes 8 × G). `--sweep a,b,c,d` adds a
-sweep, in degrees, to each leg (front, middle 1, middle 2, rear), stretching L2 so the foot keeps its height; without
-it all eight legs share one sweep, and the default output is unchanged.
+The motor sizing (`motor_sizing.py`) weighed the robot from meshes and designs that no longer exist; it is archived
+([script](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/motor_sizing.py), [result](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/motor-sizing-result.txt)).
+Results: [build log](../build-log/3-legs-and-drive.md#whole-robot-first-motor-sizing-and-chassis-plan). The N2 design sizes the motor again from its
+own parts.
 
 ![N20 candidates](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/motor-sizing.png?raw=true)

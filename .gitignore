@@ -19,18 +19,14 @@ result.json
 .verify-last.txt
 # Spanish copies of figures (--lang es) are for the private workshop kit; the scripts make them again
 *-es.png
-# Stage cache (tools/stage_cache.py) and carcass proxies (cad/robot.py): rebuilt on demand
+# Stage cache (tools/stage_cache.py): rebuilt on demand
 cad/*/out/.cache/
-cad/carcass-120/.proxy/
 # Chassis: raw meshes and the coarse lite build are intermediate
 cad/chassis/out/*-raw.ply
 cad/chassis/out/*-lite.stl
 # Chassis: coarse STL/STEP written while iterating (front-block-v2.step alone is 48 MB). The fine files that are
 # printed are added at print time with `git add -f`.
 cad/chassis/out/
-
-# N0 mock-up: the body distance field (cad/mockup/n0.py), rebuilt on demand
-cad/mockup/.cache/
 
 # Design rounds (tools/rounds.py): snapshots, gates, views, judge briefs and scores are local; the build log keeps
 # the round table (rounds.py status)

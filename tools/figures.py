@@ -449,16 +449,14 @@ if __name__ == "__main__":
     import argparse
     import sys
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from cad_verify import load_spec
+    from cad_verify import load_meshes, load_spec
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("spec")
     ap.add_argument("outdir")
     ap.add_argument("--lang", default="en", choices=sorted(WORDS))
     args = ap.parse_args()
     spec = load_spec(args.spec)
-    base = os.path.dirname(os.path.abspath(args.spec))
-    meshes = {n: p["mesh"] if "mesh" in p else trimesh.load(os.path.join(base, p["stl"]), force="mesh")
-              for n, p in spec.PARTS.items()}
+    meshes = load_meshes(spec, args.spec)
     os.makedirs(args.outdir, exist_ok=True)
     sfx = "" if args.lang == "en" else f"-{args.lang}"
     for f in (assembly_steps(spec, meshes, os.path.join(args.outdir, f"assembly-steps{sfx}.png"), args.lang),

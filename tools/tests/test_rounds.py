@@ -229,7 +229,7 @@ def test_init_mesh_writes_the_conversion_gates(tmp_path, monkeypatch):
     a = A()
     a.ws, a.level, a.purpose, a.pass_criterion = str(ws), "N1", "eyes from jenscolt's mesh", None
     a.must_have, a.must_not, a.ref, a.rounds = None, None, None, 1
-    a.mesh, a.edit, a.p95, a.max = ["eye=refs/eye.stl"], False, None, None
+    a.mesh, a.edit = ["eye=refs/eye.stl"], False
     assert r.cmd_init(a) == 0
     spec = r.jload(str(ws / "spec.json"))
     assert [g["name"] for g in spec["gates"]] == ["source", "build", "fidelity-eye"]
@@ -245,3 +245,34 @@ def test_a_design_may_have_its_own_pass_threshold():
     spec = dict(SPEC2, judge={"enabled": True, "rubric": "looks", "pass_threshold": 0.69,
                               "pass_threshold_why": "Morante: fine as it is"})
     assert r.score_round(spec, PLAN_S, GATES_OK, RUB, j, {})["passed"]
+
+
+def test_exceptions_are_recorded_and_required(tmp_path, monkeypatch):
+    import trimesh
+    root = tmp_path
+    (root / "refs").mkdir()
+    trimesh.creation.icosphere(subdivisions=2, radius=8).export(root / "refs" / "eye.stl")
+    monkeypatch.setattr(r, "ROOT", str(root))
+    ws = root / "cad" / "eyes"
+
+    class A:
+        pass
+    a = A()
+    a.ws, a.level, a.purpose, a.pass_criterion = str(ws), "N1", "eyes", None
+    a.must_have, a.must_not, a.ref, a.rounds, a.mesh, a.edit = None, None, None, 1, ["eye=refs/eye.stl"], False
+    assert r.cmd_init(a) == 0
+    spec = r.jload(str(ws / "spec.json"))
+    assert spec["dims"]["eye_fidelity"]["value"] == [0.5, 1.0]          # 16 mm: the floors
+    # own limits typed by hand, with no exception: validate refuses them
+    spec["gates"][2]["cmd"] += " --max 3.0"
+    assert any("without an approved exception" in e for e in r.check_exceptions(spec))
+    # through `except`: recorded with the reason, the gate rewritten, validate content
+    e = A()
+    e.ws, e.part, e.reason, e.p95, e.max, e.judge, e.drop = str(ws), "eye", "«vale así»", None, 1.5, 0.65, ["rim"]
+    assert r.cmd_except(e) == 0
+    spec = r.jload(str(ws / "spec.json"))
+    assert "--max 1.5" in spec["gates"][2]["cmd"] and spec["judge"]["pass_threshold"] == 0.65
+    assert [x["kind"] for x in spec["exceptions"]] == ["fidelity", "judge", "drop"]
+    assert not r.check_exceptions(spec)
+    brief = r.brief_md(spec, {}, {}, r.rubric("looks"), [], {}, 0)
+    assert "Left out on purpose (approved): `eye`: rim" in brief

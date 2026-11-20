@@ -3,7 +3,8 @@
 
 His base is solid at the top and carries the posts and mounts of his own motor and lights; ours is hollow and
 holds our mechanism (Morante, 2026-11-20: convert only the outer bowl). This writes spideybot_base_bowl.stl next to
-it, a derived reference under the same licence (CC BY-NC-SA, LICENSE.txt), the way cad/mockup/n1.py emptied it:
+it, a derived reference under the same licence (CC BY-NC-SA, LICENSE.txt), the way the N1 mock-up emptied it
+(cad/mockup/n1.py, archived at the tag n2-on-meshes-2026-11-20):
 the top deck and the inner blocks off, the largest connected piece kept, the inner static-leg tabs off, and
 the loose slivers their cut leaves dropped.
 

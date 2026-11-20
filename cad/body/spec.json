@@ -76,5 +76,26 @@
   "pass_threshold_why": "Morante, 2026-11-20: «A mí me vale el cuerpo como está, haz que pase a 0.69» (r00 scored 0.69; the refine round was stopped)"
  },
  "refine_rounds": 0,
- "asked": "Morante, 2026-11-20"
+ "asked": "Morante, 2026-11-20",
+ "exceptions": [
+  {
+   "part": "body",
+   "kind": "fidelity",
+   "value": {
+    "p95": 2.1,
+    "max": 6.0
+   },
+   "reason": "Morante, 2026-11-20, «al juez tal como está» after seeing p95 2.04/2.08, max 5.1/5.6 (curved top panels and chin grille still missing)",
+   "by": "Morante",
+   "date": "2026-11-20"
+  },
+  {
+   "part": "body",
+   "kind": "judge",
+   "value": 0.69,
+   "reason": "«A mí me vale el cuerpo como está, haz que pase a 0.69» (r00 scored 0.69; the refine round was stopped)",
+   "by": "Morante",
+   "date": "2026-11-20"
+  }
+ ]
 }

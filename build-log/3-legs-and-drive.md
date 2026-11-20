@@ -1162,7 +1162,7 @@ of both neighbours line up with the idler's gaps.
 
 *Fig. 1 · The parts of the test. The spine has a foot and an M3 nut slot at each end; the cap's tongues go down the
 journal slots. Each crankshaft is different: look at where its cranks point compared with its gear teeth. Made by
-[`tools/stl_preview.py`](../tools/stl_preview.py).*
+[`tools/stl_preview.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/tools/stl_preview.py).*
 
 #### Result
 
@@ -1414,7 +1414,7 @@ screwed on, so a fix reprints a few grams, not the base.
 
 #### Steps
 
-1. **Size the motor** with [`sim/motor_sizing.py`](../sim/motor_sizing.py): the robot's mass from the printed parts
+1. **Size the motor** with [`sim/motor_sizing.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/sim/motor_sizing.py): the robot's mass from the printed parts
    and catalogue values, the torque the four crankshafts need over one turn (from the
    [3D toy leg](#toy-leg-in-3d) model), the speed for a desk-toy walk, and Pololu's N20 data scaled to the battery
    voltage. A motor passes if its stall torque is at least 3 times the worst working torque (a **margin** of 3,
@@ -2055,7 +2055,7 @@ gait) are kept outside the repo.
 3. **Morante's decisions:** body and dome are one piece (as plan E decision 5); legs print at 10 % infill; the
    shin is never flat on the bed (at least 1 mm above it); A is rejected as too thin.
 4. **Rev 3** worked the B family with a sweep per leg (new flags `--leg-g` and `--sweep` in
-   [`motor_sizing.py`](../sim/motor_sizing.py), see [`sim/README.md`](../sim/README.md)). Gait with the per-leg
+   [`motor_sizing.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/sim/motor_sizing.py), see [`sim/README.md`](../sim/README.md)). Gait with the per-leg
    sweep: the same support feet, stride 0.2 to 0.3 mm shorter.
 
 #### Result
@@ -2144,9 +2144,9 @@ the redesign leaves behind.*
 
 The mock-up is the N0 of the [redesign](#redesign-looks-first): a change of shape costs seconds, so the look can be
 settled before any real part is modelled. The scale of 60 % comes from the bottom-up sizing in
-[`cad/mockup/sizing.py`](../cad/mockup/sizing.py): the smallest body that holds the N10 motor and six AG13 cells.
+[`cad/mockup/sizing.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/mockup/sizing.py): the smallest body that holds the N10 motor and six AG13 cells.
 
-<img src="../cad/mockup/images/n0-mockup.png" alt="The N0 mock-up from four views: three-quarter, front, side and from below">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/mockup/images/n0-mockup.png?raw=true" alt="The N0 mock-up from four views: three-quarter, front, side and from below">
 
 *Fig. 1 · The mock-up, default parameters, crank pose 0. Look at the thick legs rising level from the base and then
 bending up to the knee, the blade coming down to the foot, and the base standing clear of the ground. The grey frame
@@ -2154,7 +2154,7 @@ is the ground plane.*
 
 #### Steps
 
-1. Take jenscolt's body and base at 60 % ([`n0.py`](../cad/mockup/n0.py), parameters `P0`).
+1. Take jenscolt's body and base at 60 % ([`n0.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/mockup/n0.py), parameters `P0`).
 2. Model each of the 8 legs as a swept tube (a chain of spheres of varying radius): the inner arm from the crank pin
    to the pivot, an upper leg that goes out level and then up to the knee, and a blade from just above the knee down
    to the foot, shaped like jenscolt's `spideybot_L_leg1` and `leg2`.
@@ -2163,7 +2163,7 @@ is the ground plane.*
 4. Put the inside in as boxes: gear strip (module about 0.6) and the four crankshafts, the N10 (12 × 10 × 24 mm plus
    a 10 mm D-shaft), six AG13 as three stacks of two (2S3P, 3 V) and the SS12D00 switch.
 5. Check over 24 crank poses, in numpy only: the legs against the body, neighbouring legs, the inner arms against the
-   boxes, the boxes inside the wall and apart. Draw four views ([`n0_render.py`](../cad/mockup/n0_render.py)).
+   boxes, the boxes inside the wall and apart. Draw four views ([`n0_render.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/mockup/n0_render.py)).
 
 The legs are checked against a 2 mm voxel distance field of the real body and base surface (cached in
 `cad/mockup/.cache/`, not in git), not against a convex hull: the dome overhangs the base, and the hull filled the
@@ -2224,10 +2224,10 @@ knees are wider (44 mm); the crankshafts were raised because the base's bowl is 
 > the toy and approved the look. Next is N2, the print detail.
 
 N1 is the second of the [three levels](#redesign-looks-first). It keeps everything N0 decided
-([`P0`](../cad/mockup/n0.py): scale, leg path, crank, boxes) and swaps the simple shapes for the real parts, so the
+([`P0`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/mockup/n0.py): scale, leg path, crank, boxes) and swaps the simple shapes for the real parts, so the
 look can be judged on the real surfaces and the collisions checked against them before any part is modelled for print.
 
-<img src="../cad/mockup/images/n1-mockup.png" alt="The N1 mock-up from four views: three-quarter, front, side and from below">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/mockup/images/n1-mockup.png?raw=true" alt="The N1 mock-up from four views: three-quarter, front, side and from below">
 
 *Fig. 1 · The N1 mock-up, crank pose 0. Look at the real dome with its two eyes, two small eyes and front dome, at
 the thick curved legs that now have jenscolt's shape, and at the base standing 12 mm off the ground. The windows are
@@ -2236,7 +2236,7 @@ hidden behind the legs. The grey frame is the ground plane.*
 #### Steps
 
 1. Load jenscolt's body (with two eyes, two small eyes and the front dome) and base, scale them to 60 % and
-   vertex-cluster each to at most 25k triangles ([`n1.py`](../cad/mockup/n1.py)).
+   vertex-cluster each to at most 25k triangles ([`n1.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/mockup/n1.py)).
 2. Take the legs from his `L_leg2` (hub, inner arm, upper leg) and `L_leg1` (blade) and warp them onto N0's leg path,
    the left legs mirrored from the right. Against his 60 % size the parts are stretched ×1.53 (inner arm), ×2.86
    (upper leg) and ×1.20 (blade), so the knee stays high as approved at N0. The hub and inner arm are thinned
@@ -2250,7 +2250,7 @@ hidden behind the legs. The grey frame is the ground plane.*
 5. Move the motor 1 mm up (N10 centre z 21 → 22 mm) so the crank hubs clear it. Raising the crank axis too made the
    legs hit the base, so the axis stays.
 6. Check the 24 poses on the meshes (surfaces sampled at 0.6 mm for body and base, 1.0 mm for the legs, 0.4 mm of
-   sampling slack taken off every gap) and draw four views ([`n1_render.py`](../cad/mockup/n1_render.py)).
+   sampling slack taken off every gap) and draw four views ([`n1_render.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/mockup/n1_render.py)).
 
 <details><summary>How to reproduce</summary>
 
@@ -2309,7 +2309,7 @@ body. Morante compared the four views with his photo of the toy and approved: «
 
 ### N2 rev 5: the inside does not fit at 65 %
 
-**Phase 3 · Mechanisms · 2026-11-19** · Status: 🔄 paused for Morante's decision
+**Phase 3 · Mechanisms · 2026-11-19** · Status: ↩️ restarted from scratch ([Only the parametric parts measure](#only-the-parametric-parts-measure))
 
 > **In short.** The N2 robot now runs on the design-rounds harness, and its plan was laid out again inside the
 > unchanged look at 65 %. Nine layouts were tried and none fits: the best has its tightest pair 1.75 mm too close, and
@@ -2322,7 +2322,7 @@ The N1 look is fixed (scale ceiling S 0.70, «never grown» to fix a fit). N2 pu
 two cell packs, switch, wires. This entry is the fourth plan revision's fit check, and the setup that will be used for
 the rest of N2.
 
-<img src="../cad/robot/images/plan-exploded.png" alt="Exploded view of the N2 plan, rev 5: body, eyes, base, motor, gears, cell holders, switch and legs, with numbered labels (Spanish)">
+<img src="https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/robot/images/plan-exploded.png?raw=true" alt="Exploded view of the N2 plan, rev 5: body, eyes, base, motor, gears, cell holders, switch and legs, with numbered labels (Spanish)">
 
 *Fig. 1 · The plan, rev 5, exploded (labels in Spanish). Coloured blocks are parts not yet modelled; the grey bowl is
 the base and the yellow shapes the legs. Look at the purple and green blocks crowded between the crankshafts and the
@@ -2330,11 +2330,11 @@ dome: that is where the fit fails.*
 
 #### Steps
 
-1. **Rounds harness.** The N2 robot got a [`spec.json`](../cad/robot/spec.json) (level N2, S 0.65, the toy photo as the
-   looks judge's reference, 0 refine rounds) and a [`plan.json`](../cad/robot/plan.json) that validates
-   (`tools/rounds.py validate` PASS; the readable plan [`design-plan.md`](../cad/robot/design-plan.md) is generated from
+1. **Rounds harness.** The N2 robot got a [`spec.json`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/robot/spec.json) (level N2, S 0.65, the toy photo as the
+   looks judge's reference, 0 refine rounds) and a [`plan.json`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/robot/plan.json) that validates
+   (`tools/rounds.py validate` PASS; the readable plan [`design-plan.md`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/robot/design-plan.md) is generated from
    it). `rounds.py validate` and `check` now exit with their verdict, 0 PASS, 1 FAIL, 2 ERROR. No round has run yet.
-2. **Nine layouts.** The inside was laid out again nine ways ([`probes.py layouts5`](../cad/robot/probes.py)), each
+2. **Nine layouts.** The inside was laid out again nine ways ([`probes.py layouts5`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/robot/probes.py)), each
    with every box placed (body wall 3.0 mm; one also at 1.6) and the least gap measured over the 24 poses.
 3. **Real shapes.** The best layout was measured again with real shapes instead of boxes (`probes.py real`).
 4. **Sweep at S 0.65.** A sweep (`probes.py sweep`) checks one scale completely: every screw, pin, keeper, contact and
@@ -2394,7 +2394,7 @@ Morante chooses.
 
 ### Meshes become parameters
 
-**Phase 3 · Mechanisms · 2026-11-20** · Status: 🔄 parts converted, N1 not rebuilt on them yet
+**Phase 3 · Mechanisms · 2026-11-20** · Status: ✅ parts converted
 
 > **In short.** Building on jenscolt's STL meshes stopped working: the legs came out warped, the body is 102k
 > triangles, a STEP sewn from a mesh weighs 50–180 MB, and scale and wall thickness cannot be changed apart.
@@ -2513,11 +2513,64 @@ PASS legs: 1 rounds, refine rounds asked 1; best r00
 - **Licence:** the four conversions are derived from jenscolt's model, so they stay CC BY-NC-SA; each folder's README
   says so and links the licence.
 
+[↑ Contents](../build-log.md#contents)
+
+### Only the parametric parts measure
+
+**Phase 3 · Mechanisms · 2026-11-20** · Status: 🔄 N2 restarts on the parametric parts
+
+> **In short.** After the conversion, the N0 and N1 mock-ups and every N2 fit probe still measured jenscolt's
+> meshes. They were removed, and N2 starts again from scratch on the four parametric parts; the approved motion
+> (scale, crank, leg path) moved to a small module that reads no mesh. Checks now refuse an STL older than the model
+> it was exported from, the fidelity limit grows with the part's size, and a part departs from a rule only through an
+> exception Morante approves. Under the new limit the eyes and the leg blade pass; the leg arm and the base do not yet.
+
+Collisions, volumes and sizes are still measured on an STL, but only the one `build.py` exports from the parametric
+model on every build, at 0.05 mm: testing two meshes for contact is fast, while the same test on the exact solids is
+one OpenCascade boolean per pair and per pose (minutes per check). What failed before was modelling on a mesh, not
+measuring one.
+
+#### Steps
+
+1. Searched every script for mesh reads. The parametric parts read none; N0 (`n0.py`, the body's outline), N1
+   (`n1.py`, every part), the sizing (`sizing.py`) and the N2 probes (`probes.py`, the whole inside fit) read
+   jenscolt's meshes, and `sim/motor_sizing.py` and the simulator's base check read files that no longer existed.
+2. Moved N0's approved numbers (`P0`: scale 0.60, crank, knee, foot, leg shape) and the leg's motion over a crank
+   turn into [`cad/motion.py`](../cad/motion.py). The legs' edit test imports it; its curves and N0's 8 legs over 24
+   poses came out identical (0.0 mm).
+3. Removed `cad/mockup/`, `cad/robot/` (the N2 plan rev 5 and its probes), `sim/motor_sizing.py`, the simulator's
+   `shaft` axle and base check, and the mesh repair and preview tools. All of it is kept at the tag
+   [`n2-on-meshes-2026-11-20`](https://github.com/Morante-robotics/spider-bot-replica/tree/n2-on-meshes-2026-11-20) (and `pre-redesign-2026-11-17` for the oldest), and the links in this log point there.
+4. `cad_verify` (and the figures and workshop kit, which load parts through it) stops with `FAIL` before any check
+   when a part's STL is older than its `build.py` or `common.py`, `fits.py`, `motion.py`.
+5. Fidelity to a reference mesh is now relative: p95 ≤ 1 % and max ≤ 2 % of the part's largest size, never below
+   0.5 / 1.0 mm. A fixed 2 / 4 mm was 13 % of a 15 mm eye and 1 % of the body.
+6. Exceptions per part: own fidelity limits, the design's own judge threshold, or a detail left out; never more
+   parameters or time. `rounds.py except` records each with Morante's reason, `validate` refuses own limits without
+   one, and the judge is told which details are left out on purpose. The body's limits (2.1 / 6.0 mm) and
+   threshold (0.69) are now recorded that way.
+
+#### Result
+
+The four conversions against the new limits (both ways; max on the 99.9th percentile):
+
+| Part | Limits p95 / max (mm) | Worst p95 / max (mm) | Verdict |
+|---|---|---|---|
+| Eyes (eye, small eye, sensor) | 0.5 / 1.0 | 0.35 / 0.40 | ✅ pass |
+| Leg blade (left and right) | 0.91 / 1.83 | 0.56 / 0.96 | ✅ pass |
+| Leg arm (left and right) | 0.5 / 1.0 | 0.59 / 1.22 | ❌ fails |
+| Base (bowl) | 1.01 / 2.02 | 1.79 / 3.09 | ❌ fails |
+| Body | 2.1 / 6.0 (exception) | 2.08 / 5.56 | ✅ pass |
+
+#### Decisions
+
+- N0, N1 and the N2 plan are removed rather than rebuilt: N2 starts from scratch on the parametric parts.
+- Collisions stay on the exported mesh (fast); an STL older than its model is refused.
+- The git history is not rewritten: the old meshes stay in it, and the archive tags keep the links working.
+
 #### Next
 
-N1 reads the parts' coarse STL, so [`n0.py`](../cad/mockup/n0.py), [`n1.py`](../cad/mockup/n1.py),
-[`sizing.py`](../cad/mockup/sizing.py) and [`probes.py`](../cad/robot/probes.py) are to be pointed at them and the
-legs bent by `leg()` instead of `warp()`; then check and show Morante. N2 stays paused as in
-[its entry](#n2-rev-5-the-inside-does-not-fit-at-65-).
+N2 from scratch: copy `cad/_template/` to `cad/robot/`, place the parametric legs, eyes, base and body with
+`cad/motion.py`, and find the scale at which the inside fits (rows in Open items).
 
 [↑ Contents](../build-log.md#contents)

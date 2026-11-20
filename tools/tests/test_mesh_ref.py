@@ -69,3 +69,9 @@ def test_visible_drops_a_hidden_inside():
     assert abs(v.area - outer.area) < 1e-6
     res = mesh_ref.compare(outer, m, n=3000, view="all")
     assert res["ref_to_part"]["max"] < 1e-6                  # the hidden block no longer counts against the part
+
+
+def test_limits_relative_with_floors():
+    assert mesh_ref.limits(15.0) == (0.5, 1.0)
+    assert mesh_ref.limits(110.0) == (1.1, 2.2)
+    assert mesh_ref.limits(250.0) == (2.5, 5.0)

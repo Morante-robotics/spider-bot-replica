@@ -37,14 +37,16 @@ repeated. Its contents show where each step stands, and its **Open items** list 
 |---|---|
 | [cad/carcass-jenscolt/](cad/carcass-jenscolt/) | Carcass model by jenscolt, unmodified (CC BY-NC-SA): the looks reference, legs included |
 | [cad/](cad/) | The rules every design follows: axes, folder layout, what is kept in git; [`_template/`](cad/_template/) to start a new design |
-| [cad/mockup/](cad/mockup/) | The N0 mock-up: the whole robot in simple shapes, checked and drawn in seconds |
+| [cad/motion.py](cad/motion.py) | The approved motion (from the N0 mock-up): where the 8 legs sit, their shape and how they move over a crank turn |
+| [cad/legs/](cad/legs/), [eyes/](cad/eyes/), [base/](cad/base/), [body/](cad/body/) | jenscolt's parts rebuilt as parameters (build123d), each checked against its mesh |
 | [cad/fits.py](cad/fits.py) | The measured clearances (fits) every design takes its holes, slots and gaps from |
 | [hardware.md](hardware.md) | Screws, pins, motor, batteries: what each design uses and what is in the workshop |
 | [measurements.csv](measurements.csv) | Every caliper measurement of a printed part, the source of the fits |
 | [print/](print/) | Print settings for this printer |
-| [sim/](sim/) | The toy leg in 3D (`toy_leg_3d.py`, the chosen geometry in `toy_leg_3d_rows_cad.json`), 2D foot paths and the motor sizing |
-| [tools/](tools/) | Scripts: `cad_verify.py` checks a mechanism before it is printed; `figures.py` draws assembly and measuring diagrams; `workshop_kit.py` makes the assembly sheet for the bench; `bambu_plate.py` lays out and slices plates; `print_report.py` measures support per part; mesh repair and previews. `tools/tests/` keeps the checks honest |
+| [sim/](sim/) | The toy leg in 3D (`toy_leg_3d.py`, the chosen geometry in `toy_leg_3d_rows_cad.json`), 2D foot paths |
+| [tools/](tools/) | Scripts: `cad_verify.py` checks a mechanism before it is printed; `figures.py` draws assembly and measuring diagrams; `workshop_kit.py` makes the assembly sheet for the bench; `bambu_plate.py` lays out and slices plates; `print_report.py` measures support per part; `mesh_ref.py` measures a parametric part against the mesh it was converted from; `rounds.py` runs a design in rounds. `tools/tests/` keeps the checks honest |
 | [Archive](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17) | Everything up to the redesign: base v1, test rigs, gear train tests, chassis A–E, legs v1–v2, print plates. The build log links there |
+| [Archive, N0–N2 on meshes](https://github.com/Morante-robotics/spider-bot-replica/tree/n2-on-meshes-2026-11-20) | The N0 and N1 mock-ups and the N2 plan (rev 5) built on jenscolt's meshes, before the parts were rebuilt as parameters |
 
 ## Run the code
 

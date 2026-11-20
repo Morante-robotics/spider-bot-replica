@@ -17,11 +17,13 @@ A design folder is the workspace:
     build.py, ...    the source (spec["src"]); out/ and images/ are what it writes
     rounds/rNN/      src/ snapshot, gates.json, views, brief.md, judgment.json (the judge), score.json (not in git)
 
-Commands (from the repo root; WS is the design folder, e.g. cad/robot):
+Commands (from the repo root; WS is the design folder, e.g. cad/legs):
 
     uv run python tools/rounds.py init WS --level N2 --purpose "..." [--must-have ...] [--ref toy.jpg] [--rounds 1]
     uv run python tools/rounds.py init WS --level N1 --purpose "..." --mesh PART=ref.stl [--mesh ...] [--edit]
                                          --rounds 1      # a conversion from reference meshes (mesh-to-cad agent)
+    uv run python tools/rounds.py except WS PART --reason "..." [--p95 MM] [--max MM] [--judge 0.69] [--drop "..."]
+                                                       # an exception Morante approved for one part
     uv run python tools/rounds.py validate WS          # until PASS; writes WS/design-plan.md
     uv run python tools/rounds.py check WS             # every gate in spec["gates"]: PASS / FAIL with each failure
     uv run python tools/rounds.py round WS 0           # snapshot + gates + views + brief; prints JUDGE INSTRUCTION
@@ -134,7 +136,7 @@ def cmd_init(a):
             "views": {}, "judge": {"enabled": bool(a.ref), "rubric": "looks"},
             "refine_rounds": a.rounds, "asked": f"Morante, {datetime.date.today().isoformat()}"}
     if a.mesh:
-        err = mesh_spec(spec, ws, a.mesh, a.edit, a.p95, a.max)
+        err = mesh_spec(spec, ws, a.mesh, a.edit)
         if err:
             print(f"ERROR {err}")
             return 2
@@ -144,10 +146,11 @@ def cmd_init(a):
     return 0
 
 
-def mesh_spec(spec, ws, meshes, edit, p95, mx):
+def mesh_spec(spec, ws, meshes, edit):
     """A conversion (`init --mesh PART=REF ...`): the parts are rebuilt as parameters from reference meshes. Adds the
     gates every conversion runs (source: no mesh read; build + its --sweep; edit for an organic part; fidelity per
-    part, tools/mesh_ref.py compare at its default limits unless given), the views and the reference picture (both
+    part, tools/mesh_ref.py compare at its default limits, relative to the part's size; other limits only through
+    `except`), the views and the reference picture (both
     from mesh_ref.py views, same framing), the judge, and each reference's size as a dim. Returns an error or None."""
     sys.path.insert(0, TOOLS)
     import mesh_ref
@@ -162,7 +165,6 @@ def mesh_spec(spec, ws, meshes, edit, p95, mx):
             return f"--mesh {m}: {ref} not found (paths from the repo root)"
         pairs.append((part, ref))
     py = "{root}/.venv/bin/python"
-    lim = (f" --p95 {p95}" if p95 else "") + (f" --max {mx}" if mx else "")
     spec["src"] = ["build.py", "plan.json"]
     spec["must_not"] = (spec["must_not"] or []) + ["build.py reads a mesh: the reference meshes are read only by the "
                                                    "gates and the designer's probes"]
@@ -175,14 +177,14 @@ def mesh_spec(spec, ws, meshes, edit, p95, mx):
                               "fail_regex": "^FAIL", "timeout": 600})
     for part, ref in pairs:
         spec["gates"].append({"name": f"fidelity-{part}", "kind": "command", "fail_regex": "^FAIL", "timeout": 600,
-                              "cmd": f"{py} tools/mesh_ref.py compare {{ws}}/out/{part}.stl {ref}{lim} "
+                              "cmd": f"{py} tools/mesh_ref.py compare {{ws}}/out/{part}.stl {ref} "
                                      f"--png {{ws}}/images/fidelity-{part}.png --json {{ws}}/out/fidelity-{part}.json"})
         m = mesh_ref.load(os.path.join(ROOT, ref))
         spec["dims"][f"{part}_extent"] = {"value": [round(float(x), 2) for x in m.extents], "unit": "mm",
                                           "source": f"tools/mesh_ref.py info {ref}"}
-    spec["dims"]["fidelity"] = {"value": [p95 or mesh_ref.P95, mx or mesh_ref.MAX], "unit": "mm (p95, max)",
-                                "source": "tools/mesh_ref.py P95, MAX (Morante, 2026-11-20)" if not (p95 or mx)
-                                else "Morante: this design's own limits (say why in purpose)"}
+        spec["dims"][f"{part}_fidelity"] = {"value": list(mesh_ref.limits(m)), "unit": "mm (p95, max)",
+                                            "source": "tools/mesh_ref.py limits(): 1 % / 2 % of the largest extent, "
+                                                      "floors 0.5 / 1.0 mm (Morante, 2026-11-20)"}
     refs = " ".join(r for _, r in pairs)
     parts = " ".join(f"{{ws}}/out/{p}.stl" for p, _ in pairs)
     cmd = f"{py} tools/mesh_ref.py views {{out}} --ref {refs} --parts {parts}"
@@ -228,7 +230,67 @@ def check_spec(spec, ws):
             warn.append("spec.references: a looks judge without a reference image judges from words only")
     if spec.get("level") == "N2" and not any(g.get("kind") == "cad_verify" for g in spec.get("gates") or []):
         err.append("spec.gates: an N2 design has a cad_verify gate")
+    err += check_exceptions(spec)
     return err, warn
+
+
+EXCEPTION_KINDS = ("fidelity", "judge", "drop")
+
+
+def check_exceptions(spec):
+    """Every departure from the default rules is an exception Morante approved, with his reason (`except`): a fidelity
+    gate with its own limits, a judge threshold under the rubric's, a detail left out."""
+    err, ex = [], spec.get("exceptions") or []
+    for i, e in enumerate(ex):
+        if e.get("kind") not in EXCEPTION_KINDS or not e.get("part") or not e.get("reason") or not e.get("by"):
+            err.append(f"spec.exceptions[{i}]: needs kind ({', '.join(EXCEPTION_KINDS)}), part, reason and by")
+    has = {(e.get("kind"), e.get("part")) for e in ex}
+    for g in spec.get("gates") or []:
+        if g.get("name", "").startswith("fidelity-") and re.search(r"--(p95|max)\b", g.get("cmd", "")):
+            part = g["name"][len("fidelity-"):]
+            if ("fidelity", part) not in has:
+                err.append(f"spec.gates {g['name']}: own limits without an approved exception (rounds.py except)")
+    thr = (spec.get("judge") or {}).get("pass_threshold")
+    if thr is not None and thr < rubric(spec["judge"].get("rubric", "looks")).get("pass_threshold", 0.75) \
+            and not any(k == "judge" for k, _ in has):
+        err.append(f"spec.judge.pass_threshold {thr}: under the rubric's without an approved exception "
+                   f"(rounds.py except)")
+    return err
+
+
+def cmd_except(a):
+    """Record an exception Morante approved for one part: its own fidelity limits, a lower judge threshold (for the
+    design the part belongs to), or a detail left out. The only change to spec.json after init; the reason is his."""
+    ws = os.path.abspath(a.ws)
+    path = os.path.join(ws, "spec.json")
+    spec = jload(path)
+    if spec is None:
+        print(f"ERROR {path}: no spec.json")
+        return 2
+    if a.p95 is None and a.max is None and a.judge is None and not a.drop:
+        print("ERROR say what the exception is: --p95/--max, --judge or --drop")
+        return 2
+    ex = spec.setdefault("exceptions", [])
+    rec = {"part": a.part, "reason": a.reason, "by": "Morante", "date": datetime.date.today().isoformat()}
+    if a.p95 is not None or a.max is not None:
+        g = next((g for g in spec.get("gates", []) if g.get("name") == f"fidelity-{a.part}"), None)
+        if g is None:
+            print(f"ERROR no gate fidelity-{a.part} in {path}")
+            return 2
+        cmd = re.sub(r" --(p95|max) [0-9.]+", "", g["cmd"])
+        lim = (f" --p95 {a.p95}" if a.p95 is not None else "") + (f" --max {a.max}" if a.max is not None else "")
+        g["cmd"] = re.sub(r"(compare \S+ \S+)", lambda m: m.group(1) + lim, cmd, count=1)
+        ex.append({**rec, "kind": "fidelity", "value": {k: v for k, v in (("p95", a.p95), ("max", a.max))
+                                                         if v is not None}})
+    if a.judge is not None:
+        spec.setdefault("judge", {})["pass_threshold"] = a.judge
+        spec["judge"]["pass_threshold_why"] = f"exception for {a.part}: {a.reason}"
+        ex.append({**rec, "kind": "judge", "value": a.judge})
+    for d in a.drop or []:
+        ex.append({**rec, "kind": "drop", "value": d})
+    jsave(path, spec)
+    print(f"PASS {path}: exception for {a.part} recorded; the rounds after this one use it")
+    return 0
 
 
 def fit_names():
@@ -519,6 +581,8 @@ def brief_md(spec, plan, gates, rub, images, measured, n):
            f"- Purpose: {spec.get('purpose', '')}"]
     out += [f"- Must have: {m}" for m in spec.get("must_have", [])]
     out += [f"- Must not: {m}" for m in spec.get("must_not", [])]
+    out += [f"- Left out on purpose (approved): `{e['part']}`: {e['value']}; do not count its absence against the "
+            f"design" for e in spec.get("exceptions", []) if e.get("kind") == "drop"]
     out += ["", "## The plan (digest)", "", plan.get("summary", "")]
     out += [f"- `{p['name']}`: {p.get('role', '')}" for p in plan.get("parts", [])]
     out += ["", "## Images", ""]
@@ -931,8 +995,14 @@ def main():
     p.add_argument("--rounds", type=int, default=0, help="refine rounds Morante asked for (default 0: one round)")
     p.add_argument("--mesh", action="append", help="a conversion: PART=reference.stl (repo-relative), once per part")
     p.add_argument("--edit", action="store_true", help="conversion of an organic part: also the build.py --edit gate")
-    p.add_argument("--p95", type=float, help="conversion: this design's own p95 limit (default tools/mesh_ref.py)")
-    p.add_argument("--max", type=float, help="conversion: this design's own max limit (default tools/mesh_ref.py)")
+    p = sub.add_parser("except", help="record an exception Morante approved for one part, with his reason")
+    p.add_argument("ws")
+    p.add_argument("part", help="the part (its fidelity gate is fidelity-<part>)")
+    p.add_argument("--reason", required=True, help="Morante's reason, in his words")
+    p.add_argument("--p95", type=float, help="this part's own p95 limit (mm)")
+    p.add_argument("--max", type=float, help="this part's own max limit (mm)")
+    p.add_argument("--judge", type=float, help="the design's own pass threshold for the looks judge")
+    p.add_argument("--drop", action="append", help="a detail of the reference left out on purpose")
     for name in ("validate", "check", "status", "best"):
         sub.add_parser(name).add_argument("ws")
     for name in ("round", "score"):
@@ -946,7 +1016,7 @@ def main():
     p.add_argument("--kit", help="the workshop kit.html for this print")
     p.add_argument("--coupons", action="store_true", help="this print is the coupons for the assumed fits")
     a = ap.parse_args()
-    fn = {"init": cmd_init, "validate": cmd_validate, "check": cmd_check, "round": cmd_round, "score": cmd_score,
+    fn = {"init": cmd_init, "except": cmd_except, "validate": cmd_validate, "check": cmd_check, "round": cmd_round, "score": cmd_score,
           "status": cmd_status, "best": cmd_best, "ready": cmd_ready}[a.cmd]
     rc = fn(a)
     if a.cmd == "check":  # cmd_check returns the gates (cmd_round reuses them), or None when it could not run

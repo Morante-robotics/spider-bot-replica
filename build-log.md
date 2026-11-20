@@ -56,8 +56,9 @@ The robot's story in three parts, then what is left to do and a glossary.
    - [Redesign: looks first](build-log/3-legs-and-drive.md#redesign-looks-first) · 2026-11-17 · 🔄 in progress
    - [N0 mock-up: the looks robot in simple shapes](build-log/3-legs-and-drive.md#n0-mock-up-the-looks-robot-in-simple-shapes) · 2026-11-18 · ✅ N0 look approved, N1 next
    - [N1 form: the real looking parts as light meshes](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) · 2026-11-19 · ✅ N1 look approved, N2 next
-   - [N2 rev 5: the inside does not fit at 65 %](build-log/3-legs-and-drive.md#n2-rev-5-the-inside-does-not-fit-at-65-) · 2026-11-19 · 🔄 paused for Morante's decision
-   - [Meshes become parameters](build-log/3-legs-and-drive.md#meshes-become-parameters) · 2026-11-20 · 🔄 parts converted, N1 not rebuilt on them yet
+   - [N2 rev 5: the inside does not fit at 65 %](build-log/3-legs-and-drive.md#n2-rev-5-the-inside-does-not-fit-at-65-) · 2026-11-19 · ↩️ restarted from scratch
+   - [Meshes become parameters](build-log/3-legs-and-drive.md#meshes-become-parameters) · 2026-11-20 · ✅ parts converted
+   - [Only the parametric parts measure](build-log/3-legs-and-drive.md#only-the-parametric-parts-measure) · 2026-11-20 · 🔄 N2 restarts on the parametric parts
 4. **[Open items](#open-items)**: everything still to do.
 5. **[Glossary](#glossary)**: the terms used in the entries.
 
@@ -79,13 +80,12 @@ once, before printing. Everything before the redesign is in the
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| **First:** rebuild N1 on the parametric parts (`n0.py`, `n1.py`, `sizing.py` and `probes.py` read the parts' coarse STL; legs bent by `cad/legs` `leg()` instead of `warp()`), check it and show Morante | [Meshes become parameters](build-log/3-legs-and-drive.md#meshes-become-parameters) | 3 |
+| **First:** N2 from scratch on the parametric parts: `cad/robot/` from `cad/_template/`, the legs, eyes, base and body placed with `cad/motion.py`, the inside fitted and the scale found (S up to 0.75; the order of alternatives Morante set for a dead end still applies) | [Only the parametric parts measure](build-log/3-legs-and-drive.md#only-the-parametric-parts-measure) | 3 |
+| Leg arm and base fail the size-relative fidelity (arm p95 0.59 > 0.5, max 1.22 > 1.0 mm; base p95 1.79 > 1.01, max 3.09 > 2.02 mm): a refine round each, or an exception from Morante | [Only the parametric parts measure](build-log/3-legs-and-drive.md#only-the-parametric-parts-measure) | 3 |
 | Legs refine round r01 (the judge's list in the last `score.json`); add `edit-arm-n0.stl` to the views command of `cad/legs/spec.json`, which the judge's views lack | [Meshes become parameters](build-log/3-legs-and-drive.md#meshes-become-parameters) | 3 |
 | Body: the curved top panels and the chin grille, if Morante wants them later (a build takes 60–80 s) | [Meshes become parameters](build-log/3-legs-and-drive.md#meshes-become-parameters) | 3 |
-| Buy the N10 (3 V, ≈ 100–150 rpm) and 6 × AG13, and measure it (body, shaft, mounting) to replace the mock-up's box at N2. Chosen bottom-up from the original Mini Spider-Bot (≈ 10 cm, 6 × AG13, walks on legs): the body holds them at ≈ 60 % (`cad/mockup/sizing.py`) | Redesign, looks first | 3 |
-| After the rebuild, resolve at 0.1 mm the leg-root windows (≈ 20 × 12 mm, target was 10) and legs ↔ base (−0.4 mm) | [N1 form](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) | 3 |
-| Rebuild the base rim (ragged after emptying the base; the parametric base replaces it) | [N1 form](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) | 3 |
-| N2 paused for Morante's decision: fix the assembly order (motor off the spine cap's column, or cap before motor) and run `probes.py sweep` as an overnight batch (≈ 1.5–2 h) to get the definitive S; or another direction he chooses | [N2 rev 5](build-log/3-legs-and-drive.md#n2-rev-5-the-inside-does-not-fit-at-65-) | 3 |
+| Buy the N10 (3 V, ≈ 100–150 rpm) and 6 × AG13, and measure it (body, shaft, mounting) to replace the mock-up's box at N2. Chosen bottom-up from the original Mini Spider-Bot (≈ 10 cm, 6 × AG13, walks on legs): the body held them at ≈ 60 % on jenscolt's mesh ([`sizing.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/mockup/sizing.py)); N2 sizes again | Redesign, looks first | 3 |
+| In N2, resolve at 0.1 mm the leg-root windows (N1 measured ≈ 20 × 12 mm, target 10) and legs ↔ base (−0.4 mm at N1) | [N1 form](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) | 3 |
 | Print detail, one batch of coupons, the workshop kit and the one robot | Redesign, looks first | 4 |
 | Import the parts into Onshape as STEP and assemble them with mates | [Onshape assembly](build-log/3-legs-and-drive.md#onshape-assembly) | 3 |
 | Count the hardware in the workshop (the **Have** column) | [Hardware](hardware.md) | 3 |
