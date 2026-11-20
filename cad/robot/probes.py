@@ -371,6 +371,7 @@ STALL = 40.0                        # N10 stall torque at 3 V, N·mm (assumed �
 CROWN = dict(z_pinion=10, z_crown=20, z_spur=10, m=0.6, x=0.42, r_in=5.4, r_out=6.9, disc=1.6)  # B1, see pr_crown
 LEDS = {5.0: (5.8, 8.6), 3.0: (3.8, 5.3)}   # LED Ø: (flange Ø, dome tip to flange back), datasheet
 JST_XH = (17.0, 8.0, 6.0)           # mated 2-pin JST-XH wire pair (hardware.md; datasheet, measure on arrival)
+M2_HEAD, M2_BOSS, M2_PILOT = (3.8, 2.0), 5.0, 1.6   # rule set 5: M2 self-tapping, head Ø × h, boss OD, pilot Ø
 M3_HEAD, M3_NUT = (5.5, 3.0), (5.5, 2.4)   # socket head Ø × h, nut AF × t (hardware.md)
 CRANK_DY_65 = (0.0, 0.0, 2.0, 0.0)  # rev 4, frozen: per-crank Y offsets in mm AT S 0.65 (no rescale), pr_arms(0.65)
 _ARMF = {}
@@ -1110,7 +1111,7 @@ def sw_under_report(c, xy=SW_UNDER):
                 leg_gap=float(n0.pt_box(W, lo, hi).min() - F.LEG_PATH.side), box=(lo, hi))
 
 
-def fixed_boxes(c, led=5.0, eyes_mode="vertical", sw_front=False, boss_mode="axis", sw_under=None):
+def fixed_boxes(c, led=5.0, eyes_mode="vertical", sw_front=False, boss_mode="axis", sw_under=None, boss_od=None, boss_zr=None):
     """B3 boxes that the shell places (not the motor or cells): eyes board + LEDs + ledge + its M3 head, the front
     and rear body bosses (body → base, M3 from below, nut in the body boss, column in the base), the switch +
     retainer at the rear. Positions: LEDs on the N1 eye axes; bosses and switch at the extreme with room ≥ 0.3 on
@@ -1180,12 +1181,18 @@ def fixed_boxes(c, led=5.0, eyes_mode="vertical", sw_front=False, boss_mode="axi
         placed.append((lo, hi))
         return (nm, lo, hi, False)
     boss = (F.bore(M3_NUT[0], F.STEEL) + 2 * W_LOAD,) * 2 + (8.0,)  # body boss: nut pocket + walls, 8 tall
+    if boss_od:                      # rule set 5: M2 self-tapping into the boss itself (OD 5.0, pilot 1.6), 8 tall
+        boss = (boss_od, boss_od, 8.0)
     # body bosses sit on the skirt band (bottom z 9-13), the M3 comes up through a lug of the base wall there
     bmode = boss_mode
     ks = S / S_FIX                           # sweep: the skirt band scales with the look (1 at S 0.65)
     zt = (13.0 if bmode == "axis" else 17.0) * ks   # "free": both off the axis, bottom up to z 17 (longer base column)
-    out.append(place("bossR body", boss, lambda C: C[..., 1], x0=0.0 if bmode == "axis" else None, zmin=9.0 * ks, zmax=zt))
-    out.append(place("bossF body", boss, lambda C: -C[..., 1], zmin=9.0 * ks, zmax=zt))   # front: off the axis (option e)
+    if boss_zr is not None:          # clamshell: the boss hangs from the seam (its foot on the base column)
+        zlo_, zhi_ = boss_zr[0], boss_zr[1]
+    else:
+        zlo_, zhi_ = 9.0 * ks, zt
+    out.append(place("bossR body", boss, lambda C: C[..., 1], x0=0.0 if bmode == "axis" else None, zmin=zlo_, zmax=zhi_))
+    out.append(place("bossF body", boss, lambda C: -C[..., 1], zmin=zlo_, zmax=zhi_))   # front: off the axis (option e)
     if sw_under is not None:         # Morante 2026-11-19: switch under the base; only its leads stay inside, on the floor
         bv = np.asarray(R["st"]["base_v"])
         out.append(("switch leads",) + sw_leads(bv, sw_under) + (False,))
@@ -1435,6 +1442,10 @@ L5 = {
     "F2s-sw-lax": dict(drive="crown", rear=False, nidl=2, pick="room", pack="H3e", mount="sleeve", boss="free",
                     strip2=True, sw_under=SW_UNDER, wide=True, lax=True,
                     txt="F2s-sw with the strip gear exempt from the arms (as the strip)"),
+    "F2s-sw-split": dict(drive="crown", rear=False, nidl=2, pick="room", pack="H3e2", mount="sleeve", boss="free",
+                         strip2=True, sw_under=SW_UNDER, wide=True, boss_od=5.0, boss_split=True,
+                         txt="F2s-sw as a clamshell split at the crank axis height, rule set 5: body wall 1.6, M2 "
+                             "self-tapping (boss OD 5.0, lid boss 5.0, no nut lugs), body bosses start at the seam"),
     "F2s-1b": dict(drive="crown", rear=False, nidl=2, pick="room", pack="B6", mount="sleeve", boss="free",
                    strip2=True, sw_under=SW_UNDER, wide=True,
                    txt="F2s-sw with the 6 AG13 in ONE block, two rows of 3 (Morante 2026-11-19), placed anywhere"),
@@ -1656,7 +1667,7 @@ def pack_boxes(cA, cB, kind, hook=True, rot=0):
     if kind == "B6":
         return block_boxes(cA, rot)
     e = np.array(holders()["H3e two 3P packs on edge, rows along Y"][0])
-    base = e if kind in ("H3e", "H3x") else e[[2, 1, 0]]
+    base = e if kind in ("H3e", "H3x", "H3e2") else e[[2, 1, 0]]
     hs = base + [2 + 2 * F.TONGUE.side, 0.0 if hook else 6.2, 0]
     ax = 1
     if kind == "H3x":
@@ -1667,12 +1678,15 @@ def pack_boxes(cA, cB, kind, hook=True, rot=0):
         sl, nl = lo.copy(), lo.copy()
         sh, nh = hi.copy(), hi.copy()
         o_ = 1 - ax                      # across axis: lid screw boss 6.2 wide centred
-        sl[ax], sh[ax] = hi[ax] - 6.2, hi[ax]
-        sl[o_], sh[o_] = cc[o_] - 3.1, cc[o_] + 3.1
-        sl[2], sh[2] = hi[2], hi[2] + 3.2
+        w_, hh_ = (M2_BOSS, M2_HEAD[1] + 0.2) if kind == "H3e2" else (6.2, 3.2)
+        sl[ax], sh[ax] = hi[ax] - w_, hi[ax]
+        sl[o_], sh[o_] = cc[o_] - w_ / 2, cc[o_] + w_ / 2
+        sl[2], sh[2] = hi[2], hi[2] + hh_
         nl[ax], nh[ax] = hi[ax] - 6.2, hi[ax]
         nl[2], nh[2] = lo[2] - M3_NUT[1] - W_LOAD, lo[2]
-        out += [(f"holder{q}", lo, hi, False), (f"holder{q} lid screw", sl, sh, False), (f"holder{q} nut lug", nl, nh, False)]
+        out += [(f"holder{q}", lo, hi, False), (f"holder{q} lid screw", sl, sh, False)]
+        if kind != "H3e2":               # rule set 5: M2 self-tapping into the pack's own boss, no nut
+            out.append((f"holder{q} nut lug", nl, nh, False))
     return out, hs
 
 
@@ -1693,7 +1707,9 @@ def search_b5(name, wall=3.0, S=S_FIX, ball=BALL_D2, dy=CRANK_DY_65, steps=12):
     c = _ctx(S, ball, dy)
     c["wall"], c["o"] = wall, o
     fixed, fld, Cg = fixed_boxes(c, 5.0, "none", sw_front=o.get("rear", False), boss_mode=o.get("boss", "axis"),
-                                 sw_under=None if o.get("sw_under") is None else tuple(np.array(o["sw_under"]) * S / S_FIX))
+                                 sw_under=None if o.get("sw_under") is None else tuple(np.array(o["sw_under"]) * S / S_FIX),
+                                 boss_od=o.get("boss_od"),
+                                 boss_zr=(c["z0"] - 0.3, c["z0"] + 0.3) if o.get("boss_split") else None)
     G = room_grid(S, wall)
     fex = np.minimum(np.minimum(G["g"], arm_field(S, ball, dy)["g"]), _mech_field(c, G, True))
     Qg = Cg.reshape(-1, 3)
@@ -2269,11 +2285,12 @@ def sweep_checks(c, boxes, zrim, wall):
     return res, tres
 
 
-def sweep_S(S, wall=3.0, name="F2s-1b", full=False):
+def sweep_S(S, wall=3.0, name="F2s-1b", full=False, gap=None, extras=None, checks=None, tag=""):
     """full=False: stop as soon as a box↔box pair is under SW_GAP (no real shape can lift it: the box is the
     shape), before real shapes, paths and tools; full=True measures everything to diagnose."""
     import contextlib, io, time
     global ROOM_PITCH
+    gap = SW_GAP if gap is None else gap
     ROOM_PITCH = sweep_pitch(S)
     t0 = time.time()
     with contextlib.redirect_stdout(io.StringIO()):
@@ -2298,11 +2315,11 @@ def sweep_S(S, wall=3.0, name="F2s-1b", full=False):
     ax = [G["lo"][i] + ROOM_PITCH * np.arange(G["g"].shape[i]) for i in range(3)]
     Cg = np.stack(np.meshgrid(*ax, indexing="ij"), -1)
     zrim = float(np.asarray(n1.run(c["p"])["st"]["base_v"])[:, 2].max())
-    boxes = list(r["boxes"]) + sweep_extras(c, list(r["boxes"]), Cg, G, A, zrim)
+    boxes = list(r["boxes"]) + (extras or sweep_extras)(c, list(r["boxes"]), Cg, G, A, zrim)
     least, bind, res = eval_layout(c, boxes, wall)
     # real shapes for the pairs under SW_GAP that real_parts defines (cylinders, rounded block edges)
     c["_idl_z"] = {"motor idler": r["info"]["idlers"][0][1][1], "motor idler 2": r["info"]["idlers"][-1][1][1]}
-    low = {k: v for k, v in res.items() if v < SW_GAP}
+    low = {k: v for k, v in res.items() if v < gap}
     real_names = ("motor", "motor pinion", "motor crown", "motor idler", "motor idler 2", "motor idler (strip)",
                   "motor idler 2 (strip)", "bossR body", "bossF body", "LEDL", "LEDR")
     boxbox = lambda k: (k.split("↔")[0] not in real_names and k.split("↔")[1] not in real_names
@@ -2313,13 +2330,13 @@ def sweep_S(S, wall=3.0, name="F2s-1b", full=False):
         out = dict(S=S, wall=wall, name=name, dy=dy, train=bool(tr), early=True,
                    train_gears=[(n, float(y), float(z), float(t)) for n, y, z, t in g],
                    least=float(early[bind]), bind=bind,
-                   under=sorted(((k, float(v)) for k, v in res.items() if v < SW_GAP), key=lambda t: t[1]),
+                   under=sorted(((k, float(v)) for k, v in res.items() if v < gap), key=lambda t: t[1]),
                    paths=[], tools=[], path_ok=None, tool_ok=None, pitch=ROOM_PITCH,
                    block_rot=BLOCK_ROT[r["st"].get("rot", 0)], motor=(float(r["st"]["ym"]), float(r["st"]["zm"])),
                    boxes=[(b[0], [float(v) for v in b[1]], [float(v) for v in b[2]]) for b in boxes],
                    secs=round(time.time() - t0), **{"pass": False})
         os.makedirs(CACHE, exist_ok=True)
-        json.dump(out, open(os.path.join(CACHE, f"sweep_{S:.2f}.json"), "w"), indent=1)
+        json.dump(out, open(os.path.join(CACHE, f"sweep{tag}_{S:.2f}.json"), "w"), indent=1)
         return out
     if low:
         flags = [[b[0], bool(b[3]), bool(b[4]) if len(b) > 4 else True, bool(b[5]) if len(b) > 5 else True] for b in boxes]
@@ -2349,17 +2366,17 @@ def sweep_S(S, wall=3.0, name="F2s-1b", full=False):
                 res[k] = real_gap(dens[a_], hulls[a_], dens[b_], hulls[b_])
     bind = min(res, key=res.get)
     least = res[bind]
-    paths, tools = sweep_checks(c, boxes, zrim, wall)
+    paths, tools = (checks or sweep_checks)(c, boxes, zrim, wall)
     out = dict(S=S, wall=wall, name=name, dy=dy, train=bool(tr), train_gears=[(n, float(y), float(z), float(t)) for n, y, z, t in g],
-               least=float(least), bind=bind, under=sorted(((k, float(v)) for k, v in res.items() if v < SW_GAP), key=lambda t: t[1]),
+               least=float(least), bind=bind, under=sorted(((k, float(v)) for k, v in res.items() if v < gap), key=lambda t: t[1]),
                paths=[(k, float(v)) for k, v in paths], tools=[(k, float(v)) for k, v in tools],
                path_ok=bool(min(v for _, v in paths) >= 0), tool_ok=bool(min(v for _, v in tools) >= 0),
                block_rot=BLOCK_ROT[r["st"].get("rot", 0)], motor=(float(r["st"]["ym"]), float(r["st"]["zm"])),
                boxes=[(b[0], [float(v) for v in b[1]], [float(v) for v in b[2]]) for b in boxes],
                pitch=ROOM_PITCH, secs=round(time.time() - t0))
-    out["pass"] = bool(out["train"] and least >= SW_GAP and out["path_ok"] and out["tool_ok"])
+    out["pass"] = bool(out["train"] and least >= gap and out["path_ok"] and out["tool_ok"])
     os.makedirs(CACHE, exist_ok=True)
-    json.dump(out, open(os.path.join(CACHE, f"sweep_{S:.2f}.json"), "w"), indent=1)
+    json.dump(out, open(os.path.join(CACHE, f"sweep{tag}_{S:.2f}.json"), "w"), indent=1)
     return out
 
 
@@ -2454,6 +2471,428 @@ def pr_sweep_bisect(lo, hi, step, full=False):
     print("bisect: " + ", ".join(f"{grid[i]:.2f} {'PASS' if p else 'fail'}" for i, p in sorted(tried.items())), flush=True)
     print(f"smallest passing S: {grid[best]:.2f}" if best is not None else f"no S up to {hi:.2f} passes", flush=True)
 
+# ---------------------------------------------------------------- clamshell split (2026-11-19, Morante's two decisions)
+# A) the shell splits horizontally at the crank axis height (z0): every shaft and pin drops into half-cradles of the
+#    base and is held by ribs of the body; spine, spine cap, keepers and every M3 nut are gone; the body closes with
+#    M2 self-tapping screws from below (SPLIT_SCREWS) and 2 locating pins.
+# B) rule set 5: body wall 1.6 (base 1.2), margin 0.5, every screw M2 self-tapping into plastic (head Ø3.8 × 2.0,
+#    boss OD 5.0, pilot Ø1.6), tool access a straight Ø3 shaft to each M2 head.
+# Commands: probes.py split layout | real | sweep | order | all
+SPLIT_NAME, SPLIT_WALL, SPLIT_GAP = "F2s-sw-split", 1.6, 0.5
+SPLIT_TOOL_R = 1.5                # straight Ø3 shaft
+SPLIT_SCREWS = 2                  # closing screws (rear boss, front boss); optional 4 changes nothing in the boxes' place
+SPLIT_LOC = 2                     # locating pins
+
+
+def _split_opt_file():
+    return os.path.join(CACHE, f"split_layout_{SPLIT_WALL:.1f}.json")
+
+
+def split_opt():
+    try:
+        return json.load(open(_split_opt_file()))["chosen"]
+    except Exception:
+        return "tower"
+
+
+def _idl_from_boxes(boxes):
+    B = {b[0]: b for b in boxes}
+    d = B["motor idler"]
+    f1, f2 = B["motor idler 2 (strip)"], B["motor idler 2"]
+    return {"drop": ((d[1][1] + d[2][1]) / 2, (d[1][2] + d[2][2]) / 2),
+            "front": ((f1[1][1] + f1[2][1]) / 2, (f1[1][2] + f2[2][2]) / 2)}
+
+
+def split_support_boxes(c, boxes, opt, S=S_FIX, wall=SPLIT_WALL):
+    """High cradles. low walls (every option): two 1.2 walls in the clear channel in front of the strip, floor to the
+    crank sweep top, holding the front gear's and the drop idler's pins. 'tower': the same walls on up to the crown
+    axis (over the strip band, y to the crown's rear edge). 'step': no high walls; the seam steps up round the crown
+    and the drop idler, whose 3 mm pins reach across to the shell on both sides."""
+    B = {b[0]: b for b in boxes}
+    cr = B["motor crown"]
+    xl, xr = float(cr[1][0]), float(B["motor idler"][2][0])
+    zm = (B["motor"][1][2] + B["motor"][2][2]) / 2
+    lo_s = c["strip"][0]
+    yf = min(float(B[k][1][1]) for k in ("motor crown", "motor idler", "motor idler 2"))
+    zc = float(c["sweeps"][0][1][2])
+    out = []
+    for sd, (x0, x1) in (("L", (xl, xl + W_LOAD)), ("R", (xr - W_LOAD, xr))):
+        out.append((f"motor tower {sd} low", np.array([x0, yf, BASE_WALL]), np.array([x1, lo_s[1], zc]), True, False))
+        if opt == "tower":
+            out.append((f"motor tower {sd} high", np.array([x0, yf, zc]), np.array([x1, float(cr[2][1]), zm]), True, False))
+    if opt == "step":
+        idl = _idl_from_boxes(boxes)
+        yC = (cr[1][1] + cr[2][1]) / 2
+        for nm, (y, z) in (("crown", (yC, zm)), ("drop idler", idl["drop"])):
+            xe = 2.0
+            while xe < 40 and float(inside_gap(np.array([[xe + 1.0, y, z]]), S, wall)) >= 0:
+                xe += 1.0
+            while float(inside_gap(np.array([[xe + 0.25, y, z]]), S, wall, True)) >= 0 and xe < 40:
+                xe += 0.25
+            out.append((f"motor step pin {nm}", np.array([-xe, y - 1.5, z - 1.5]), np.array([xe, y + 1.5, z + 1.5]), True, False))
+    return out
+
+
+def split_layout(only_eval=False):
+    """(1) boxes at wall 1.6 exact: layout alone, + tower, + step. Chooses the larger least gap."""
+    path = os.path.join(CACHE, f"layouts5_{SPLIT_NAME}_{SPLIT_WALL:.1f}.json")
+    if not os.path.exists(path):
+        pr_layouts5(SPLIT_NAME, SPLIT_WALL)
+    r = json.load(open(path))
+    c = _ctx(S_FIX, BALL_D2, CRANK_DY_65)
+    c["wall"], c["o"] = SPLIT_WALL, L5[SPLIT_NAME]
+    c["X"], c["R"] = arm_cloud(c["L"], BALL_D2, step=1)
+    boxes = [(b[0], np.array(b[1]), np.array(b[2]), f[1], f[2], f[3]) for b, f in zip(r["boxes"], r["flags"])]
+    res = {}
+    for opt in (None, "tower", "step"):
+        bx = boxes + (split_support_boxes(c, boxes, opt) if opt else [])
+        least, bind, allp = eval_layout(c, bx, SPLIT_WALL)
+        nxt = sorted(allp.items(), key=lambda kv: kv[1])[:4]
+        sup = {k: v for k, v in allp.items() if ("motor tower" in k or "motor step" in k) and "↔motor" not in k.split("↔")[0][:0]}
+        sk = min(sup, key=sup.get) if sup else None
+        res[opt or "layout"] = dict(least=float(least), bind=bind, next=[(k, float(v)) for k, v in nxt],
+                                    support_least=float(sup[sk]) if sk else None, support_bind=sk)
+        print(f"{opt or 'layout (no supports)':22s} least {least:+.2f} ({bind}); next " +
+              ", ".join(f"{k} {v:+.2f}" for k, v in nxt[1:]) +
+              (f"; supports alone {sup[sk]:+.2f} ({sk})" if sk else ""), flush=True)
+    ch = max(("tower", "step"), key=lambda k: (round(res[k]["least"], 2), res[k]["support_least"]))
+    res["chosen"] = ch
+    print(f"chosen support: {ch}")
+    json.dump(res, open(_split_opt_file(), "w"), indent=1)
+    return res
+
+
+def split_extras(c, boxes, Cg, G, A, zrim):
+    """What the clamshell carries beyond the layout search: the cradles, columns, pins, wires. No spine cap, no
+    keepers, no nuts, no motor cap screw (the body's ribs hold the motor)."""
+    zs = c["z0"]
+    out = split_support_boxes(c, boxes, split_opt(), c["S"], c["wall"])
+    for b in [b for b in boxes if b[0].startswith("boss")]:       # base column under each body boss, M2 from below
+        m = (b[1] + b[2]) / 2
+        out.append((b[0].split()[0] + " column", np.array([m[0] - M2_BOSS / 2, m[1] - M2_BOSS / 2, BASE_WALL]),
+                    np.array([m[0] + M2_BOSS / 2, m[1] + M2_BOSS / 2, b[1][2]]), False, False))
+    L = c["L"]
+    pin = F.bore(2.0, F.STEEL) + 2 * W_MIN
+    for Lg in L:                      # 8 pivot pins Ø2 × 8 in the rim seat, body rib 1.2 on top
+        P = Lg["P"]
+        out.append((f"pivot{Lg['side']} pin{Lg['i'] + 1}", P - [pin / 2, pin / 2, 4.0], P + [pin / 2, pin / 2, 4.0 + W_LOAD],
+                    False, False, False))
+    f = _sw_field(c, boxes + out, Cg, G, A)
+    bs = [b for b in boxes if b[0].startswith("boss")]
+    for j, bb in enumerate(bs[:SPLIT_LOC]):                       # locating pins Ø2 + walls, on the seam, beside a boss
+        m = (bb[1] + bb[2]) / 2
+        sz = np.array([3.6, 3.6, 6.0])
+        d = np.hypot(Cg[..., 0] - m[0], Cg[..., 1] - m[1])
+        cons = (np.abs(Cg[..., 2] - zs) < 0.26) & (d > 5.0) & (d < 12.0)
+        _, q = _sw_place(f, Cg, sz, cons)
+        out.append((f"locpin {j + 1}", q - sz / 2, q + sz / 2, False))
+        f = _sw_field(c, boxes + out, Cg, G, A)
+    for nm, sz0 in (("LEDL leads+resistor", (4.0, 4.0, 14.0)), ("LEDR leads+resistor", (4.0, 4.0, 14.0)),
+                    ("wires packs", (3.0, 3.0, 16.0)), ("wire link A-B", (3.0, 3.0, 16.0)), ("wires switch", (3.0, 3.0, 16.0))):
+        best = None
+        for perm in ((0, 1, 2), (0, 2, 1), (2, 1, 0)):
+            sz = tuple(np.array(sz0)[list(perm)])
+            cons = None
+            if nm.startswith("LED"):
+                lb = [b for b in boxes if b[0] == nm.split()[0]][0]
+                cons = (Cg[..., 1] < lb[2][1] + 14.0) & (np.abs(Cg[..., 0] - (lb[1][0] + lb[2][0]) / 2) < 10.0)
+            r, q = _sw_place(f, Cg, sz, cons)
+            if best is None or r > best[0]:
+                best = (r, q, np.array(sz))
+        out.append((nm, best[1] - best[2] / 2, best[1] + best[2] / 2, False))
+        f = _sw_field(c, boxes + out, Cg, G, A)
+    return out
+
+
+_SPLIT_MESH = None
+
+
+def _item(meshes):
+    return dict(pieces=meshes, dense=[_dense(p) for p in meshes], hull=_hulls(meshes),
+                lo=np.min([p.vertices.min(0) for p in meshes], 0), hi=np.max([p.vertices.max(0) for p in meshes], 0))
+
+
+def _shift_hull(h, t):
+    from types import SimpleNamespace
+    e = h.equations.copy()
+    e[:, 3] = e[:, 3] - e[:, 2] * t
+    return SimpleNamespace(equations=e)
+
+
+def _drop_gap(E, P, tmax=70.0, step=0.75):
+    """Least gap while item E (pieces) moves down −z from tmax above its home to home, against item P in place;
+    None if they already overlap at home (a layout fault, not an order fault)."""
+    lo, hi = E["lo"], E["hi"]
+    if np.any(hi[:2] < P["lo"][:2]) or np.any(lo[:2] > P["hi"][:2]) or P["hi"][2] <= lo[2]:
+        return 9.0
+    t0 = max(0.0, P["lo"][2] - hi[2])
+    t1 = min(tmax, P["hi"][2] - lo[2])
+    g0 = min(real_gap(E["dense"], E["hull"], P["dense"], P["hull"]), 9.0)
+    if g0 < -0.05:
+        return None
+    best = 9.0
+    t = max(step, t0)
+    while t <= t1 + step:                 # adaptive: a move of dt cannot close a gap by more than dt
+        Da = [d + [0, 0, t] for d in E["dense"]]
+        Ha = [_shift_hull(h, t) for h in E["hull"]]
+        g = real_gap(Da, Ha, P["dense"], P["hull"])
+        best = min(best, g)
+        if best < -0.05:
+            break
+        t += max(step, 0.8 * g)
+    return best
+
+
+def split_checks(c, boxes, zrim, wall):
+    """(2) assembly order: every part enters along −z; (3) tool access Ø3 straight to each M2 head."""
+    S, zs = c["S"], c["z0"]
+    B = {b[0]: b for b in boxes}
+    idl = _idl_from_boxes(boxes)
+    c["_idl_z"] = {"motor idler": idl["drop"][1], "motor idler 2": idl["front"][1]}
+    flags = [[b[0], True, True, True] for b in boxes]
+    parts = real_parts(boxes, flags, c)
+    stg, swp = real_fixed(c)
+    import manifold3d as mf
+    stg, swp = dict(stg), dict(swp)
+    items, zc, mesh = {}, {}, set()
+    gn = [g_[0] for g_ in c["g"]]
+    for i in range(4):
+        lo, hi = c["sweeps"][i]
+        mid = (lo + hi) / 2
+        ball2 = _mf_mesh(_mf_cyl(0, (0, mid[1], mid[2]), (hi[1] - lo[1]) / 2, -hi[0], -lo[0]))
+        items[f"crank {i + 1}"] = _item(stg[f"strip gear {gn[i]}"] + swp[f"crank sweep {i + 1}"] + [ball2])
+        zc[f"crank {i + 1}"] = c["g"][i][2]
+    for i in range(3):
+        items[f"idler {i + 1}-{i + 2}"] = _item(stg[f"strip gear {gn[4 + i]}"])
+        zc[f"idler {i + 1}-{i + 2}"] = c["g"][4 + i][2]
+        mesh |= {(f"idler {i + 1}-{i + 2}", f"crank {i + 1}"), (f"idler {i + 1}-{i + 2}", f"crank {i + 2}")}
+    items["front strip gear"] = _item(parts["motor idler 2 (strip)"] + parts["motor idler 2"])
+    items["drop idler"] = _item(parts["motor idler"])
+    items["crown part"] = _item(parts["motor crown"])
+    items["motor+pinion"] = _item(sum((parts[k] for k in ("motor", "motor pinion", "motor terminals", "motor wires")), []))
+    zc.update({"front strip gear": idl["front"][1], "drop idler": idl["drop"][1],
+               "crown part": (B["motor crown"][1][2] + B["motor crown"][2][2]) / 2})
+    mesh |= {("front strip gear", "crank 1"), ("drop idler", "front strip gear"), ("crown part", "drop idler")}
+    rolling = {("crown part", "motor+pinion"), ("motor+pinion", "crown part")}   # face gear / pinion: rolls in down the rack
+    for q in "AB":
+        items[f"cell pack {q}"] = _item(parts[f"holder{q}"] + parts[f"holder{q} lid screw"])
+    for k in ("jst1", "jst2", "switch leads"):
+        items[k] = _item(parts[k])
+    static = {nm: _item(parts[nm]) for nm in parts if nm.startswith(("boss", "locpin")) and "body" not in nm}
+    pins = {nm: _item(parts[nm]) for nm in parts if nm.startswith("pivot")}
+    body_items = {"bosses": _item(sum((parts[k] for k in ("bossR body", "bossF body")), [])),
+                  "LEDs": _item(parts["LEDL"] + parts["LEDR"])}
+    AP = _arm_poses(c)[::2]
+    trees = [(cKDTree(X), R) for X, R in AP]
+    names = list(items) + ["arms+legs"] + list(pins)
+    blk = {}                          # blk[(E, P)]: least gap when E enters with P already in place (< 0: blocked)
+    for E in items:
+        for P in items:
+            if E == P:
+                continue
+            if (E, P) in mesh:
+                blk[(E, P)] = 9.0 if zc[E] >= zc[P] - 1e-6 else -1.0 - (zc[P] - zc[E]) * 0
+                continue
+            if (P, E) in mesh:
+                blk[(E, P)] = 9.0 if zc[E] >= zc[P] - 1e-6 else -1.0
+                continue
+            if (E, P) in rolling:
+                blk[(E, P)] = 9.0
+                continue
+            g = _drop_gap(items[E], items[P])
+            if g is not None:
+                blk[(E, P)] = g
+        for P, it in static.items():
+            g = _drop_gap(items[E], it)
+            if g is not None:
+                blk[(E, "base:" + P)] = g
+        for k, (tr, R) in enumerate(trees[:0]):
+            pass
+        # against the arms: best pose
+        if items[E]["lo"][2] < max(X[:, 2].max() for X, _ in AP) + 3:
+            bestp = -9.0
+            for tr, R in trees:
+                gmin = 9.0
+                for t in np.arange(0.0, 30.0, 1.0):
+                    pts = np.vstack(items[E]["dense"]) + [0, 0, t]
+                    d, ix = tr.query(pts)
+                    gmin = min(gmin, float((d - R[ix]).min()))
+                    if gmin < -0.05:
+                        break
+                bestp = max(bestp, gmin)
+            home = min(float((tr.query(np.vstack(items[E]["dense"]))[0] - R[tr.query(np.vstack(items[E]["dense"]))[1]]).min()) for tr, R in trees)
+            if home >= -0.05:
+                blk[(E, "arms+legs")] = bestp
+    # arms+legs entering: columns over every arm point against what is in place (dense points of the placed parts)
+    for P, it in items.items():
+        Q = np.vstack(it["dense"])
+        best = -9.0
+        for X, R in AP:
+            tq = cKDTree(Q[:, :2])
+            hit = tq.query_ball_point(X[:, :2], R.max())
+            gk = 9.0
+            for i_, h_ in enumerate(hit):
+                if h_:
+                    qq = Q[h_]
+                    dxy = np.hypot(qq[:, 0] - X[i_, 0], qq[:, 1] - X[i_, 1]) - R[i_]
+                    ok = (qq[:, 2] > X[i_, 2]) & (dxy < -0.05)
+                    if ok.any():
+                        gk = min(gk, float(dxy[ok].min()))
+            best = max(best, gk)
+        blk[("arms+legs", P)] = best if best < 0 else 9.0
+    # pivot pins: enter after the arms (through the eyes), against everything
+    for nm, it in pins.items():
+        for P in items:
+            g = _drop_gap(it, items[P])
+            if g is not None:
+                blk[(nm, P)] = g
+    # order: E before P whenever E is blocked by P in place
+    edges = {n: set() for n in names}
+    for (E, P), g in blk.items():
+        if g < -0.05 and not P.startswith("base:") and P in edges:
+            edges[E].add(P)
+    for nm in pins:
+        edges[nm].add("__none__")
+        edges["arms+legs"].add(nm) if False else None
+    first_block = [(E, P, g) for (E, P), g in blk.items() if g < -0.05]
+    # Kahn: place E only after everything not blocked by E... E must come BEFORE P (P in edges[E])
+    must_before = {n: set() for n in names}
+    for E, Ps in edges.items():
+        for P in Ps:
+            if P in must_before:
+                must_before[P].add(E)         # P comes after E
+    order, left = [], set(names)
+    while left:
+        ready = [n for n in sorted(left) if not (must_before[n] & left)]
+        if not ready:
+            break
+        order.append(ready[0])
+        left.discard(ready[0])
+    base_blk = [(E, P, g) for (E, P), g in blk.items() if P.startswith("base:") and g < -0.05]
+    res = []
+    if left:
+        mutual = [(E, P) for E in left for P in edges[E] if P in left and E in edges.get(P, ())]
+        cyc = mutual[0] if mutual else (sorted(left)[0], sorted(edges[sorted(left)[0]] & left)[0] if edges[sorted(left)[0]] & left else "?")
+        g1 = blk.get((cyc[0], cyc[1]), -1.0)
+        g2 = blk.get((cyc[1], cyc[0]), -1.0)
+        res.append((f"path ORDER FAILS: {cyc[0]} blocked by {cyc[1]} and {cyc[1]} by {cyc[0]}; stuck {sorted(left)}", min(g1, g2)))
+    else:
+        res.append(("path order found: " + " > ".join(order), 1.0))
+    for E, P, g in base_blk:
+        res.append((f"path {E} blocked by base feature {P[5:]}", g))
+    tot_pairs = [(E, P, g) for E, P, g in first_block]
+    for E in names:
+        gl = [g for (e_, p_), g in blk.items() if e_ == E and p_ in (order[:order.index(E)] if E in order else [])]
+        res.append((f"path {E} from +z against the parts already in", min(gl) if gl else 9.0))
+    # body: bosses and LEDs come down with the shell over everything in place
+    for nm, it in body_items.items():
+        g = 9.0
+        who = ""
+        for P, o in list(items.items()) + list(pins.items()):
+            gg = _drop_gap(it, o)
+            if gg is not None and gg < g:
+                g, who = gg, P
+        res.append((f"path body {nm} from +z ({who})", g))
+    inner = [b for b in boxes if (b[4] if len(b) > 4 else True) and not b[0].startswith(("boss", "LED", "motor tower", "motor step"))]
+    g, gk = 9.0, ""
+    for nm, lo, hi, *_ in inner:
+        X = box_pts(lo, hi)
+        for t in np.arange(0.5, max(0.5, hi[2] - zs) + 0.5, 1.0):
+            Y = X - [0, 0, t]
+            Y = Y[Y[:, 2] >= zs]
+            if len(Y):
+                v = float(inside_gap(Y, S, wall).min())
+                if v < g:
+                    g, gk = v, nm
+    res.append((f"path body shell down over the parts (binding {gk})", g))
+    g, gk = 9.0, ""
+    lo_s, hi_s = c["strip"]
+    for nm, lo, hi in [("strip", lo_s, hi_s)] + [(f"crank sweep {i + 1}", a, b) for i, (a, b) in enumerate(c["sweeps"])]:
+        X = box_pts(lo, hi)
+        for t in np.arange(0.5, max(0.5, zs - lo[2]) + 0.5, 1.0):
+            Y = X + [0, 0, t]
+            Y = Y[Y[:, 2] <= zs]
+            if len(Y):
+                v = float(inside_gap(Y, S, wall).min())
+                if v < g:
+                    g, gk = v, nm
+    res.append((f"path strip into the base bowl below the seam (binding {gk})", g))
+    # (3) tools: Ø3 straight line to each M2 head
+    R_ = n1.run(c["p"])
+    bv = np.asarray(R_["st"]["base_v"])
+    W = np.vstack([n1.carry(lg["samp"], lg["g"]).reshape(-1, 3) for lg in R_["legs"]])
+    swlo, swhi, _ = sw_box(bv)
+    tres = []
+    for nm in ("bossR column", "bossF column"):
+        b = B[nm] if nm in B else None
+        if b is None:
+            tres.append((f"tool {nm}", -9.0))
+            continue
+        m = (b[1] + b[2]) / 2
+        near = bv[np.hypot(bv[:, 0] - m[0], bv[:, 1] - m[1]) < 2.5]
+        z0_ = float(near[:, 2].min()) if len(near) else 0.0
+        T = np.repeat(m[None], 80, 0)
+        T[:, 2] = z0_ - np.linspace(0.2, 40.0, 80)
+        g = min(float(n0.pt_box(T, swlo, swhi).min()), float(cKDTree(W).query(T)[0].min())) - SPLIT_TOOL_R
+        tres.append((f"tool {nm.split()[0]} closing screw from -z (head at z {z0_:.1f})", g))
+    for q in "AB":
+        b = B[f"holder{q} lid screw"]
+        m = (b[1] + b[2]) / 2
+        T = np.repeat(m[None], 80, 0)
+        T[:, 2] = b[2][2] + np.linspace(0.2, 40.0, 80)
+        g = min(float(n0.pt_box(T, o[1], o[2]).min()) for o in boxes
+                if not o[0].startswith(("boss", "LED", "holder" + q, "pivot", "wire", "motor tower", "motor step")))
+        tres.append((f"tool pack {q} lid screw from +z", g - SPLIT_TOOL_R))
+    c["_order"] = order
+    return res, tres
+
+
+SPLIT_BOM = """Count (clamshell, rule set 5):
+ printed: base (bowl + strip cradles + tower + 8 rim seats + 2 boss columns + switch pocket), body (shell + ribs +
+   2 M2 bosses + eye bores), 4 crankshafts, 3 strip idlers, front strip gear, drop idler, crown part, pinion,
+   2 cell packs, 2 pack lids, 8 leg-arms, 8 legs = 31 printed parts (spine, spine cap, 2 keepers, motor sleeve gone)
+ bought: N10 motor 1, AG13 6, SS12D00 switch 1, 5 mm LED 2 (+2 resistors), steel pin Ø3: 6 (3 strip idlers, front gear,
+   drop idler, crown), steel pin Ø2 x 8: 8, JST-XH pairs 2
+ screws: M2 self-tapping: 2 closing (from below) + 2 pack lids = 4; M3: 0; nuts: 0; locating pins 2 (printed, on the seam)
+ contacts: 6 springs (negative), 6 positive plates (2 bus strips of 3), 1 series link
+ wires: 2 LED leads, pack A leads 2, pack B leads 2, link 1, switch 2, motor 2, 2 JST pairs = 13 wire runs
+ ribs / cradles: 4 crank journal pairs, 3 idler pins, front gear, drop idler, crown pin, motor cradle + 2 body ribs, 8 pivot ribs"""
+
+
+def pr_split_sweep(S=S_FIX):
+    r = sweep_S(S, SPLIT_WALL, SPLIT_NAME, True, SPLIT_GAP, split_extras, split_checks, "_split")
+    sweep_box_list(r, os.path.join(CACHE, f"sweep_split_boxes_{S:.2f}.txt"))
+    wp = min(r["paths"], key=lambda t: t[1])
+    wt = min(r["tools"], key=lambda t: t[1])
+    print(f"S {S:.2f} split ({split_opt()}): least {r['least']:+.2f} ({r['bind']}); path {'ok' if r['path_ok'] else 'NO'} "
+          f"({wp[0]} {wp[1]:+.2f}); tool {'ok' if r['tool_ok'] else 'NO'} ({wt[0]} {wt[1]:+.2f}); train {'ok' if r['train'] else 'NO'}; "
+          f"{'PASS' if r['pass'] else 'fail'}; {len(r['under'])} pairs < {SPLIT_GAP}; {r['secs']} s", flush=True)
+    for k, v in r["under"][:8]:
+        print(f"   {k:48s} {v:+.2f}")
+    for k, v in r["paths"]:
+        if v < 0 or k.startswith("path order"):
+            print(f"   {k} {v:+.2f}")
+    for k, v in r["tools"]:
+        print(f"   {k} {v:+.2f}")
+    print(SPLIT_BOM)
+    return r
+
+
+def pr_split_order():
+    """The order and tool checks alone on the boxes of the cached sweep (no search)."""
+    r = json.load(open(os.path.join(CACHE, f"sweep_split_{S_FIX:.2f}.json")))
+    c = _ctx(S_FIX, BALL_D2, tuple(r["dy"]))
+    c["wall"], c["o"] = SPLIT_WALL, L5[SPLIT_NAME]
+    boxes = [(b[0], np.array(b[1]), np.array(b[2]), True, True, True) for b in r["boxes"]]
+    zrim = float(np.asarray(n1.run(c["p"])["st"]["base_v"])[:, 2].max())
+    paths, tools = split_checks(c, boxes, zrim, SPLIT_WALL)
+    for k, v in paths + tools:
+        print(f"{k} {v:+.2f}")
+    print("order:", c.get("_order"))
+    return paths, tools
+
+
+
 if __name__ == "__main__":
     a = sys.argv[1:] or ["gear", "cell", "pins", "pivot", "arms", "neck", "crown", "asm"]
     if a[0] == "layouts3":     # best rows only, at the S given: probes.py layouts3 0.70
@@ -2467,6 +2906,17 @@ if __name__ == "__main__":
         full = "--full" in a
         v = [x for x in a[1:] if x != "--full"]
         pr_sweep_bisect(*map(float, v[1:4]), full=full) if v[0] == "bisect" else pr_sweep([float(x) for x in v], full)
+        sys.exit()
+    if a[0] == "split":        # probes.py split layout | real | sweep | order | all
+        w = a[1] if len(a) > 1 else "all"
+        if w in ("layout", "all"):
+            split_layout()
+        if w in ("real", "all"):
+            pr_real(SPLIT_NAME, SPLIT_WALL)
+        if w in ("sweep", "all"):
+            pr_split_sweep()
+        if w == "order":
+            pr_split_order()
         sys.exit()
     if a[0] == "figure":
         pr_figure(a[1])
