@@ -59,6 +59,10 @@ The Spider-Bot walks on eight legs driven by one motor, so the core problem is t
 14. **The real parts as meshes.** N1 puts jenscolt's own body, base, eyes and legs into the same check, with the legs
     warped onto the mock-up's path, and cuts one window per leg root. The check passes within 1 mm and the look was
     approved. The print detail (N2) is next.
+15. **Meshes become parameters.** CAD on top of jenscolt's meshes did not work (warped legs, a 102k-triangle body, STEP
+    files of 50–180 MB, scale and wall tied together), so every mesh is converted once into build123d parameters and
+    kept only as a reference. A new tool measures a rebuild against its reference; the eyes, base, body and legs are
+    converted (scores 0.92, 0.83, 0.69, 0.89). Rebuilding N1 on them is next.
 
 <img src="https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/drive-attempts.png?raw=true" alt="The three drives tried, from above and from the side">
 
@@ -2301,6 +2305,7 @@ body. Morante compared the four views with his photo of the toy and approved: «
 - **Base emptied of all jenscolt's supports and pillars.** Morante: «quita todos esos soportes y pilares que tenía
   jenscolt. No los necesitamos».
 - **Motor 1 mm higher** instead of a higher crank axis.
+- The legs warped from jenscolt's meshes are replaced by parametric legs: see [Meshes become parameters](#meshes-become-parameters).
 
 ### N2 rev 5: the inside does not fit at 65 %
 
@@ -2386,5 +2391,133 @@ run in `real_F2s-sw_3.0.json` and the sweep in `sweep_0.65.json`; the cache is n
 Fix the assembly order, either the motor off the spine cap's column or the cap before the motor, then run
 `probes.py sweep 0.65 0.70 …` as an overnight batch (about 1.5–2 h) to get the definitive S. Or another direction
 Morante chooses.
+
+### Meshes become parameters
+
+**Phase 3 · Mechanisms · 2026-11-20** · Status: 🔄 parts converted, N1 not rebuilt on them yet
+
+> **In short.** Building on jenscolt's STL meshes stopped working: the legs came out warped, the body is 102k
+> triangles, a STEP sewn from a mesh weighs 50–180 MB, and scale and wall thickness cannot be changed apart.
+> Morante decided to stay on build123d and convert every mesh into parameters once, keeping the meshes only as
+> references. A new tool measures how far a rebuild is from its reference, and the eyes, base, body and legs are
+> converted and pass (0.92, 0.83, 0.69, 0.89). N1 has to be rebuilt on these parts next.
+
+The [N1 form](#n1-form-the-real-looking-parts-as-light-meshes) worked on meshes: legs warped onto N0's path, bodies
+simplified by clustering vertices. Every later step (windows, the inside at N2, scale, wall) fights the mesh. The
+cure is not another CAD program but a different source: a part defined by a few named numbers can be scaled, bent or
+thickened by changing one of them.
+
+#### Options
+
+| Option | Why not (or why) |
+|---|---|
+| Keep working on the meshes | The problems above; none gets better with more work |
+| OpenSCAD | Rejected: it is meshes and CSG, has no STEP, and is a step back from build123d |
+| Onshape with its FeatureScript MCP (Labs) | Not now: it runs in the cloud, outside git and outside our gates |
+| **build123d, mesh converted to parameters once** | **Chosen.** The mesh stays as a reference to measure against |
+
+#### Steps
+
+1. **Pilot on the leg** ([`cad/legs/`](../cad/legs/)). Version 1 was a table of 26 sections of the blade (score
+   0.88). The edit test then asked whether the part can change shape: the blade's skin became **50 numbers**, a
+   5-point spine and 6 sections, and it bends onto N0's path by its spine alone (also 0.88). That second form was
+   adopted.
+2. **A measuring tool**, [`tools/mesh_ref.py`](../tools/mesh_ref.py): `info` and `sections` give the numbers to model
+   from, `compare` measures the surface distance both ways and draws a heat map (with `--view` to compare only what
+   a viewer outside sees), `source` fails if a build script reads a mesh, `views` draws the design and the
+   reference in the same views for the judge.
+3. **The rounds harness** learned conversions: `rounds.py init --mesh` writes a conversion's gates (no mesh read,
+   sweep of variants, edit test, fidelity). Gate items are decided by the gates, not by the judge, and a design may
+   have its own pass threshold, set by Morante. A new `mesh-to-cad` agent (kept in the private config, not in this
+   repo) does the conversion: measure the reference, model it as spines, sections and named features, run the
+   rounds.
+4. **Fidelity limits.** Morante first chose p95 1.0 mm and max 2.5 mm, then relaxed them to **p95 2.0 / max 4.0 mm**
+   (the max on the 99.9th percentile, so one stray sample does not decide) after seeing the body: «a nivel aspecto
+   general lo veo bien». They are the default; a design can set its own with a reason.
+5. **Four conversions**, each in its own folder with a datasheet of numbers.
+
+<img src="../cad/carcass-jenscolt/images/conversions-vs-reference.png" width="640" alt="Four rows, each with jenscolt's mesh in grey on the left and the parametric rebuild in colour on the right: body, base, leg, eyes">
+
+*Fig. 1 · Reference (grey) and rebuild (colour) of the body, the base seen from below, one leg (blade and arm) and the
+three eyes, same view for both. The reference's scribbles and spikes are mesh noise; the rebuild is smooth. Look at the
+body: the rebuild has the eye barrels, side scoop and rear lip but not the curved panel lines on top.*
+
+<img src="../cad/legs/images/edit-demo.png" alt="Edit test of the leg: the blade bent onto N0's curve, lengthened by 10 %, bowed by 3 mm, and the arm bent onto N0's inner arm and upper leg">
+
+*Fig. 2 · The edit test of the leg: only the spine's points change. Left: the blade bent onto N0's leg curve (blue; the
+original in grey). Centre: length +10 %, then bow +3 mm. Right: the arm bent onto N0's inner arm and upper leg (the
+red dashed line), with the blade beside it. Each is one valid solid.*
+
+<details><summary>How to reproduce</summary>
+
+```
+uv run python tools/rounds.py status cad/<design>                     # the table of rounds
+uv run python tools/mesh_ref.py compare cad/legs/out/leg-blade.stl cad/carcass-jenscolt/spideybot_L_leg1.stl --png heat.png
+uv run python tools/conversions_figure.py cad/carcass-jenscolt/images/conversions-vs-reference.png
+(cd cad/legs && ../../.venv/bin/python build.py --sweep --edit)
+```
+
+</details>
+
+#### Result
+
+| Design | Rounds | Score | Passed | Fidelity (both ways) |
+|---|---|---|---|---|
+| Eyes (3 parts) | r00 0.91, **r01 0.92** | 0.92 | yes | default limits |
+| Base | r00 0.63 (no), **r01 0.83** | 0.83 | yes | default limits |
+| Body | **r00 0.69** | 0.69 | yes (own threshold 0.69) | own limits p95 2.1 / max 6.0 mm |
+| Legs (left and right) | **r00 0.89** | 0.89 | yes | blade p95 0.53 / 0.56, arm 0.59 / 0.48 mm |
+
+Round tables as printed by `rounds.py status`:
+
+<details><summary>Rounds of each design</summary>
+
+```
+PASS eyes: 2 rounds, refine rounds asked 1; best r01
+| r00 | PASS | 0.91 | yes | — |
+| r01 | PASS | 0.92 | yes | — |
+
+PASS base: 2 rounds, refine rounds asked 1; best r01
+| r00 | PASS | 0.63 | no  | — |
+| r01 | PASS | 0.83 | yes | — |
+
+PASS body: 1 rounds, refine rounds asked 0; best r00
+| r00 | PASS | 0.69 | yes | — |
+
+PASS legs: 1 rounds, refine rounds asked 1; best r00
+| r00 | PASS | 0.89 | yes | — |      next: refine round r01
+```
+
+</details>
+
+- **Eyes:** one parametric cup used by the large eye, the small eye and the sensor, each with its own numbers. Its last
+  remark: more segments on the large eye's dome so it reads smooth.
+- **Base:** the reference is a derived bowl ([`derive_bowl.py`](../cad/carcass-jenscolt/derive_bowl.py)), because the
+  inside of his base is ours to design, not his. Round r00 scored 0.63 and did not pass (the judge: a V-shaped
+  underside instead of a round bowl, leg windows and rim slots missing); r01 passed with 0.83. Still open in r01: the
+  rim notches as named features, a rounder lower profile and dark patches on the inside skin.
+- **Body:** 0.69. Morante: «A mí me vale el cuerpo como está, haz que pase a 0.69», so the body has its own
+  threshold and own limits (p95 2.1 / max 6.0 mm) and its refine round was stopped. Still missing: the curved panel
+  lines on the top and the chin grille. A build takes 60–80 s.
+- **Legs:** 0.89, left and right from one model. The arm and the blade lie on spines, so N1 gets them from one call,
+  `leg()`, instead of warping a mesh. The judge's remaining remarks, for refine round r01: a deeper seam groove and a
+  raised eye on the blade, a deeper gear relief and open gaps between the neck rings on the arm.
+
+#### Decisions
+
+- **Stay on build123d and convert once.** Meshes stay in `cad/carcass-jenscolt/` as references only; no printed part
+  is a mesh.
+- **Fidelity default p95 2.0 / max 4.0 mm**, relaxed from 1.0 / 2.5 by Morante, who judges the look himself; a
+  design may have its own threshold (body 0.69).
+- **Body accepted as it is** (Morante), top panel lines and chin grille left for later.
+- **Licence:** the four conversions are derived from jenscolt's model, so they stay CC BY-NC-SA; each folder's README
+  says so and links the licence.
+
+#### Next
+
+N1 reads the parts' coarse STL, so [`n0.py`](../cad/mockup/n0.py), [`n1.py`](../cad/mockup/n1.py),
+[`sizing.py`](../cad/mockup/sizing.py) and [`probes.py`](../cad/robot/probes.py) are to be pointed at them and the
+legs bent by `leg()` instead of `warp()`; then check and show Morante. N2 stays paused as in
+[its entry](#n2-rev-5-the-inside-does-not-fit-at-65-).
 
 [↑ Contents](../build-log.md#contents)

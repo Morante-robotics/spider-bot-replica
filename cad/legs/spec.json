@@ -1,0 +1,135 @@
+{
+ "design": "legs",
+ "level": "N1",
+ "purpose": "jenscolt's leg (left and right) as parameters: the blade's skin from a spine and a few control sections, so it bends onto N0's leg path by its spine alone; the right leg is the left one mirrored. Pilot (2026-11-20) adopted as the method; fidelity at the default.",
+ "pass_criterion": "leg-blade within the default fidelity (tools/mesh_ref.py) of L_leg1 both ways with its skin from ≤ 60 numbers; build.py --edit bends it onto N0's right-front blade curve (spine within 0.5 mm of it) and makes the length +10 % and bow +3 mm variants, every one a valid closed solid; the judge scores ≥ 0.70 against the mesh render",
+ "must_have": [
+  "leg-blade's skin from a spine curve (BLADE_SPINE, ≤ 5 control points) and ≤ 8 control sections interpolated along it (≤ 60 numbers in all for the skin); the seam grooves, socket and eye placed relative to the spine so they follow a bend",
+  "leg-arm's neck on a spine of ≤ 5 points (hub, gears and tab rigid at its start), so it bends onto N0's inner and upper leg path; same fidelity gate (Morante, 2026-11-20: N1 bends both parts)",
+  "build.py --edit writes out/edit-*.stl and images/edit-demo.png: (a) the blade bent onto N0's right-front blade curve (cad/mockup/n0.py leg_shape with P0, imported, never copied) in N0's frame at its S, (b) length +10 %, (c) bow +3 mm; prints FAIL for any variant that is not one valid closed solid or, for (a), whose spine is more than 0.5 mm from N0's curve",
+  "build.py --sweep as in v1 (S 0.65, thickness and arm section 0.8x / 1.2x)",
+  "a fidelity-vs-sections table in datasheet.md: blade p95/max with 4, 6, 8 control sections (and v1's 26), so Morante sees the trade-off",
+  "the right leg (leg-blade-r, leg-arm-r) from the same model by a mirror parameter, never a second model; its fidelity against jenscolt's R_leg1 / R_leg2"
+ ],
+ "must_not": [
+  "build.py never reads an STL or uses trimesh: the meshes are read only by the gates and by the designer's probes (scratchpad)",
+  "no warp or morph of mesh vertices"
+ ],
+ "dims": {
+  "blade_extent": {
+   "value": [
+    30.52,
+    29.74,
+    91.27
+   ],
+   "unit": "mm",
+   "source": "tools/mesh_ref.py info cad/carcass-jenscolt/spideybot_L_leg1.stl"
+  },
+  "arm_extent": {
+   "value": [
+    36.34,
+    39.88,
+    47.8
+   ],
+   "unit": "mm",
+   "source": "tools/mesh_ref.py info cad/carcass-jenscolt/spideybot_L_leg2.stl"
+  },
+  "build_time": {
+   "value": 15,
+   "unit": "s",
+   "source": "Morante, 2026-11-20: both parts, coarse STL + STEP"
+  },
+  "blade_skin_numbers": {
+   "value": 60,
+   "unit": "numbers",
+   "source": "Morante, 2026-11-20: edit test (v1 had ≈ 270)"
+  },
+  "edit_spine_dev": {
+   "value": 0.5,
+   "unit": "mm",
+   "source": "Morante, 2026-11-20: edit test"
+  },
+  "fidelity": {
+   "value": [
+    2.0,
+    4.0
+   ],
+   "unit": "mm (p95, max)",
+   "source": "tools/mesh_ref.py P95, MAX (Morante, 2026-11-20)"
+  }
+ },
+ "references": [
+  {
+   "image": "{ws}/images/reference.png",
+   "label": "the reference mesh(es) to reproduce, same four views and framing"
+  }
+ ],
+ "src": [
+  "build.py",
+  "plan.json"
+ ],
+ "gates": [
+  {
+   "name": "source",
+   "kind": "command",
+   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py source {ws}/build.py",
+   "fail_regex": "^FAIL"
+  },
+  {
+   "name": "build",
+   "kind": "command",
+   "cmd": "cd {ws} && /usr/bin/time -p {root}/.venv/bin/python build.py --sweep",
+   "fail_regex": "^FAIL",
+   "timeout": 300
+  },
+  {
+   "name": "edit",
+   "kind": "command",
+   "cmd": "cd {ws} && {root}/.venv/bin/python build.py --edit",
+   "fail_regex": "^FAIL",
+   "timeout": 300
+  },
+  {
+   "name": "fidelity-blade",
+   "kind": "command",
+   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py compare {ws}/out/leg-blade.stl cad/carcass-jenscolt/spideybot_L_leg1.stl --png {ws}/images/fidelity-blade.png --json {ws}/out/fidelity-blade.json",
+   "fail_regex": "^FAIL",
+   "timeout": 300
+  },
+  {
+   "name": "fidelity-arm",
+   "kind": "command",
+   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py compare {ws}/out/leg-arm.stl cad/carcass-jenscolt/spideybot_L_leg2.stl --png {ws}/images/fidelity-arm.png --json {ws}/out/fidelity-arm.json",
+   "fail_regex": "^FAIL",
+   "timeout": 300
+  },
+  {
+   "name": "fidelity-leg-blade-r",
+   "kind": "command",
+   "fail_regex": "^FAIL",
+   "timeout": 600,
+   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py compare {ws}/out/leg-blade-r.stl cad/carcass-jenscolt/spideybot_R_leg1.stl --png {ws}/images/fidelity-leg-blade-r.png --json {ws}/out/fidelity-leg-blade-r.json"
+  },
+  {
+   "name": "fidelity-leg-arm-r",
+   "kind": "command",
+   "fail_regex": "^FAIL",
+   "timeout": 600,
+   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py compare {ws}/out/leg-arm-r.stl cad/carcass-jenscolt/spideybot_R_leg2.stl --png {ws}/images/fidelity-leg-arm-r.png --json {ws}/out/fidelity-leg-arm-r.json"
+  }
+ ],
+ "views": {
+  "cmd": "{root}/.venv/bin/python tools/mesh_ref.py views {out} --ref cad/carcass-jenscolt/spideybot_L_leg1.stl cad/carcass-jenscolt/spideybot_L_leg2.stl --parts {ws}/out/leg-blade.stl {ws}/out/leg-arm.stl --edits {dir}/edits.png {ws}/out/edit-n0.stl=\"bent onto N0's leg path (S 0.60)\" {ws}/out/edit-length.stl=\"length +10 %\" {ws}/out/edit-bow.stl=\"bow +3 mm\"",
+  "images": [
+   "{out}",
+   "{dir}/edits.png"
+  ],
+  "timeout": 600
+ },
+ "judge": {
+  "enabled": true,
+  "rubric": "looks"
+ },
+ "refine_rounds": 1,
+ "asked": "Morante, 2026-11-20 (pilot v1, edit test, adopted with right legs)"
+}

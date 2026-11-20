@@ -1,6 +1,6 @@
 # Carcass base model: Spidey-Bot by jenscolt
 
-Unmodified files of [Spidey-Bot](https://www.thingiverse.com/thing:5196618) by **jenscolt** (Thingiverse, January 2022), a
+Reference meshes only (Morante, 2026-11-20): every printed part is rebuilt from parameters ([`../README.md`](../README.md) «From a mesh»), and these files are what the conversions are measured against. Unmodified files of [Spidey-Bot](https://www.thingiverse.com/thing:5196618) by **jenscolt** (Thingiverse, January 2022), a
 static display model of the Avengers Campus Spider-Bot with room inside the body for lights. It is the starting point
 for the carcass. Repaired and scaled versions: [../carcass-120/](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/carcass-120).
 
@@ -28,6 +28,7 @@ front legs are where the author placed them; eyes moved into their sockets; the 
 | `spideybot_eye.stl` | 17.5 × 8.5 × 17.7 | 3692 | Large eye dome |
 | `spideybot_small_eye.stl` | 7.3 × 4.8 × 7.4 | 3692 | Small eye dome |
 | `spideybot_sensor.stl` | 7.6 × 4.8 × 7.6 | 3692 | Front sensor dome |
+| `spideybot_base_bowl.stl` | 101.2 × 88.3 × 35.0 | 3021 | **Derived**: the base's bowl skin and rim only, his inside removed ([`derive_bowl.py`](derive_bowl.py)); the reference for our base |
 
 Sizes at 100 % scale. For the full robot print 4 of each leg file (L and R) and 2 of each eye.
 

@@ -1,0 +1,92 @@
+{
+ "summary": "jenscolt's base as one parametric bowl: skin, wall, rim and the front leg windows; his inside is left out (N2 puts our mechanism there).",
+ "parts": [
+  {
+   "name": "base",
+   "role": "the bowl the body and mechanism sit in, ground part",
+   "why_separate": "the only part of this design",
+   "grams": 9,
+   "print_orient": "bowl up, foot on the bed"
+  }
+ ],
+ "joints": [],
+ "assembly": [
+  {
+   "part": "base",
+   "from": null,
+   "tool": "hand",
+   "check": "stands on its foot, open side up"
+  }
+ ],
+ "alternatives": [
+  {
+   "topic": "how the wall is made",
+   "options": [
+    "outer loft minus inner loft",
+    "outer and inner skins sewn with a top ring"
+   ],
+   "choice": "outer and inner skins sewn with a top ring",
+   "why": "the cut of two near-parallel lofts took 40 s and came out invalid; the sewn shell builds in 6 s"
+  }
+ ],
+ "acceptance": [
+  {
+   "id": "a1",
+   "text": "the bowl is within the default fidelity limits of the reference both ways",
+   "how": "measure",
+   "gate": "fidelity-base",
+   "priority": "must"
+  },
+  {
+   "id": "a2",
+   "text": "every sweep variant (S 0.65, wall and section 0.8x / 1.2x) is one valid closed solid",
+   "how": "measure",
+   "gate": "build",
+   "priority": "must"
+  },
+  {
+   "id": "a3",
+   "text": "build.py reads no mesh",
+   "how": "measure",
+   "gate": "source",
+   "priority": "must"
+  },
+  {
+   "id": "a4",
+   "text": "the bowl, its rim and the front windows look like jenscolt's base",
+   "how": "visual",
+   "priority": "must"
+  },
+  {
+   "id": "m1",
+   "text": "bowl skin and wall thickness separate parameters",
+   "how": "visual",
+   "priority": "must",
+   "from": "spec.must_have"
+  },
+  {
+   "id": "m2",
+   "text": "the rim notches (leg windows) as named features, one parameter set mirrored left/right",
+   "how": "visual",
+   "priority": "must",
+   "from": "spec.must_have"
+  },
+  {
+   "id": "n1",
+   "text": "not: build.py reads a mesh: the reference meshes are read only by the gates and the designer's probes",
+   "how": "visual",
+   "priority": "must",
+   "from": "spec.must_not"
+  },
+  {
+   "id": "p1",
+   "text": "the default fidelity gate passes, the sweep's variants are valid solids, and the judge scores ≥ 0.70 against the mesh",
+   "how": "morante",
+   "priority": "must",
+   "from": "spec.pass_criterion"
+  }
+ ],
+ "open_questions": [],
+ "diagram": "",
+ "_validated": "2dee2ca2b6c895ff:495de32f6fd3"
+}

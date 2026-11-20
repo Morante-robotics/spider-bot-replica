@@ -57,6 +57,7 @@ The robot's story in three parts, then what is left to do and a glossary.
    - [N0 mock-up: the looks robot in simple shapes](build-log/3-legs-and-drive.md#n0-mock-up-the-looks-robot-in-simple-shapes) · 2026-11-18 · ✅ N0 look approved, N1 next
    - [N1 form: the real looking parts as light meshes](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) · 2026-11-19 · ✅ N1 look approved, N2 next
    - [N2 rev 5: the inside does not fit at 65 %](build-log/3-legs-and-drive.md#n2-rev-5-the-inside-does-not-fit-at-65-) · 2026-11-19 · 🔄 paused for Morante's decision
+   - [Meshes become parameters](build-log/3-legs-and-drive.md#meshes-become-parameters) · 2026-11-20 · 🔄 parts converted, N1 not rebuilt on them yet
 4. **[Open items](#open-items)**: everything still to do.
 5. **[Glossary](#glossary)**: the terms used in the entries.
 
@@ -78,9 +79,12 @@ once, before printing. Everything before the redesign is in the
 
 | Pending | Came up in | Phase |
 |---|---|---|
+| **First:** rebuild N1 on the parametric parts (`n0.py`, `n1.py`, `sizing.py` and `probes.py` read the parts' coarse STL; legs bent by `cad/legs` `leg()` instead of `warp()`), check it and show Morante | [Meshes become parameters](build-log/3-legs-and-drive.md#meshes-become-parameters) | 3 |
+| Legs refine round r01 (the judge's list in the last `score.json`); add `edit-arm-n0.stl` to the views command of `cad/legs/spec.json`, which the judge's views lack | [Meshes become parameters](build-log/3-legs-and-drive.md#meshes-become-parameters) | 3 |
+| Body: the curved top panels and the chin grille, if Morante wants them later (a build takes 60–80 s) | [Meshes become parameters](build-log/3-legs-and-drive.md#meshes-become-parameters) | 3 |
 | Buy the N10 (3 V, ≈ 100–150 rpm) and 6 × AG13, and measure it (body, shaft, mounting) to replace the mock-up's box at N2. Chosen bottom-up from the original Mini Spider-Bot (≈ 10 cm, 6 × AG13, walks on legs): the body holds them at ≈ 60 % (`cad/mockup/sizing.py`) | Redesign, looks first | 3 |
-| Resolve at 0.1 mm the leg-root windows (≈ 20 × 12 mm, target was 10) and legs ↔ base (−0.4 mm) | [N1 form](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) | 3 |
-| Rebuild the base rim (ragged after emptying the base) | [N1 form](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) | 3 |
+| After the rebuild, resolve at 0.1 mm the leg-root windows (≈ 20 × 12 mm, target was 10) and legs ↔ base (−0.4 mm) | [N1 form](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) | 3 |
+| Rebuild the base rim (ragged after emptying the base; the parametric base replaces it) | [N1 form](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) | 3 |
 | N2 paused for Morante's decision: fix the assembly order (motor off the spine cap's column, or cap before motor) and run `probes.py sweep` as an overnight batch (≈ 1.5–2 h) to get the definitive S; or another direction he chooses | [N2 rev 5](build-log/3-legs-and-drive.md#n2-rev-5-the-inside-does-not-fit-at-65-) | 3 |
 | Print detail, one batch of coupons, the workshop kit and the one robot | Redesign, looks first | 4 |
 | Import the parts into Onshape as STEP and assemble them with mates | [Onshape assembly](build-log/3-legs-and-drive.md#onshape-assembly) | 3 |
@@ -134,5 +138,8 @@ Terms used in the entries, in the order they first appear, with a link to that e
 | **Mock-up (N0)** | The whole robot drawn and checked in simple shapes (tubes and boxes), so a change costs seconds. | [N0 mock-up](build-log/3-legs-and-drive.md#n0-mock-up-the-looks-robot-in-simple-shapes) |
 | **N1 form** | The real looking parts (body, base, eyes, legs) as light meshes of at most 25k triangles, checked over 24 crank poses. | [N1 form](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) |
 | **Window** | The opening cut in the body and base where a leg root passes, sized by the root's swing over a turn. | [N1 form](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) |
+| **Reference mesh** | A downloaded STL kept only to measure a parametric rebuild against; no printed part is a mesh. | [Meshes become parameters](build-log/3-legs-and-drive.md#meshes-become-parameters) |
+| **Spine and sections** | A part's skin described by a curve of 5 points (spine) and a few cross-sections along it; changing the spine bends the part. | [Meshes become parameters](build-log/3-legs-and-drive.md#meshes-become-parameters) |
+| **Fidelity (p95, max)** | How far a rebuild's surface is from its reference, both ways: 95 % of points within p95, the max on the 99.9th percentile. | [Meshes become parameters](build-log/3-legs-and-drive.md#meshes-become-parameters) |
 
 [↑ Contents](#contents)

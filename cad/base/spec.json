@@ -1,0 +1,78 @@
+{
+ "design": "base",
+ "level": "N1",
+ "purpose": "jenscolt's base as parameters: only the outer bowl, its rim and the leg notches (Morante, 2026-11-20); his inside (posts, motor and light mounts, static-leg tabs) is left out, our mechanism goes there at N2. Reference: the derived bowl (derive_bowl.py).",
+ "pass_criterion": "the default fidelity gate passes, the sweep's variants are valid solids, and the judge scores ≥ 0.70 against the mesh",
+ "must_have": [
+  "bowl skin and wall thickness separate parameters",
+  "the rim notches (leg windows) as named features, one parameter set mirrored left/right"
+ ],
+ "must_not": [
+  "build.py reads a mesh: the reference meshes are read only by the gates and the designer's probes"
+ ],
+ "dims": {
+  "base_extent": {
+   "value": [
+    101.2,
+    88.3,
+    35.0
+   ],
+   "unit": "mm",
+   "source": "tools/mesh_ref.py info cad/carcass-jenscolt/spideybot_base_bowl.stl"
+  },
+  "fidelity": {
+   "value": [
+    2.0,
+    4.0
+   ],
+   "unit": "mm (p95, max)",
+   "source": "tools/mesh_ref.py P95, MAX (Morante, 2026-11-20)"
+  }
+ },
+ "references": [
+  {
+   "image": "{ws}/images/reference.png",
+   "label": "the reference mesh(es) to reproduce, same four views and framing"
+  }
+ ],
+ "src": [
+  "build.py",
+  "plan.json"
+ ],
+ "gates": [
+  {
+   "name": "source",
+   "kind": "command",
+   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py source {ws}/build.py",
+   "fail_regex": "^FAIL"
+  },
+  {
+   "name": "build",
+   "kind": "command",
+   "cmd": "cd {ws} && {root}/.venv/bin/python build.py --sweep",
+   "fail_regex": "^FAIL",
+   "timeout": 600
+  },
+  {
+   "name": "fidelity-base",
+   "kind": "command",
+   "fail_regex": "^FAIL",
+   "timeout": 600,
+   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py compare {ws}/out/base.stl cad/carcass-jenscolt/spideybot_base_bowl.stl --view below --png {ws}/images/fidelity-base.png --json {ws}/out/fidelity-base.json",
+   "note": "visible from below and the sides only: the body covers the base's top; the bowl's inside is ours (N2)"
+  }
+ ],
+ "views": {
+  "cmd": "{root}/.venv/bin/python tools/mesh_ref.py views {out} --ref cad/carcass-jenscolt/spideybot_base_bowl.stl --parts {ws}/out/base.stl",
+  "images": [
+   "{out}"
+  ],
+  "timeout": 600
+ },
+ "judge": {
+  "enabled": true,
+  "rubric": "looks"
+ },
+ "refine_rounds": 1,
+ "asked": "Morante, 2026-11-20"
+}

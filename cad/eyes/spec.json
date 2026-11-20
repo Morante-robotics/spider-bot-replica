@@ -1,0 +1,108 @@
+{
+ "design": "eyes",
+ "level": "N1",
+ "purpose": "jenscolt's eye domes as parameters: the large eye, the small eye and the front sensor (cups made of primitives), in their reference frames",
+ "pass_criterion": "the default fidelity gate passes for each part, the sweep's variants are valid solids, and the judge scores ≥ 0.70 against the meshes",
+ "must_have": [
+  "one parametric cup (radius, depth, wall, rim) used by all three parts, each with its own numbers"
+ ],
+ "must_not": [
+  "build.py reads a mesh: the reference meshes are read only by the gates and the designer's probes"
+ ],
+ "dims": {
+  "eye_extent": {
+   "value": [
+    17.52,
+    8.46,
+    17.65
+   ],
+   "unit": "mm",
+   "source": "tools/mesh_ref.py info cad/carcass-jenscolt/spideybot_eye.stl"
+  },
+  "small-eye_extent": {
+   "value": [
+    7.3,
+    4.78,
+    7.36
+   ],
+   "unit": "mm",
+   "source": "tools/mesh_ref.py info cad/carcass-jenscolt/spideybot_small_eye.stl"
+  },
+  "sensor_extent": {
+   "value": [
+    7.6,
+    4.78,
+    7.6
+   ],
+   "unit": "mm",
+   "source": "tools/mesh_ref.py info cad/carcass-jenscolt/spideybot_sensor.stl"
+  },
+  "fidelity": {
+   "value": [
+    2.0,
+    4.0
+   ],
+   "unit": "mm (p95, max)",
+   "source": "tools/mesh_ref.py P95, MAX (Morante, 2026-11-20)"
+  }
+ },
+ "references": [
+  {
+   "image": "{ws}/images/reference.png",
+   "label": "the reference mesh(es) to reproduce, same four views and framing"
+  }
+ ],
+ "src": [
+  "build.py",
+  "plan.json"
+ ],
+ "gates": [
+  {
+   "name": "source",
+   "kind": "command",
+   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py source {ws}/build.py",
+   "fail_regex": "^FAIL"
+  },
+  {
+   "name": "build",
+   "kind": "command",
+   "cmd": "cd {ws} && {root}/.venv/bin/python build.py --sweep",
+   "fail_regex": "^FAIL",
+   "timeout": 600
+  },
+  {
+   "name": "fidelity-eye",
+   "kind": "command",
+   "fail_regex": "^FAIL",
+   "timeout": 600,
+   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py compare {ws}/out/eye.stl cad/carcass-jenscolt/spideybot_eye.stl --png {ws}/images/fidelity-eye.png --json {ws}/out/fidelity-eye.json"
+  },
+  {
+   "name": "fidelity-small-eye",
+   "kind": "command",
+   "fail_regex": "^FAIL",
+   "timeout": 600,
+   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py compare {ws}/out/small-eye.stl cad/carcass-jenscolt/spideybot_small_eye.stl --png {ws}/images/fidelity-small-eye.png --json {ws}/out/fidelity-small-eye.json"
+  },
+  {
+   "name": "fidelity-sensor",
+   "kind": "command",
+   "fail_regex": "^FAIL",
+   "timeout": 600,
+   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py compare {ws}/out/sensor.stl cad/carcass-jenscolt/spideybot_sensor.stl --png {ws}/images/fidelity-sensor.png --json {ws}/out/fidelity-sensor.json"
+  }
+ ],
+ "views": {
+  "cmd": "{root}/.venv/bin/python tools/mesh_ref.py views {out} --ref cad/carcass-jenscolt/spideybot_eye.stl cad/carcass-jenscolt/spideybot_small_eye.stl cad/carcass-jenscolt/spideybot_sensor.stl --parts {ws}/out/eye.stl {ws}/out/small-eye.stl {ws}/out/sensor.stl",
+  "images": [
+   "{out}"
+  ],
+  "timeout": 600
+ },
+ "judge": {
+  "enabled": true,
+  "rubric": "looks"
+ },
+ "refine_rounds": 1,
+ "asked": "Morante, 2026-11-20"
+}

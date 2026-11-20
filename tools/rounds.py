@@ -20,6 +20,8 @@ A design folder is the workspace:
 Commands (from the repo root; WS is the design folder, e.g. cad/robot):
 
     uv run python tools/rounds.py init WS --level N2 --purpose "..." [--must-have ...] [--ref toy.jpg] [--rounds 1]
+    uv run python tools/rounds.py init WS --level N1 --purpose "..." --mesh PART=ref.stl [--mesh ...] [--edit]
+                                         --rounds 1      # a conversion from reference meshes (mesh-to-cad agent)
     uv run python tools/rounds.py validate WS          # until PASS; writes WS/design-plan.md
     uv run python tools/rounds.py check WS             # every gate in spec["gates"]: PASS / FAIL with each failure
     uv run python tools/rounds.py round WS 0           # snapshot + gates + views + brief; prints JUDGE INSTRUCTION
@@ -51,7 +53,7 @@ HOWS = ("verify", "measure", "visual", "morante", "print")
 VERIFY_CHECKS = ("integrity", "motion", "gears", "retention", "assembly", "print", "keep-out", "access", "joints",
                  "seats", "keep-in", "marks")
 KEBAB = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
-PLACEHOLDER = re.compile(r"<[^>]*>|\bTODO\b|\bTBD\b|\?\?\?")
+PLACEHOLDER = re.compile(r"<[A-Za-z][\w ./-]{0,40}>|\bTODO\b|\bTBD\b|\?\?\?")
 
 
 # ---------------------------------------------------------------- files
@@ -131,10 +133,70 @@ def cmd_init(a):
             "gates": [{"name": "cad_verify", "kind": "cad_verify", "spec": "verify.py"}] if a.level == "N2" else [],
             "views": {}, "judge": {"enabled": bool(a.ref), "rubric": "looks"},
             "refine_rounds": a.rounds, "asked": f"Morante, {datetime.date.today().isoformat()}"}
+    if a.mesh:
+        err = mesh_spec(spec, ws, a.mesh, a.edit, a.p95, a.max)
+        if err:
+            print(f"ERROR {err}")
+            return 2
     jsave(path, spec)
     print(f"PASS wrote {path}\n  next: fill dims (each with its source), gates and views; then write plan.json "
           f"(cad/_template/plan.json) and run validate")
     return 0
+
+
+def mesh_spec(spec, ws, meshes, edit, p95, mx):
+    """A conversion (`init --mesh PART=REF ...`): the parts are rebuilt as parameters from reference meshes. Adds the
+    gates every conversion runs (source: no mesh read; build + its --sweep; edit for an organic part; fidelity per
+    part, tools/mesh_ref.py compare at its default limits unless given), the views and the reference picture (both
+    from mesh_ref.py views, same framing), the judge, and each reference's size as a dim. Returns an error or None."""
+    sys.path.insert(0, TOOLS)
+    import mesh_ref
+    pairs = []
+    for m in meshes:
+        if "=" not in m:
+            return f"--mesh {m}: PART=path/to/reference.stl"
+        part, ref = m.split("=", 1)
+        if not KEBAB.match(part):
+            return f"--mesh {m}: part names are kebab-case"
+        if not os.path.exists(os.path.join(ROOT, ref)):
+            return f"--mesh {m}: {ref} not found (paths from the repo root)"
+        pairs.append((part, ref))
+    py = "{root}/.venv/bin/python"
+    lim = (f" --p95 {p95}" if p95 else "") + (f" --max {mx}" if mx else "")
+    spec["src"] = ["build.py", "plan.json"]
+    spec["must_not"] = (spec["must_not"] or []) + ["build.py reads a mesh: the reference meshes are read only by the "
+                                                   "gates and the designer's probes"]
+    spec["gates"] = [{"name": "source", "kind": "command", "cmd": f"{py} tools/mesh_ref.py source {{ws}}/build.py",
+                      "fail_regex": "^FAIL"},
+                     {"name": "build", "kind": "command", "cmd": f"cd {{ws}} && {py} build.py --sweep",
+                      "fail_regex": "^FAIL", "timeout": 600}]
+    if edit:
+        spec["gates"].append({"name": "edit", "kind": "command", "cmd": f"cd {{ws}} && {py} build.py --edit",
+                              "fail_regex": "^FAIL", "timeout": 600})
+    for part, ref in pairs:
+        spec["gates"].append({"name": f"fidelity-{part}", "kind": "command", "fail_regex": "^FAIL", "timeout": 600,
+                              "cmd": f"{py} tools/mesh_ref.py compare {{ws}}/out/{part}.stl {ref}{lim} "
+                                     f"--png {{ws}}/images/fidelity-{part}.png --json {{ws}}/out/fidelity-{part}.json"})
+        m = mesh_ref.load(os.path.join(ROOT, ref))
+        spec["dims"][f"{part}_extent"] = {"value": [round(float(x), 2) for x in m.extents], "unit": "mm",
+                                          "source": f"tools/mesh_ref.py info {ref}"}
+    spec["dims"]["fidelity"] = {"value": [p95 or mesh_ref.P95, mx or mesh_ref.MAX], "unit": "mm (p95, max)",
+                                "source": "tools/mesh_ref.py P95, MAX (Morante, 2026-11-20)" if not (p95 or mx)
+                                else "Morante: this design's own limits (say why in purpose)"}
+    refs = " ".join(r for _, r in pairs)
+    parts = " ".join(f"{{ws}}/out/{p}.stl" for p, _ in pairs)
+    cmd = f"{py} tools/mesh_ref.py views {{out}} --ref {refs} --parts {parts}"
+    images = ["{out}"]
+    if edit:
+        cmd += " --edits {dir}/edits.png {ws}/out/edit-*.stl"
+        images.append("{dir}/edits.png")
+    spec["views"] = {"cmd": cmd, "images": images, "timeout": 600}
+    os.makedirs(os.path.join(ws, "images"), exist_ok=True)
+    mesh_ref.views(os.path.join(ws, "images", "reference.png"), [os.path.join(ROOT, r) for _, r in pairs])
+    spec["references"] = [{"image": "{ws}/images/reference.png",
+                           "label": "the reference mesh(es) to reproduce, same four views and framing"}]
+    spec["judge"] = {"enabled": True, "rubric": "looks"}
+    return None
 
 
 # ---------------------------------------------------------------- validate
@@ -449,7 +511,7 @@ def judge_criteria(rub, measured):
 
 def brief_md(spec, plan, gates, rub, images, measured, n):
     crit, meas = judge_criteria(rub, measured)
-    acc = [x for x in plan.get("acceptance", []) if x.get("how") in ("visual", "measure")]
+    acc = [x for x in plan.get("acceptance", []) if x.get("how") in ("visual", "measure") and not (x.get("how") == "measure" and x.get("gate"))]
     out = [f"# Judge brief · {spec['design']} · round r{n:02d}", "",
            "You judge pictures of a 3D-printed robot design against its request and its reference. You never see "
            "the code. Everything you may use is in this file and the images listed below.", "",
@@ -625,6 +687,10 @@ def score_round(spec, plan, gates, rub, judgment, measured):
             full = all(not g["partial"] for g in gates.get("gates", []) if g["kind"] == "cad_verify")
             state = "verified" if st and full and all(s["fail"] == 0 for s in st) else \
                 "failed" if any(s["fail"] for s in st) else "pending"
+        elif how == "measure" and x.get("gate"):             # code answers: the named gate's verdict, not the judge
+            st = [g["verdict"] for g in gates.get("gates", []) if g["name"] == x["gate"]]
+            state = "verified" if st == ["PASS"] else "failed" if st and st[0] in ("FAIL", "PARTIAL FAIL") else \
+                "pending"
         elif how in ("visual", "measure") and judgment is not None:
             state = "verified" if (jacc.get(x["id"]) or {}).get("verified") else "failed"
         acc_rows.append((x["id"], x["priority"], how, state, x["text"]))
@@ -644,7 +710,8 @@ def score_round(spec, plan, gates, rub, judgment, measured):
     raw = overall
     for c, why in caps:
         overall = min(overall, c)
-    passed = overall >= rub.get("pass_threshold", 0.75) and not floors and \
+    thr = (spec.get("judge") or {}).get("pass_threshold", rub.get("pass_threshold", 0.75))  # Morante may set a design's own
+    passed = overall >= thr and not floors and \
         all(g["verdict"] == "PASS" for g in gates.get("gates", []))
     return {"overall": round(overall, 3), "raw": round(raw, 3), "passed": passed,
             "caps": [f"{c:.2f} {why}" for c, why in caps if c < raw + 1e-9], "criteria": crit_scores,
@@ -862,6 +929,10 @@ def main():
     p.add_argument("--must-not", action="append")
     p.add_argument("--ref", action="append", help="reference image, e.g. {refs}/spider-bot-juguete.jpg")
     p.add_argument("--rounds", type=int, default=0, help="refine rounds Morante asked for (default 0: one round)")
+    p.add_argument("--mesh", action="append", help="a conversion: PART=reference.stl (repo-relative), once per part")
+    p.add_argument("--edit", action="store_true", help="conversion of an organic part: also the build.py --edit gate")
+    p.add_argument("--p95", type=float, help="conversion: this design's own p95 limit (default tools/mesh_ref.py)")
+    p.add_argument("--max", type=float, help="conversion: this design's own max limit (default tools/mesh_ref.py)")
     for name in ("validate", "check", "status", "best"):
         sub.add_parser(name).add_argument("ws")
     for name in ("round", "score"):

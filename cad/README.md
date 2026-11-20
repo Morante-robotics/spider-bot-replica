@@ -1,7 +1,8 @@
 # Spider-Bot CAD
 
-Every part of the robot is modelled in code ([build123d](https://github.com/gumyr/build123d)) or kept as a mesh,
-one folder per design. This page holds the rules every design follows, so a new one starts from the same layout,
+Every part of the robot is modelled in code ([build123d](https://github.com/gumyr/build123d)), one folder per
+design. No printed part is a mesh: a part that exists only as a mesh (a downloaded model, a scan) is first converted
+to parameters (see «From a mesh»), and the mesh stays only as its reference. This page holds the rules every design follows, so a new one starts from the same layout,
 the same axes and the same clearances. Set up the Python environment once from the repo root with `uv sync`.
 
 ## Conventions
@@ -14,6 +15,7 @@ the same axes and the same clearances. Set up the Python environment once from t
 | Crank angle | 0° = every crank level; it turns positive about +X |
 | Left and right | Seen from behind the robot, looking forward: as the robot's own right and left |
 | Clearances | Only from [`fits.py`](fits.py): measured on real prints, never typed in a design |
+| Fidelity to a reference mesh | p95 ≤ 2.0 mm and max ≤ 4.0 mm (checked on the 99.9th percentile: one stray sample does not decide), both ways, at the reference's scale: the defaults of [`mesh_ref.py`](../tools/mesh_ref.py) (Morante, 2026-11-20) |
 | Names | Parts in kebab-case (`leg-front-left`), numbered front to rear (`crankshaft-1` is the front one); versions as `-v2`, never «new» or «final» |
 
 ## A design folder
@@ -87,10 +89,41 @@ simulator's geometry, hardware sizes, build123d helpers) is in [`common.py`](com
 [`robot.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/robot.py), holds the datums, the carcass envelope, the interfaces between designs and the bought parts'
 sizes (catalogue values until they are measured): a design takes these numbers from it, never a copy.
 
-Geometry stays light: no cut or check runs against the carcass body's scan (102k triangles); `robot.carcass_proxy()`
-(within 0.2 mm, cached) or `robot.carcass_envelope()` (boxes) take its place. Shared stage caching for mesh builds:
+Geometry stays light: no cut or check runs against a reference mesh (jenscolt's body is 102k triangles); checks
+read the parametric parts' coarse STL, cached, or boxes. Shared stage caching for mesh builds:
 [`tools/stage_cache.py`](../tools/stage_cache.py). A spec may name each interface's parts in `GROUPS`, so
 `--only <group>` checks one interface instead of the whole robot.
+
+## From a mesh
+
+A part that exists only as a mesh is converted once, by the `mesh-to-cad` agent, into a design folder like any
+other: the reference mesh is measured, never read by `build.py`.
+
+1. The request, with Morante (what to keep, what to leave out, how much detail):
+   `uv run python tools/rounds.py init cad/<design> --level N1 --purpose "..." --mesh <part>=<ref.stl> [--mesh ...]
+   [--edit] --rounds 1`. It writes the gates every conversion runs and the reference picture:
+   - `source`: `build.py` reads no mesh (`mesh_ref.py source`);
+   - `build`: `build.py --sweep` rebuilds at S 0.65 and with every wall and section scale at 0.8× and 1.2×, each one
+     valid closed solid;
+   - `edit` (`--edit`, organic parts): `build.py --edit` moves the spine (a target curve, length +10 %, bow +3 mm);
+   - `fidelity-<part>`: `mesh_ref.py compare` against its reference at the default limits, with a heat map in
+     `images/fidelity-<part>.png`. When the reference's inside is not kept (jenscolt's body), the coordinator adds
+     `--view above` (or `below`): only what a viewer outside sees counts, on both meshes.
+2. The structure: primitives by their named dimensions; organic skins as a loft of ≤ 8 control sections along a
+   spine of ≤ 5 points (≤ ~60 numbers per skin); shell walls as an offset, separate from the outer form; every
+   detail placed in its host's frame, so it follows an edit; left and right as one model and a mirror.
+3. Rounds as for any design: r00, the blind judge on `mesh_ref.py views` (the design and the reference in the same
+   four views and framing), the refine rounds Morante asked for, then his «se parece».
+
+[`legs/`](legs/) is the worked example: jenscolt's leg as a 5-point spine and 6 sections (50 numbers for the
+blade's skin, ≈ 270 as a table of sections), bent onto the N0 leg path by its spine alone.
+
+```bash
+uv run python tools/mesh_ref.py info <ref.stl>                         # size, triangles, watertight
+uv run python tools/mesh_ref.py sections <ref.stl> --axis z --n 12     # the sections to model from
+uv run python tools/mesh_ref.py compare cad/<design>/out/<part>.stl <ref.stl> --png heat.png
+uv run python tools/mesh_ref.py views out.png --ref <ref.stl> --parts cad/<design>/out/<part>.stl
+```
 
 ## Assembly steps
 
@@ -102,8 +135,6 @@ against the parts already in; it reports «goes in: down 30 mm, then +Y 4 mm» o
 ## What is printed and kept in git
 
 - STL and STEP of a part are committed when that version is printed, and at milestones.
-- Mesh parts (`body-v2`, `front-block-v2`: the STEP is the STL sewn face by face, minutes and 50-180 MB) write their
-  STEP only with `--step`: pass it before an Onshape upload or a milestone, never in the inner loop.
 - A print plate (`../print/*.3mf`) is committed once, for the version that was printed; a re-slice of the same
   parts does not get a new commit, since the README's command rebuilds it. Plates of milestones also go into the
   GitHub release.

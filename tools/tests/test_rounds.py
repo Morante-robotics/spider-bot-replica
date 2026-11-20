@@ -201,3 +201,47 @@ def test_ready_fails_when_the_best_round_is_not_the_last_or_has_open_items(tmp_p
                     acceptance=[("a1", "must", "verify", "failed", "held")])
     f = fails(ready(tmp_path, rs=[(0, s, None)]))
     assert any("gate items in its score: 1" in t for t in f) and any("a1" in t for t in f)
+
+
+def test_measure_item_with_a_gate_is_decided_by_that_gate_not_the_judge():
+    plan = {"acceptance": [{"id": "m1", "text": "no mesh read", "how": "measure", "gate": "source", "priority": "must"},
+                           {"id": "m2", "text": "edit ok", "how": "measure", "gate": "edit", "priority": "must"}]}
+    gates = {"gates": GATES_OK["gates"] + [
+        {"name": "source", "kind": "command", "verdict": "PASS", "partial": False, "fails": [], "checks": {}},
+        {"name": "edit", "kind": "command", "verdict": "FAIL", "partial": False, "fails": ["FAIL edit"], "checks": {}}]}
+    j = judgment()
+    j["acceptance"] = {"m1": {"verified": False}, "m2": {"verified": True}}   # the judge cannot see code: ignored
+    s = r.score_round(SPEC2, plan, gates, RUB, j, {})
+    rows = {a[0]: a[3] for a in s["acceptance"]}
+    assert rows == {"m1": "verified", "m2": "failed"}
+
+
+def test_init_mesh_writes_the_conversion_gates(tmp_path, monkeypatch):
+    import trimesh
+    root = tmp_path
+    (root / "refs").mkdir()
+    trimesh.creation.icosphere(subdivisions=2, radius=8).export(root / "refs" / "eye.stl")
+    monkeypatch.setattr(r, "ROOT", str(root))
+    ws = root / "cad" / "eyes"
+
+    class A:
+        pass
+    a = A()
+    a.ws, a.level, a.purpose, a.pass_criterion = str(ws), "N1", "eyes from jenscolt's mesh", None
+    a.must_have, a.must_not, a.ref, a.rounds = None, None, None, 1
+    a.mesh, a.edit, a.p95, a.max = ["eye=refs/eye.stl"], False, None, None
+    assert r.cmd_init(a) == 0
+    spec = r.jload(str(ws / "spec.json"))
+    assert [g["name"] for g in spec["gates"]] == ["source", "build", "fidelity-eye"]
+    assert "--p95" not in spec["gates"][2]["cmd"] and spec["judge"]["enabled"]
+    assert (ws / "images" / "reference.png").exists()
+    err, _ = r.check_spec(spec, str(ws))
+    assert not err
+
+
+def test_a_design_may_have_its_own_pass_threshold():
+    j = judgment(a=0.69, b=0.69)
+    assert not r.score_round(SPEC2, PLAN_S, GATES_OK, RUB, j, {})["passed"]          # rubric threshold 0.75
+    spec = dict(SPEC2, judge={"enabled": True, "rubric": "looks", "pass_threshold": 0.69,
+                              "pass_threshold_why": "Morante: fine as it is"})
+    assert r.score_round(spec, PLAN_S, GATES_OK, RUB, j, {})["passed"]

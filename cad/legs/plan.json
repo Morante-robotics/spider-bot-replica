@@ -1,0 +1,272 @@
+{
+ "summary": "jenscolt's leg, left and right, as two parametric build123d solids per side: leg-blade (L_leg1) and leg-arm (L_leg2), the right ones (leg-blade-r, leg-arm-r) the same model mirrored about x = 35.45 by a side parameter; the blade's skin from a 5-point spine and 6 control sections (50 numbers), the arm's neck lofted along its own 5-point spine with the hub rigid at its start, so both bend onto N0's leg path by their spines alone (--edit, and leg() for N1); nothing moves.",
+ "parts": [
+  {
+   "name": "leg-blade",
+   "role": "the leg's outer blade: a skin lofted along a 5-point spine from 6 control sections with rounded ends, the arm's socket, the side seam grooves and the eye boss carried in the spine's frame",
+   "why_separate": "a separate jenscolt mesh (L_leg1); N1 form part, not printed",
+   "grams": 19,
+   "print_orient": "not printed (N1 form part)"
+  },
+  {
+   "name": "leg-arm",
+   "role": "the leg's arm: hub plate with axle hole, ring and gears (rigid at the spine's start, the crank pin), a ringed neck lofted along a 5-point spine (pin, neck root, pivot, middle, knee) flaring into the top block, the ringed tab tube and the static-leg tab",
+   "why_separate": "a separate jenscolt mesh (L_leg2); N1 form part, not printed",
+   "grams": 7,
+   "print_orient": "not printed (N1 form part)"
+  },
+  {
+   "name": "leg-blade-r",
+   "role": "the right leg's blade: leg-blade mirrored about x = 35.45 (side 'R'), never a second model",
+   "why_separate": "a separate jenscolt mesh (R_leg1); N1 form part, not printed",
+   "grams": 19,
+   "print_orient": "not printed (N1 form part)"
+  },
+  {
+   "name": "leg-arm-r",
+   "role": "the right leg's arm: leg-arm mirrored about x = 35.45 (side 'R'), never a second model",
+   "why_separate": "a separate jenscolt mesh (R_leg2); N1 form part, not printed",
+   "grams": 7,
+   "print_orient": "not printed (N1 form part)"
+  }
+ ],
+ "joints": [],
+ "assembly": [
+  {
+   "part": "leg-arm",
+   "from": null,
+   "tool": "none",
+   "check": "exported in jenscolt's frame"
+  },
+  {
+   "part": "leg-blade",
+   "from": "+z",
+   "tool": "none",
+   "check": "the arm's top block sits in the blade's socket, both in jenscolt's frame"
+  },
+  {
+   "part": "leg-arm-r",
+   "from": null,
+   "tool": "none",
+   "check": "exported in jenscolt's frame, mirror of leg-arm"
+  },
+  {
+   "part": "leg-blade-r",
+   "from": "+z",
+   "tool": "none",
+   "check": "the right arm's top block sits in the right blade's socket"
+  }
+ ],
+ "alternatives": [
+  {
+   "topic": "blade skin parameters",
+   "options": [
+    "a spine (cubic spline through 5 points) + K control sections, a cubic spline through each number along it",
+    "v1's 26 planar sections on a straight axis (≈ 270 numbers)",
+    "one section swept along the spine with width / thickness laws (polynomials)"
+   ],
+   "choice": "a spine (cubic spline through 5 points) + K control sections, a cubic spline through each number along it",
+   "why": "≤ 60 readable numbers (spine points, widths, thicknesses, roundness) that bend with the spine; v1's table cannot bend and a single swept section loses the tip and the ridge's change along the blade"
+  },
+  {
+   "topic": "where the features go on a new spine",
+   "options": [
+    "carried in the spine's frame at the same arc-length fraction (n1 warp's convention)",
+    "rigid at the same distance from the top end"
+   ],
+   "choice": "carried in the spine's frame at the same arc-length fraction (n1 warp's convention)",
+   "why": "the sections sit at arc-length fractions too, so socket and eye stay on the skin when the length changes (at a fixed distance the eye floated off the stretched N0 blade)"
+  },
+  {
+   "topic": "arm body",
+   "options": [
+    "hub rigid at the start of a 5-point spine, neck lofted along it, rings / flare / block / boss placed by z of the original spine mapped knot to knot",
+    "v1: 2.5D plate + neck loft on horizontal stations (cannot bend)",
+    "one loft along a branched spine"
+   ],
+   "choice": "hub rigid at the start of a 5-point spine, neck lofted along it, rings / flare / block / boss placed by z of the original spine mapped knot to knot",
+   "why": "N1 lays the arm on N0's inner arm + upper path (crank pin -> pivot -> knee) by its spine alone; mapping knot to knot keeps the pivot on N0's pivot (n1's breakpoints); the hub's flat faces stay exact at 45 degrees"
+  },
+  {
+   "topic": "right leg",
+   "options": [
+    "side parameter: the left model mirrored about x = 35.45 (or, on given spines, about the leg plane)",
+    "a second model with its own numbers"
+   ],
+   "choice": "side parameter: the left model mirrored about x = 35.45 (or, on given spines, about the leg plane)",
+   "why": "jenscolt's R meshes are the L ones mirrored about x = 35.45 to 0.0000 mm (probe); one model keeps both sides equal under every edit"
+  }
+ ],
+ "acceptance": [
+  {
+   "id": "a1",
+   "text": "four parts, leg-blade (jenscolt L_leg1), leg-arm (L_leg2), leg-blade-r (R_leg1), leg-arm-r (R_leg2), each one valid closed build123d solid, exported by build.py to out/leg-blade.*, out/leg-arm.*, out/leg-blade-r.*, out/leg-arm-r.* (STL and STEP) in jenscolt's own frame at 100 %",
+   "how": "measure",
+   "priority": "must",
+   "gate": "build"
+  },
+  {
+   "id": "a2",
+   "text": "every shape parameter at the top of build.py with its source (a mesh_ref section or measurement); the shape comes from parameters, not from the mesh",
+   "how": "morante",
+   "priority": "must",
+   "note": "code review by the coordinator: the judge sees pictures, not code"
+  },
+  {
+   "id": "a3",
+   "text": "build.py --sweep rebuilds both sides at S 0.65 and the left parts with blade thickness and arm section scale at 0.8x and 1.2x, and prints FAIL for any variant that is not one valid closed solid",
+   "how": "measure",
+   "priority": "must",
+   "gate": "build"
+  },
+  {
+   "id": "a4",
+   "text": "the arm's visible details (hub hole, gear relief, the rings, the static-leg tab) present as shape; fine relief may be simplified if fidelity still passes",
+   "how": "visual",
+   "priority": "must"
+  },
+  {
+   "id": "a5",
+   "text": "fidelity of leg-blade to L_leg1 within the default (tools/mesh_ref.py) both ways, its skin from ≤ 60 numbers",
+   "how": "measure",
+   "priority": "must",
+   "gate": "fidelity-blade"
+  },
+  {
+   "id": "a6",
+   "text": "fidelity of leg-arm to L_leg2 within the default (tools/mesh_ref.py) both ways",
+   "how": "measure",
+   "priority": "must",
+   "gate": "fidelity-arm"
+  },
+  {
+   "id": "a7",
+   "text": "leg-blade's skin from BLADE_SPINE (≤ 5 points) and BLADE_CTRL (≤ 8 sections), ≤ 60 numbers in all; build.py prints FAIL past any limit",
+   "how": "measure",
+   "priority": "must",
+   "gate": "build"
+  },
+  {
+   "id": "a8",
+   "text": "build.py --edit: (a) the blade on N0's right-front blade curve at its S, spine within 0.5 mm of it, (b) length +10 %, (c) bow +3 mm, (d) the arm on N0's right-front inner arm + upper leg curve at its S; each one valid closed solid in out/edit-*.stl, and images/edit-demo.png; FAIL printed otherwise",
+   "how": "measure",
+   "priority": "must",
+   "gate": "edit"
+  },
+  {
+   "id": "a9",
+   "text": "socket, eye and seam grooves carried in the blade spine's frame, the arm's hub, rings, flare and block in the arm spine's frame, so they follow a bend (edit-demo.png)",
+   "how": "visual",
+   "priority": "must"
+  },
+  {
+   "id": "a10",
+   "text": "datasheet.md: blade p95 / max with 4, 6, 8 control sections and v1's 26, measured with tools/mesh_ref.py compare; the fewest that pass are used",
+   "how": "morante",
+   "priority": "must",
+   "note": "a table in datasheet.md: checked by the coordinator (the judge sees pictures only)"
+  },
+  {
+   "id": "a11",
+   "text": "fidelity of leg-blade-r to R_leg1 within the default both ways",
+   "how": "measure",
+   "priority": "must",
+   "gate": "fidelity-leg-blade-r"
+  },
+  {
+   "id": "a12",
+   "text": "fidelity of leg-arm-r to R_leg2 within the default both ways",
+   "how": "measure",
+   "priority": "must",
+   "gate": "fidelity-leg-arm-r"
+  },
+  {
+   "id": "a13",
+   "text": "the arm's neck lofted along ARM_SPINE (≤ 5 points), the hub rigid at its start, rings / flare / block / boss at positions mapped along it; --edit (d) lays it on N0's inner arm + upper curve as one valid solid",
+   "how": "measure",
+   "priority": "must",
+   "gate": "edit"
+  },
+  {
+   "id": "a14",
+   "text": "leg(side, blade_spine, arm_spine, S, across) -> (blade, arm) solids in build.py, a pure memoised function of its inputs, documented in datasheet.md for N1",
+   "how": "morante",
+   "priority": "must",
+   "note": "code and datasheet review by the coordinator (the judge sees pictures only)"
+  },
+  {
+   "id": "n1",
+   "text": "not build.py never reads an STL or uses trimesh: the meshes are read only by the gates and by the designer's probes (scratchpad)",
+   "how": "measure",
+   "priority": "must",
+   "gate": "source"
+  },
+  {
+   "id": "n2",
+   "text": "not no warp or morph of mesh vertices",
+   "how": "measure",
+   "priority": "must",
+   "gate": "source"
+  },
+  {
+   "id": "m1",
+   "text": "leg-blade's skin from a spine curve (BLADE_SPINE, ≤ 5 control points) and ≤ 8 control sections interpolated along it (≤ 60 numbers in all for the skin); the seam grooves, socket and eye placed relative to the spine so they follow a bend",
+   "how": "measure",
+   "priority": "must",
+   "from": "spec.must_have",
+   "gate": "build"
+  },
+  {
+   "id": "m2",
+   "text": "leg-arm unchanged from v1 (same fidelity gate)",
+   "how": "measure",
+   "priority": "must",
+   "from": "spec.must_have",
+   "gate": "fidelity-arm",
+   "note": "the arm now lies on a spine (the request's change 2); its fidelity gate is the same"
+  },
+  {
+   "id": "m3",
+   "text": "build.py --edit writes out/edit-*.stl and images/edit-demo.png: (a) the blade bent onto N0's right-front blade curve (cad/mockup/n0.py leg_shape with P0, imported, never copied) in N0's frame at its S, (b) length +10 %, (c) bow +3 mm; prints FAIL for any variant that is not one valid closed solid or, for (a), whose spine is more than 0.5 mm from N0's curve",
+   "how": "measure",
+   "priority": "must",
+   "from": "spec.must_have",
+   "gate": "edit"
+  },
+  {
+   "id": "m4",
+   "text": "build.py --sweep as in v1 (S 0.65, thickness and arm section 0.8x / 1.2x)",
+   "how": "measure",
+   "priority": "must",
+   "from": "spec.must_have",
+   "gate": "build"
+  },
+  {
+   "id": "m5",
+   "text": "a fidelity-vs-sections table in datasheet.md: blade p95/max with 4, 6, 8 control sections (and v1's 26), so Morante sees the trade-off",
+   "how": "morante",
+   "priority": "must",
+   "from": "spec.must_have",
+   "note": "a table in datasheet.md: checked by the coordinator (the judge sees pictures only)"
+  },
+  {
+   "id": "m6",
+   "text": "the right leg (leg-blade-r, leg-arm-r) from the same model by a mirror parameter, never a second model; its fidelity against jenscolt's R_leg1 / R_leg2",
+   "how": "measure",
+   "priority": "must",
+   "from": "spec.must_have",
+   "gate": "fidelity-leg-blade-r",
+   "note": "and fidelity-leg-arm-r; mirror by the side parameter of leg()"
+  },
+  {
+   "id": "p1",
+   "text": "leg-blade within the default fidelity (tools/mesh_ref.py) of L_leg1 both ways with its skin from ≤ 60 numbers; build.py --edit bends it onto N0's right-front blade curve (spine within 0.5 mm of it) and makes the length +10 % and bow +3 mm variants, every one a valid closed solid; the judge scores ≥ 0.70 against the mesh render",
+   "how": "morante",
+   "priority": "must",
+   "from": "spec.pass_criterion"
+  }
+ ],
+ "open_questions": [],
+ "diagram": "BLADE_SPINE (5 pts) + BLADE_CTRL (6 sections) --loft--> leg-blade skin; socket, eye, grooves carried in the spine's frame; ARM_SPINE (5 pts: pin, root, pivot, middle, knee): hub rigid at the pin, neck lofted along it, rings / flare / block carried; leg(side, blade_spine, arm_spine, S) -> (blade, arm); side R = mirror (x = 35.45)",
+ "_validated": "5512384708e33e27:2eb5603107a5"
+}

@@ -1,0 +1,80 @@
+{
+ "design": "body",
+ "level": "N1",
+ "purpose": "jenscolt's body (the top shell) rebuilt as parameters, every visible detail (eye sockets and rings, front grille, panels, rear features, rim); outer form and wall thickness as separate parameters, so scale and wall change independently. His inside is not kept beyond the shell wall.",
+ "pass_criterion": "the default fidelity gate passes, the sweep's variants are valid solids, and the judge scores ≥ 0.70 against the mesh",
+ "must_have": [
+  "outer form and wall thickness separate parameters (wall as an inward offset of the skin)",
+  "every visible detail a named feature placed on the skin: eye sockets and rings, front grille, panel lines, rear features"
+ ],
+ "must_not": [
+  "build.py reads a mesh: the reference meshes are read only by the gates and the designer's probes"
+ ],
+ "dims": {
+  "body_extent": {
+   "value": [
+    96.0,
+    110.5,
+    66.05
+   ],
+   "unit": "mm",
+   "source": "tools/mesh_ref.py info cad/carcass-jenscolt/spideybot_body.stl"
+  },
+  "fidelity": {
+   "value": [
+    2.1,
+    6.0
+   ],
+   "unit": "mm (p95, max)",
+   "source": "Morante, 2026-11-20: this design's own limits, «al juez tal como está»"
+  }
+ },
+ "references": [
+  {
+   "image": "{ws}/images/reference.png",
+   "label": "the reference mesh(es) to reproduce, same four views and framing"
+  }
+ ],
+ "src": [
+  "build.py",
+  "plan.json"
+ ],
+ "gates": [
+  {
+   "name": "source",
+   "kind": "command",
+   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py source {ws}/build.py",
+   "fail_regex": "^FAIL"
+  },
+  {
+   "name": "build",
+   "kind": "command",
+   "cmd": "cd {ws} && {root}/.venv/bin/python build.py --sweep",
+   "fail_regex": "^FAIL",
+   "timeout": 1200
+  },
+  {
+   "name": "fidelity-body",
+   "kind": "command",
+   "fail_regex": "^FAIL",
+   "timeout": 600,
+   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py compare {ws}/out/body.stl cad/carcass-jenscolt/spideybot_body.stl --p95 2.1 --max 6.0 --view above --png {ws}/images/fidelity-body.png --json {ws}/out/fidelity-body.json",
+   "note": "visible from above only (Morante, 2026-11-20: his inside is not kept; the reference's eye block, bosses and frame are hidden inside); own limits p95 2.1 / max 6.0: Morante, 2026-11-20, «al juez tal como está» after seeing p95 2.04/2.08, max 5.1/5.6 (curved top panels and chin grille still missing)"
+  }
+ ],
+ "views": {
+  "cmd": "{root}/.venv/bin/python tools/mesh_ref.py views {out} --ref cad/carcass-jenscolt/spideybot_body.stl --parts {ws}/out/body.stl",
+  "images": [
+   "{out}"
+  ],
+  "timeout": 600
+ },
+ "judge": {
+  "enabled": true,
+  "rubric": "looks",
+  "pass_threshold": 0.69,
+  "pass_threshold_why": "Morante, 2026-11-20: «A mí me vale el cuerpo como está, haz que pase a 0.69» (r00 scored 0.69; the refine round was stopped)"
+ },
+ "refine_rounds": 0,
+ "asked": "Morante, 2026-11-20"
+}

@@ -35,3 +35,10 @@ cad/mockup/.cache/
 # Design rounds (tools/rounds.py): snapshots, gates, views, judge briefs and scores are local; the build log keeps
 # the round table (rounds.py status)
 cad/*/rounds/
+# Conversions from meshes (cad/README.md «From a mesh»): out/ is rebuilt by build.py, the heat maps by the gates;
+# the STL/STEP of a printed version are added with `git add -f`, as for every design
+cad/body/out/
+cad/base/out/
+cad/eyes/out/
+cad/legs/out/
+cad/*/images/fidelity-*.png

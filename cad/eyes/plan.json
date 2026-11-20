@@ -1,0 +1,120 @@
+{
+ "summary": "jenscolt's three dome cups (large eye, small eye, front sensor) as one revolved parametric cup with three parameter sets, each in its reference frame; nothing moves.",
+ "parts": [
+  {
+   "name": "eye",
+   "role": "the large eye dome (spideybot_eye.stl): a hollow cup, apex at low Y, open at high Y",
+   "why_separate": "a separate jenscolt mesh, far from the others; N1 form part, not printed",
+   "grams": 19,
+   "print_orient": "not printed (N1 form part)"
+  },
+  {
+   "name": "small-eye",
+   "role": "the small eye dome (spideybot_small_eye.stl), same cup with its own numbers",
+   "why_separate": "a separate jenscolt mesh, far from the others; N1 form part, not printed",
+   "grams": 1,
+   "print_orient": "not printed (N1 form part)"
+  },
+  {
+   "name": "sensor",
+   "role": "the front sensor dome (spideybot_sensor.stl), same cup with its own numbers",
+   "why_separate": "a separate jenscolt mesh, far from the others; N1 form part, not printed",
+   "grams": 1,
+   "print_orient": "not printed (N1 form part)"
+  }
+ ],
+ "joints": [],
+ "assembly": [
+  {
+   "part": "eye",
+   "from": null,
+   "tool": "none",
+   "check": "exported in jenscolt's frame"
+  },
+  {
+   "part": "small-eye",
+   "from": null,
+   "tool": "none",
+   "check": "exported in jenscolt's frame"
+  },
+  {
+   "part": "sensor",
+   "from": null,
+   "tool": "none",
+   "check": "exported in jenscolt's frame"
+  }
+ ],
+ "alternatives": [
+  {
+   "topic": "cup profile",
+   "options": [
+    "revolved profile: flat apex, elliptic dome, straight wall",
+    "sphere cap minus an inner sphere"
+   ],
+   "choice": "revolved profile: flat apex, elliptic dome, straight wall",
+   "why": "the meshes have a flat apex and a straight wall that a sphere cap cannot give; 5 numbers per cup"
+  }
+ ],
+ "acceptance": [
+  {
+   "id": "a1",
+   "text": "each part is within p95 1.0 mm and max 2.5 mm of its reference, both ways",
+   "how": "measure",
+   "gate": "fidelity-eye",
+   "priority": "must"
+  },
+  {
+   "id": "a2",
+   "text": "the small eye is within the same fidelity",
+   "how": "measure",
+   "gate": "fidelity-small-eye",
+   "priority": "must"
+  },
+  {
+   "id": "a3",
+   "text": "the sensor is within the same fidelity",
+   "how": "measure",
+   "gate": "fidelity-sensor",
+   "priority": "must"
+  },
+  {
+   "id": "a4",
+   "text": "every sweep variant is one valid closed solid",
+   "how": "measure",
+   "gate": "build",
+   "priority": "must"
+  },
+  {
+   "id": "a5",
+   "text": "build.py reads no mesh",
+   "how": "measure",
+   "gate": "source",
+   "priority": "must"
+  },
+  {
+   "id": "m1",
+   "text": "one parametric cup (radius, depth, wall, rim) used by all three parts, each with its own numbers",
+   "how": "measure",
+   "priority": "must",
+   "from": "spec.must_have",
+   "gate": "build"
+  },
+  {
+   "id": "n1",
+   "text": "not: build.py reads a mesh: the reference meshes are read only by the gates and the designer's probes",
+   "how": "measure",
+   "priority": "must",
+   "from": "spec.must_not",
+   "gate": "source"
+  },
+  {
+   "id": "p1",
+   "text": "the default fidelity gate passes for each part, the sweep's variants are valid solids, and the judge scores ≥ 0.70 against the meshes",
+   "how": "morante",
+   "priority": "must",
+   "from": "spec.pass_criterion"
+  }
+ ],
+ "open_questions": [],
+ "_validated": "86d034affe831556:699c3dfcaf01"
+}
