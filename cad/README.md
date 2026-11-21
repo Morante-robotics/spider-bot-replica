@@ -15,7 +15,7 @@ the same axes and the same clearances. Set up the Python environment once from t
 | Crank angle | 0° = every crank level; it turns positive about +X |
 | Left and right | Seen from behind the robot, looking forward: as the robot's own right and left |
 | Clearances | Only from [`fits.py`](fits.py): measured on real prints, never typed in a design |
-| Fidelity to a reference mesh | p95 ≤ 1 % and max ≤ 2 % of the reference's largest extent, never below 0.5 / 1.0 mm (max checked on the 99.9th percentile: one stray sample does not decide), both ways, at the reference's scale: [`mesh_ref.py`](../tools/mesh_ref.py) `limits()` (Morante, 2026-11-20). Other limits for one part only as an approved exception (`rounds.py except`, «From a mesh») |
+| Fidelity to a reference mesh | p95 ≤ 3 % and max ≤ 6 % of the reference's largest extent, never below 1.0 / 2.0 mm (max checked on the 99.9th percentile: one stray sample does not decide), both ways, at the reference's scale: [`mesh_ref.py`](../tools/mesh_ref.py) `limits()` (Morante, 2026-11-21: «more or less» like the Spider-Bot; the judge and Morante decide the look). Other limits for one part only as an approved exception (`rounds.py except`, «From a mesh») |
 | Names | Parts in kebab-case (`leg-front-left`), numbered front to rear (`crankshaft-1` is the front one); versions as `-v2`, never «new» or «final» |
 
 ## A design folder
@@ -35,6 +35,7 @@ what to run and where the result is:
 | `out/` | STEP (for Onshape) and STL (for printing) of every part, written by `build.py` |
 | `verify.py` | The [`cad_verify`](../tools/cad_verify.py) spec: every part, motion, joints with their fits, marks, assembly, access, measurements |
 | `verify-result.txt` | The last full verification (`PASS`, not `PARTIAL`) |
+| `fitcheck/` | Only the whole robot ([`robot/fitcheck/`](robot/fitcheck/)): the fit check that finds the layout before the parts are modelled, every gap against `fits.py` |
 | `design-review.md` | Fits, strength, retention, assembly, seats, print, marks, carry-over, pre-mortem: each with the number or picture that shows it |
 | `images/` | Figures made by scripts (`verify/` from `cad_verify --render`, others from [`tools/figures.py`](../tools/figures.py)) |
 

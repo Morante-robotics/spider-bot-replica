@@ -71,7 +71,7 @@ Spec file (all names optional except PARTS and poses):
                                               # elsewhere, e.g. a cap resting on its frame); "moves": True to box
                                               # the region with the first part instead
     MARKS = {"shaft": "dot on the tooth that meets the idler's dot", "idler": "dot between two teeth"}
-    SEATS = {"gear": {"on": "frame", "dir": [0, 0, -1], "why": "big gear in its pocket"}}   # tol: 0.05 mm default
+    SEATS = {"gear": {"on": "frame", "dir": [0, 0, -1], "why": "big gear in its pocket"}}   # tol: 0.2 mm default (one layer)
     GEAR_MOTION = [(a, 0) for a in range(0, 31)]   # optional: meshing pairs checked over these steps only (one
                                               # tooth pitch, finer) instead of MOTION; every other pair over MOTION
     KEEP_IN = {"shell": {"mesh": carcass, "inset": 2.0, "z": (None, 72.5), "parts": ["module"],
@@ -1168,7 +1168,7 @@ def check_seats(spec, meshes, rep, only=None):
         if not involves(only, name, st["on"]):
             continue
         d = np.asarray(st["dir"], float) / np.linalg.norm(st["dir"])
-        tol = st.get("tol", 0.05)
+        tol = st.get("tol", 0.2)          # one 0.2 layer: less is mesh noise, not a part off its seat (was 0.05)
         me, on = ms[name], ms[st["on"]]
         v0 = overlap(me, on)
         free = None

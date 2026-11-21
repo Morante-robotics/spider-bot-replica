@@ -16,8 +16,8 @@ N1 conversion of cad/carcass-jenscolt/spideybot_base_bowl.stl (derived reference
 
 ## Fidelity (mesh_ref.py compare --view below; 2026-11-20, r01)
 
-Limits: this design's own, p95 ≤ 1.8 / max ≤ 3.1 mm, an exception Morante approved on 2026-11-20 (`spec.json` →
-`exceptions`); the size-relative default would be 1.01 / 2.02 mm.
+Limits: the size-relative default since 2026-11-21, p95 ≤ 3.04 / max ≤ 6.07 mm (3 % / 6 % of 101 mm). Until then
+this design had its own, p95 ≤ 1.8 / max ≤ 3.1 mm, an exception the looser default made unnecessary.
 
 | Part | part to ref max (p99.9) / p95 | ref to part max (p99.9) / p95 |
 |---|---|---|

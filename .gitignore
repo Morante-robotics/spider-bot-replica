@@ -38,3 +38,6 @@ cad/base/out/
 cad/eyes/out/
 cad/legs/out/
 cad/*/images/fidelity-*.png
+# Whole-robot fit check: point-cloud caches and reports are rebuilt by check.py
+cad/robot/fitcheck/.cache/
+cad/robot/fitcheck/out/

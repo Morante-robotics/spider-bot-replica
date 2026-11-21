@@ -1,12 +1,12 @@
 {
  "design": "robot",
  "level": "N2",
- "purpose": "The whole looks Spider-Bot as one assembly: the parametric legs (8), eyes, base and body placed with cad/motion.py, and the drive fitted inside them: N10 gear motor, gear train to the crankshafts, 6 x AG13 wired 2S3P with contacts, slide switch, two 5 mm LED eye bores. The scale S starts at 0.60; a larger S (0.75, 0.8) is an alternative put to Morante, not a limit.",
+ "purpose": "The whole looks Spider-Bot as one assembly: the parametric legs (8), eyes, base and body placed with cad/motion.py, and the drive fitted inside them: N10 gear motor, gear train to the crankshafts, 6 x AG13 wired 2S3P with contacts, slide switch, two 5 mm LED eye bores. The scale S is 0.70 (Morante, 2026-11-21: «Prueba 0.70»): every length in cad/motion.py P0 (approved at N0 at 0.60) times S/0.60, so the look is N0's; a larger S (0.75, 0.8) is an alternative put to Morante, not a limit.",
  "pass_criterion": "full cad_verify PASS with every part inside (no collision over the 24 poses, each part's assembly path) at the chosen S, and the judge >= 0.60 against jenscolt's model (his photos and his assembled meshes in the same views as the robot)",
  "must_have": [
   "the parts are imported from cad/legs, cad/eyes, cad/base, cad/body; scale, crank and leg path from cad/motion.py, never copied",
   "the parametric parts may be reshaped where the inside needs it (surfaces moved, stretched or opened), as long as the robot's look passes the judge",
-  "every part, screw, contact and wire is in the code that counts the fit; a fit that leaves something out is reported as partial",
+  "every part, screw and contact is in the code that counts the fit; a fit that leaves something out is reported as partial. Wires take no volume (flexible, routed by hand); only a hole or slot where a wire must pass a wall between its two ends (Morante, 2026-11-21: «no consideres los cables ni el espacio que ocupan… si hay que conectar cables entre dos puntos que separa una pared, sí tienes que dejar un agujero o ranura para que pasen»)",
   "assembly order and each part's path checked before the scale",
   "the motor's fit is a separate, screwed part (the motor is bought later and measured; a fix reprints grams)",
   "Morante can change the cells; the switch is reached from outside",
@@ -16,7 +16,16 @@
   "margins, walls and clearances: the standard values of cad/fits.py; changed only where they cause a problem, and put to Morante",
   "print support as little as possible; up to 20-30 % on a part is accepted when a valid solution needs it",
   "screwdriver access: where it blocks a solution, it is put to Morante before the solution is dropped",
-  "when something does not fit, alternatives in this order: clamshell split like the toy -> cells in the abdomen with a lid below -> mechanism first, shell reshaped -> one crankshaft + side bars -> a larger S (0.75, 0.8); before dropping one, find what binds"
+  "when something collides: first layout; then the colliding part is reshaped locally to make room (a pocket, relief, notch or bulge), any bulge outward on the shell (base) or the body first; a larger S is not wanted and is only put to Morante when nothing else works (Morante, 2026-11-21: «cada vez que te encuentres con un problema de colisiones, modifica o deforma la pieza local para dar cabida a lo que falta… empiezas por fuera en la carcasa o en el cuerpo»; «no quiero aumentar la escala más»)",
+  "views.py places jenscolt's meshes (body, base, eyes, sensor, 8 legs; leg placement as the archived tools/assemble_jenscolt.py) at the robot's S and frame, writes out/reference.stl, and renders robot and reference with tools/mesh_ref.py views; `views.py --reference` writes images/reference.png; meshes are read only here, never by build.py or a gate",
+  "cell contacts: conical springs + nickel strip (to buy)",
+  "eye LEDs: red or yellow from the Arduino kit, with their resistors placed and counted",
+  "wiring through one 3-pin JST-XH (to buy); hook-up wire from the Arduino kit",
+  "crank 4 and the rear legs clear the base's back sheet through a local pocket in it, 1.6 mm outward, x ±11, z 7-17, hidden behind the body's rear tab (notched to match); the back scoop itself is not moved (Morante, 2026-11-21: «Tu recomendación»)",
+  "cranks 2 and 3 (and their mirror) 2.6 mm further apart along Y than motion.py's uniform DY, standard fits.LEG_PATH on every leg pair (no waiver); the middle legs open ~1.3 mm each, shown to Morante next to jenscolt before motion.py changes (Morante, 2026-11-21: «Ok», S 0.70 signed probe: leg ends 2/3 −2.55)",
+  "front leg windows of the base: a local relief where the leg arm passes (S 0.70 probe −0.76 at ±20.6, −16.9, 16.3) (Morante, 2026-11-21: «Ok»)",
+  "leg-arm end tube tail shortened to ~0.7 mm where it meets its own crank web (Morante, 2026-11-21: «Ok»)",
+  "body held at the front by snap fits (the front screws are boxed in by the eye block and the legs); screws only where they have driver access (Morante, 2026-11-21: «Ok»)"
  ],
  "must_not": [
   "a probe that leaves parts out reported as a fit",
@@ -24,9 +33,9 @@
  ],
  "dims": {
   "S_start": {
-   "value": 0.6,
+   "value": 0.7,
    "unit": "scale vs jenscolt",
-   "source": "N0 (cad/motion.py P0); Morante, 2026-11-20: larger (0.75, 0.8) only as an alternative"
+   "source": "Morante, 2026-11-21: «Prueba 0.70», every fit decision taken at 0.60 reset; motion.py lengths × S/0.60"
   },
   "motor_n10": {
    "value": [
@@ -71,6 +80,21 @@
    "value": 30,
    "unit": "% of a part",
    "source": "Morante, 2026-11-20: as little as possible; 20-30 % accepted when a valid solution needs it"
+  },
+  "hookup_wire_od": {
+   "value": 1.0,
+   "unit": "mm outside diameter",
+   "source": "Morante, 2026-11-21: «Asume 1 mm», cannot measure it; kit hook-up wire (22-24 AWG) is often 1.4-1.6, so the routes also report their margin at 1.6; used only to size the holes/slots where a wire passes a wall"
+  },
+  "back_sheet_pocket": {
+   "value": 1.6,
+   "unit": "mm outward, x ±11, z 7-17 (robot mm)",
+   "source": "S 0.70 probe: crank 4 webs −0.42 and rear legs −1.19 vs the back sheet; Morante, 2026-11-21: «Tu recomendación»"
+  },
+  "crank_2_3_extra_dy": {
+   "value": 2.6,
+   "unit": "mm extra Y spacing, cranks 2-3 only",
+   "source": "S 0.70 signed probe: leg ends need 6.7 mm, adjacent pins 4.38 apart; Morante, 2026-11-21: «Ok»"
   }
  },
  "references": [
@@ -89,7 +113,8 @@
  ],
  "src": [
   "build.py",
-  "verify.py"
+  "verify.py",
+  "views.py"
  ],
  "gates": [
   {
@@ -98,7 +123,13 @@
    "spec": "verify.py"
   }
  ],
- "views": {},
+ "views": {
+  "cmd": "cd {ws} && {root}/.venv/bin/python views.py {out}",
+  "images": [
+   "{out}"
+  ],
+  "timeout": 600
+ },
  "judge": {
   "enabled": true,
   "rubric": "looks",

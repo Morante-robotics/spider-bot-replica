@@ -46,7 +46,14 @@ LOCATOR = Fit("short printed skirt or lip that centres a small part on another (
               "use WINDOW there")
 GEAR_AXIAL = Fit("spinning gear face to a stationary printed face, at the worst position of every loose part", 0.8,
                  "measured", "test cap v2.1, 2026-11-12 (0.25 mm jammed the train, v2 cap)")
-LEG_PATH = Fit("moving leg to anything it sweeps past", 0.8, "assumed", "base v1 LEG_CLR, not printed yet")
+LEG_PATH = Fit("moving leg to anything it sweeps past", 0.5, "assumed",
+               "the measured WINDOW: test leg v2 swung in its fork with 0.5 a side (2026-11-11). Was 0.8, base v1's "
+               "LEG_CLR, never printed; lowered with Morante, 2026-11-21 («relaja las condiciones»). Coupon in the "
+               "robot's batch")
+NEIGHBOUR = Fit("two fixed printed parts side by side, with no joint between them (only must not touch once "
+                "printed)", 0.1, "assumed",
+                "Morante, 2026-11-21: was LOCATOR 0.2, a centring fit that never applied here; 0.1 covers the walls "
+                "coming out wider. Large parts (the body or base shell, > 40 mm) keep LOCATOR 0.2")
 PRESS = Fit("printed press fit or snap", 0.0, "assumed", "never printed: prove on a coupon")
 GEAR_THRUST_CRANK = Fit("crank gear face to a spine wall, a side (the crankshaft's webs on the walls locate it)", 0.25,
                         "measured", "gear train test v2, 2026-11-12: the train turned without the cap "
@@ -54,32 +61,21 @@ GEAR_THRUST_CRANK = Fit("crank gear face to a spine wall, a side (the crankshaft
 GEAR_THRUST_IDLER = Fit("idler face to a spine wall, a side (idler on a steel pin between the walls)", 0.45,
                         "measured", "gear train test v2, 2026-11-12: the train turned without the cap "
                         "(gear-train-test-v2-the-cap)")
-DSHAFT = Fit("printed D-bore pressed on a steel D-shaft (N20 Ø3, flat 0.5 deep), modelled at the shaft's size", 0.0,
-             "assumed", "never printed; printed holes come out smaller, which gives the press. Coupon K1 (3 bores "
-             "round this value) waits for the motor")
-SLIP_BORE = Fit("printed gear turning on a printed sleeve as a friction clutch (pinion on the clutch sleeve), a side",
-                0.1, "assumed", "never printed; tighter than TURN to centre the pinion (design-plan-clutch.md rev 2 "
-                "item 4). Coupon CL1: the pinion turns on the pressed sleeve by hand when the spring is off")
-MOTOR_SEAT = Fit("bought metal motor (N20 gearbox and can) against its printed seat faces and clamp", 0.2, "assumed",
-                 "as LOCATOR for a short printed part, not printed against a metal body yet. Coupon K2 waits for the "
+DSHAFT = Fit("printed D-bore pressed on a steel D-shaft (gear motor's Ø3, flat 0.5 deep), modelled at the shaft's "
+             "size", 0.0, "assumed", "never printed; printed holes come out smaller, which gives the press. A coupon "
+             "of 3 bores round this value waits for the motor")
+MOTOR_SEAT = Fit("bought metal motor (gearbox and can) against its printed seat faces and clamp", 0.2, "assumed",
+                 "as LOCATOR for a short printed part, not printed against a metal body yet. A coupon waits for the "
                  "motor")
-TONGUE = Fit("cap tongue in a journal slot, a side", 0.3, "assumed",
-             "test cap v2.1 went on with 0.15 a side (CAP_CLR 0.3 on the width), base v1's tongues at 0.15 a side "
-             "did not go in (2026-11-12/13); 0.3 a side until coupon K3")
-
 TONGUE_SHORT = Fit("short cap tongue (≤ 12 mm of slot) in a journal slot, a side", 0.15, "measured",
                    "test cap v2.1, 2026-11-12: went on and the train turned with the tongues 4.2 in a 4.5 slot "
-                   "(CAP_CLR 0.3 on the width); see measurements.csv. Not valid for base v1's 70 mm cap: its tongues "
-                   "at 0.15 a side did not go in (WINDOW, 2026-11-13); TONGUE stays 0.3 for that")
-
-GEAR_TIP = Fit("radial room round a gear's tip circle in its printed pocket", 0.5, "assumed",
-               "chassis rev 4 (was GEAR_ROOM typed in chassis/build.py): base v1's big gear pocket and the gear train "
-               "test's open frame are not this case; proven by the drive-module coupon (K3) turning by hand")
-MOTOR_PRELOAD = Fit("printed clamp pad pressed onto the N20 gearbox: interference, the clamp bar is the spring "
-                    "(negative side = overlap)", -0.3, "assumed",
-                    "chassis design review 2026-11-14 (motor floats 1.0 mm in X with the pads 0.2 clear): never "
-                    "printed. Coupon K2 prints the clamp with 0.2 clear and with this preload; pass = the motor does "
-                    "not move in X when pushed by hand")
+                   "(CAP_CLR 0.3 on the width); see measurements.csv. A long tongue (70 mm, base v1) did not go in at "
+                   "0.15: use WINDOW for one longer than 12 mm")
+GEAR_TIP = Fit("radial room round a gear's tip circle in its printed pocket", 0.4, "assumed",
+               "a gear on a steel pin (STEEL 0.15) plus a wider printed wall (0.1) needs 0.25; was 0.5 (chassis rev 4), "
+               "lowered with Morante, 2026-11-21. Proven by the drive coupon turning by hand")
+# Removed 2026-11-21 (Morante: checks inherited from designs that no longer exist): TONGUE (base v1's 70 mm cap),
+# SLIP_BORE (the friction clutch), MOTOR_PRELOAD (the N20 clamp). Archive tag pre-redesign-2026-11-17 has them.
 
 # gears: backlash at the pitch circle, per mesh (gear train test v2, 2026-11-12: turned with 0.20)
 GEAR_BACKLASH = 0.20

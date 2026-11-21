@@ -1,0 +1,675 @@
+{
+ "summary": "S 0.70 spider: base (ground), body snapped on (2 front fingers + rear tab), spine with open-top journal slots, 4 printed cranks capped by the drive unit (1-3) and the holder post (4), 3 idlers and transfer, N10 drive unit, 2S3P AG13 holder, 8 legs on crank pins; cranks 2/3 2.6 further apart (probe full70d.py).",
+ "parts": [
+  {
+   "name": "base",
+   "role": "ground: bowl with 8 open-top leg windows, front snap ribs, back-sheet pocket, 1.2 pads where loaded, front-window bulges",
+   "why_separate": "the ground shell, prints in one piece",
+   "grams": 14,
+   "print_orient": "foot down"
+  },
+  {
+   "name": "body",
+   "role": "dome with the eye block, front snap fingers (0.8 x 5, L 8), rear snap tab, inner pocket over the cell pack's lift path",
+   "why_separate": "lifts off for service",
+   "grams": 16,
+   "print_orient": "rim up (roof on the bed), fingers vertical"
+  },
+  {
+   "name": "spine",
+   "role": "two gear walls with open-top journal slots (TURN), idler-axle holes, keel seat",
+   "why_separate": "carries the whole train as one unit",
+   "grams": 3,
+   "print_orient": "side face down"
+  },
+  {
+   "name": "crankshafts",
+   "role": "4 printed cranks with gears, webs and Ø3 pins",
+   "why_separate": "each turns in the spine",
+   "grams": 3,
+   "print_orient": "axis vertical"
+  },
+  {
+   "name": "idlers",
+   "role": "3 idlers and the transfer compound",
+   "why_separate": "each turns on its axle",
+   "grams": 1,
+   "print_orient": "face down"
+  },
+  {
+   "name": "drive-unit",
+   "role": "N10 clamp, transfer cheek, 2 blocks + ears on 2 M2; wall-top cheeks whose tongues cap cranks 1-3",
+   "why_separate": "motor comes out without the train",
+   "grams": 2,
+   "print_orient": "ear face down"
+  },
+  {
+   "name": "legs",
+   "role": "8 legs, end tube on the pin, ball in the window",
+   "why_separate": "each rides its own pin",
+   "grams": 8,
+   "print_orient": "flat on its side"
+  },
+  {
+   "name": "cell-holder",
+   "role": "3 x 2 AG13, spring, nickel strip, wire slot; post caps crank 4; front-bottom notch at drive block 2",
+   "why_separate": "screwed on the post, cells swap",
+   "grams": 2,
+   "print_orient": "floor down"
+  },
+  {
+   "name": "cell-lid",
+   "role": "closes the cells",
+   "why_separate": "opens for cell swap",
+   "grams": 1,
+   "print_orient": "flat"
+  },
+  {
+   "name": "n10-motor",
+   "role": "drive",
+   "hardware": true
+  },
+  {
+   "name": "m2-screws",
+   "role": "M2 socket cap ISO 4762 (1.5 mm hex key), self-tapping in PLA: 3 idler axles, 2 keel, 2 drive, 1 holder",
+   "hardware": true
+  },
+  {
+   "name": "ag13-cells",
+   "role": "power 2S3P",
+   "hardware": true
+  },
+  {
+   "name": "ss12d00-switch",
+   "role": "power switch",
+   "hardware": true
+  },
+  {
+   "name": "leds",
+   "role": "two 5 mm LEDs + resistors",
+   "hardware": true
+  },
+  {
+   "name": "jst-xh",
+   "role": "3-pin connector body/base",
+   "hardware": true
+  }
+ ],
+ "joints": [
+  {
+   "name": "crank-in-spine",
+   "a": "crankshafts",
+   "b": "spine",
+   "type": "turn",
+   "fit": "fits.TURN",
+   "held": {
+    "+x": "gear face vs wall (THRUST)",
+    "-x": "web vs wall (THRUST)",
+    "+y": "slot face",
+    "-y": "slot face",
+    "+z": "cap tongue (drive unit 1-3, holder post 4)",
+    "-z": "slot bottom"
+   },
+   "in_from": "+z",
+   "apart_by": "lift the holder and the drive unit, lift each crank out of its slots"
+  },
+  {
+   "name": "gear-mesh",
+   "a": "idlers",
+   "b": "crankshafts",
+   "type": "gear",
+   "fit": "fits.GEAR_TIP",
+   "held": {
+    "+x": "wall",
+    "-x": "axle head",
+    "+y": "axle",
+    "-y": "axle",
+    "+z": "axle",
+    "-z": "axle"
+   },
+   "in_from": "+z (idler drops in, then its M2 axle along +x)",
+   "apart_by": "pull the M2 axle along -x, lift the idler"
+  },
+  {
+   "name": "leg-on-pin",
+   "a": "legs",
+   "b": "crankshafts",
+   "type": "turn",
+   "fit": "fits.TURN",
+   "held": {
+    "+x": "crank web",
+    "-x": "window",
+    "+y": "base window",
+    "-y": "body rim",
+    "+z": "window",
+    "-z": "window floor"
+   },
+   "in_from": "-z through its open-top window, then along the pin (x)",
+   "apart_by": "lift the body, slide the leg off its pin along x, lift it out"
+  },
+  {
+   "name": "leg-path",
+   "a": "legs",
+   "b": "base",
+   "type": "clearance",
+   "fit": "fits.LEG_PATH",
+   "held": {
+    "+x": "window",
+    "-x": "window",
+    "+y": "window",
+    "-y": "body rim",
+    "+z": "window",
+    "-z": "window"
+   },
+   "in_from": "as leg-on-pin",
+   "apart_by": "as leg-on-pin"
+  },
+  {
+   "name": "spine-on-keel",
+   "a": "spine",
+   "b": "base",
+   "type": "screw",
+   "fit": "fits.STEEL",
+   "held": {
+    "+x": "keel",
+    "-x": "keel",
+    "+y": "keel",
+    "-y": "2 M2",
+    "+z": "keel",
+    "-z": "bowl floor"
+   },
+   "in_from": "+z",
+   "apart_by": "undo 2 M2 from below"
+  },
+  {
+   "name": "drive-on-spine",
+   "a": "drive-unit",
+   "b": "spine",
+   "type": "screw",
+   "fit": "fits.STEEL",
+   "held": {
+    "+x": "cheek",
+    "-x": "block",
+    "+y": "wall",
+    "-y": "2 M2",
+    "+z": "block",
+    "-z": "block"
+   },
+   "in_from": "+z",
+   "apart_by": "undo 2 M2 from above"
+  },
+  {
+   "name": "holder-on-post",
+   "a": "cell-holder",
+   "b": "spine",
+   "type": "screw",
+   "fit": "fits.STEEL",
+   "held": {
+    "+x": "post",
+    "-x": "post",
+    "+y": "post",
+    "-y": "M2",
+    "+z": "post",
+    "-z": "post"
+   },
+   "in_from": "+z",
+   "apart_by": "undo M2"
+  },
+  {
+   "name": "lid-on-holder",
+   "a": "cell-lid",
+   "b": "cell-holder",
+   "type": "snap",
+   "fit": "fits.PRESS",
+   "held": {
+    "+x": "rim",
+    "-x": "rim",
+    "+y": "rim",
+    "-y": "snap",
+    "+z": "rim",
+    "-z": "holder wall"
+   },
+   "in_from": "+z",
+   "apart_by": "lift by its tab"
+  },
+  {
+   "name": "body-front-snaps",
+   "a": "body",
+   "b": "base",
+   "type": "snap",
+   "fit": "fits.PRESS",
+   "held": {
+    "+x": "rim",
+    "-x": "front wall",
+    "+y": "rim",
+    "-y": "2 hooks under ribs",
+    "+z": "rim",
+    "-z": "base ledge"
+   },
+   "in_from": "+z",
+   "apart_by": "pull the body up (45 deg return faces)"
+  },
+  {
+   "name": "body-rear-tab",
+   "a": "body",
+   "b": "base",
+   "type": "snap",
+   "fit": "fits.PRESS",
+   "held": {
+    "+x": "tab",
+    "-x": "tab",
+    "+y": "tab",
+    "-y": "snap rib",
+    "+z": "back sheet",
+    "-z": "ledge"
+   },
+   "in_from": "+z",
+   "apart_by": "pull up with the front"
+  },
+  {
+   "name": "motor-in-clamp",
+   "a": "n10-motor",
+   "b": "drive-unit",
+   "type": "press",
+   "fit": "fits.MOTOR_SEAT",
+   "held": {
+    "+x": "clamp",
+    "-x": "clamp",
+    "+y": "clamp",
+    "-y": "clamp",
+    "+z": "clamp",
+    "-z": "clamp"
+   },
+   "in_from": "-x",
+   "apart_by": "slide out along -x"
+  }
+ ],
+ "assembly": [
+  {
+   "part": "base",
+   "from": null,
+   "tool": "hand",
+   "check": "foot flat"
+  },
+  {
+   "part": "spine",
+   "from": "+z",
+   "tool": "hand",
+   "already": "nothing (on the bench)",
+   "check": "upright, slots up"
+  },
+  {
+   "part": "crankshafts",
+   "from": "+z",
+   "tool": "hand",
+   "already": "spine",
+   "check": "journals down in their 8 slots at the phase marks (pose KC)"
+  },
+  {
+   "part": "idlers",
+   "from": "+z",
+   "tool": "hand",
+   "already": "crankshafts",
+   "check": "each meshes both cranks"
+  },
+  {
+   "part": "m2-screws",
+   "from": "-x",
+   "tool": "1.5 mm hex key",
+   "already": "idlers",
+   "check": "3 idler axles in along +x, train turns by hand"
+  },
+  {
+   "part": "spine",
+   "from": "+z",
+   "tool": "hand",
+   "already": "base",
+   "check": "spine set on the keel"
+  },
+  {
+   "part": "m2-screws",
+   "from": "-z",
+   "tool": "1.5 mm hex key",
+   "already": "spine",
+   "check": "2 keel M2 tight"
+  },
+  {
+   "part": "legs",
+   "from": "+z",
+   "tool": "hand",
+   "already": "spine",
+   "check": "dropped through its window, slid onto its pin along x, ball in its seat"
+  },
+  {
+   "part": "drive-unit",
+   "from": "+z",
+   "tool": "1.5 mm hex key",
+   "already": "legs",
+   "check": "tongues in slots 1-3, 2 M2 tight"
+  },
+  {
+   "part": "n10-motor",
+   "from": "-x",
+   "tool": "hand",
+   "already": "drive-unit",
+   "check": "slid in along +x, pinion meshes, flush"
+  },
+  {
+   "part": "cell-holder",
+   "from": "+z",
+   "tool": "1.5 mm hex key",
+   "already": "n10-motor",
+   "check": "post tongues in crank 4's slots, M2 tight"
+  },
+  {
+   "part": "ag13-cells",
+   "from": "+z",
+   "tool": "hand",
+   "already": "cell-holder",
+   "check": "+ toward the strip"
+  },
+  {
+   "part": "cell-lid",
+   "from": "+z",
+   "tool": "hand",
+   "already": "ag13-cells",
+   "check": "snaps shut"
+  },
+  {
+   "part": "jst-xh",
+   "from": "+z",
+   "tool": "hand",
+   "already": "cell-lid",
+   "check": "latched"
+  },
+  {
+   "part": "leds",
+   "from": "+y",
+   "tool": "hand",
+   "already": "body",
+   "check": "domes in the eye bores"
+  },
+  {
+   "part": "ss12d00-switch",
+   "from": "-y",
+   "tool": "hand",
+   "already": "body",
+   "check": "lever out the back"
+  },
+  {
+   "part": "body",
+   "from": "+z",
+   "tool": "hand",
+   "already": "everything",
+   "check": "two front clicks, rear tab seated, legs turn"
+  }
+ ],
+ "alternatives": [
+  {
+   "topic": "crank 2/3 split",
+   "options": [
+    "±1.3 about the midpoint",
+    "crank 2 +0.5, crank 3 +3.1 rearward (C +1.8)",
+    "crank 3 +2.6 only"
+   ],
+   "choice": "crank 2 +0.5, crank 3 +3.1 rearward (C +1.8)",
+   "why": "±1.3 leaves leg ends 0/1 at −1.40; C +1.8 is the least shift with every leg pair ≥ 0.8; pivots P do not move, only the inner arms skew"
+  },
+  {
+   "topic": "body front hold",
+   "options": [
+    "2 M2 from below at ±44°",
+    "2 snap fingers at x ±6 under base ribs",
+    "1 central snap"
+   ],
+   "choice": "2 snap fingers at x ±6 under base ribs",
+   "why": "screws boxed in by eye block and legs (Morante); two fingers stop roll, front wall straight there"
+  },
+  {
+   "topic": "front window relief",
+   "options": [
+    "pocket + outward bulge, 45° chamfer under it",
+    "through-notch (window grows)",
+    "larger S"
+   ],
+   "choice": "pocket + outward bulge, 45° chamfer under it; through only where the bulge would come within LEG_PATH of a leg",
+   "why": "spec rule: reshape locally, outward on the base first; S not wanted"
+  },
+  {
+   "topic": "crank retention",
+   "options": [
+    "two separate walls clamped by the idler axles + keel",
+    "open-top journal slots capped by drive-unit tongues (1-3) and the holder post (4)",
+    "spine split at the crank axis, screwed top half"
+   ],
+   "choice": "open-top journal slots capped by drive-unit tongues (1-3) and the holder post (4)",
+   "why": "a one-piece crank's webs stop a wall sliding on along x; the caps reuse the drive unit and holder (no new part)"
+  },
+  {
+   "topic": "front snap finger",
+   "options": [
+    "T 1.0, L 7.0, travel 0.6 (1.8 %)",
+    "T 0.8, L 8.0, travel 0.5, overlap 0.4 (0.9 %)"
+   ],
+   "choice": "T 0.8, L 8.0, travel 0.5, overlap 0.4 (0.9 %)",
+   "why": "≤ 1.1 % across layers; fits.PRESS kept as assumed"
+  },
+  {
+   "topic": "cell holder vs drive block 2",
+   "options": [
+    "notch at PY 14.0 (front wall left 0.42)",
+    "PY +0.4 with a 0.38 notch and a body inner pocket",
+    "PY +0.8, no notch"
+   ],
+   "choice": "PY +0.4 with a 0.38 notch and a body inner pocket",
+   "why": "wall ≥ 0.8 by the spring seat; the body wall is 3.2, the pocket is inside it"
+  }
+ ],
+ "acceptance": [
+  {
+   "id": "m1",
+   "text": "the parts are imported from cad/legs, cad/eyes, cad/base, cad/body; scale, crank and leg path from cad/motion.py, never copied",
+   "how": "verify",
+   "priority": "must",
+   "check": "motion"
+  },
+  {
+   "id": "m2",
+   "text": "the parametric parts may be reshaped where the inside needs it (surfaces moved, stretched or opened), as long as the robot's look passes the judge",
+   "how": "verify",
+   "priority": "must",
+   "check": "integrity"
+  },
+  {
+   "id": "m3",
+   "text": "every part, screw and contact is in the code that counts the fit; a fit that leaves something out is reported as partial. Wires take no volume (flexible, routed by hand); only a hole or slot where a wire must pass a wall between its two ends (Morante, 2026-11-21: «no consideres los cables ni el espacio que ocupan… si hay que conectar cables entre dos puntos que separa una pared, sí tienes que dejar un agujero o ranura para que pasen»)",
+   "how": "verify",
+   "priority": "must",
+   "check": "access"
+  },
+  {
+   "id": "m4",
+   "text": "assembly order and each part's path checked before the scale",
+   "how": "verify",
+   "priority": "must",
+   "check": "assembly"
+  },
+  {
+   "id": "m5",
+   "text": "the motor's fit is a separate, screwed part (the motor is bought later and measured; a fix reprints grams)",
+   "how": "verify",
+   "priority": "must",
+   "check": "access"
+  },
+  {
+   "id": "m6",
+   "text": "Morante can change the cells; the switch is reached from outside",
+   "how": "verify",
+   "priority": "must",
+   "check": "integrity"
+  },
+  {
+   "id": "m7",
+   "text": "two 5 mm LED bores in the eyes, wired by Morante (no eyes board)",
+   "how": "verify",
+   "priority": "must",
+   "check": "integrity"
+  },
+  {
+   "id": "m8",
+   "text": "the views command renders the robot and jenscolt's assembled meshes in the same views and framing, written as images/reference.png next to the photos",
+   "how": "visual",
+   "priority": "must"
+  },
+  {
+   "id": "m9",
+   "text": "fasteners: start with M2 self-tapping screws or snap fits; M3 where it solves a problem",
+   "how": "verify",
+   "priority": "must",
+   "check": "retention"
+  },
+  {
+   "id": "m10",
+   "text": "margins, walls and clearances: the standard values of cad/fits.py; changed only where they cause a problem, and put to Morante",
+   "how": "verify",
+   "priority": "must",
+   "check": "joints"
+  },
+  {
+   "id": "m11",
+   "text": "print support as little as possible; up to 20-30 % on a part is accepted when a valid solution needs it",
+   "how": "verify",
+   "priority": "must",
+   "check": "print"
+  },
+  {
+   "id": "m12",
+   "text": "screwdriver access: where it blocks a solution, it is put to Morante before the solution is dropped",
+   "how": "verify",
+   "priority": "must",
+   "check": "access"
+  },
+  {
+   "id": "m13",
+   "text": "when something collides: first layout; then the colliding part is reshaped locally to make room (a pocket, relief, notch or bulge), any bulge outward on the shell (base) or the body first; a larger S is not wanted and is only put to Morante when nothing else works (Morante, 2026-11-21: «cada vez que te encuentres con un problema de colisiones, modifica o deforma la pieza local para dar cabida a lo que falta… empiezas por fuera en la carcasa o en el cuerpo»; «no quiero aumentar la escala más»)",
+   "how": "verify",
+   "priority": "must",
+   "check": "keep-in"
+  },
+  {
+   "id": "m14",
+   "text": "views.py places jenscolt's meshes (body, base, eyes, sensor, 8 legs; leg placement as the archived tools/assemble_jenscolt.py) at the robot's S and frame, writes out/reference.stl, and renders robot and reference with tools/mesh_ref.py views; `views.py --reference` writes images/reference.png; meshes are read only here, never by build.py or a gate",
+   "how": "visual",
+   "priority": "must"
+  },
+  {
+   "id": "m15",
+   "text": "cell contacts: conical springs + nickel strip (to buy)",
+   "how": "verify",
+   "priority": "must",
+   "check": "integrity"
+  },
+  {
+   "id": "m16",
+   "text": "eye LEDs: red or yellow from the Arduino kit, with their resistors placed and counted",
+   "how": "verify",
+   "priority": "must",
+   "check": "integrity"
+  },
+  {
+   "id": "m17",
+   "text": "wiring through one 3-pin JST-XH (to buy); hook-up wire from the Arduino kit",
+   "how": "verify",
+   "priority": "must",
+   "check": "integrity"
+  },
+  {
+   "id": "m18",
+   "text": "crank 4 and the rear legs clear the base's back sheet through a local pocket in it, 1.6 mm outward, x ±11, z 7-17, hidden behind the body's rear tab (notched to match); the back scoop itself is not moved (Morante, 2026-11-21: «Tu recomendación»)",
+   "how": "verify",
+   "priority": "must",
+   "check": "motion"
+  },
+  {
+   "id": "m19",
+   "text": "cranks 2 and 3 (and their mirror) 2.6 mm further apart along Y than motion.py's uniform DY, standard fits.LEG_PATH on every leg pair (no waiver); the middle legs open ~1.3 mm each, shown to Morante next to jenscolt before motion.py changes (Morante, 2026-11-21: «Ok», S 0.70 signed probe: leg ends 2/3 −2.55)",
+   "how": "verify",
+   "priority": "must",
+   "check": "motion"
+  },
+  {
+   "id": "m20",
+   "text": "front leg windows of the base: a local relief where the leg arm passes (S 0.70 probe −0.76 at ±20.6, −16.9, 16.3) (Morante, 2026-11-21: «Ok»)",
+   "how": "verify",
+   "priority": "must",
+   "check": "motion"
+  },
+  {
+   "id": "m21",
+   "text": "leg-arm end tube tail shortened to ~0.7 mm where it meets its own crank web (Morante, 2026-11-21: «Ok»)",
+   "how": "verify",
+   "priority": "must",
+   "check": "motion"
+  },
+  {
+   "id": "m22",
+   "text": "body held at the front by snap fits (the front screws are boxed in by the eye block and the legs); screws only where they have driver access (Morante, 2026-11-21: «Ok»)",
+   "how": "verify",
+   "priority": "must",
+   "check": "retention"
+  },
+  {
+   "id": "n1",
+   "text": "a probe that leaves parts out reported as a fit",
+   "how": "verify",
+   "check": "integrity",
+   "priority": "must"
+  },
+  {
+   "id": "n2",
+   "text": "jenscolt's inner posts in the body or base",
+   "how": "verify",
+   "check": "integrity",
+   "priority": "must"
+  },
+  {
+   "id": "p1",
+   "text": "full cad_verify PASS with every part inside (no collision over the 24 poses, each part's assembly path) at the chosen S, and the judge >= 0.60 against jenscolt's model (his photos and his assembled meshes in the same views as the robot)",
+   "how": "morante",
+   "priority": "must"
+  },
+  {
+   "id": "q1",
+   "text": "front snaps click on and pull off by hand; legs walk a full turn",
+   "how": "print",
+   "priority": "must"
+  },
+  {
+   "id": "c1",
+   "text": "snap coupon, one batch after the whole robot passes: front-wall strip with rib + rim strip with fingers, rear-tab rib, real print orientations; clicks on, pulls off by hand",
+   "how": "print",
+   "priority": "must"
+  },
+  {
+   "id": "c2",
+   "text": "gear coupon m 0.6: spine-wall stub, 2 cranks + idler at the 13.35 gap; turns by hand, no skip",
+   "how": "print",
+   "priority": "must"
+  },
+  {
+   "id": "c3",
+   "text": "slot coupon: wall stub with an open-top journal slot, crank journal, cap tongue; drops in, turns free, cap holds",
+   "how": "print",
+   "priority": "must"
+  },
+  {
+   "id": "c4",
+   "text": "leg coupon: leg end bore on a printed Ø3 pin + window strip; slides on, ball seats, swings free",
+   "how": "print",
+   "priority": "must"
+  }
+ ],
+ "open_questions": [],
+ "diagram": "base > keel M2 > spine set (spine, cranks in open slots, idlers, 3 M2 axles) > legs (window, pin) > drive-unit (caps 1-3, 2 M2) > N10 > cell-holder (post caps 4, M2) > cells > lid; body snaps",
+ "_validated": "0235c7d97523054c:da2249b03de8"
+}

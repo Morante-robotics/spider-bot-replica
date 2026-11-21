@@ -51,11 +51,11 @@
   },
   "fidelity": {
    "value": [
-    2.0,
-    4.0
+    0.03,
+    0.06
    ],
-   "unit": "mm (p95, max)",
-   "source": "tools/mesh_ref.py P95, MAX (Morante, 2026-11-20)"
+   "unit": "fraction of each part's largest extent (p95, max), floors 1.0 / 2.0 mm",
+   "source": "tools/mesh_ref.py limits() (Morante, 2026-11-21: «mucho más laxas»; was 1 % / 2 % and own limits per part)"
   }
  },
  "references": [
@@ -99,7 +99,7 @@
   {
    "name": "fidelity-arm",
    "kind": "command",
-   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py compare {ws}/out/leg-arm.stl cad/carcass-jenscolt/spideybot_L_leg2.stl --p95 0.6 --max 1.25 --png {ws}/images/fidelity-arm.png --json {ws}/out/fidelity-arm.json",
+   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py compare {ws}/out/leg-arm.stl cad/carcass-jenscolt/spideybot_L_leg2.stl --png {ws}/images/fidelity-arm.png --json {ws}/out/fidelity-arm.json",
    "fail_regex": "^FAIL",
    "timeout": 300
   },
@@ -115,7 +115,7 @@
    "kind": "command",
    "fail_regex": "^FAIL",
    "timeout": 600,
-   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py compare {ws}/out/leg-arm-r.stl cad/carcass-jenscolt/spideybot_R_leg2.stl --p95 0.6 --max 1.25 --png {ws}/images/fidelity-leg-arm-r.png --json {ws}/out/fidelity-leg-arm-r.json"
+   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py compare {ws}/out/leg-arm-r.stl cad/carcass-jenscolt/spideybot_R_leg2.stl --png {ws}/images/fidelity-leg-arm-r.png --json {ws}/out/fidelity-leg-arm-r.json"
   }
  ],
  "views": {
@@ -132,28 +132,5 @@
  },
  "refine_rounds": 1,
  "asked": "Morante, 2026-11-20 (pilot v1, edit test, adopted with right legs)",
- "exceptions": [
-  {
-   "part": "arm",
-   "reason": "Excepción para ambos (brazo y base, a la fidelidad relativa del 2026-11-20)",
-   "by": "Morante",
-   "date": "2026-11-20",
-   "kind": "fidelity",
-   "value": {
-    "p95": 0.6,
-    "max": 1.25
-   }
-  },
-  {
-   "part": "leg-arm-r",
-   "reason": "Excepción para ambos (brazo y base, a la fidelidad relativa del 2026-11-20)",
-   "by": "Morante",
-   "date": "2026-11-20",
-   "kind": "fidelity",
-   "value": {
-    "p95": 0.6,
-    "max": 1.25
-   }
-  }
- ]
+ "exceptions": []
 }

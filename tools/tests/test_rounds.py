@@ -271,7 +271,7 @@ def test_exceptions_are_recorded_and_required(tmp_path, monkeypatch):
     a.must_have, a.must_not, a.ref, a.rounds, a.mesh, a.edit = None, None, None, 1, ["eye=refs/eye.stl"], False
     assert r.cmd_init(a) == 0
     spec = r.jload(str(ws / "spec.json"))
-    assert spec["dims"]["eye_fidelity"]["value"] == [0.5, 1.0]          # 16 mm: the floors
+    assert spec["dims"]["eye_fidelity"]["value"] == [1.0, 2.0]          # 16 mm: the floors
     # own limits typed by hand, with no exception: validate refuses them
     spec["gates"][2]["cmd"] += " --max 3.0"
     assert any("without an approved exception" in e for e in r.check_exceptions(spec))

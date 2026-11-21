@@ -22,11 +22,11 @@
   },
   "fidelity": {
    "value": [
-    2.1,
-    6.0
+    0.03,
+    0.06
    ],
-   "unit": "mm (p95, max)",
-   "source": "Morante, 2026-11-20: this design's own limits, «al juez tal como está»"
+   "unit": "fraction of each part's largest extent (p95, max), floors 1.0 / 2.0 mm",
+   "source": "tools/mesh_ref.py limits() (Morante, 2026-11-21: «mucho más laxas»; was 1 % / 2 % and own limits per part)"
   }
  },
  "references": [
@@ -58,8 +58,8 @@
    "kind": "command",
    "fail_regex": "^FAIL",
    "timeout": 600,
-   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py compare {ws}/out/body.stl cad/carcass-jenscolt/spideybot_body.stl --p95 2.1 --max 6.0 --view above --png {ws}/images/fidelity-body.png --json {ws}/out/fidelity-body.json",
-   "note": "visible from above only (Morante, 2026-11-20: his inside is not kept; the reference's eye block, bosses and frame are hidden inside); own limits p95 2.1 / max 6.0: Morante, 2026-11-20, «al juez tal como está» after seeing p95 2.04/2.08, max 5.1/5.6 (curved top panels and chin grille still missing)"
+   "cmd": "{root}/.venv/bin/python tools/mesh_ref.py compare {ws}/out/body.stl cad/carcass-jenscolt/spideybot_body.stl --view above --png {ws}/images/fidelity-body.png --json {ws}/out/fidelity-body.json",
+   "note": "visible from above only (Morante, 2026-11-20: his inside is not kept; the reference's eye block, bosses and frame are hidden inside); default limits since 2026-11-21 (the own limits of 2026-11-20 were tighter)"
   }
  ],
  "views": {
@@ -78,17 +78,6 @@
  "refine_rounds": 0,
  "asked": "Morante, 2026-11-20",
  "exceptions": [
-  {
-   "part": "body",
-   "kind": "fidelity",
-   "value": {
-    "p95": 2.1,
-    "max": 6.0
-   },
-   "reason": "Morante, 2026-11-20, «al juez tal como está» after seeing p95 2.04/2.08, max 5.1/5.6 (curved top panels and chin grille still missing)",
-   "by": "Morante",
-   "date": "2026-11-20"
-  },
   {
    "part": "body",
    "kind": "judge",

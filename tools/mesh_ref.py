@@ -14,9 +14,10 @@ reference's, both ways, so «it looks like it» becomes a figure in mm. The `mes
     uv run python tools/mesh_ref.py views OUT.png --ref A.stl [B.stl ...] [--parts a.stl [b.stl ...]]
                                           [--edits OUT2.png x.stl[=label] ...]
 
-Fidelity limits (defaults of compare): relative to the part's size, both ways, at the reference's scale: p95 ≤ 1 %
-and max ≤ 2 % of the reference's largest extent, never below 0.5 / 1.0 mm (Morante, 2026-11-20: a fixed 2 / 4 mm
-was 13 % of a 15 mm eye and 1 % of the body). The gate guards the form; the looks judge and Morante decide the look.
+Fidelity limits (defaults of compare): relative to the part's size, both ways, at the reference's scale: p95 ≤ 3 %
+and max ≤ 6 % of the reference's largest extent, never below 1.0 / 2.0 mm (Morante, 2026-11-21: the robot has to look
+«more or less» like the Spider-Bot, so the limits are three times the 1 % / 2 % of 2026-11-20, which made
+exceptions for the arm, base and body). The gate guards the form; the looks judge and Morante decide the look.
 Other limits for one part only as an exception Morante approved, with his reason (`rounds.py except`).
 
 `compare` samples both surfaces evenly and measures each sample's distance to the other surface (the «max» limit
@@ -39,8 +40,8 @@ import numpy as np
 import trimesh
 
 
-P95_REL, MAX_REL = 0.01, 0.02   # default fidelity limits: fractions of the reference's largest extent (docstring)
-P95_MIN, MAX_MIN = 0.5, 1.0     # mm, the floors (a small part is not held to less than a print can show)
+P95_REL, MAX_REL = 0.03, 0.06   # default fidelity limits: fractions of the reference's largest extent (docstring)
+P95_MIN, MAX_MIN = 1.0, 2.0     # mm, the floors (a small part is not held to less than a print can show)
 
 
 def limits(ref):

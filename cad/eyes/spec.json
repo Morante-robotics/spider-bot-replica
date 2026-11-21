@@ -39,11 +39,11 @@
   },
   "fidelity": {
    "value": [
-    2.0,
-    4.0
+    0.03,
+    0.06
    ],
-   "unit": "mm (p95, max)",
-   "source": "tools/mesh_ref.py P95, MAX (Morante, 2026-11-20)"
+   "unit": "fraction of each part's largest extent (p95, max), floors 1.0 / 2.0 mm",
+   "source": "tools/mesh_ref.py limits() (Morante, 2026-11-21: «mucho más laxas»; was 1 % / 2 % and own limits per part)"
   }
  },
  "references": [
@@ -104,5 +104,6 @@
   "rubric": "looks"
  },
  "refine_rounds": 1,
- "asked": "Morante, 2026-11-20"
+ "asked": "Morante, 2026-11-20",
+ "exceptions": []
 }

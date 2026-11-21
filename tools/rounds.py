@@ -183,8 +183,8 @@ def mesh_spec(spec, ws, meshes, edit):
         spec["dims"][f"{part}_extent"] = {"value": [round(float(x), 2) for x in m.extents], "unit": "mm",
                                           "source": f"tools/mesh_ref.py info {ref}"}
         spec["dims"][f"{part}_fidelity"] = {"value": list(mesh_ref.limits(m)), "unit": "mm (p95, max)",
-                                            "source": "tools/mesh_ref.py limits(): 1 % / 2 % of the largest extent, "
-                                                      "floors 0.5 / 1.0 mm (Morante, 2026-11-20)"}
+                                            "source": "tools/mesh_ref.py limits(): 3 % / 6 % of the largest extent, "
+                                                      "floors 1.0 / 2.0 mm (Morante, 2026-11-21)"}
     refs = " ".join(r for _, r in pairs)
     parts = " ".join(f"{{ws}}/out/{p}.stl" for p, _ in pairs)
     cmd = f"{py} tools/mesh_ref.py views {{out}} --ref {refs} --parts {parts}"

@@ -72,6 +72,6 @@ def test_visible_drops_a_hidden_inside():
 
 
 def test_limits_relative_with_floors():
-    assert mesh_ref.limits(15.0) == (0.5, 1.0)
-    assert mesh_ref.limits(110.0) == (1.1, 2.2)
-    assert mesh_ref.limits(250.0) == (2.5, 5.0)
+    assert mesh_ref.limits(15.0) == (1.0, 2.0)
+    assert mesh_ref.limits(110.0) == (3.3, 6.6)
+    assert mesh_ref.limits(250.0) == (7.5, 15.0)

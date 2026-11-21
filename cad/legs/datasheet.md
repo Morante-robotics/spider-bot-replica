@@ -13,9 +13,9 @@ parameter block at the top of `build.py` (each with the probe or section it came
 
 ## Fidelity (`tools/mesh_ref.py compare`, max on p99.9)
 
-Limits: the blade has the size-relative default (p95 ≤ 0.91, max ≤ 1.83 mm). The arm (left and right) has its own,
-p95 ≤ 0.6 / max ≤ 1.25 mm: an exception Morante approved on 2026-11-20 (`spec.json` → `exceptions`), since it
-misses the default 0.5 / 1.0 mm by 0.09 / 0.22 mm.
+Limits: the size-relative default since 2026-11-21 (3 % / 6 % of the largest extent, floors 1.0 / 2.0 mm): blade
+p95 ≤ 2.74 / max ≤ 5.48 mm, arm p95 ≤ 1.43 / max ≤ 2.87 mm. The arm's own limits of 2026-11-20 (0.6 / 1.25 mm, an
+exception) are no longer needed.
 
 | Part | part → ref max / p99.9 / p95 | ref → part max / p99.9 / p95 |
 |---|---|---|
