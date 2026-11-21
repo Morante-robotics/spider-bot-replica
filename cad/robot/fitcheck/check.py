@@ -38,20 +38,22 @@ def idler(c1, c2, r1, r2, up=True):
     return (ym - s*h*(z2 - z1)/d, zm + s*h*(y2 - y1)/d)
 cc = lambda za, zb: rp(za) + rp(zb) + F.GEAR_BACKLASH / 2
 I = [idler((Oy[i], Oz), (Oy[i + 1], Oz), cc(ZT, ZI[i]), cc(ZT, ZI[i])) for i in range(3)]
+IDL_T = 0.2                                          # idlers and transfer-small are GW - 0.4 wide, centred: each face GEAR_THRUST_IDLER (0.45) to the spine walls
 TH = F.GEAR_THRUST_CRANK.side; gx = GW / 2; wx0, wx1 = gx + TH, gx + TH + W
 ST, MV, BD, HW = {}, {}, {}, set()
 JR = 1.5                                             # printed crank journal r (Ø3) in the spine walls, TURN
 PINR = 1.5                                           # printed crank pin Ø3 (no steel pin)
 WEB_T = 1.2; wb0 = wx1 + TH; wb1 = wb0 + WEB_T       # webs just outside the walls
 for i in range(4): MV[f"crank-gear-{i+1}"] = cyl_x(Oy[i], Oz, rt(ZT), -gx, gx)
-for i, c in enumerate(I): MV[f"idler-{i+1}"] = cyl_x(c[0], c[1], rt(ZI[i]), -gx, gx)
+for i, c in enumerate(I): MV[f"idler-{i+1}"] = cyl_x(c[0], c[1], rt(ZI[i]), -gx + IDL_T, gx - IDL_T)
 IPR = 1.0                                            # idler axle: M2 screw (steel) through both walls
 ytop = max(c[1] + IPR + F.STEEL.side + W for c in I)
 zsp0 = Oz - JR - F.TURN.side - W - 0.3
 SPF, SPB = E("SPF", 3.2), E("SPB", 3.2)
 KY = E("KY", 5.0)                                    # keel under the spine to the bowl floor, 2 M2 from below
-KEELFIX = E("KEELFIX", 0)                            # 1: keel top under the gear tips (Oz - tip - GEAR_TIP), walls down to it
-zk1 = min(zsp0, Oz - rt(ZT) - F.GEAR_TIP.side) if KEELFIX else zsp0
+KEELFIX = E("KEELFIX", 1)                            # 1: keel top under the gear tips (Oz - tip - GEAR_TIP), walls down to it
+KSLOT = E("KSLOT", F.TURN.side)                      # each crank journal rests on its slot bottom: gear TURN lower than centred
+zk1 = min(zsp0, Oz - rt(ZT) - F.GEAR_TIP.side - KSLOT) if KEELFIX else zsp0
 ST["spine"] = np.vstack([box((wx0 if sx > 0 else -wx1, min(Oy) - SPF, zsp0), (wx1 if sx > 0 else -wx0, max(Oy) + SPB, ytop)) for sx in (1, -1)]
                         + ([box((wx0 if sx > 0 else -wx1, -KY, zk1), (wx1 if sx > 0 else -wx0, KY, zsp0)) for sx in (1, -1)] if KEELFIX else []))
 ST["spine-keel"] = box((-wx1, -KY, 2.0), (wx1, KY, zk1 - 0.01))
@@ -61,7 +63,7 @@ for k, y in enumerate((-KY + 1.8, KY - 1.8)):
 # transfer compound above idler TI; pinion on the N10 along -x; drive unit screwed to the spine top
 ti = int(E("TI", 1)); a = math.radians(E("TANG", 90)); T = (I[ti][0] + cc(ZS, ZI[ti]) * math.cos(a), I[ti][1] + cc(ZS, ZI[ti]) * math.sin(a))
 XB0 = E("XB0", wx1 + F.GEAR_AXIAL.side)
-MV["transfer-small"] = cyl_x(T[0], T[1], rt(ZS), -gx, gx); MV["transfer-big"] = cyl_x(T[0], T[1], rt(ZB), XB0, XB0 + GW)
+MV["transfer-small"] = cyl_x(T[0], T[1], rt(ZS), -gx + IDL_T, gx - IDL_T); MV["transfer-big"] = cyl_x(T[0], T[1], rt(ZB), XB0, XB0 + GW)
 ST["transfer-axle"] = cyl_x(T[0], T[1], 1.0, -wx1, XB0 + GW + F.GEAR_AXIAL.side + W); HW.add("transfer-axle")
 ma = math.radians(E("MANG", 60)); Mc = (T[0] + cc(ZB, ZP) * math.cos(ma), T[1] + cc(ZB, ZP) * math.sin(ma))
 MV["pinion"] = cyl_x(Mc[0], Mc[1], rt(ZP), XB0, XB0 + GW)
@@ -315,22 +317,32 @@ for a_, b_ in itertools.combinations(ALL, 2):
         continue
     if bbd(a_, b_) > FAR: continue
     gq = KD[a_].query(ALL[b_])[0]; k = int(np.argmin(gq)); rows.append((gq[k], need(a_, b_), a_, b_, np.round(ALL[b_][k], 1)))
+for n_ in [f"idler-{i+1}" for i in range(3)] + ["transfer-small"]:   # axial faces to the spine walls: GEAR_THRUST_IDLER
+    _x = ALL[n_][:, 0]
+    rows.append((float(min(wx0 - _x.max(), wx0 + _x.min())), F.GEAR_THRUST_IDLER.side, n_, "spine wall faces (axial THRUST)", ""))
+# keel vs crank gears with each crank journal resting on its slot bottom (TURN lower than centred)
+for i in range(4):
+    gq = KD["spine-keel"].query(ALL[f"crank-gear-{i+1}"] - [0, 0, KSLOT])[0]; k = int(np.argmin(gq))
+    rows.append((gq[k], F.GEAR_TIP.side, "spine-keel", f"crank-gear-{i+1} at slot bottom (-{KSLOT:.2f})", np.round(ALL[f"crank-gear-{i+1}"][k], 1)))
 tick("pairs")
 # local pockets in the two parts that meet a leg arm's sweep (spec: reshape the colliding part locally): their surface within PKR of the arms' sweep is pushed back to PKR
-PKR = E("PKR", 0.85); _AT0 = cKDTree(vox(np.vstack(ARMS), 0.25)); POCKETS = {}
+PKR = E("PKR", 0.85); _AT0 = cKDTree(vox(np.vstack(ARMS), 0.25)); POCKETS, POCKET_DROPPED = {}, {}
 for n_ in ("eye-block", "cell-holder"):
     q0 = ALL[n_]; q = q0.copy(); d0 = _AT0.query(q0, distance_upper_bound=PKR)[0]
-    for _it in range(10):
+    for _it in range(40):
         d_, j_ = _AT0.query(q, distance_upper_bound=PKR); m_ = np.isfinite(d_) & (d_ < PKR - 1e-3) & (d_ > 1e-6)
         if not m_.any(): break
         v_ = q[m_] - _AT0.data[j_[m_]]; q[m_] = _AT0.data[j_[m_]] + PKR * v_ / np.linalg.norm(v_, axis=1)[:, None]
+    # points still inside the sweep (between two arms' samples the push does not converge) are material the pocket
+    # removes: drop them; the pocket wall is the pushed points around them, all at >= PKR from the sweep
+    _in = _AT0.query(q)[0] < PKR - 0.05; POCKET_DROPPED[n_] = int(_in.sum()); q, q0, d0 = q[~_in], q0[~_in], d0[~_in]
     ch_ = np.linalg.norm(q - q0, axis=1) > 1e-6
     if ch_.any():
         POCKETS[n_] = (np.round(q0[ch_].min(0), 1).tolist(), np.round(q0[ch_].max(0), 1).tolist(), round(float(PKR - d0[np.isfinite(d0)].min()), 2))
         for D_ in (ALL, ST, BD, MV):
             if n_ in D_: D_[n_] = q
         KD[n_] = cKDTree(q); BB[n_] = (q.min(0), q.max(0))
-print("leg-arm pockets in parts (bbox, depth)", POCKETS)
+print("leg-arm pockets in parts (bbox, depth)", POCKETS, "points removed inside the sweep", POCKET_DROPPED)
 # legs (inner end, arm, root ball) over the 24 poses vs every part; the pin is their designed bearing
 for n, q in ALL.items():
     if n == "crankshafts": continue      # per pose above
@@ -475,13 +487,22 @@ if not E("LEGSONLY", 0):
     print("body inner pocket for holder/lid lift-off (bbox, depth)", BPOCK)
     _BW, _crw, _dmw = _relieve(j2r(body_inner_pts(w=0.3)[0])); print('body rim notch (w=0.3 rows) depth', round(float(BRELD - _dmw), 2) if _crw.any() else 0)
     BODY_SET = np.vstack([_BI, _BW] + [BD[n] for n in BD])
-    _bxy = cKDTree(_LF[:, :2]); BS = BODY_SET[_bxy.query(BODY_SET[:, :2], distance_upper_bound=3.0)[0] < 3.0]; _best = None
+    _bxy = cKDTree(_LF[:, :2]); LIFTD = E("LIFTD", 8.0); LIFTR = E("LIFTR", F.NEIGHBOUR.side + 0.1); NOTCH2 = {}   # assembly path need (README) + sampling (a cloud overestimates a gap ~0.1)
+    BS = BODY_SET[_bxy.query(BODY_SET[:, :2], distance_upper_bound=3.0)[0] < 3.0]; _best = None
     for k in range(24):                                  # the body goes on last, at ONE crank pose chosen as the best of the 24
         Lk = np.vstack([leg_pose(Lg, k, True) for Lg in range(8)]); Lk = Lk[cKDTree(PIV).query(Lk)[0] > PB + 2.5]; tk = cKDTree(vox(Lk, 0.3))
-        gk = min((tk.query(BS + [0, 0, t], distance_upper_bound=3.0)[0].min(), t) for t in np.r_[0.0, 0.5, np.arange(1.0, 40.1, 1.0)])
+        BSk = BS.copy(); tv = cKDTree(np.vstack([tk.data - [0, 0, t] for t in np.arange(0, LIFTD + 0.01, 0.5)]))     # deeper rim notch: the body keeps LEG_PATH from the leg parts above it along the lift
+        for _it in range(40):
+            d_, j_ = tv.query(BSk, distance_upper_bound=LIFTR); m_ = np.isfinite(d_) & (d_ < LIFTR - 1e-3)
+            if not m_.any(): break
+            v_ = BSk[m_] - tv.data[j_[m_]]; BSk[m_] = tv.data[j_[m_]] + LIFTR * v_ / np.maximum(np.linalg.norm(v_, axis=1), 1e-9)[:, None]
+        _in = tv.query(BSk)[0] < LIFTR - 0.05; _dropped = int(_in.sum()); BSk = BSk[~_in]; BS_ = BS[~_in]      # still inside between two columns: material the notch removes
+        _mv = np.linalg.norm(BSk - BS_, axis=1) > 1e-6; NOTCH2[k] = (np.round(BS_[_mv].min(0), 1).tolist(), np.round(BS_[_mv].max(0), 1).tolist(), round(float(np.linalg.norm(BSk - BS_, axis=1).max()), 2), 'dropped', _dropped) if _mv.any() else None
+        gk = min((tk.query(BSk + [0, 0, t], distance_upper_bound=3.0)[0].min(), t) for t in np.r_[0.0, 0.5, np.arange(1.0, 40.1, 1.0)])
         if _best is None or gk[0] > _best[0]: _best = gk + (k,)
     print("body lift-off vs legs: best of 24 poses = pose", _best[2], "gap", round(float(_best[0]), 2), "at +", _best[1])
-    rows.append((min(_best[0], 3.0), 0.0, "legs (whole, ball seat excluded)", f"body lift-off at the best of 24 crank poses (pose {_best[2]}), @+{_best[1]:.1f}", ""))
+    print("body rim notch deepened for the lift-off at the best pose (bbox, depth)", NOTCH2[_best[2]])
+    rows.append((min(_best[0], 3.0), F.NEIGHBOUR.side, "legs (whole, ball seat excluded)", f"body lift-off at the best of 24 crank poses (pose {_best[2]}), @+{_best[1]:.1f}", ""))
     BST = {n: q for n, q in {**ST, **MV}.items() if not n.startswith(("body-screw", "jst", "snap-rib"))}
     names = list(BST); SQ = np.vstack([BST[n] for n in names]); lab = np.concatenate([np.full(len(BST[n]), i) for i, n in enumerate(names)])
     SK = cKDTree(SQ); best = {n: (9e9, 0) for n in names}

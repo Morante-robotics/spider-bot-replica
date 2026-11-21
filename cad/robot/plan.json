@@ -1,16 +1,16 @@
 {
- "summary": "S 0.70 spider: base (ground), body snapped on (2 front fingers + rear tab), spine with open-top journal slots, 4 printed cranks capped by the drive unit (1-3) and the holder post (4), 3 idlers and transfer, N10 drive unit, 2S3P AG13 holder, 8 legs on crank pins; cranks 2/3 2.6 further apart (probe full70d.py).",
+ "summary": "S 0.70 spider: base (ground), body snapped on (2 front fingers + rear tab), spine with open-top journal slots, 4 printed cranks capped by the drive unit (1-3) and the holder post (4), 3 idlers and transfer, N10 drive unit, 2S3P AG13 holder, 8 legs on crank pins; cranks 2/3 2.6 further apart (cad/robot/fitcheck/check.py: 0 failing of 319 with the real cad/legs parts, LEG_PATH 0.5).",
  "parts": [
   {
    "name": "base",
-   "role": "ground: bowl with 8 open-top leg windows, front snap ribs, back-sheet pocket, 1.2 pads where loaded, front-window bulges",
+   "role": "ground: bowl with 8 open-top leg windows sized from the real cad/legs neck sweep (NR 5.4, about Ø10.8), front snap ribs, back-sheet pocket, 1.2 pads where loaded (100 % of each window ring), front-window reliefs",
    "why_separate": "the ground shell, prints in one piece",
    "grams": 14,
    "print_orient": "foot down"
   },
   {
    "name": "body",
-   "role": "dome with the eye block, front snap fingers (0.8 x 5, L 8), rear snap tab, inner pocket over the cell pack's lift path",
+   "role": "dome with the eye block (0.85 leg-arm pocket on its lower front corners), front snap fingers (0.8 x 5, L 8), rear snap tab, inner pocket over the cell pack's lift path",
    "why_separate": "lifts off for service",
    "grams": 16,
    "print_orient": "rim up (roof on the bed), fingers vertical"
@@ -20,18 +20,18 @@
    "role": "two gear walls with open-top journal slots (TURN), idler-axle holes, keel seat",
    "why_separate": "carries the whole train as one unit",
    "grams": 3,
-   "print_orient": "side face down"
+   "print_orient": "keel down, walls upright, slots up"
   },
   {
    "name": "crankshafts",
    "role": "4 printed cranks with gears, webs and Ø3 pins",
    "why_separate": "each turns in the spine",
    "grams": 3,
-   "print_orient": "axis vertical"
+   "print_orient": "axis vertical, one piece; support marks sanded (sandpaper)"
   },
   {
    "name": "idlers",
-   "role": "3 idlers and the transfer compound",
+   "role": "3 idlers and the transfer compound, each GW - 0.4 wide, on an M2 axle with a printed spacer so tightening does not pinch the walls",
    "why_separate": "each turns on its axle",
    "grams": 1,
    "print_orient": "face down"
@@ -52,7 +52,7 @@
   },
   {
    "name": "cell-holder",
-   "role": "3 x 2 AG13, spring, nickel strip, wire slot; post caps crank 4; front-bottom notch at drive block 2",
+   "role": "3 x 2 AG13, spring, nickel strip, wire slot; post caps crank 4; front-bottom notch at drive block 2; 0.8 leg-arm pocket on its top edge",
    "why_separate": "screwed on the post, cells swap",
    "grams": 2,
    "print_orient": "floor down"
@@ -331,7 +331,7 @@
    "from": "-z",
    "tool": "1.5 mm hex key",
    "already": "spine",
-   "check": "2 keel M2 tight"
+   "check": "lay the base on its flank for the keel M2 (step 7); cranks held in their slots by a rubber band over the walls until the drive unit caps them; 2 keel M2 tight"
   },
   {
    "part": "legs",
@@ -401,7 +401,7 @@
    "from": "+z",
    "tool": "hand",
    "already": "everything",
-   "check": "two front clicks, rear tab seated, legs turn"
+   "check": "body-on mark: crank pose 12 (best of 24 for the lift-off; the rim notch over the leg arms, 0.22 deep, is cut for it); two front clicks, rear tab seated, legs turn"
   }
  ],
  "alternatives": [
@@ -413,7 +413,7 @@
     "crank 3 +2.6 only"
    ],
    "choice": "crank 2 +0.5, crank 3 +3.1 rearward (C +1.8)",
-   "why": "±1.3 leaves leg ends 0/1 at −1.40; C +1.8 is the least shift with every leg pair ≥ 0.8; pivots P do not move, only the inner arms skew"
+   "why": "±1.3 leaves leg ends 0/1 at −1.40; C +1.8 is the least shift with every leg pair ≥ 0.8; pivots P do not move, only the inner arms skew; chosen at LEG_PATH 0.8, now 0.5 (measured fork window), about 0.3 spare"
   },
   {
    "topic": "body front hold",
@@ -463,6 +463,16 @@
    ],
    "choice": "PY +0.4 with a 0.38 notch and a body inner pocket",
    "why": "wall ≥ 0.8 by the spring seat; the body wall is 3.2, the pocket is inside it"
+  },
+  {
+   "topic": "leg arm vs eye block and cell holder",
+   "options": [
+    "local pocket PKR 0.85 from the arms' 24-pose sweep",
+    "move the eye block forward",
+    "larger S"
+   ],
+   "choice": "local pocket PKR 0.85 from the arms' 24-pose sweep",
+   "why": "spec rule m13: reshape the colliding part locally; the pockets are inside, under 0.9 deep, not visible"
   }
  ],
  "acceptance": [
@@ -646,30 +656,24 @@
   },
   {
    "id": "c1",
-   "text": "snap coupon, one batch after the whole robot passes: front-wall strip with rib + rim strip with fingers, rear-tab rib, real print orientations; clicks on, pulls off by hand",
+   "text": "snap coupon, runs before the body and the base are printed (PRESS assumed): front-wall strip with rib + rim strip with fingers, rear-tab rib, real print orientations; clicks on, pulls off by hand",
    "how": "print",
    "priority": "must"
   },
   {
    "id": "c2",
-   "text": "gear coupon m 0.6: spine-wall stub, 2 cranks + idler at the 13.35 gap; turns by hand, no skip",
-   "how": "print",
-   "priority": "must"
-  },
-  {
-   "id": "c3",
-   "text": "slot coupon: wall stub with an open-top journal slot, crank journal, cap tongue; drops in, turns free, cap holds",
+   "text": "gear and slot coupon m 0.6 (c2 + c3 merged): wall-pair stub with open-top slots, cap tongue, a crank and an idler (GW - 0.4 wide) on a real M2 self-tapping axle with spacer; turns by hand, no skip, drops in, turns free, cap holds, tightening does not pinch",
    "how": "print",
    "priority": "must"
   },
   {
    "id": "c4",
-   "text": "leg coupon: leg end bore on a printed Ø3 pin + window strip; slides on, ball seats, swings free",
+   "text": "leg coupon: leg end bore on a printed Ø3 pin + window strip; slides on, ball seats, swings free; the pin is printed in the crank's real orientation (axis vertical)",
    "how": "print",
    "priority": "must"
   }
  ],
  "open_questions": [],
  "diagram": "base > keel M2 > spine set (spine, cranks in open slots, idlers, 3 M2 axles) > legs (window, pin) > drive-unit (caps 1-3, 2 M2) > N10 > cell-holder (post caps 4, M2) > cells > lid; body snaps",
- "_validated": "0235c7d97523054c:da2249b03de8"
+ "_validated": "0235c7d97523054c:5b3fcd9a91eb"
 }

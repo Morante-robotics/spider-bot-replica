@@ -2,7 +2,7 @@
 
 Generated from `plan.json` by `tools/rounds.py validate`: edit the JSON, never this page.
 
-**S 0.70 spider: base (ground), body snapped on (2 front fingers + rear tab), spine with open-top journal slots, 4 printed cranks capped by the drive unit (1-3) and the holder post (4), 3 idlers and transfer, N10 drive unit, 2S3P AG13 holder, 8 legs on crank pins; cranks 2/3 2.6 further apart (probe full70d.py).**
+**S 0.70 spider: base (ground), body snapped on (2 front fingers + rear tab), spine with open-top journal slots, 4 printed cranks capped by the drive unit (1-3) and the holder post (4), 3 idlers and transfer, N10 drive unit, 2S3P AG13 holder, 8 legs on crank pins; cranks 2/3 2.6 further apart (cad/robot/fitcheck/check.py: 0 failing of 319 with the real cad/legs parts, LEG_PATH 0.5).**
 
 Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric legs (8), eyes, base and body placed with cad/motion.py, and the drive fitted inside them: N10 gear motor, gear train to the crankshafts, 6 x AG13 wired 2S3P with contacts, slide switch, two 5 mm LED eye bores. The scale S is 0.70 (Morante, 2026-11-21: «Prueba 0.70»): every length in cad/motion.py P0 (approved at N0 at 0.60) times S/0.60, so the look is N0's; a larger S (0.75, 0.8) is an alternative put to Morante, not a limit. · pass: full cad_verify PASS with every part inside (no collision over the 24 poses, each part's assembly path) at the chosen S, and the judge >= 0.60 against jenscolt's model (his photos and his assembled meshes in the same views as the robot)
 
@@ -10,14 +10,14 @@ Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric 
 
 | Part | Role | Why separate | g | Print orientation |
 |---|---|---|---|---|
-| base | ground: bowl with 8 open-top leg windows, front snap ribs, back-sheet pocket, 1.2 pads where loaded, front-window bulges | the ground shell, prints in one piece | 14 | foot down |
-| body | dome with the eye block, front snap fingers (0.8 x 5, L 8), rear snap tab, inner pocket over the cell pack's lift path | lifts off for service | 16 | rim up (roof on the bed), fingers vertical |
-| spine | two gear walls with open-top journal slots (TURN), idler-axle holes, keel seat | carries the whole train as one unit | 3 | side face down |
-| crankshafts | 4 printed cranks with gears, webs and Ø3 pins | each turns in the spine | 3 | axis vertical |
-| idlers | 3 idlers and the transfer compound | each turns on its axle | 1 | face down |
+| base | ground: bowl with 8 open-top leg windows sized from the real cad/legs neck sweep (NR 5.4, about Ø10.8), front snap ribs, back-sheet pocket, 1.2 pads where loaded (100 % of each window ring), front-window reliefs | the ground shell, prints in one piece | 14 | foot down |
+| body | dome with the eye block (0.85 leg-arm pocket on its lower front corners), front snap fingers (0.8 x 5, L 8), rear snap tab, inner pocket over the cell pack's lift path | lifts off for service | 16 | rim up (roof on the bed), fingers vertical |
+| spine | two gear walls with open-top journal slots (TURN), idler-axle holes, keel seat | carries the whole train as one unit | 3 | keel down, walls upright, slots up |
+| crankshafts | 4 printed cranks with gears, webs and Ø3 pins | each turns in the spine | 3 | axis vertical, one piece; support marks sanded (sandpaper) |
+| idlers | 3 idlers and the transfer compound, each GW - 0.4 wide, on an M2 axle with a printed spacer so tightening does not pinch the walls | each turns on its axle | 1 | face down |
 | drive-unit | N10 clamp, transfer cheek, 2 blocks + ears on 2 M2; wall-top cheeks whose tongues cap cranks 1-3 | motor comes out without the train | 2 | ear face down |
 | legs | 8 legs, end tube on the pin, ball in the window | each rides its own pin | 8 | flat on its side |
-| cell-holder | 3 x 2 AG13, spring, nickel strip, wire slot; post caps crank 4; front-bottom notch at drive block 2 | screwed on the post, cells swap | 2 | floor down |
+| cell-holder | 3 x 2 AG13, spring, nickel strip, wire slot; post caps crank 4; front-bottom notch at drive block 2; 0.8 leg-arm pocket on its top edge | screwed on the post, cells swap | 2 | floor down |
 | cell-lid | closes the cells | opens for cell swap | 1 | flat |
 | n10-motor | drive |  |  |  |
 | m2-screws | M2 socket cap ISO 4762 (1.5 mm hex key), self-tapping in PLA: 3 idler axles, 2 keel, 2 drive, 1 holder |  |  |  |
@@ -52,7 +52,7 @@ Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric 
 | 4 | idlers | +z | hand | crankshafts | each meshes both cranks |
 | 5 | m2-screws | -x | 1.5 mm hex key | idlers | 3 idler axles in along +x, train turns by hand |
 | 6 | spine | +z | hand | base | spine set on the keel |
-| 7 | m2-screws | -z | 1.5 mm hex key | spine | 2 keel M2 tight |
+| 7 | m2-screws | -z | 1.5 mm hex key | spine | lay the base on its flank for the keel M2 (step 7); cranks held in their slots by a rubber band over the walls until the drive unit caps them; 2 keel M2 tight |
 | 8 | legs | +z | hand | spine | dropped through its window, slid onto its pin along x, ball in its seat |
 | 9 | drive-unit | +z | 1.5 mm hex key | legs | tongues in slots 1-3, 2 M2 tight |
 | 10 | n10-motor | -x | hand | drive-unit | slid in along +x, pinion meshes, flush |
@@ -62,16 +62,17 @@ Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric 
 | 14 | jst-xh | +z | hand | cell-lid | latched |
 | 15 | leds | +y | hand | body | domes in the eye bores |
 | 16 | ss12d00-switch | -y | hand | body | lever out the back |
-| 17 | body | +z | hand | everything | two front clicks, rear tab seated, legs turn |
+| 17 | body | +z | hand | everything | body-on mark: crank pose 12 (best of 24 for the lift-off; the rim notch over the leg arms, 0.22 deep, is cut for it); two front clicks, rear tab seated, legs turn |
 
 ## Alternatives
 
-- **crank 2/3 split**: ±1.3 about the midpoint / crank 2 +0.5, crank 3 +3.1 rearward (C +1.8) / crank 3 +2.6 only → **crank 2 +0.5, crank 3 +3.1 rearward (C +1.8)**, ±1.3 leaves leg ends 0/1 at −1.40; C +1.8 is the least shift with every leg pair ≥ 0.8; pivots P do not move, only the inner arms skew
+- **crank 2/3 split**: ±1.3 about the midpoint / crank 2 +0.5, crank 3 +3.1 rearward (C +1.8) / crank 3 +2.6 only → **crank 2 +0.5, crank 3 +3.1 rearward (C +1.8)**, ±1.3 leaves leg ends 0/1 at −1.40; C +1.8 is the least shift with every leg pair ≥ 0.8; pivots P do not move, only the inner arms skew; chosen at LEG_PATH 0.8, now 0.5 (measured fork window), about 0.3 spare
 - **body front hold**: 2 M2 from below at ±44° / 2 snap fingers at x ±6 under base ribs / 1 central snap → **2 snap fingers at x ±6 under base ribs**, screws boxed in by eye block and legs (Morante); two fingers stop roll, front wall straight there
 - **front window relief**: pocket + outward bulge, 45° chamfer under it / through-notch (window grows) / larger S → **pocket + outward bulge, 45° chamfer under it; through only where the bulge would come within LEG_PATH of a leg**, spec rule: reshape locally, outward on the base first; S not wanted
 - **crank retention**: two separate walls clamped by the idler axles + keel / open-top journal slots capped by drive-unit tongues (1-3) and the holder post (4) / spine split at the crank axis, screwed top half → **open-top journal slots capped by drive-unit tongues (1-3) and the holder post (4)**, a one-piece crank's webs stop a wall sliding on along x; the caps reuse the drive unit and holder (no new part)
 - **front snap finger**: T 1.0, L 7.0, travel 0.6 (1.8 %) / T 0.8, L 8.0, travel 0.5, overlap 0.4 (0.9 %) → **T 0.8, L 8.0, travel 0.5, overlap 0.4 (0.9 %)**, ≤ 1.1 % across layers; fits.PRESS kept as assumed
 - **cell holder vs drive block 2**: notch at PY 14.0 (front wall left 0.42) / PY +0.4 with a 0.38 notch and a body inner pocket / PY +0.8, no notch → **PY +0.4 with a 0.38 notch and a body inner pocket**, wall ≥ 0.8 by the spring seat; the body wall is 3.2, the pocket is inside it
+- **leg arm vs eye block and cell holder**: local pocket PKR 0.85 from the arms' 24-pose sweep / move the eye block forward / larger S → **local pocket PKR 0.85 from the arms' 24-pose sweep**, spec rule m13: reshape the colliding part locally; the pockets are inside, under 0.9 deep, not visible
 
 ## Acceptance
 
@@ -103,10 +104,9 @@ Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric 
 | n2 | jenscolt's inner posts in the body or base | verify | integrity | must |
 | p1 | full cad_verify PASS with every part inside (no collision over the 24 poses, each part's assembly path) at the chosen S, and the judge >= 0.60 against jenscolt's model (his photos and his assembled meshes in the same views as the robot) | morante |  | must |
 | q1 | front snaps click on and pull off by hand; legs walk a full turn | print |  | must |
-| c1 | snap coupon, one batch after the whole robot passes: front-wall strip with rib + rim strip with fingers, rear-tab rib, real print orientations; clicks on, pulls off by hand | print |  | must |
-| c2 | gear coupon m 0.6: spine-wall stub, 2 cranks + idler at the 13.35 gap; turns by hand, no skip | print |  | must |
-| c3 | slot coupon: wall stub with an open-top journal slot, crank journal, cap tongue; drops in, turns free, cap holds | print |  | must |
-| c4 | leg coupon: leg end bore on a printed Ø3 pin + window strip; slides on, ball seats, swings free | print |  | must |
+| c1 | snap coupon, runs before the body and the base are printed (PRESS assumed): front-wall strip with rib + rim strip with fingers, rear-tab rib, real print orientations; clicks on, pulls off by hand | print |  | must |
+| c2 | gear and slot coupon m 0.6 (c2 + c3 merged): wall-pair stub with open-top slots, cap tongue, a crank and an idler (GW - 0.4 wide) on a real M2 self-tapping axle with spacer; turns by hand, no skip, drops in, turns free, cap holds, tightening does not pinch | print |  | must |
+| c4 | leg coupon: leg end bore on a printed Ø3 pin + window strip; slides on, ball seats, swings free; the pin is printed in the crank's real orientation (axis vertical) | print |  | must |
 
 ## Diagram
 
