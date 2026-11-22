@@ -17,7 +17,7 @@ def tick(m): print(f"[{time.time() - _t0:5.1f}s] {m}", file=sys.stderr)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 # the layout chosen at the S 0.70 probe of 2026-11-21 (env values, overridable)
 LAYOUT = dict(MANG=78, PY=14.4, PZ=31, TANG=107.5, DSY1=8.3, DSY2=8.075, DBH=2.45, SWZ=22, JZ=43.5, WEBW=0.55, KEELFIX=1,
-              HSZ=1, RYO=1.3, CLX1=-2.1, CTX0=-7.0, NSX=18.5, BSA=44, PR=2.35, SNT=0.8, RIBD=0.9, SNZ=9, N=70)
+              HSZ=1, RYO=1.3, CLX1=-2.1, CTX0=-7.0, NSX=18.5, BSA=44, PR=2.35, SNT=0.8, RIBD=0.9, SNZ=9, N=70, EARH2=1.0)
 for _k, _v in LAYOUT.items(): os.environ.setdefault(_k, str(_v))
 from fit_env import *
 import fit_legs as LR
@@ -96,7 +96,9 @@ for k, y in enumerate((T[0] - E("DSY1", DSY), T[0] + E("DSY2", DSY))):
     ST[f"drive-block-{k+1}"] = box((-wx1, y0b, zb), (wx1, y + DBH, DZT - 0.01))
     hs_ = E("HSINK2", 0.3) if k == 1 else 0.0            # screw 2's head counterbored into its ear (local reshape: N10 clearance)
     if E("DSCREW", 0): ST[f"drive-screw-{k+1}"] = np.vstack([cyl_z(0, y, 1.0, max(DZT - 5.0, zb + 0.01), DZT + 2.4 - hs_), cyl_z(0, y, 1.9, DZT + 2.4 - hs_, DZT + 3.8 - hs_)]); HW.add(f"drive-screw-{k+1}") if E("DSCREW", 0) else None
-    ST[f"drive-ear-{k+1}"] = box((-2.6, y - DBH, DZT), (2.6, y + DBH, DZT + 2.4 - 0.01))
+    # ear 2 lowered (EARH2, local reshape 2026-11-22): the holder tab and its M2 head sit under the N10 (STEEL) and the
+    # drive unit's lower clamp (NEIGHBOUR) instead of in them; ear 1 keeps 2.4
+    ST[f"drive-ear-{k+1}"] = box((-2.6, y - DBH, DZT), (2.6, y + DBH, DZT + (E("EARH2", 2.4) if k == 1 else 2.4) - 0.01))
 # cells: 3 stacks of 2 AG13 lying along y, side by side along x; conical spring + nickel strip; lid on top
 cy, cz = E("PY", 12.0), E("PZ", 30.0); pd = 11.6 + 2 * F.STEEL.side; pitch = pd + 0.8
 SPR = E("SPR", 2.0)                                  # conical spring compressed
@@ -108,8 +110,8 @@ ST["cell-holder"] = np.vstack([box((-hx, cy - hy, cz - pd/2 - W), (hx, cy + hy, 
 LIDT = E("LIDT", 1.2)
 ST["cell-lid"] = box((-hx, cy - hy, cz + pd/2 + 0.01), (hx, cy + hy, cz + pd/2 + LIDT))
 _cq = cyl_x(0.0, cz, 5.8, -5.4, 5.4)
-ST["ag13-cells"] = np.vstack([np.c_[_cq[:, 1] + xs, _cq[:, 0] + cy + sy * 2.85, _cq[:, 2]] for xs in (-pitch, 0, pitch) for sy in (-1, 1)]) if False else \
-    np.vstack([np.c_[_cq[:, 1] + xs, _cq[:, 0] * (10.8 / 10.8) + cy, _cq[:, 2]] for xs in (-pitch, 0, pitch)])
+CYC = cy + L/2 - F.STEEL.side - 0.3 - 5.4             # cells' centre: pushed by the spring (compressed to SPR) against the strip
+ST["ag13-cells"] = np.vstack([np.c_[_cq[:, 1] + xs, _cq[:, 0] + CYC, _cq[:, 2]] for xs in (-pitch, 0, pitch)])
 HW.add("ag13-cells")
 ST["cell-springs"] = np.vstack([cyl_ax((xs, cy - L/2 + F.STEEL.side, cz), (xs, cy - L/2 + F.STEEL.side + SPR, cz), 3.5) for xs in (-pitch, 0, pitch)]); HW.add("cell-springs")
 NSX = E("NSX", 1.5 * pitch + 4)                     # strip half-width (inside the holder's back wall: hx - W - STEEL)
@@ -155,7 +157,7 @@ HEADB = None
 if not POSTSPINE:
     ST["holder-post"] = box((-wx1, cy + HSY - 3, zhp), (wx1, cy + HSY + 3, zpt))     # the holder's foot on the spine top
     add_solid("holder-post", (-wx1, cy + HSY - 3, zhp), (wx1, cy + HSY + 3, zpt))
-    TABHW = E("TABHW", 2.6); HSYY = 0.5 * (YB[1][0] + YB[1][1]); ztb = DZT + 2.4          # tab half-width; screw y = ear 2's centre; tab rests on its top
+    TABHW = E("TABHW", 2.6); HSYY = 0.5 * (YB[1][0] + YB[1][1]); ztb = DZT + E("EARH2", 2.4)   # tab half-width; screw y = ear 2's centre; tab rests on its top
     TABZ1 = ztb + W; HR = 1.0 + F.STEEL.side                                              # tab top (1.2 thick), hole round the shank (STEEL)
     _tb = box((-TABHW, HSYY - TABHW, ztb), (TABHW, cy - hy + W, TABZ1)); _tb = _tb[np.hypot(_tb[:, 0], _tb[:, 1] - HSYY) >= HR + 1e-6]
     _zz = np.linspace(ztb, TABZ1, 6)
@@ -351,7 +353,7 @@ def bbd(a_, b_):
     (l1, h1), (l2, h2) = BB[a_], BB[b_]; return float(np.linalg.norm(np.maximum(0, np.maximum(l1 - h2, l2 - h1))))
 FAR = 3.0; KD = {n: cKDTree(q) for n, q in ALL.items()}
 SOLIDS = {n: solids_of(ALL[n], KD[n]) for n in HW if n in ALL and n != "ag13-cells"}; FLIPPED = []
-SOLIDS["ag13-cells"] = [dict(kind="cyl", a=np.array([xs, cy - 5.4, cz]), b=np.array([xs, cy + 5.4, cz]), r=5.8) for xs in (-pitch, 0, pitch)]
+SOLIDS["ag13-cells"] = [dict(kind="cyl", a=np.array([xs, CYC - 5.4, cz]), b=np.array([xs, CYC + 5.4, cz]), r=5.8) for xs in (-pitch, 0, pitch)]
 print("hardware solids (primitives per part)", {n: len(v) for n, v in SOLIDS.items()})
 def shell_gap(q):                                    # gaps over 3 mm are reported as 3 (either sign): rows only need the least
     d, _ = WALL_T.query(q, distance_upper_bound=3.0, workers=-1); d = np.minimum(d, 3.0); ins = inside(q); gg = np.where(ins, d, -d); k = int(np.argmin(gg)); return gg[k], q[k]
@@ -741,17 +743,21 @@ tick('legs done')
 PLACED = ["spine", "crankshafts", "transfer-small", "transfer-big", "drive-unit", "journal-caps", "drive-block-1", "drive-block-2", "drive-ear-1", "drive-ear-2"] + GEARS + [f"idler-axle-{j+1}" for j in range(3)]
 for k_ in ((1, 2) if E("DSCREW", 0) else ()):
     c = ST[f"drive-screw-{k_}"].mean(0); c[2] = ST[f"drive-screw-{k_}"][:, 2].max(); driver(f"drive-screw-{k_}", c, up, [o for o in PLACED if o != "drive-unit"] + [f"drive-block-{3-k_}"], legs=True)
-# 7 motor slides into its clamp along +x (out: -x)
-prow("n10-motor", 0.0, path(np.vstack([ST["n10-motor"], ST["n10-shaft"]]), (-1, 0, 0), 24, ["spine", "transfer-big", "transfer-small", "journal-caps", "drive-block-1", "drive-block-2", "drive-ear-1", "drive-ear-2"] + GEARS, legs=True), "-x (out of the clamp)")
-PLACED += ["n10-motor", "n10-shaft", "pinion", "motor-leads"]
-# 8 holder with its post down (+z): post cap tongues into crank 4's slots (TURN); then its screw
+# 7 holder with its post down (+z), before the motor (2026-11-22: its tab and M2 head sit under the N10): post cap
+# tongues into crank 4's slots (TURN); then its screw, driven while the clamp is still empty
 HQ = np.vstack([ST["cell-holder"]] + ([ST["holder-post"]] if "holder-post" in ST else []) + [ST["cell-springs"], ST["nickel-strip"]])
 prow("cell-holder", 0.0, path(HQ, up, 30, [o for o in PLACED if o != "spine"], legs=True), "+z")
 prow("post-cap", F.NEIGHBOUR.side, path(ST["post-cap"], up, 30, ["spine", "crankshafts"] + GEARS, legs=True), "+z into crank 4's slots", "(TURN)")
 c = ST["holder-screw"].mean(0); c[2] = ST["holder-screw"][:, 2].max(); driver("holder-screw", c, up, PLACED + ["cell-springs", "nickel-strip"], legs=True)
-PLACED += ["cell-holder", "post-cap", "cell-springs", "nickel-strip"] + (["holder-post"] if "holder-post" in ST else [])
+HOLDER_SET = ["cell-holder", "post-cap", "cell-springs", "nickel-strip", "holder-screw"] + (["holder-post"] if "holder-post" in ST else [])
+PLACED += HOLDER_SET
+# 8 motor slides into its clamp along +x over the holder tab (out: -x, the holder stays)
+prow("n10-motor", 0.0, path(np.vstack([ST["n10-motor"], ST["n10-shaft"]]), (-1, 0, 0), 24, ["spine", "transfer-big", "transfer-small", "journal-caps", "drive-block-1", "drive-block-2", "drive-ear-1", "drive-ear-2"] + GEARS + HOLDER_SET, legs=True), "-x (out of the clamp)")
+PLACED += ["n10-motor", "n10-shaft", "pinion", "motor-leads"]
+# cells, lid, connector from above; the springs yield as a cell goes in (designed: pressed by hand), not an obstacle
 for n, ag_ in (("ag13-cells", PLACED), ("cell-lid", PLACED + ["ag13-cells"]), ("jst-xh", PLACED + ["ag13-cells", "cell-lid"])):
-    prow(n, 0.0, path(ALL[n], up, 25, [o for o in ag_ if o not in ("cell-holder",) or n == "jst-xh"], legs=True), "+z")
+    skip_ = {"ag13-cells": ("cell-holder", "cell-springs"), "cell-lid": ("cell-holder",), "jst-xh": ()}[n]
+    prow(n, 0.0, path(ALL[n], up, 25, [o for o in ag_ if o not in skip_], legs=True), "+z")
 tick('stage 6-8')
 # ---------------- base wall pads (1.2 where loaded) and the front-window bulge's outer skin vs the whole legs
 LFULL = cKDTree(vox(np.vstack([leg_pose(Lg, k, True) for Lg in range(8) for k in range(24)]), 0.3))

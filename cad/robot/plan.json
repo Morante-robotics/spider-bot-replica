@@ -38,7 +38,7 @@
   },
   {
    "name": "drive-unit",
-   "role": "N10 clamp, transfer cheek, 2 blocks + ears; wall-top cheeks whose tongues cap cranks 1-3; two lugs on its -x plate clamped by idler axles 1 and 2 (STEEL holes, 1.2 wall)",
+   "role": "N10 clamp, transfer cheek, 2 blocks + ears; wall-top cheeks whose tongues cap cranks 1-3; two lugs on its -x plate clamped by idler axles 1 and 2 (STEEL holes, 1.2 wall); ear 2 lowered to 1.0 tall (the holder tab and its M2 head sit under the N10 and the lower clamp)",
    "why_separate": "motor comes out without the train",
    "grams": 2,
    "print_orient": "ear face down"
@@ -59,7 +59,7 @@
   },
   {
    "name": "cell-holder",
-   "role": "3 x 2 AG13, spring, nickel strip, wire slot; the post (x ±4, y ±3 about the cells' centre) down to the wall tops, post-cap tongues cap crank 4; front tab (5.2 x 1.2) on drive ear 2 with the holder M2 (hole STEEL, head on the tab) down into drive block 2 / ear 2; front-bottom notch at drive block 2; 0.8 leg-arm pocket on its top edge",
+   "role": "3 x 2 AG13, spring, nickel strip, wire slot; the post (x ±4, y ±3 about the cells' centre) down to the wall tops, post-cap tongues cap crank 4; front tab (5.2 x 1.2) on drive ear 2 (lowered, under the N10 and its clamp) with the holder M2 (hole STEEL, head on the tab) down into drive block 2 / ear 2; front-bottom notch at drive block 2; 0.8 leg-arm pocket on its top edge",
    "why_separate": "screwed to drive block 2, cells swap",
    "grams": 2,
    "print_orient": "floor down"
@@ -220,7 +220,7 @@
     "-z": "tab on the ear top, post on the wall tops"
    },
    "in_from": "+z",
-   "apart_by": "undo the M2 (from above), lift the holder"
+   "apart_by": "slide the N10 out (-x), undo the M2 (from above), lift the holder"
   },
   {
    "name": "lid-on-holder",
@@ -389,10 +389,17 @@
    "check": "dropped through its window, slid onto its pin along x, ball in its seat"
   },
   {
+   "part": "cell-holder",
+   "from": "+z",
+   "tool": "1.5 mm hex key",
+   "already": "legs",
+   "check": "before the motor (its tab and M2 head sit under the N10): post-cap tongues in crank 4's slots, tab on drive ear 2 (lowered to 1.0), M2 through the tab into block 2 tight, driven while the clamp is empty"
+  },
+  {
    "part": "pinion",
    "from": "-x",
    "tool": "hand",
-   "already": "legs",
+   "already": "cell-holder",
    "check": "on the bench: pressed on the N10 shaft to its stop, flat to the D"
   },
   {
@@ -400,21 +407,14 @@
    "from": "-x",
    "tool": "hand",
    "already": "pinion",
-   "check": "slid in along +x with its pinion, pinion meshes, flush"
-  },
-  {
-   "part": "cell-holder",
-   "from": "+z",
-   "tool": "1.5 mm hex key",
-   "already": "n10-motor",
-   "check": "after the drive unit, the axles and the motor: post-cap tongues in crank 4's slots, tab on drive ear 2, M2 through the tab into block 2 tight"
+   "check": "slid in along +x with its pinion over the holder tab, pinion meshes, flush; comes out along -x with the holder in place"
   },
   {
    "part": "ag13-cells",
    "from": "+z",
    "tool": "hand",
-   "already": "cell-holder",
-   "check": "+ toward the strip"
+   "already": "n10-motor",
+   "check": "+ toward the strip, each cell pressed against its spring as it goes down"
   },
   {
    "part": "cell-lid",
@@ -722,6 +722,6 @@
   }
  ],
  "open_questions": [],
- "diagram": "base > keel M2 > spine set (spine, cranks in open slots, idlers, drive-unit caps 1-3, 3 M2 axles: 1 and 2 through its lugs) > legs (window, pin) > N10 + pinion > cell-holder (post on the wall tops, tongues cap 4, tab M2 into drive block 2) > cells > lid; body snaps",
- "_validated": "0235c7d97523054c:7fb2512dcfe9"
+ "diagram": "base > keel M2 > spine set (spine, cranks in open slots, idlers, drive-unit caps 1-3, 3 M2 axles: 1 and 2 through its lugs) > legs (window, pin) > cell-holder (post on the wall tops, tongues cap 4, tab M2 into drive block 2) > N10 + pinion > cells > lid; body snaps",
+ "_validated": "0235c7d97523054c:d2ebb4d92cef"
 }

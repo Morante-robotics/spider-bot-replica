@@ -26,7 +26,7 @@ import os
 import sys
 import time
 
-from build123d import Align, Box, Cylinder, Face, Polyline, Pos, Rot, Solid, Spline, Vector, Wire, export_step, export_stl
+from build123d import Align, Box, Cylinder, Edge, Face, Polyline, PositionMode, Pos, Rot, Solid, Spline, Vector, Wire, export_step, export_stl
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "out")
@@ -87,14 +87,30 @@ def plan_n(z):
     return N_FOOT + (N_TOP - N_FOOT) * min(1.0, max(0.0, (z - Z_FOOT) / (Z_LEDGE - Z_FOOT)))
 
 
-def section(z, a, b, n, pts=PTS):
-    """Closed superellipse wire at height z, half-widths a (x) and b (y), about the bowl axis."""
+def section_pts(z, a, b, n, pts=PTS):
+    """The pts points of the superellipse section at height z, half-widths a (x) and b (y), about the bowl axis."""
     p = []
     for i in range(pts):
         t = 2 * math.pi * i / pts
         c, s = math.cos(t), math.sin(t)
         p.append((CX + a * math.copysign(abs(c) ** (2 / n), c), CY + b * math.copysign(abs(s) ** (2 / n), s), z))
-    return Wire([Spline(*p, periodic=True)])
+    return p
+
+
+def section(z, a, b, n, pts=PTS):
+    """Closed superellipse wire at height z, half-widths a (x) and b (y), about the bowl axis: the periodic chord-length
+    spline through the pts points, re-interpolated through pts * 2 points of itself (the pts points and the curve's
+    midpoint between each pair) with uniform parameters. The shape is the spline's (< 0.01 mm), but every station has
+    the same knot vector, so the loft needs no extra knots (a 35 x 32 pole skin, not 175 x 16 poles: every boolean on
+    the bowl is far faster)."""
+    p = section_pts(z, a, b, n, pts)
+    e = Edge.make_spline(p, periodic=True)
+    c = [0.0]
+    for u, v in zip(p, p[1:] + p[:1]):
+        c.append(c[-1] + math.dist(u, v))
+    q = [e.position_at((c[i] + c[i + 1]) / 2 / c[-1], position_mode=PositionMode.PARAMETER) for i in range(pts)]
+    two = [x for i in range(pts) for x in (Vector(*p[i]), q[i])]
+    return Wire([Edge.make_spline(two, periodic=True, parameters=[float(i) for i in range(2 * pts + 1)])])
 
 
 def skin(d, k):

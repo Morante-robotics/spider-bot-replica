@@ -41,3 +41,5 @@ cad/*/images/fidelity-*.png
 # Whole-robot fit check: point-cloud caches and reports are rebuilt by check.py
 cad/robot/fitcheck/.cache/
 cad/robot/fitcheck/out/
+# Whole robot: shells' STL/STEP, stage caches and the assembled reference (private) are rebuilt by build.py
+cad/robot/out/

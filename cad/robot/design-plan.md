@@ -15,10 +15,10 @@ Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric 
 | spine | two gear walls with open-top journal slots (TURN), idler-axle holes, keel seat; wall tops raised 0.8 under the holder post where idler 3's tip passes | carries the whole train as one unit | 3 | keel down, walls upright, slots up |
 | crankshafts | 4 printed cranks with gears, webs and Ø3 pins | each turns in the spine | 3 | axis vertical, one piece; support marks sanded (sandpaper) |
 | idlers | 3 idlers and the transfer compound, each GW - 0.4 wide, turning (TURN, Ø3.7 bore) on printed spacer sleeves Ø3.2 x 3.5 (M2-tapped bore Ø1.6, wall 0.8) clamped wall to wall by the M2 axle, so tightening does not pinch the walls | each turns on its axle | 1 | face down |
-| drive-unit | N10 clamp, transfer cheek, 2 blocks + ears; wall-top cheeks whose tongues cap cranks 1-3; two lugs on its -x plate clamped by idler axles 1 and 2 (STEEL holes, 1.2 wall) | motor comes out without the train | 2 | ear face down |
+| drive-unit | N10 clamp, transfer cheek, 2 blocks + ears; wall-top cheeks whose tongues cap cranks 1-3; two lugs on its -x plate clamped by idler axles 1 and 2 (STEEL holes, 1.2 wall); ear 2 lowered to 1.0 tall (the holder tab and its M2 head sit under the N10 and the lower clamp) | motor comes out without the train | 2 | ear face down |
 | pinion | 16 T m 0.6 pinion pressed on the N10's D-shaft (DSHAFT), meshes the transfer big gear | bought motor shaft; reprints alone | 0.2 | face down |
 | legs | 8 legs, end tube on the pin, ball in the window | each rides its own pin | 8 | flat on its side |
-| cell-holder | 3 x 2 AG13, spring, nickel strip, wire slot; the post (x ±4, y ±3 about the cells' centre) down to the wall tops, post-cap tongues cap crank 4; front tab (5.2 x 1.2) on drive ear 2 with the holder M2 (hole STEEL, head on the tab) down into drive block 2 / ear 2; front-bottom notch at drive block 2; 0.8 leg-arm pocket on its top edge | screwed to drive block 2, cells swap | 2 | floor down |
+| cell-holder | 3 x 2 AG13, spring, nickel strip, wire slot; the post (x ±4, y ±3 about the cells' centre) down to the wall tops, post-cap tongues cap crank 4; front tab (5.2 x 1.2) on drive ear 2 (lowered, under the N10 and its clamp) with the holder M2 (hole STEEL, head on the tab) down into drive block 2 / ear 2; front-bottom notch at drive block 2; 0.8 leg-arm pocket on its top edge | screwed to drive block 2, cells swap | 2 | floor down |
 | cell-lid | closes the cells | opens for cell swap | 1 | flat |
 | n10-motor | drive |  |  |  |
 | m2-screws | M2 socket cap ISO 4762 (1.5 mm hex key), self-tapping in PLA (pilot Ø1.6, assumed, proven on coupon c2, the holder's too): 3 idler axles (1 and 2 through the drive unit's lugs), 2 keel, 1 holder |  |  |  |
@@ -37,7 +37,7 @@ Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric 
 | leg-path | legs ↔ base | clearance | +x window · -x window · +y window · -y body rim · +z window · -z window | fits.LEG_PATH | as leg-on-pin | as leg-on-pin |
 | spine-on-keel | spine ↔ base | screw | +x keel · -x keel · +y keel · -y 2 M2 · +z keel · -z bowl floor | fits.STEEL | +z | undo 2 M2 from below |
 | drive-on-spine | drive-unit ↔ spine | screw | +x lug face on the -x wall, axle heads · -x lugs clamped by idler axles 1 and 2 · +y tongues in slots 1-3 · -y tongues in slots 1-3 · +z idler axles 1 and 2 through the lugs · -z cheeks on the wall tops | fits.STEEL | +z (on the bench, before the idler axles) | undo idler axles 1 and 2 along -x (spine set out of the base), lift the drive unit |
-| holder-on-drive-block | cell-holder ↔ drive-unit | screw | +x tab on drive ear 2, post tongues in slot 4 · -x tab on drive ear 2, post tongues in slot 4 · +y tongues in slot 4, M2 in the block · -y tongues in slot 4, M2 in the block · +z M2 (head on the tab) into drive block 2 / ear 2 · -z tab on the ear top, post on the wall tops | fits.STEEL | +z | undo the M2 (from above), lift the holder |
+| holder-on-drive-block | cell-holder ↔ drive-unit | screw | +x tab on drive ear 2, post tongues in slot 4 · -x tab on drive ear 2, post tongues in slot 4 · +y tongues in slot 4, M2 in the block · -y tongues in slot 4, M2 in the block · +z M2 (head on the tab) into drive block 2 / ear 2 · -z tab on the ear top, post on the wall tops | fits.STEEL | +z | slide the N10 out (-x), undo the M2 (from above), lift the holder |
 | lid-on-holder | cell-lid ↔ cell-holder | snap | +x rim · -x rim · +y rim · -y snap · +z rim · -z holder wall | fits.PRESS | +z | lift by its tab |
 | body-front-snaps | body ↔ base | snap | +x rim · -x front wall · +y rim · -y 2 hooks under ribs · +z rim · -z base ledge | fits.PRESS | +z | pull the body up (45 deg return faces) |
 | body-rear-tab | body ↔ base | snap | +x tab · -x tab · +y tab · -y snap rib · +z back sheet · -z ledge | fits.PRESS | +z | pull up with the front |
@@ -58,10 +58,10 @@ Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric 
 | 7 | spine | +z | hand | base | spine set (with the drive unit) on the keel |
 | 8 | m2-screws | -z | 1.5 mm hex key | spine | lay the base on its flank for the keel M2; crank 4 held in its slots by a rubber band over the walls until the holder caps it; 2 keel M2 tight |
 | 9 | legs | +z | hand | spine | dropped through its window, slid onto its pin along x, ball in its seat |
-| 10 | pinion | -x | hand | legs | on the bench: pressed on the N10 shaft to its stop, flat to the D |
-| 11 | n10-motor | -x | hand | pinion | slid in along +x with its pinion, pinion meshes, flush |
-| 12 | cell-holder | +z | 1.5 mm hex key | n10-motor | after the drive unit, the axles and the motor: post-cap tongues in crank 4's slots, tab on drive ear 2, M2 through the tab into block 2 tight |
-| 13 | ag13-cells | +z | hand | cell-holder | + toward the strip |
+| 10 | cell-holder | +z | 1.5 mm hex key | legs | before the motor (its tab and M2 head sit under the N10): post-cap tongues in crank 4's slots, tab on drive ear 2 (lowered to 1.0), M2 through the tab into block 2 tight, driven while the clamp is empty |
+| 11 | pinion | -x | hand | cell-holder | on the bench: pressed on the N10 shaft to its stop, flat to the D |
+| 12 | n10-motor | -x | hand | pinion | slid in along +x with its pinion over the holder tab, pinion meshes, flush; comes out along -x with the holder in place |
+| 13 | ag13-cells | +z | hand | n10-motor | + toward the strip, each cell pressed against its spring as it goes down |
 | 14 | cell-lid | +z | hand | ag13-cells | snaps shut |
 | 15 | jst-xh | +z | hand | cell-lid | latched |
 | 16 | leds | +y | hand | body | domes in the eye bores |
@@ -114,4 +114,4 @@ Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric 
 
 ## Diagram
 
-<img src="base > keel M2 > spine set (spine, cranks in open slots, idlers, drive-unit caps 1-3, 3 M2 axles: 1 and 2 through its lugs) > legs (window, pin) > N10 + pinion > cell-holder (post on the wall tops, tongues cap 4, tab M2 into drive block 2) > cells > lid; body snaps" alt="Plan diagram">
+<img src="base > keel M2 > spine set (spine, cranks in open slots, idlers, drive-unit caps 1-3, 3 M2 axles: 1 and 2 through its lugs) > legs (window, pin) > cell-holder (post on the wall tops, tongues cap 4, tab M2 into drive block 2) > N10 + pinion > cells > lid; body snaps" alt="Plan diagram">
