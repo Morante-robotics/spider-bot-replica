@@ -4,6 +4,7 @@ the legs' inner arms from cad/motion.py over 24 poses, and helpers to sample box
 modification time of the build modules they come from."""
 import sys, os, math, json, numpy as np
 from scipy.spatial import cKDTree
+import fit_samplers as _FS
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", "..", "..")); sys.path.insert(0, ROOT); sys.path.insert(0, ROOT + "/cad")
 CACHE = os.path.join(HERE, ".cache"); os.makedirs(CACHE, exist_ok=True)
@@ -146,16 +147,17 @@ def box(lo, hi, h=0.5):
         o = [i for i in range(3) if i != k]; A, B = np.meshgrid(ax[o[0]], ax[o[1]], indexing="ij")
         for v in (lo[k], hi[k]):
             P_ = np.zeros((A.size, 3)); P_[:, k] = v; P_[:, o[0]] = A.ravel(); P_[:, o[1]] = B.ravel(); pts.append(P_)
-    return np.vstack(pts)
+    q = np.vstack(pts); _FS.log_prim("box", q, lo=lo, hi=hi); return q
 def cyl_x(y, z, r, x0, x1, h=0.5):
     n = max(12, int(2 * np.pi * r / h)); t = np.linspace(0, 2 * np.pi, n, endpoint=False)
     xs = np.linspace(x0, x1, max(2, int((x1 - x0) / h) + 1)); pts = [np.c_[np.repeat(xs, n), np.tile(y + r * np.cos(t), len(xs)), np.tile(z + r * np.sin(t), len(xs))]]
     for x in (x0, x1):
         for rr in np.linspace(0, r, max(2, int(r / h) + 1)):
             pts.append(np.c_[np.full(n, x), y + rr * np.cos(t), z + rr * np.sin(t)])
-    return np.vstack(pts)
+    q = np.vstack(pts); _FS.log_prim("cyl", q, a=np.array([x0, y, z], float), b=np.array([x1, y, z], float), r=r); return q
 def cyl_z(x, y, r, z0, z1, h=0.5):
-    q = cyl_x(y, x, r, z0, z1, h); return q[:, [1, 2, 0]][:, [1, 0, 2]] if False else np.c_[q[:, 2], q[:, 1], q[:, 0]]
+    q = cyl_x(y, x, r, z0, z1, h); _FS.PRIMS.pop(); q = np.c_[q[:, 2], q[:, 1], q[:, 0]]
+    _FS.log_prim("cyl", q, a=np.array([x, y, z0], float), b=np.array([x, y, z1], float), r=r); return q
 def capsule(a, b, r, h=0.5):
     a, b = np.asarray(a, float), np.asarray(b, float); L = np.linalg.norm(b - a); n = max(2, int(L / h) + 1)
     c = a + np.linspace(0, 1, n)[:, None] * (b - a); return c, r     # centre-line, radius

@@ -21,7 +21,7 @@ LAYOUT = dict(MANG=78, PY=14.4, PZ=31, TANG=107.5, DSY1=8.3, DSY2=8.075, DBH=2.4
 for _k, _v in LAYOUT.items(): os.environ.setdefault(_k, str(_v))
 from fit_env import *
 import fit_legs as LR
-from fit_samplers import cyl_ax, swept_x
+from fit_samplers import cyl_ax, swept_x, solids_of, inside_depth, add_solid, EXTRA_SOLIDS
 E = lambda k, d: float(os.environ.get(k, d))
 # ---------------- gear train: module from the scale, m 1 proven at 120 % -> 0.583 at 70 % -> m 0.6
 M = 0.6; ZT = 12; ZP = 16; ZB = 20; ZS = 15; W = 1.2; GW = 3.0
@@ -83,13 +83,19 @@ DSY = E("DSY", 8.0); DZT = E("DZT", 26.0)          # drive unit screws: 2 M2 dow
 def _top_below(y):                                   # highest gear tip under y (between the walls)
     t = [c[1] + rt(ZI[i]) for i, c in enumerate(I) if abs(c[0] - y) < rt(ZI[i]) + 2.6] + [Oz + rt(ZT) for o in Oy if abs(o - y) < rt(ZT) + 2.6]
     return max(t + [ytop])
+# re-plan 2026-11-22: the 2 drive M2 bit only the drive unit's own blocks; the drive unit is held instead by lugs on its
+# left plate (x -wx1-W .. -wx1, outside the -x wall) clamped by idler axles 1 and 2 (head on the lug, STEEL hole)
+LUGR = 1.0 + F.STEEL.side + W                         # lug round the M2 shank: hole STEEL, wall 1.2
+for k_ in (0, 1):
+    ST["drive-unit"] = np.vstack([ST["drive-unit"], cyl_x(I[k_][0], I[k_][1], LUGR, -wx1 - W, -wx1),
+                                  box((-wx1 - W, I[k_][0] - LUGR, I[k_][1]), (-wx1, I[k_][0] + LUGR, DZT + 0.5))])
 DBH = E("DBH", 2.6); ZB, YB = [], []                                  # block / ear half-length in y
 for k, y in enumerate((T[0] - E("DSY1", DSY), T[0] + E("DSY2", DSY))):
     zb = _top_below(y) + F.GEAR_TIP.side
     y0b = y - DBH; ZB.append(zb); YB.append((y0b, y + DBH))
     ST[f"drive-block-{k+1}"] = box((-wx1, y0b, zb), (wx1, y + DBH, DZT - 0.01))
     hs_ = E("HSINK2", 0.3) if k == 1 else 0.0            # screw 2's head counterbored into its ear (local reshape: N10 clearance)
-    ST[f"drive-screw-{k+1}"] = np.vstack([cyl_z(0, y, 1.0, max(DZT - 5.0, zb + 0.01), DZT + 2.4 - hs_), cyl_z(0, y, 1.9, DZT + 2.4 - hs_, DZT + 3.8 - hs_)]); HW.add(f"drive-screw-{k+1}")
+    if E("DSCREW", 0): ST[f"drive-screw-{k+1}"] = np.vstack([cyl_z(0, y, 1.0, max(DZT - 5.0, zb + 0.01), DZT + 2.4 - hs_), cyl_z(0, y, 1.9, DZT + 2.4 - hs_, DZT + 3.8 - hs_)]); HW.add(f"drive-screw-{k+1}") if E("DSCREW", 0) else None
     ST[f"drive-ear-{k+1}"] = box((-2.6, y - DBH, DZT), (2.6, y + DBH, DZT + 2.4 - 0.01))
 # cells: 3 stacks of 2 AG13 lying along y, side by side along x; conical spring + nickel strip; lid on top
 cy, cz = E("PY", 12.0), E("PZ", 30.0); pd = 11.6 + 2 * F.STEEL.side; pitch = pd + 0.8
@@ -117,6 +123,7 @@ if HNOTCH:
     in_h = lambda q: np.any([inb(q, a, b) for a, b in HB], axis=0)
     _hq = ST["cell-holder"]; NOTCHES = []
     for _n, _g in (("drive-block-2", 0.55), ("drive-ear-2", 0.55), ("drive-screw-2", 0.2), ("drive-unit", 0.55)):
+        if _n not in ST: continue
         _d = cKDTree(_hq).query(ST[_n])[0]; s_ = ST[_n][_d < _g + E("HNS", 1.2)]
         if not len(s_): continue
         lo_, hi_ = s_.min(0) - _g, s_.max(0) + _g; lo_ = np.maximum(lo_, HB[0][0]); hi_ = np.minimum(hi_, (hx, cy + hy, cz + pd/2))
@@ -139,10 +146,40 @@ SPRISE = max(0.0, zhp - ytop)                        # local reshape: spine wall
 if SPRISE > 0:
     ST["spine"] = np.vstack([ST["spine"]] + [box((wx0 if sx > 0 else -wx1, cy + HSY - 3, ytop), (wx1 if sx > 0 else -wx0, cy + HSY + 3, zhp)) for sx in (1, -1)])
 YB_END = YB[1][1]; ZCAP = min(ZB) + 0.0
-ST["holder-post"] = box((-wx1, cy + HSY - 3, zhp), (wx1, cy + HSY + 3, cz - pd/2 - W - 0.01))     # the holder's foot on the spine top
+# re-plan 2026-11-22 (coordinator): the post is the holder's again (it comes down with the holder, after the drive unit and the axles);
+# the holder M2 goes down through a tab on the holder's front wall into drive block 2 / ear 2 (where drive screw 2 was).
+# POSTSPINE=1 keeps the previous geometry (post in the spine, boss in a recess, M2 in the post) only to show the path solid test flips it.
+POSTSPINE = int(E("POSTSPINE", 0))
+zpt = cz - pd/2 - W - 0.01                              # post top: the holder floor's underside
+HEADB = None
+if not POSTSPINE:
+    ST["holder-post"] = box((-wx1, cy + HSY - 3, zhp), (wx1, cy + HSY + 3, zpt))     # the holder's foot on the spine top
+    add_solid("holder-post", (-wx1, cy + HSY - 3, zhp), (wx1, cy + HSY + 3, zpt))
+    TABHW = E("TABHW", 2.6); HSYY = 0.5 * (YB[1][0] + YB[1][1]); ztb = DZT + 2.4          # tab half-width; screw y = ear 2's centre; tab rests on its top
+    TABZ1 = ztb + W; HR = 1.0 + F.STEEL.side                                              # tab top (1.2 thick), hole round the shank (STEEL)
+    _tb = box((-TABHW, HSYY - TABHW, ztb), (TABHW, cy - hy + W, TABZ1)); _tb = _tb[np.hypot(_tb[:, 0], _tb[:, 1] - HSYY) >= HR + 1e-6]
+    _zz = np.linspace(ztb, TABZ1, 6)
+    ST["cell-holder"] = np.vstack([ST["cell-holder"], _tb, np.c_[HR * np.cos(np.linspace(0, 2 * np.pi, 24, endpoint=False))[None].repeat(len(_zz), 0).ravel(), HSYY + HR * np.sin(np.linspace(0, 2 * np.pi, 24, endpoint=False))[None].repeat(len(_zz), 0).ravel(), np.repeat(_zz, 24)]])   # hole wall
+    HSCREW = np.vstack([cyl_z(0, HSYY, 1.0, max(TABZ1 - E("HSL", 8.0), ZB[1] + 0.01), TABZ1), cyl_z(0, HSYY, 1.9, TABZ1, TABZ1 + 1.4)])
+else:
+    PHW = E("PHW", 4.0); BOSSR = E("BOSSR", 3.0); BOSSD = E("BOSSD", 1.6); RECR = BOSSR + F.LOCATOR.side
+    zrec = zpt - BOSSD - F.LOCATOR.side          # recess floor (boss end LOCATOR above it)
+    _pq = box((-PHW, cy + HSY - 3, zhp), (PHW, cy + HSY + 3, zpt)); _pq = _pq[~((np.hypot(_pq[:, 0], _pq[:, 1] - cy - HSY) < RECR) & (_pq[:, 2] > zrec + 1e-6))]
+    _t = np.linspace(0, 2 * np.pi, 48, endpoint=False)
+    _pq = np.vstack([_pq] + [np.c_[RECR * np.cos(_t), cy + HSY + RECR * np.sin(_t), np.full(48, z_)] for z_ in np.arange(zrec, zpt, 0.25)]
+                    + [np.c_[rr * np.cos(_t), cy + HSY + rr * np.sin(_t), np.full(48, zrec)] for rr in np.linspace(0, RECR, 6)])
+    ST["spine"] = np.vstack([ST["spine"], _pq])
+    # its solid below the recess floor: slot 4 is cut through the walls' part only (|x| in wx0..wx1); the middle and the outside are full
+    _y0, _y1, _s4 = cy + HSY - 3, cy + HSY + 3, Oy[3] - (JR + F.TURN.side)
+    for _xa, _xb, _ya, _yb in [(-PHW, -wx1, _y0, _y1), (wx1, PHW, _y0, _y1), (-wx0, wx0, _y0, _y1), (wx0, wx1, _y0, min(_y1, _s4)), (-wx1, -wx0, _y0, min(_y1, _s4))]:
+        add_solid("spine", (_xa, _ya, zhp), (_xb, _yb, zrec))
+    HEADB = cz - pd/2 - F.STEEL.side - 1.4                 # head bottom: its top STEEL under the floor top (cells clear above)
+    _hb = cyl_z(0, cy + HSY, BOSSR, zpt - BOSSD, zpt + 0.02)
+    _cb = (np.hypot(ST["cell-holder"][:, 0], ST["cell-holder"][:, 1] - cy - HSY) < 1.9 + F.STEEL.side) & (ST["cell-holder"][:, 2] > HEADB - 1e-6) & (ST["cell-holder"][:, 2] < cz - pd/2 + 0.3)
+    ST["cell-holder"] = np.vstack([ST["cell-holder"][~_cb], _hb, cyl_z(0, cy + HSY, 1.9 + F.STEEL.side, HEADB, cz - pd/2)])
 SLW = JR + F.TURN.side                                # slot half-width (journal + TURN)
 PY0 = cy + HSY - 3; PY1 = max(cy + HSY + 3, Oy[3] + SLW + W)
-wtop = lambda y: np.where(np.abs(y - (cy + HSY)) <= 3, max(zhp, ytop), ytop)
+wtop = lambda y: np.where(np.abs(y - (cy + HSY)) <= 3, max(zpt if POSTSPINE else zhp, ytop), ytop)
 def _slots(q):
     m = np.zeros(len(q), bool)
     for o in Oy: m |= ((np.abs(q[:, 1] - o) < SLW - 1e-6) & (q[:, 2] > Oz - 1e-6) | (np.hypot(q[:, 1] - o, q[:, 2] - Oz) < SLW - 1e-6)) & (np.abs(q[:, 0]) > wx0 - 1e-6) & (np.abs(q[:, 0]) < wx1 + 1e-6)   # U slot: straight sides and its round floor
@@ -153,6 +190,9 @@ for o in Oy:
         for x_ in np.linspace(wx0, wx1, 4) * sx:
             zt_ = float(wtop(o)); zz_ = np.arange(Oz, zt_, 0.25); _sf += [np.c_[np.full(len(zz_), x_), np.full(len(zz_), o + e_ * SLW), zz_] for e_ in (1, -1)]
             t_ = np.linspace(np.pi, 2 * np.pi, 25); _sf.append(np.c_[np.full(25, x_), o + SLW * np.cos(t_), Oz + SLW * np.sin(t_)])
+for sx in ((1, -1) if POSTSPINE else ()):
+    for x_ in np.linspace(wx0, wx1, 4) * sx:
+        zz_ = np.arange(zhp, zpt, 0.25); _sf.append(np.c_[np.full(len(zz_), x_), np.full(len(zz_), Oy[3] - SLW), zz_])
 ST["spine"] = np.vstack([_sq[~_slots(_sq)]] + _sf)
 TG = SLW - F.TURN.side                                # cap tongue half-width in the slot (TURN a side)
 ztg = Oz + JR + F.TURN.side                           # tongue foot over the journal (TURN)
@@ -165,9 +205,11 @@ ST["journal-caps"] = np.vstack(cap)
 pc = []
 for sx in (1, -1):
     xa, xb = (wx0, wx1) if sx > 0 else (-wx1, -wx0); pc.append(box((xa, Oy[3] - TG, ztg), (xb, Oy[3] + TG, zhp)))
-pc.append(box((-wx1, cy + HSY + 3, zhp), (wx1, PY1, cz - pd/2 - W - 0.01)))
+pc.append(box((-wx1, cy + HSY + 3 + (F.NEIGHBOUR.side if POSTSPINE else 0), zhp), (wx1, PY1, cz - pd/2 - W - 0.01)))
+for sx in ((1, -1) if POSTSPINE else ()):              # (old geometry) tongue 4 runs up through the post's slot to the holder floor
+    xa, xb = (wx0, wx1) if sx > 0 else (-wx1, -wx0); pc.append(box((xa, Oy[3] - TG, zhp), (xb, Oy[3] + TG, cz - pd/2 - W - 0.01)))
 ST["post-cap"] = np.vstack(pc)
-ST["holder-screw"] = np.vstack([cyl_z(0, cy + HSY, 1.0, (zhp + 0.01) if HSZ else ytop - 4, cz - pd/2), cyl_z(0, cy + HSY, 1.9, cz - pd/2, cz - pd/2 + 1.4)]); HW.add("holder-screw")
+ST["holder-screw"] = (np.vstack([cyl_z(0, cy + HSY, 1.0, zhp + 0.01, HEADB), cyl_z(0, cy + HSY, 1.9, HEADB, HEADB + 1.4)]) if POSTSPINE else HSCREW); HW.add("holder-screw")
 # leg pivots: the toy's notch: a ball on the leg root in the base wall window, held down by the body's rim
 PB = P["r_root"]
 # body screws: a pair M2 from below, through posts on the base wall into bosses under the body rim, at angle BSA
@@ -300,12 +342,17 @@ SEATED_SHELL = {"spine-keel", "snap-finger-1", "snap-finger-2", "snap-rib-1", "s
                 "resistor-r", "resistor-l", "led-leads-r", "led-leads-l"}
 ALL = {**ST, **MV, **BD}
 _dead = sorted(tuple(sorted(p)) for p in D if any(n not in ALL for n in p)); D = {p for p in D if all(n in ALL for n in p)}
+if POSTSPINE: des(("holder-screw", "spine"), ("cell-holder", "spine"))   # old: screw bites the post (spine); boss in its LOCATOR recess (checked below)
+else: des(("holder-screw", "drive-block-2"), ("holder-screw", "drive-ear-2"), ("cell-holder", "drive-ear-2"))   # screw bites block 2 / ear 2; the tab rests on the ear
 print("DEAD designed pairs (a name that is not a part here), removed:", len(_dead), _dead)
 tick("parts"); rows = []; seats = []; tick(f"crankshafts pts {len(MV['crankshafts'])}")
 BB = {n: (q.min(0), q.max(0)) for n, q in ALL.items()}
 def bbd(a_, b_):
     (l1, h1), (l2, h2) = BB[a_], BB[b_]; return float(np.linalg.norm(np.maximum(0, np.maximum(l1 - h2, l2 - h1))))
 FAR = 3.0; KD = {n: cKDTree(q) for n, q in ALL.items()}
+SOLIDS = {n: solids_of(ALL[n], KD[n]) for n in HW if n in ALL and n != "ag13-cells"}; FLIPPED = []
+SOLIDS["ag13-cells"] = [dict(kind="cyl", a=np.array([xs, cy - 5.4, cz]), b=np.array([xs, cy + 5.4, cz]), r=5.8) for xs in (-pitch, 0, pitch)]
+print("hardware solids (primitives per part)", {n: len(v) for n, v in SOLIDS.items()})
 def shell_gap(q):                                    # gaps over 3 mm are reported as 3 (either sign): rows only need the least
     d, _ = WALL_T.query(q, distance_upper_bound=3.0, workers=-1); d = np.minimum(d, 3.0); ins = inside(q); gg = np.where(ins, d, -d); k = int(np.argmin(gg)); return gg[k], q[k]
 for n, q in ALL.items():
@@ -316,7 +363,14 @@ for a_, b_ in itertools.combinations(ALL, 2):
         if bbd(a_, b_) < FAR: seats.append((a_, b_, f"designed, gap {KD[a_].query(ALL[b_])[0].min():.2f}"))
         continue
     if bbd(a_, b_) > FAR: continue
-    gq = KD[a_].query(ALL[b_])[0]; k = int(np.argmin(gq)); rows.append((gq[k], need(a_, b_), a_, b_, np.round(ALL[b_][k], 1)))
+    gq = KD[a_].query(ALL[b_])[0]; k = int(np.argmin(gq)); g0_ = gq[k]; at_ = np.round(ALL[b_][k], 1)
+    for h_, o_ in ((a_, b_), (b_, a_)):                # solid-in-solid: the other part's samples inside a hardware solid
+        if h_ in SOLIDS:
+            dd_ = inside_depth(ALL[o_], SOLIDS[h_]); j_ = int(np.argmax(dd_))
+            if dd_[j_] > 0.05 and -dd_[j_] < g0_:
+                if g0_ >= need(a_, b_) - 0.1: FLIPPED.append((a_, b_, round(float(g0_), 2), round(-float(dd_[j_]), 2)))
+                g0_, at_ = -float(dd_[j_]), np.round(ALL[o_][j_], 1)
+    rows.append((g0_, need(a_, b_), a_, b_, at_))
 for n_ in [f"idler-{i+1}" for i in range(3)] + ["transfer-small"]:   # axial faces to the spine walls: GEAR_THRUST_IDLER
     _x = ALL[n_][:, 0]
     rows.append((float(min(wx0 - _x.max(), wx0 + _x.min())), F.GEAR_THRUST_IDLER.side, n_, "spine wall faces (axial THRUST)", ""))
@@ -324,6 +378,11 @@ for n_ in [f"idler-{i+1}" for i in range(3)] + ["transfer-small"]:   # axial fac
 for i in range(4):
     gq = KD["spine-keel"].query(ALL[f"crank-gear-{i+1}"] - [0, 0, KSLOT])[0]; k = int(np.argmin(gq))
     rows.append((gq[k], F.GEAR_TIP.side, "spine-keel", f"crank-gear-{i+1} at slot bottom (-{KSLOT:.2f})", np.round(ALL[f"crank-gear-{i+1}"][k], 1)))
+if POSTSPINE:
+    _rq = _pq[np.hypot(_pq[:, 0], _pq[:, 1] - cy - HSY) < RECR + 0.01]
+    rows.append((float(cKDTree(_rq).query(_hb)[0].min()), F.LOCATOR.side, "holder boss", "post recess (spine)", ""))
+_lug = ST["drive-unit"][(ST["drive-unit"][:, 0] < -wx1 + 1e-6)]
+print("solid-in-solid rows flipped (pair, point gap, signed)", len(FLIPPED), FLIPPED)
 tick("pairs")
 # local pockets in the two parts that meet a leg arm's sweep (spec: reshape the colliding part locally): their surface within PKR of the arms' sweep is pushed back to PKR
 PKR = E("PKR", 0.85); _AT0 = cKDTree(vox(np.vstack(ARMS), 0.25)); POCKETS, POCKET_DROPPED = {}, {}
@@ -519,12 +578,16 @@ tick("lift-off")
 # the legs over 24 poses in every stage after them; driver lines as filled cylinders
 PATHQ = {}
 LEGS_IN = cKDTree(vox(np.vstack(ARMS), 0.3))
+PSOLID = int(E("PSOLID", 1)); PSOL = []                 # path solid test: a moving part's points inside a placed part's solid are a FAIL (negative gap)
 def path(q, d, dist, against, shell=True, legs=False, extra=None):
-    worst = (3.0, 0, "")
+    worst = (3.0, 0, ""); qv = vox(q, 0.35)
     for t in np.arange(0.5, dist, 0.5):
         qq = q + t * np.asarray(d, float)
         for o in against:
             g_ = KD[o].query(qq, distance_upper_bound=3.0)[0].min()
+            if PSOLID and (o in SOLIDS or o in EXTRA_SOLIDS):
+                dd_ = inside_depth(qv + t * np.asarray(d, float), SOLIDS.get(o, []) + EXTRA_SOLIDS.get(o, []))
+                if dd_.max() > 0.05 and -dd_.max() < g_: PSOL.append((o, round(t, 1), round(float(g_), 2), round(-float(dd_.max()), 2))); g_ = -float(dd_.max())
             if g_ < worst[0]: worst = (g_, t, o)
         if legs:
             g_ = LEGS_IN.query(qq, distance_upper_bound=3.0)[0].min()
@@ -570,8 +633,12 @@ def driver(n, c, d, against, legs=False, extra=None, r=2.25, Ld=40.0):
         gg = LEGS_IN.query(q, distance_upper_bound=4.0)[0].min()
         if gg < g_[0]: g_ = (gg, "legs (24 poses)")
     rows.append((min(g_[0], 4.0), 0.0, n, f"driver line {tuple(np.round(d, 2))} vs {g_[1]} (filled Ø{2*r:.1f})", ""))
+# 3 (re-plan 2026-11-22) drive unit down (+z) on the bench: tongues into slots 1-3 (TURN), lugs outside the -x wall; no axles yet
+DUQ = np.vstack([ST["drive-unit"], ST["journal-caps"], ST["drive-block-1"], ST["drive-block-2"], ST["drive-ear-1"], ST["drive-ear-2"]])
+prow("drive-unit", F.NEIGHBOUR.side, path(DUQ, up, 30, ["spine", "crankshafts", "transfer-small"] + GEARS, shell=False), "+z (bench)", "(tongues in slots TURN)")
+# 4 idler axles M2 along +x (head -x, on the lugs for 1 and 2): driver line out along -x vs the spine set and the drive unit
 for i, c in enumerate(I):
-    driver(f"idler-axle-{i+1}", np.array([-wx1 - 1.2, c[0], c[1]]), (-1, 0, 0), ["spine", "crank@KC"] + GEARS)
+    driver(f"idler-axle-{i+1}", np.array([-wx1 - W, c[0], c[1]]), (-1, 0, 0), ["spine", "crank@KC", "drive-unit"] + GEARS)
 tick('stage 3 axles')
 # 4 the spine set (spine, cranks at KC, idlers, axles) down onto the keel: vs shell, snap ribs
 # local pockets in the base's inner face where the spine set's gear tips pass the rim (front, back): inner face moved out by
@@ -581,7 +648,7 @@ for x0_, x1_, y0_, y1_, z0_, z1_, dy_ in SPK:
     _m = (WALL_PTS[:, 0] > x0_) & (WALL_PTS[:, 0] < x1_) & (WALL_PTS[:, 1] > y0_) & (WALL_PTS[:, 1] < y1_) & (WALL_PTS[:, 2] > z0_) & (WALL_PTS[:, 2] < z1_)
     WALL_PTS = WALL_PTS.copy(); WALL_PTS[_m] += [0, dy_, 0]
 if SPK: WALL_T = cKDTree(WALL_PTS); print("spine-set rim pockets (x0,x1,y0,y1,z0,z1,dy)", SPK)
-SPSET = np.vstack([ST["spine"], CRK] + [MV[g] for g in GEARS] + [ST[f"idler-axle-{i+1}"] for i in range(3)])
+SPSET = np.vstack([ST["spine"], CRK, DUQ, MV["transfer-small"], MV["transfer-big"], ST["transfer-axle"]] + [MV[g] for g in GEARS] + [ST[f"idler-axle-{i+1}"] for i in range(3)])
 prow("spine set", 0.0, path(SPSET, up, 28, ["snap-rib-1", "snap-rib-2"]), "+z onto the keel")
 for k_ in (1, 2): driver(f"keel-screw-{k_}", np.array([0, (-KY + 1.8, KY - 1.8)[k_ - 1], -1.8]), (0, 0, -1), [], legs=True)
 tick('stage 4 spine set')
@@ -639,7 +706,7 @@ LUP = E("LUP", 14.0)                                  # then up out of the open-
 def legpath(t, u_): return t * u_ if t <= LSL else LSL * u_ + np.array([0, 0, t - LSL])   # slide off the pin along u (LSL), then lift +z
 LG = {}; WIN = {}; KL = {}
 LPOSES = [int(v) for v in os.environ.get("LPOSES", ",".join(str((KC + d) % 24) for d in (0, 6, 12, 18))).split(",")]
-ag = ["spine", "spine-keel", "keel-screw-1", "keel-screw-2", "snap-rib-1", "snap-rib-2"] + GEARS + [f"idler-axle-{j+1}" for j in range(3)]
+ag = ["spine", "spine-keel", "keel-screw-1", "keel-screw-2", "snap-rib-1", "snap-rib-2", "drive-unit", "journal-caps", "drive-block-1", "drive-block-2", "drive-ear-1", "drive-ear-2", "transfer-big", "transfer-axle"] + GEARS + [f"idler-axle-{j+1}" for j in range(3)]
 AGT = cKDTree(np.vstack([ALL[o] for o in ag]))
 def _leg_task(Lg):
     n0 = len(rows)
@@ -670,20 +737,19 @@ for Lg, (_r, _k, _w, _rw) in enumerate(_res):
 print("leg insertion crank poses", KL); tick("leg windows")
 tick('legs done')
 # 6 drive unit down (+z): tongues into slots 1-3 (TURN), blocks over the gears; legs in (24 poses)
-DUQ = np.vstack([ST["drive-unit"], ST["journal-caps"], ST["drive-block-1"], ST["drive-block-2"], ST["drive-ear-1"], ST["drive-ear-2"]])
-prow("drive-unit", F.NEIGHBOUR.side, path(DUQ, up, 30, ["spine", "crankshafts", "transfer-small"] + GEARS + [f"idler-axle-{j+1}" for j in range(3)], legs=True), "+z", "(tongues in slots TURN)")
+# 6 the drive unit went in on the bench (stage 3) and travelled in with the spine set
 PLACED = ["spine", "crankshafts", "transfer-small", "transfer-big", "drive-unit", "journal-caps", "drive-block-1", "drive-block-2", "drive-ear-1", "drive-ear-2"] + GEARS + [f"idler-axle-{j+1}" for j in range(3)]
-for k_ in (1, 2):
+for k_ in ((1, 2) if E("DSCREW", 0) else ()):
     c = ST[f"drive-screw-{k_}"].mean(0); c[2] = ST[f"drive-screw-{k_}"][:, 2].max(); driver(f"drive-screw-{k_}", c, up, [o for o in PLACED if o != "drive-unit"] + [f"drive-block-{3-k_}"], legs=True)
 # 7 motor slides into its clamp along +x (out: -x)
 prow("n10-motor", 0.0, path(np.vstack([ST["n10-motor"], ST["n10-shaft"]]), (-1, 0, 0), 24, ["spine", "transfer-big", "transfer-small", "journal-caps", "drive-block-1", "drive-block-2", "drive-ear-1", "drive-ear-2"] + GEARS, legs=True), "-x (out of the clamp)")
 PLACED += ["n10-motor", "n10-shaft", "pinion", "motor-leads"]
 # 8 holder with its post down (+z): post cap tongues into crank 4's slots (TURN); then its screw
-HQ = np.vstack([ST["cell-holder"], ST["holder-post"], ST["cell-springs"], ST["nickel-strip"]])
+HQ = np.vstack([ST["cell-holder"]] + ([ST["holder-post"]] if "holder-post" in ST else []) + [ST["cell-springs"], ST["nickel-strip"]])
 prow("cell-holder", 0.0, path(HQ, up, 30, [o for o in PLACED if o != "spine"], legs=True), "+z")
 prow("post-cap", F.NEIGHBOUR.side, path(ST["post-cap"], up, 30, ["spine", "crankshafts"] + GEARS, legs=True), "+z into crank 4's slots", "(TURN)")
 c = ST["holder-screw"].mean(0); c[2] = ST["holder-screw"][:, 2].max(); driver("holder-screw", c, up, PLACED + ["cell-springs", "nickel-strip"], legs=True)
-PLACED += ["cell-holder", "holder-post", "post-cap", "cell-springs", "nickel-strip"]
+PLACED += ["cell-holder", "post-cap", "cell-springs", "nickel-strip"] + (["holder-post"] if "holder-post" in ST else [])
 for n, ag_ in (("ag13-cells", PLACED), ("cell-lid", PLACED + ["ag13-cells"]), ("jst-xh", PLACED + ["ag13-cells", "cell-lid"])):
     prow(n, 0.0, path(ALL[n], up, 25, [o for o in ag_ if o not in ("cell-holder",) or n == "jst-xh"], legs=True), "+z")
 tick('stage 6-8')
@@ -757,3 +823,4 @@ if E("FIG", 0):                                       # Morante's picture: base 
     ax[0].set_ylabel("z (mm)"); fig.suptitle(f"Base shell seen from outside at leg {LGF} window (pivot y {c[1]:.1f}, z {c[2]:.1f}); red = wall removed, blue = real leg neck (24 poses)", fontsize=9)
     fig.tight_layout(); fig.savefig(os.path.join(OUT, "window_old_vs_new.png"), dpi=130)
     print("window removal on the outer skin (old, new) points", int(old.sum()), int(new.sum()), "new bbox", np.round(sk[new].min(0), 1).tolist(), np.round(sk[new].max(0), 1).tolist())
+print("path solid test: steps inside a placed part's solid (part, step mm, surface gap, signed depth)", len(PSOL), PSOL[:40])
