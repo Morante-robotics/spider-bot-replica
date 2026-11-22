@@ -5,7 +5,7 @@ the open problems of the fit check, each marked where it happens.
 
 **Open it:** double-click [`index.html`](index.html). It works from disk in Safari, Firefox and Chrome, with no
 server. Everything it needs is in this folder. Only the fonts come from Google Fonts, and without a connection the
-page uses the system fonts. The same page is published as the claude.ai artifact *Spider-Bot Replica Viewer*.
+page uses the system fonts.
 
 ## What it shows
 
@@ -26,8 +26,8 @@ After a fit check run or a changed part:
 ```
 
 It runs the parts half of `check.py` (≈ 10 s with its caches, none of the pair checks) and rewrites
-`robot-data.js` and `index.html`. When only `src/page.html` changed, `--page` rewrites `index.html` alone. Then
-publish the artifact again (page `src/page.html`, with `robot-data.js` and `three-r147.js` beside it).
+`robot-data.js` and `index.html`. When only `src/page.html` changed, `--page` rewrites `index.html` alone. Commit
+the regenerated files with the change that caused them.
 
 A new problem without plain words in `src/page.html` (`TEXT`) is shown with its part names; add its title and
 description there.
