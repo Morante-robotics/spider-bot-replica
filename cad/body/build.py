@@ -26,7 +26,7 @@ import time
 import numpy as np
 from scipy.interpolate import PchipInterpolator
 from build123d import (Axis, Box, Cylinder, Face, Location, Plane, Pos, Rot, Solid, Spline, Torus, Wire,
-                       export_step, export_stl, extrude, loft, Polygon)
+                       export_step, export_stl, extrude, loft, Polygon, Edge, PositionMode, Vector)
 from OCP.BRep import BRep_Tool
 from OCP.BRepBuilderAPI import BRepBuilderAPI_Transform
 from OCP.gp import gp_Pnt, gp_Trsf
@@ -123,11 +123,25 @@ def se_points(z, a, bf, bb, nf, nb, n=SKIN_PTS):
     return [(float(xi), float(yi), float(z)) for xi, yi in zip(x, y)]
 
 
+def section_wire(p):
+    """Closed periodic spline through the points p (chord-length), re-interpolated through 2 * len(p) points of itself
+    (p and the curve's midpoint between each pair) with uniform parameters: the shape is the spline's, but every
+    station has the same knot vector, so the loft needs no extra knots (few poles: booleans on the skin are fast)."""
+    n = len(p)
+    e = Edge.make_spline([Vector(*q) for q in p], periodic=True)
+    c = [0.0]
+    for u, v in zip(p, p[1:] + p[:1]):
+        c.append(c[-1] + float(np.linalg.norm(np.subtract(u, v))))
+    mid = [e.position_at((c[i] + c[i + 1]) / 2 / c[-1], position_mode=PositionMode.PARAMETER) for i in range(n)]
+    two = [x for i in range(n) for x in (Vector(*p[i]), mid[i])]
+    return Wire([Edge.make_spline(two, periodic=True, parameters=[float(i) for i in range(2 * n + 1)])])
+
+
 def skin(ks=1.0, da=0.0):
     """The outer skin; da widens every section's half-width a (the side scoops' proud layer)."""
     secs = []
     for z, row in zip(SKIN_Z, ctrl_interp(ks) + np.array([da, 0, 0, 0, 0])):
-        secs.append(Face(Wire([Spline(*se_points(z, *row), periodic=True)])))
+        secs.append(Face(section_wire(se_points(z, *row))))
     return loft(secs)
 
 
@@ -155,7 +169,7 @@ def inner_rows(w, ks=1.0):
 
 
 def wall_skin(w, ks=1.0):
-    secs = [Face(Wire([Spline(*se_points(z, a, bf, bb, nf, nb), periodic=True)]))
+    secs = [Face(section_wire(se_points(z, a, bf, bb, nf, nb)))
             for z, a, bf, bb, nf, nb in inner_rows(w, ks)]
     return loft(secs)
 

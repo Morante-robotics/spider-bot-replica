@@ -419,7 +419,11 @@ def fuse_cut(P, cuts, add=None):
     return P
 def base():
     key = ("base", S, WALL_PAD, RN, WR, RELD, PKT, SNX, SNW, SNZ, RIBD, CL.LSL, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py", "cad/robot/shells.py"))
-    return cached("base", key, _base)
+    # the booleans leave coplanar fragments that touch along a line (28 non-manifold STL edges); unifying same-domain faces
+    # merges them (volume unchanged, 1 valid solid) and the STL exports watertight. Outside the cache so the stages stay valid.
+    b = one(cached("base", key, _base).clean())
+    assert b.is_valid and len(b.solids()) == 1, "base: clean() left it invalid"
+    return b
 
 # ---- body
 EYES = [(BO.CX - BO.EYE_DX, -50.0, BO.EYE_Z, "eye"), (BO.CX + BO.EYE_DX, -50.0, BO.EYE_Z, "eye"),     # x, back y, z
@@ -435,20 +439,79 @@ def eye_cups():
         cups.append(Pos(x, yb - L, z) * c)
     cups.append(EY.build("sensor"))
     return cups
+CRUMB = 0.1          # mm3: a loose solid under this left by a cut is dropped with a note (a 0.4 mm nozzle lays ~0.03 mm3 a mm)
+def local_seq(P, ops, label):
+    """ops = [(kind, tool, label, touch)] applied in turn to P, each on its own local piece: checked() sees only the piece
+    (pvol of the whole BSpline skin costs about a minute), the piece goes back by one fuse with the rest. The whole
+    volume is integrated only once, at the end of _body."""
+    tot = 0.0
+    for kind, T, lab, touch in ops:
+        bx = local_box([T], 10.0); piece = _bool("and", P, bx); rest = _bool("cut", P, bx); vp = pvol(piece)
+        new = checked(kind, piece, T, lab, touch=touch); dv = pvol(new) - vp
+        for f in (0.0, 1e-4, 1e-3):                          # no whole-skin volume per op (pvol of the rest is 30 s)
+            out = _bool("fuse", rest, new, f)
+            ss = out.solids(); crumbs = [s for s in ss if s.volume < CRUMB]
+            if crumbs and len(ss) - len(crumbs) == 1:            # a cut can leave a loose crumb between hulls (rim leg 3:
+                print(f"    [{lab}] dropped {len(crumbs)} loose crumb(s), {sum(s.volume for s in crumbs):.3f} mm3", flush=True)
+                out = max(ss, key=lambda s: s.volume)             # 0.01 mm3, 0.6 x 0.6 x 0.2 mm): not printable, said, not silent
+            if len(out.solids()) == 1 and out.is_valid: break
+        else: raise RuntimeError(f"[{lab}] local fuse: {len(out.solids())} solids, valid {out.is_valid}")
+        P = out; tot += dv
+    ss = P.solids()
+    if len(ss) != 1 or not P.is_valid: raise RuntimeError(f"[{label}] {len(ss)} solids, valid {P.is_valid}")
+    print(f"    [{label}] {len(ops)} ops, sum of op changes {tot:+.2f} mm3, 1 valid solid", flush=True)
+    return ss[0]
+def one_count(sh): return sh.solids()
 def _body():
-    b = to_robot(BO.body(k=1.0))
-    for c in eye_cups(): b = b.fuse(to_robot(c))
-    print("    body + eyes:", len(b.solids()), "solid(s)", flush=True)
-    for _, fing, _ in snap_geometry(): b = b.fuse(fing)
-    tw, ty0, ty1, tz = BO.TAB; ty = (ty0 - ORIGIN[1]) * S          # rear tab notched over the back-sheet pocket
-    dp, hx, z0, z1 = PKT
-    b = b - Pos(0, ty - 1.0, z0 - 0.5) * Box(2 * hx + 1.0, dp + 1.0, z1 - z0 + 1.0, align=(Align.CENTER, Align.MIN, Align.MIN))
+    import time; _T0[0] = time.time()
+    key0 = ("body", S, BRELD, PKT, SNX, SNW, SNT, SNZ, RIBD, SNG, KC, RCELL, stamp("cad/body/build.py", "cad/eyes/build.py", "cad/legs/build.py", "cad/motion.py", "cad/robot/shells.py"))
+    def skin_stage():
+        b = to_robot(BO.body(k=1.0)); tick("body skin"); return b
+    b = cached("body_skin", key0 + ("skin",), skin_stage)
+    def eyes_stage():
+        ops = [("fuse", to_robot(cup), f"cup {n}", False) for n, cup in enumerate(eye_cups())]
+        # the sensor dome floats 4.07 mm under the body's chin (jenscolt's separate mesh): a 1.2 mm stem up into the chin
+        bb = to_robot(eye_cups()[-1]).bounding_box()
+        stem = Pos((bb.min.X + bb.max.X) / 2, (bb.min.Y + bb.max.Y) / 2, bb.max.Z - 2.4) * Cylinder(1.2, 27.4 - (bb.max.Z - 2.4), align=(Align.CENTER, Align.CENTER, Align.MIN))
+        ops.insert(len(ops) - 1, ("fuse", stem, "sensor stem", False))      # stem before the sensor cup
+        c = local_seq(b, ops, "eyes"); tick("eye cups + sensor stem"); return c
+    b = cached("body_eyes", key0 + ("eyes", "stem"), eyes_stage)
+    def fit_stage():
+        ops = []
+        for n, (_, fing, _) in enumerate(snap_geometry()):       # a finger that does not meet the body is not fused (it would be a
+            if pvol(_bool("and", _bool("and", b, local_box([fing], 1.0)), fing)) < 1.0:      # 2nd solid, dropped by one())
+                print(f"    [snap finger {n}] WARN: does not touch the body (7.18 mm off), left out as the old one() did", flush=True)
+            else: ops.append(("fuse", fing, f"snap finger {n}", False))
+        tw, ty0, ty1, tz = BO.TAB; ty = (ty0 - ORIGIN[1]) * S          # rear tab notched over the back-sheet pocket
+        dp, hx, z0, z1 = PKT
+        notch = Pos(0, ty - 1.0, z0 - 0.5) * Box(2 * hx + 1.0, dp + 1.0, z1 - z0 + 1.0, align=(Align.CENTER, Align.MIN, Align.MIN))
+        ops.append(("cut", notch, "tab notch", True)); c = local_seq(b, ops, "fit"); tick("snap fingers + tab notch"); return c
+    b = cached("body_fit", key0 + ("fit",), fit_stage)
     near = samples(b)
-    b = cut_many(b, sweep_hulls(near, BRELD))                  # rim notch + eye-block pocket from the arms' sweep
-    b = cut_many(b, sweep_hulls(near, F.NEIGHBOUR.side + 0.1, poses=[KC], group=1, lift=CL.LIFTD))   # lift-off at pose KC
-    return one(b)
+    def per_leg(name, r, **kw):
+        """one fused cutter per leg (its hulls tree-fused, cached per leg), cut in turn with the volume invariant."""
+        ops = []
+        for Lg in range(8):
+            def mk(Lg=Lg):
+                hs = sweep_hulls(near, r, legs=(Lg,), planes=True, cell=RCELL, **kw)
+                tick(f"{name} leg {Lg}: {len(hs)} hulls")
+                return tree_fuse(hs) if hs else None
+            t = cached(f"body_{name}{Lg}", key0 + (name, Lg), lambda: mk() or Box(0.01, 0.01, 0.01))
+            if pvol(t) > 0.01: ops.append(("cut", t, f"{name} leg {Lg}", False))
+        return local_seq(b, ops, name)
+    def rim_stage():
+        c = per_leg("rim", BRELD); tick("rim cuts"); return c
+    b = cached("body_rim", key0 + ("rim",), rim_stage)
+    def lift_stage():
+        c = per_leg("lift", F.NEIGHBOUR.side + 0.1, poses=[KC], group=1, lift=CL.LIFTD); tick("lift cuts"); return c
+    b = cached("body_lift", key0 + ("lift",), lift_stage)
+    assert len(b.solids()) == 1 and b.is_valid and pvol(b) > 0, f"body: {len(b.solids())} solids, valid {b.is_valid}"
+    print(f"    [body] volume {pvol(b):.1f} mm3, valid, 1 solid", flush=True)
+    return b
 def body():
-    key = ("body", S, BRELD, PKT, SNX, SNW, SNT, SNZ, RIBD, SNG, KC, stamp("cad/body/build.py", "cad/eyes/build.py", "cad/legs/build.py", "cad/motion.py", "cad/robot/shells.py"))
-    return cached("body", key, _body)
+    key = ("body", S, BRELD, PKT, SNX, SNW, SNT, SNZ, RIBD, SNG, KC, RCELL, stamp("cad/body/build.py", "cad/eyes/build.py", "cad/legs/build.py", "cad/motion.py", "cad/robot/shells.py"))
+    b = one(cached("body", key, _body).clean())          # coplanar fragments: unify as base() does, outside the cache
+    assert b.is_valid and len(b.solids()) == 1, "body: clean() left it invalid"
+    return b
 
 PARTS = {"base": base, "body": body, **{f"leg-{Lg}": (lambda Lg=Lg: leg(Lg)) for Lg in range(8)}}
