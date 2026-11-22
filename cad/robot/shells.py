@@ -206,9 +206,11 @@ def LP(Lg, k):
     return _LP[(Lg, k)]
 
 # ---- sweep cutters (hulls of the legs' samples, chunked along the leg and over 3 poses each)
-def sweep_hulls(near, r, legs=range(8), poses=range(24), group=3, cell=3.0, rn=None, lift=0.0, planes=False):
+def sweep_hulls(near, r, legs=range(8), poses=range(24), group=3, cell=3.0, rn=None, lift=0.0, planes=False, reach=None):
     """convex hulls (grown by r) covering the legs' sweep where it comes within r + 1 of the samples `near`.
-    rn: only samples within rn of the pivot (window neck); lift: also slide the samples down by lift (body lift-off)."""
+    rn: only samples within rn of the pivot (window neck); lift: also slide the samples down by lift (body lift-off).
+    reach: keep samples within reach of `near` (default r + 1): a cutter that must cover every sample another cutter (a bulge
+    grown further) covers takes that cutter's reach."""
     tn = cKDTree(near); hulls = []
     for Lg in legs:
         for g0 in range(0, len(poses), group):
@@ -217,7 +219,7 @@ def sweep_hulls(near, r, legs=range(8), poses=range(24), group=3, cell=3.0, rn=N
             if rn is not None: Q = [q[np.linalg.norm(q - PIV[Lg], axis=1) <= rn] for q in Q]
             q = np.vstack(Q)
             if lift > 0: q = np.vstack([q - [0, 0, t] for t in np.arange(0, lift + 0.01, 1.0)])
-            d = tn.query(q, distance_upper_bound=r + 1.0)[0]; q = q[np.isfinite(d)]
+            d = tn.query(q, distance_upper_bound=(r + 1.0) if reach is None else reach)[0]; q = q[np.isfinite(d)]
             if len(q) < 8: continue
             cid = np.floor(q / cell).astype(int); _, inv = np.unique(cid, axis=0, return_inverse=True)
             for c in range(inv.max() + 1):
@@ -228,6 +230,15 @@ def sweep_hulls(near, r, legs=range(8), poses=range(24), group=3, cell=3.0, rn=N
     return hulls
 def samples(sh, tol=0.3):
     V, _ = sh.tessellate(tol, 0.5); return np.array([[v.X, v.Y, v.Z] for v in V])
+DENSE = 1.0                              # mm: surface sample spacing of the `near` cloud of the sweep cutters (see dense())
+def dense(sh, edge=DENSE, tol=0.3):
+    """surface samples of sh at most `edge` mm apart. samples() are the tessellation's vertices only (a flat wall has a
+    vertex every 4-9 mm): sweep_hulls keeps a leg sample only within r + 1 of `near`, so with that cloud the samples of a leg
+    in mid-face (2.3-4.7 mm from the nearest vertex) were never in a hull and the wall kept them (smoke 2026-11-22: base x
+    legs 0/4 91/28 mm3, body x legs up to 20 mm3, while the point-cloud fit check, which has every wall point, gave 0 failing)."""
+    from trimesh.remesh import subdivide_to_size
+    V, Fc = sh.tessellate(tol, 0.5); V = np.array([[v.X, v.Y, v.Z] for v in V])
+    return subdivide_to_size(V, np.array(Fc), max_edge=edge)[0]
 def cut_many(sh, tools, batch=40):
     for j in range(0, len(tools), batch):
         sh = sh.cut(Compound(tools[j:j + batch]))
@@ -272,6 +283,16 @@ def snap_geometry():
         hook = bx(np.array([x0, yw + F.WINDOW.side, SNZ]), np.array([x1, yf + 0.01, SNZ + 0.8]))
         out.append((rib, finger + hook, yw))
     return out
+FING_Z0, FING_Z1, FING_IN = 24.5, 27.5, 1.2   # snap finger root: a block from z FING_Z0 to FING_Z1, FING_IN mm further out than the
+# finger (-y), embedded in the body's front wall (inner face y -29.6 at z 26 .. -30.4 at 27.5 at x +-6, outer -33.7 .. -34.0)
+def finger_root(fing):
+    """the finger (top at z RIMR + 0.6) did not reach the body: its front wall starts at z 25.5 there (7.2 mm above the finger).
+    Returns finger + a plate of its own section (x span, SNT thick on its back face) up to FING_Z0 and a block FING_IN
+    further out (-y) to FING_Z1, embedded in the wall: one solid, to be fused into the body."""
+    bb = fing.bounding_box(); x0, x1, y0, y1, z1 = bb.min.X, bb.max.X, bb.min.Y, bb.max.Y, bb.max.Z
+    plate = Pos((x0 + x1) / 2, y1 - SNT / 2, (z1 - 0.3 + FING_Z0 + 0.3) / 2) * Box(x1 - x0, SNT, FING_Z0 + 0.3 - (z1 - 0.3))
+    block = Pos((x0 + x1) / 2, (y1 - SNT - FING_IN + y1) / 2, (FING_Z0 + FING_Z1) / 2) * Box(x1 - x0, SNT + FING_IN, FING_Z1 - FING_Z0)
+    return fing.fuse(plate, block).clean()
 _T0 = [0.0]
 def tick(msg):
     import time
@@ -377,12 +398,13 @@ def _base():
             tick(f"4 window cuts, side {side[0]}-{side[-1]}")
         return c
     b = cached("base_win", key0 + ("win",), win_stage)
-    near = samples(b)                                           # front leg windows: pocket RELD from the front arms' sweep
+    near = dense(b)                                             # front leg windows: pocket RELD from the front arms' sweep
     def relief_tools(Lg):
         """leg Lg's relief pocket solid and outward bulge solid (hull cell RCELL), each cached by its inputs."""
         kk = key0 + ("relief", Lg, RCELL, RELD, BA.WALL * S)
         def mk():
-            rel = sweep_hulls(near, RELD, legs=(Lg,), planes=True, cell=RCELL)
+            rel = sweep_hulls(near, RELD, legs=(Lg,), planes=True, cell=RCELL, reach=RELD + BA.WALL * S + 1.0)   # same samples as the bulge's hulls:
+            # a leg sample inside the bulge but > RELD + 1 from the wall was left in it (relief cut 41 mm3, bulge 268 mm3 round the leg)
             grown = sweep_hulls(near, RELD + BA.WALL * S, legs=(Lg,), planes=True, cell=RCELL)
             tick(f"leg {Lg} relief hulls: {len(rel)} + {len(grown)} grown, faces/hull {sorted(len(h.faces()) for h in rel + grown)[-1]} max")
             return rel, grown
@@ -393,7 +415,13 @@ def _base():
             rel, grown = mk(); return tree_fuse(grown)
         gs = cached(f"relg{Lg}", kk + ("gs",), gs_fn)
         outer = to_robot(BA.skin(0.0, 1.0)); bx = local_box([gs], 1.0)
-        bulge = cached(f"relb{Lg}", kk + ("bulge",), lambda: gs - (outer & bx)); tick(f"leg {Lg} bulge")
+        def bulge_fn():
+            # the bulge (gs - outer) is the hull cutters' grown shell: the part of the leg between those hulls (samples that are
+            # not within reach of the wall) is inside it too (smoke: 459 leg-0 samples at pose 0). Carve it with the sweep of
+            # every leg sample within RELD + 1 of the bulge itself: it keeps RELD from the leg, like the relief.
+            b0 = gs - (outer & bx); nb = dense(b0)
+            return b0 - tree_fuse(sweep_hulls(nb, RELD, legs=(Lg,), planes=True, cell=RCELL))
+        bulge = cached(f"relb{Lg}", kk + ("bulge2",), bulge_fn); tick(f"leg {Lg} bulge")
         return rs, gs, bulge
     def relief_stage():
         c = b
@@ -439,6 +467,7 @@ def eye_cups():
         cups.append(Pos(x, yb - L, z) * c)
     cups.append(EY.build("sensor"))
     return cups
+LEDB0, LEDB1 = 0.3, 1.3  # LED through-bore: from 0.3 behind the bore floor to 1.3 past it (cavity face is 0.7 past, ray scan of body.stl)
 CRUMB = 0.1          # mm3: a loose solid under this left by a cut is dropped with a note (a 0.4 mm nozzle lays ~0.03 mm3 a mm)
 def local_seq(P, ops, label):
     """ops = [(kind, tool, label, touch)] applied in turn to P, each on its own local piece: checked() sees only the piece
@@ -474,20 +503,24 @@ def _body():
         bb = to_robot(eye_cups()[-1]).bounding_box()
         stem = Pos((bb.min.X + bb.max.X) / 2, (bb.min.Y + bb.max.Y) / 2, bb.max.Z - 2.4) * Cylinder(1.2, 27.4 - (bb.max.Z - 2.4), align=(Align.CENTER, Align.CENTER, Align.MIN))
         ops.insert(len(ops) - 1, ("fuse", stem, "sensor stem", False))      # stem before the sensor cup
+        # the small eyes' bore (r SEYE_BORE, floor at SEYE_BACK) stops 0.7 mm short of the body cavity and the cup closes its
+        # mouth: a sealed void (-262 mm3 each) with no way in for the LED. Through-bore: same radius, floor to cavity.
+        for sx in (-1, 1):
+            led = Pos((BO.CX + sx * BO.SEYE_DX - ORIGIN[0]) * S, (BO.SEYE_BACK - ORIGIN[1]) * S - LEDB0, (BO.SEYE_Z - ORIGIN[2]) * S) * \
+                  Rot(-90, 0, 0) * Cylinder(BO.SEYE_BORE * S, LEDB1 + LEDB0, align=(Align.CENTER, Align.CENTER, Align.MIN))
+            ops.append(("cut", led, f"led bore {sx:+d}", True))
         c = local_seq(b, ops, "eyes"); tick("eye cups + sensor stem"); return c
-    b = cached("body_eyes", key0 + ("eyes", "stem"), eyes_stage)
+    b = cached("body_eyes", key0 + ("eyes", "stem", LEDB0, LEDB1), eyes_stage)
     def fit_stage():
         ops = []
-        for n, (_, fing, _) in enumerate(snap_geometry()):       # a finger that does not meet the body is not fused (it would be a
-            if pvol(_bool("and", _bool("and", b, local_box([fing], 1.0)), fing)) < 1.0:      # 2nd solid, dropped by one())
-                print(f"    [snap finger {n}] WARN: does not touch the body (7.18 mm off), left out as the old one() did", flush=True)
-            else: ops.append(("fuse", fing, f"snap finger {n}", False))
+        for n, (_, fing, _) in enumerate(snap_geometry()):       # finger lengthened up into the front wall (finger_root), else it
+            ops.append(("fuse", finger_root(fing), f"snap finger {n}", True))     # would be a 2nd solid, dropped by one()
         tw, ty0, ty1, tz = BO.TAB; ty = (ty0 - ORIGIN[1]) * S          # rear tab notched over the back-sheet pocket
         dp, hx, z0, z1 = PKT
         notch = Pos(0, ty - 1.0, z0 - 0.5) * Box(2 * hx + 1.0, dp + 1.0, z1 - z0 + 1.0, align=(Align.CENTER, Align.MIN, Align.MIN))
         ops.append(("cut", notch, "tab notch", True)); c = local_seq(b, ops, "fit"); tick("snap fingers + tab notch"); return c
     b = cached("body_fit", key0 + ("fit",), fit_stage)
-    near = samples(b)
+    near = dense(b)
     def per_leg(name, r, **kw):
         """one fused cutter per leg (its hulls tree-fused, cached per leg), cut in turn with the volume invariant."""
         ops = []
