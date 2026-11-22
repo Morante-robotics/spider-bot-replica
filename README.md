@@ -37,6 +37,7 @@ repeated. Its contents show where each step stands, and its **Open items** list 
 |---|---|
 | [cad/carcass-jenscolt/](cad/carcass-jenscolt/) | Carcass model by jenscolt, unmodified (CC BY-NC-SA): the looks reference, legs included |
 | [cad/](cad/) | The rules every design follows: axes, folder layout, what is kept in git; [`_template/`](cad/_template/) to start a new design |
+| [viewer/](viewer/) | The whole robot in 3D as it stands today, with the fit check's open problems marked: open `viewer/index.html` |
 | [cad/motion.py](cad/motion.py) | The approved motion (from the N0 mock-up): where the 8 legs sit, their shape and how they move over a crank turn |
 | [cad/legs/](cad/legs/), [eyes/](cad/eyes/), [base/](cad/base/), [body/](cad/body/) | jenscolt's parts rebuilt as parameters (build123d), each checked against its mesh |
 | [cad/fits.py](cad/fits.py) | The measured clearances (fits) every design takes its holes, slots and gaps from |
