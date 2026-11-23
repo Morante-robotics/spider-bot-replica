@@ -9,7 +9,7 @@ toy: the specification is now the toy and jenscolt's model, and the mechanism is
 went through a mock-up in simple shapes (N0), the real parts as light meshes (N1), and a first print-detail attempt
 that did not fit at 65 % (N2 rev 5). Meshes then proved a dead end, so every part was rebuilt as parameters and only
 those measure. Round r00 of N2 designed the inside (drive and power); the shells then took an hour to build, so their
-leg clearances were redesigned as simple shapes and every build and check came under 40 s, with 0 failures. Older
+leg clearances were redesigned as simple shapes and every build and check came under 40 s, with 0 failures. Last, the unused front sensor was removed and the mouth closed with a front panel. Older
 entries are shortened to their summary; the full text is in git (links).
 
 ### Redesign: looks first
@@ -280,5 +280,43 @@ The middle column is the body as the viewer had it, before its rim cuts.*
 #### Next
 
 Round r00: the looks judge and Morante's «se parece»; the half turn in the workshop kit.
+
+[↑ Contents](../build-log.md#contents)
+
+### Front sensor removed, mouth closed
+
+**Phase 3 · Mechanisms · 2026-11-24** · Status: ✅ done, before plating
+
+> **In short.** jenscolt's front «sensor» (a ball on a stem hanging in the mouth) does nothing in the toy, so it is
+> no longer placed. The mouth is now closed at the front face by a 1.2 mm panel flush with the body's skin, which also
+> hides the body's two front snap fingers. Body valid, whole-robot check still PASS, 0 FAIL.
+
+Morante, looking at the robot before plating: «elimina ese palo y la bola, que no sirven para nada». The two vertical
+columns he saw in the mouth are the body's two front snap fingers (x ±6, 0.8 × 5 mm, flexing length 8 mm) under ribs
+on the base's front wall. With the rear tab they are the only retention of the body ([decision m22](#n2-round-r00-the-inside-and-the-leg-hold)), so
+they stay, but behind a cover.
+
+#### Result
+
+<img src="images/mouth-closed.png" alt="Front of the robot before and after">
+
+*Fig. 1 · Left: before, with the stem and ball and the open mouth. Right: after (closer view), the panel closes the
+front down to the base. The two views are at different zoom.*
+
+- `eye_cups()` no longer places the sensor and `body_static()` no longer adds its stem (`cad/robot/shells.py`);
+  `cad/eyes` still builds the sensor as a converted part, it is just not placed.
+- `front_panel()` (same file) is fused into the body: 1.2 mm thick (the minimum loaded wall, rules 3.2), x ±18, z ≈ 13.2–27.3, its outer
+  face the skin's front swept down, flush round the chin arch and covering the arch and the slit below it, down to
+  0.2 mm above the base's front top (the same seam as between body and base). The snap fingers keep their flexing
+  length free (about 1.7 mm of room in front of them).
+- Body: 1 valid solid, 35 416 mm³ (35 002 before). Leg gaps ≥ 0.53 mm over 24 poses, lift ≥ 0.55 mm. A ray scan from
+  the front finds no ray through the panel, only the 0.2 mm seam at its bottom edge.
+- Full check: PASS, 0 FAIL, 95 WARN (the same rows as before), [`verify-result.txt`](../cad/robot/verify-result.txt).
+
+#### Decisions
+
+- **Close at the front, not inside.** A first try cut the chin arch as a 1.4 mm recess closed behind it. Morante:
+  «No está bien. Tiene que cerrar por delante no por dentro». The panel version: «Me gusta».
+- `cad/body/build.py` is unchanged (its chin arch cut stays): the panel is a feature of the robot frame.
 
 [↑ Contents](../build-log.md#contents)

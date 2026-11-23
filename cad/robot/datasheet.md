@@ -40,6 +40,12 @@ How (rules in `cad/README.md` «Time budget»):
   bounding boxes + LOCATOR, not offsets.
 - `fitcheck/check.py` (19 min) is the pre-CAD planner, not a gate.
 
+**Body front, 2026-11-24.** jenscolt's front sensor (ball on a stem) is not placed (`eye_cups()`, `body_static()` in
+`shells.py`; `cad/eyes` still builds it). `front_panel()` closes the mouth at the front face: 1.2 mm (`PANEL_T`), x ±18,
+z ≈ 13.2–27.3, flush with the skin, 0.2 mm above the base's front top (`PANEL_GAP` = `fits.LOCATOR`); it hides the two
+front snap fingers (x ±6, 0.8 x 5, flex L 8) with ≈ 1.7 mm free in front of them. Body: 1 valid solid, 35 416 mm³;
+leg gaps ≥ 0.53, lift ≥ 0.55; full check PASS, 0 FAIL, 95 WARN. `cad/body/build.py` unchanged.
+
 **Next**
 1. `rounds.py round cad/robot 0`, the looks judge, Morante's «se parece».
 2. Workshop kit: the crank half-turn before legs 0 and 3 and the body; the glued switch.

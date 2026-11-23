@@ -11,7 +11,7 @@ Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric 
 | Part | Role | Why separate | g | Print orientation |
 |---|---|---|---|---|
 | base | ground: bowl with 8 open-top leg windows sized from the real cad/legs neck sweep (NR 5.4, about Ø10.8), front snap ribs, back-sheet pocket, 1.2 pads where loaded (100 % of each window ring), front-window reliefs | the ground shell, prints in one piece | 14 | foot down |
-| body | dome with the eye block (0.85 leg-arm pocket on its lower front corners), front snap fingers (0.8 x 5, L 8), rear snap tab, inner pocket over the cell pack's lift path | lifts off for service | 16 | rim up (roof on the bed), fingers vertical |
+| body | dome with the eye block (0.85 leg-arm pocket on its lower front corners), front snap fingers (0.8 x 5, L 8), rear snap tab, front panel closing the mouth at the front face (1.2 thick, x ±18, hides the snap fingers; no front sensor placed), inner pocket over the cell pack's lift path | lifts off for service | 16 | rim up (roof on the bed), fingers vertical |
 | spine | two gear walls with open-top journal slots (TURN), idler-axle holes, keel seat; wall tops raised 0.8 under the holder post where idler 3's tip passes | carries the whole train as one unit | 3 | keel down, walls upright, slots up |
 | crankshafts | 4 printed cranks with gears, webs and Ø3 pins | each turns in the spine | 3 | axis vertical, one piece; support marks sanded (sandpaper) |
 | idlers | 3 idlers and the transfer compound, each GW - 0.4 wide, turning (TURN, Ø3.7 bore) on printed spacer sleeves Ø3.2 x 3.5 (M2-tapped bore Ø1.6, wall 0.8) clamped wall to wall by the M2 axle, so tightening does not pinch the walls | each turns on its axle | 1 | face down |

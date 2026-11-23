@@ -18,7 +18,7 @@ ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 for p in (ROOT, ROOT + "/cad", HERE + "/fitcheck", ROOT + "/tools"):
     if p not in sys.path: sys.path.insert(0, p)
 from build123d import (Shape, Box, Cylinder, Sphere, Pos, Rot, Solid, Shell, Face, Wire, Compound, Vector, Align,
-                       export_step, export_stl, import_brep, export_brep)
+                       export_step, export_stl, import_brep, export_brep, extrude, Plane, Polygon)
 from OCP.BRepBuilderAPI import BRepBuilderAPI_Transform
 from OCP.ShapeUpgrade import ShapeUpgrade_UnifySameDomain
 from OCP.gp import gp_Trsf, gp_Vec, gp_Ax2, gp_Pnt, gp_Dir
@@ -288,6 +288,37 @@ def finger_root(fing):
     plate = Pos((x0 + x1) / 2, y1 - SNT / 2, (z1 - 0.3 + FING_Z0 + 0.3) / 2) * Box(x1 - x0, SNT, FING_Z0 + 0.3 - (z1 - 0.3))
     block = Pos((x0 + x1) / 2, (y1 - SNT - FING_IN + y1) / 2, (FING_Z0 + FING_Z1) / 2) * Box(x1 - x0, SNT + FING_IN, FING_Z1 - FING_Z0)
     return fing.fuse(plate, block).clean()
+PANEL_T = CL.W                           # front panel thickness 1.2 (rules 3.2: PLA wall >= 1.2); the face sits in the body's outer 1.2, the finger plates (y +1.4 behind) stay free
+PANEL_XW = 18.0                          # panel half-width: the arch (BO.CHIN[0] x S = 17.5) + 0.5, where the base's front wall meets the body rim (brief 2026-11-24: by |x| 18)
+PANEL_M = 0.8                            # the panel's top follows the arch ellipse grown by this: it fuses into the wall round the arch (wall 3.2)
+PANEL_RAY = 0.15                         # the outer face is the skin's y this far above the arch edge (step to the skin <= 0.4)
+PANEL_BASE_TOP = ((0, 12.96), (4, 13.22), (8, 14.00), (12, 15.35), (14, 16.27), (16, 16.80), (18, 17.01))   # |x|, base front wall top z: measured on the base (robot frame, brief 2026-11-24); 18 = body rim RIMR
+PANEL_GAP = F.LOCATOR.side               # fixed-part gap panel to base top (large parts keep LOCATOR 0.2)
+def front_panel(b0):
+    """closes the mouth at the front face: the skin's outer face over the chin arch (at the arch edge, y(x) of the skin just above
+    it), swept straight down (z) to the base's front-wall top + PANEL_GAP; PANEL_T thick along the plan normal; one solid
+    to be fused into the body (the arch edge, PANEL_M inside the wall)."""
+    import cutters as CU
+    m = CU.mesh_of(b0, 0.05, 0.3)
+    cw, ch = BO.CHIN[0] * S, BO.CHIN[1] * S; cx = (BO.CX - ORIGIN[0]) * S
+    ell = lambda x, g=0.0: RIMR + (ch + g) * math.sqrt(max(1 - (x / (cw + g)) ** 2, 0.0))
+    xs = np.linspace(-PANEL_XW, PANEL_XW, 73)
+    org = np.array([[x, -60.0, ell(x - cx) + PANEL_RAY if abs(x - cx) < cw else RIMR + 0.5] for x in xs])
+    hit = m.ray.intersects_location(org, np.tile([0, 1, 0], (len(xs), 1)), multiple_hits=True)
+    yo = np.full(len(xs), np.nan)
+    for loc, ri in zip(hit[0], hit[1]):
+        if np.isnan(yo[ri]) or loc[1] < yo[ri]: yo[ri] = loc[1]
+    assert not np.isnan(yo).any(), "front_panel: a ray missed the skin"
+    ax = np.abs(xs); c = np.polyfit(ax ** 2, yo, 4); yo = np.polyval(c, ax ** 2)       # smooth, symmetric
+    sl = np.gradient(yo, xs); nr = np.sqrt(1 + sl ** 2)
+    outer = [(x, y) for x, y in zip(xs, yo)]
+    inner = [(x - PANEL_T * s / n, y + PANEL_T / n) for x, y, s, n in zip(xs, yo, sl, nr)][::-1]
+    zl, zh = 12.0, ell(0, PANEL_M) + 0.5
+    strip = extrude(Plane.XY.offset(zl) * Polygon(*(outer + inner), align=None), zh - zl)
+    bt = lambda x: float(np.interp(abs(x), [a for a, _ in PANEL_BASE_TOP], [b for _, b in PANEL_BASE_TOP])) + PANEL_GAP
+    top = [(x, ell(x - cx, PANEL_M)) for x in xs[::-1]]
+    reg = extrude(Plane.XZ.offset(15) * Polygon(*([(x, bt(x)) for x in xs] + top), align=None), 30)
+    return strip & reg
 _T0 = [0.0]
 def tick(msg):
     t = time.time(); print(f"    [shells] {msg}: {t - _T0[0]:.1f} s", flush=True); _T0[0] = t
@@ -376,7 +407,8 @@ def post_solid(a, b, r=XS_RP):
 # ---- body
 EYES = [(BO.CX - BO.EYE_DX, -50.0, BO.EYE_Z, "eye"), (BO.CX + BO.EYE_DX, -50.0, BO.EYE_Z, "eye"),     # x, back y, z
         (BO.CX - BO.SEYE_DX, -44.0, BO.SEYE_Z, "small-eye"), (BO.CX + BO.SEYE_DX, -44.0, BO.SEYE_Z, "small-eye")]
-# back y -50 / -44: the archived tools/assemble_jenscolt.py (flat face back, dome forward); sensor where jenscolt put it
+# back y -50 / -44: the archived tools/assemble_jenscolt.py (flat face back, dome forward). jenscolt's front sensor (a dome
+# on a stem in the mouth) is not placed: it held a sensor in his toy, here it did nothing (Morante, 2026-11-24)
 def eye_cups():
     cups = []
     for x, yb, z, n in EYES:
@@ -385,7 +417,6 @@ def eye_cups():
             c = c + Pos(0, L - 1.0, 0) * Rot(-90, 0, 0) * (Cylinder(BO.EYE_BORE_R + 0.1, 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
                                                            - Cylinder(R - 0.3, 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN)))
         cups.append(Pos(x, yb - L, z) * c)
-    cups.append(EY.build("sensor"))
     return cups
 LED_R = 2.5                                  # 5 mm LED (datasheet: Ø5 body, flange Ø5.8 x 1): the bore is LED_R + TURN a side, the floor's back face stops the flange
 SW_THROW = 1.5                               # SS12D00 lever travel between positions: 1.5 mm (the usual SS12D00 pitch; hardware.md gives no figure)
@@ -410,12 +441,12 @@ def body_skin():
 def _file_key(*rel): return [hashlib.sha1(open(os.path.join(ROOT, r), "rb").read()).hexdigest()[:12] for r in rel]
 def body_static():
     """what the body has whatever the legs do (cached BREP, keyed by the text of cad/body, cad/eyes, power.py and this
-    function): the shell, the eye cups and the sensor stem, the snap fingers, the switch keeper (one fuse); the tab's notch
+    function): the shell, the eye cups, the snap fingers, the switch keeper (one fuse); the tab's notch
     over the back pocket, the LED bores, the small eyes' vents, the lever slot, box pockets round the cell holder, lid,
     cells and switch (their bounding boxes + LOCATOR) and the strip under the holder (one cut)."""
     import power as PW
-    key = (_file_key("cad/body/build.py", "cad/eyes/build.py", "cad/robot/power.py"), S, srch(body_static, body_skin, eye_cups, snap_geometry, finger_root, led_pos, to_robot),
-           PKT, SNX, SNW, SNT, SNZ, RIBD, SNG, LEDB0, LEDB1, LED_R, SW_THROW, SW_SLOT_Y, SW_KEEP_REACH, W_KEEP, STRIP_X, STRIP_X2, STRIP_Y0, STRIP_Y1, STRIP_Z0, STRIP_Z1, STRIP_Z2)
+    key = (_file_key("cad/body/build.py", "cad/eyes/build.py", "cad/robot/power.py"), S, srch(body_static, body_skin, eye_cups, snap_geometry, finger_root, front_panel, led_pos, to_robot),
+           PKT, SNX, SNW, SNT, SNZ, RIBD, SNG, PANEL_T, PANEL_XW, PANEL_M, PANEL_RAY, PANEL_BASE_TOP, PANEL_GAP, LEDB0, LEDB1, LED_R, SW_THROW, SW_SLOT_Y, SW_KEEP_REACH, W_KEEP, STRIP_X, STRIP_X2, STRIP_Y0, STRIP_Y1, STRIP_Z0, STRIP_Z1, STRIP_Z2)
     p = os.path.join(CACHE, f"body_static_{khash(key)}.brep")
     if os.path.exists(p) and os.path.exists(p + ".npz"):
         import trimesh
@@ -423,14 +454,13 @@ def body_static():
     MIN = (Align.MIN, Align.MIN, Align.MIN)
     cylA = lambda p, r, L: Pos(*p) * Rot(-90, 0, 0) * Cylinder(r, L, align=(Align.CENTER, Align.CENTER, Align.MIN))
     b0 = body_skin()
-    cups = [to_robot(c) for c in eye_cups()]; bb = cups[-1].bounding_box()
-    stem = Pos((bb.min.X + bb.max.X) / 2, (bb.min.Y + bb.max.Y) / 2, bb.max.Z - 2.4) * Cylinder(1.2, 27.4 - (bb.max.Z - 2.4), align=(Align.CENTER, Align.CENTER, Align.MIN))
+    cups = [to_robot(c) for c in eye_cups()]
     bx, by, bz = PW.SW_BODY; lx, ly, lz = PW.SW_LEVER; y1 = PW.SWY1; zs = PW.SWZ; st = F.STEEL.side
     yk = y1 - by - st; xk = bx / 2 + st; zb, zt = zs - bz / 2, zs + bz / 2 + st; yr = y1 + SW_KEEP_REACH
     keeper = [Pos(-xk - W_KEEP, yk, zt) * Box(2 * (xk + W_KEEP), yr - yk, W_KEEP, align=MIN)]       # top bar from the switch's front face back
     # (it overhung the front by W_KEEP: the fingertip that pushes the switch in touched it, verify 2026-11-23)
     keeper += [Pos(sx * (xk + W_KEEP / 2) - W_KEEP / 2, yk - W_KEEP, zb) * Box(W_KEEP, yr - yk + W_KEEP, zt - zb, align=MIN) for sx in (-1, 1)]
-    adds = cups + [stem] + [finger_root(f) for _, f, _ in snap_geometry()] + keeper
+    adds = cups + [finger_root(f) for _, f, _ in snap_geometry()] + keeper + [front_panel(b0)]
     b = b0.fuse(*adds)
     tw, ty0, ty1, tz = BO.TAB; ty = (ty0 - ORIGIN[1]) * S; dp, hx, z0, z1 = PKT
     cuts = [Pos(0, ty - 1.0, z0 - 0.5) * Box(2 * hx + 1.0, dp + 1.0, z1 - z0 + 1.0, align=(Align.CENTER, Align.MIN, Align.MIN))]

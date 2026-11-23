@@ -62,6 +62,7 @@ The robot's story in four parts, then what is left to do and a glossary.
    - [Only the parametric parts measure](build-log/4-looks-first.md#only-the-parametric-parts-measure) · 2026-11-20 · ✅ done
    - [N2 round r00: the inside and the leg hold](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) · 2026-11-23 · ✅ r00 is the robot, printing next
    - [Fast shells: clearances designed, not computed](build-log/4-looks-first.md#fast-shells-clearances-designed-not-computed) · 2026-11-23 · ✅ under 40 s, 0 FAIL
+   - [Front sensor removed, mouth closed](build-log/4-looks-first.md#front-sensor-removed-mouth-closed) · 2026-11-24 · ✅ done
 5. **[Open items](#open-items)**: everything still to do.
 6. **[Glossary](#glossary)**: the terms used in the entries.
 
