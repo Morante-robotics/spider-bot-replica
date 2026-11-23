@@ -94,8 +94,8 @@ Geometry stays light: no cut or check runs against a reference mesh (jenscolt's 
 read the parametric parts' coarse STL, cached, or boxes. That STL is the model's own export, so `cad_verify` (and
 everything that loads parts through it) fails before any check when an STL is older than its `build.py` or the shared
 `common.py`, `fits.py`, `motion.py`: rebuild first. The approved motion (scale, crank, leg path) is
-[`motion.py`](motion.py); every design imports it, never a copy. Shared stage caching for mesh builds:
-[`tools/stage_cache.py`](../tools/stage_cache.py). A spec may name each interface's parts in `GROUPS`, so
+[`motion.py`](motion.py); every design imports it, never a copy. Caching: one cache per slow input that does not depend
+on the moving parts (see «Time budget»). A spec may name each interface's parts in `GROUPS`, so
 `--only <group>` checks one interface instead of the whole robot.
 
 ## From a mesh

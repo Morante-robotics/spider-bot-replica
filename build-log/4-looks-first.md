@@ -8,8 +8,9 @@ The second design, started on 2026-11-17 after the first ([Legs and drive](3-leg
 toy: the specification is now the toy and jenscolt's model, and the mechanism is fitted inside the looking parts. It
 went through a mock-up in simple shapes (N0), the real parts as light meshes (N1), and a first print-detail attempt
 that did not fit at 65 % (N2 rev 5). Meshes then proved a dead end, so every part was rebuilt as parameters and only
-those measure. Round r00 of N2 designed the inside (drive and power) and is where the design stands. Older entries
-are shortened to their summary; the full text is in git (links).
+those measure. Round r00 of N2 designed the inside (drive and power); the shells then took an hour to build, so their
+leg clearances were redesigned as simple shapes and every build and check came under 40 s, with 0 failures. Older
+entries are shortened to their summary; the full text is in git (links).
 
 ### Redesign: looks first
 
@@ -188,5 +189,75 @@ its STL (joint radius 1.75 against a bore of 1.84): a model bug to fix whichever
 One cad-fixer for the chosen option: the cranks rebuild in seconds, the legs in about a minute. The fit check has
 one known bug: around line 260 of `cad/robot/fitcheck/check.py` it misses `- ORIGIN[1]` for the battery box (the same
 bug was fixed in `power.py`).
+
+### Fast shells: clearances designed, not computed
+
+**Phase 3 · Mechanisms · 2026-11-23** · Status: ✅ every build and check under 40 s, whole-robot check 0 FAIL
+
+> **In short.** The base took 28 minutes to build and the body about an hour, because the room each leg needs was
+> computed: hundreds of convex hulls around sampled leg points, cut one by one from curved skins. Each leg's room is
+> now one simple prism whose outline is measured from the leg's motion, and each shell is one fuse and one cut. The
+> base builds in 22 s, the body in 28 s and the check of the whole robot runs in 37 s with 0 failures (5 before).
+> Morante chose the shapes on three comparison sheets.
+
+Context: Morante set the rule that any build or check over 40 s is a bug (aim for 10 s). The causes were measured in
+the previous session (base 1669 s, body ≈ 3500 s, `body.step` 152 MB); this entry is the fix.
+
+#### Steps
+
+1. **A window from the motion.** For each leg, the base wall points that the leg comes within its clearance of
+   (WR 0.9 mm, at its 24 crank poses and along the slide onto its pin) are seen along the wall's normal; their lowest
+   point per 0.25 mm column is the window's floor, open to the top. The outline, buffered and simplified, has 11–13
+   straight sides and is cut through the wall as one prism ([`cutters.py`](../cad/robot/cutters.py)). Wall left
+   between two windows narrower than 4 nozzle lines joins the first window. Prototyped on meshes (seconds per try),
+   then built in OpenCascade.
+2. **The body the same way.** A notch from the rim for each leg (its 24 poses, and the body pressed on from above at
+   crank pose 12), and a shallow pocket where a leg nears a face below the rim (the rear tab, legs 3 and 7). What does
+   not depend on the legs (shell, eye cups, snap fingers, switch keeper, bores, pockets round the power parts as
+   boxes) is one cached stage. The x-stop posts were found once and frozen.
+3. **Proof on meshes, inside the build.** Every leg is checked against the built shell at every pose and along its
+   path with manifold3d (a few seconds). This replaced a volume check around every boolean.
+4. **The checks.** `cad_verify` remembers the legs' frames (11 000 calls had rebuilt each leg's shape: 9 s), measures
+   joints with one gap query, advances assembly paths by the free gap, runs retention and print in a second process,
+   and lets an assembly step set the crank pose it is done at.
+5. **Removed**: the hull and offset code of `shells.py` (768 → 450 lines), the stage-cache tool, 1.6 GB of caches.
+
+#### Result
+
+| What | Before | After |
+|---|---|---|
+| Base build | 1669 s | 22 s |
+| Body build | ≈ 3500 s | 28 s (40 s when its fixed stage is rebuilt) |
+| Whole robot, each part | — | ≤ 26 s (80 s for all 34 parts) |
+| `cad_verify verify.py --quick` | 70 s, 5 FAIL | 37–40 s, 0 FAIL |
+
+<img src="images/speed-1-windows.png" alt="Base from four sides and a close-up: jenscolt's reference, the base with computed windows, the base with designed windows" width="720">
+
+*Fig. 1 · Decision 1, the base windows: reference, computed (before), designed (accepted). The floors stay at the
+same height; the thin posts the old pads left above the rim are gone.*
+
+<img src="images/speed-2-front.png" alt="Front of the base: reference, the old relief and bulge, the smooth wall; and the front arms at their closest pose" width="720">
+
+*Fig. 2 · Decision 2, the front of legs 0 and 4: the relief and bulge are dropped; the arms clear the smooth wall by
+0.40 mm (bottom row).*
+
+<img src="images/speed-3-body.png" alt="Body from six sides: reference, the version in the viewer, the body with designed notches" width="720">
+
+*Fig. 3 · Decision 3, the body: a notch at the rim for each leg, a shallow pocket on the rear tab, the x-stop posts.
+The middle column is the body as the viewer had it, before its rim cuts.*
+
+#### Decisions
+
+- Windows as designed; smooth base front, no relief («Lisa»); body notches, tab pocket and frozen posts (Morante).
+- No 1.2 mm pads round the windows: open-top windows carry no load (the leg is held by its pin). With a 1.2 mm wall
+  the front arms came within 0.14 mm.
+- Legs 1, 2, 4–7 go on with the crank at pose 0; after half a turn, legs 0 and 3 and the body.
+- Legs 0 and 7 may slide 1.65 mm towards their crank at pose 0 (Morante: «Aceptar 1,6 mm hacia dentro»).
+- The back pocket is a cup (the bare sheet came loose), and the switch keeper's bar no longer overhangs the switch.
+- Carving on meshes (STL only) was not needed: the STEP for Onshape is kept.
+
+#### Next
+
+Round r00: the looks judge and Morante's «se parece»; the half turn in the workshop kit.
 
 [↑ Contents](../build-log.md#contents)

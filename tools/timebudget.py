@@ -40,6 +40,12 @@ def _watch():
             os._exit(3)
 
 
+def reset(stage="(start)"):
+    """a new budget from now: a build of several parts gives each part its own CAD_BUDGET."""
+    global _T0
+    _T0 = time.time(); _cur["stage"], _cur["t"] = stage, _T0
+
+
 def start():
     if _started or BUDGET <= 0:
         return

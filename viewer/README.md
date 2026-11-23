@@ -11,7 +11,7 @@ page uses the system fonts.
 
 | In the viewer | Where it comes from | State |
 |---|---|---|
-| Base and body | `cad/base/out/base.stl`, `cad/body/out/body.stl`, moved into the robot frame at S | As those designs are; the plan's windows, pockets and tabs are cut by `cad/robot/shells.py`, which does not build yet |
+| Base and body | `cad/robot/out/base.stl`, `cad/robot/out/body.stl`: the shells as `cad/robot/shells.py` builds them (leg windows, notches, pockets) | Real parts |
 | Legs | The 8 printed legs, `cad/robot/out/leg-0..7.stl` (end tube with the snap bead, root ball), carried per crank pose by `shells.leg_frame` as `cad/robot/verify.py` does | Real parts |
 | Cranks | Journals, webs and pins from `cad/robot/fitcheck/check.py`, per pose | Plan |
 | Interior | The boxes and cylinders `check.py` samples each part from (one node per part; a convex hull where a part is not made of whole primitives) | Plan, not modelled yet |

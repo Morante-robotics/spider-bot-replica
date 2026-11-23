@@ -1,7 +1,7 @@
 """Writes the viewer (viewer/index.html + viewer/robot-data.js) from the robot as it stands today.
 
 Runs the parts half of cad/robot/fitcheck/check.py (everything up to the pair checks, ≈ 10 s with its caches) and packs
-  - the shells as they are in cad/base and cad/body (the plan's windows and pockets are not cut until shells.py builds),
+  - the shells as cad/robot builds them (cad/robot/out/base.stl and body.stl: windows, notches, pockets cut),
   - the interior as the fit check's boxes and cylinders (plan, not modelled yet), one node per part,
   - the real printed legs (cad/robot/out/leg-0..7.stl) and, per crank pose, each leg's matrix
     (shells.leg_frame, as verify.py) and the crank webs and pins,
@@ -86,8 +86,8 @@ Oy, Oz, JR, wb0, wb1 = NS["Oy"], NS["Oz"], NS["JR"], NS["wb0"], NS["wb1"]
 jm = trimesh.util.concatenate([trimesh.creation.cylinder(radius=JR, segment=np.array([[-wb0, y, Oz], [wb0, y, Oz]]), sections=20) for y in Oy])
 scene.add_geometry(jm, node_name="journals", geom_name="journals"); parts_meta["journals"] = dict(group="transmision", how="prims")
 
-for n, f in (("base", "cad/base/out/base.stl"), ("body", "cad/body/out/body.stl")):   # jenscolt frame 100 % -> robot
-    m = trimesh.load(os.path.join(ROOT, f)); m.vertices = motion.to_frame(m.vertices, FE.P)
+for n, f in (("base", "cad/robot/out/base.stl"), ("body", "cad/robot/out/body.stl")):   # robot frame already
+    m = trimesh.load(os.path.join(ROOT, f))
     scene.add_geometry(m, node_name="shell-" + n, geom_name="shell-" + n)
     parts_meta["shell-" + n] = dict(group="chasis" if n == "base" else "cuerpo", how="cad stl")
 
