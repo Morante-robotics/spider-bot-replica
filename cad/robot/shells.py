@@ -412,7 +412,9 @@ def body_static():
     key = (_file_key("cad/body/build.py", "cad/eyes/build.py", "cad/robot/power.py"), S, srch(body_static, body_skin, eye_cups, snap_geometry, finger_root, led_pos, to_robot),
            PKT, SNX, SNW, SNT, SNZ, RIBD, SNG, LEDB0, LEDB1, LED_R, SW_THROW, SW_SLOT_Y, SW_KEEP_REACH, W_KEEP, STRIP_X, STRIP_X2, STRIP_Y0, STRIP_Y1, STRIP_Z0, STRIP_Z1, STRIP_Z2)
     p = os.path.join(CACHE, f"body_static_{khash(key)}.brep")
-    if os.path.exists(p): return import_brep(p)
+    if os.path.exists(p) and os.path.exists(p + ".npz"):
+        import trimesh
+        d = np.load(p + ".npz"); return import_brep(p), trimesh.Trimesh(d["v"], d["f"], process=False)
     MIN = (Align.MIN, Align.MIN, Align.MIN)
     cylA = lambda p, r, L: Pos(*p) * Rot(-90, 0, 0) * Cylinder(r, L, align=(Align.CENTER, Align.CENTER, Align.MIN))
     b0 = body_skin()
@@ -420,7 +422,8 @@ def body_static():
     stem = Pos((bb.min.X + bb.max.X) / 2, (bb.min.Y + bb.max.Y) / 2, bb.max.Z - 2.4) * Cylinder(1.2, 27.4 - (bb.max.Z - 2.4), align=(Align.CENTER, Align.CENTER, Align.MIN))
     bx, by, bz = PW.SW_BODY; lx, ly, lz = PW.SW_LEVER; y1 = PW.SWY1; zs = PW.SWZ; st = F.STEEL.side
     yk = y1 - by - st; xk = bx / 2 + st; zb, zt = zs - bz / 2, zs + bz / 2 + st; yr = y1 + SW_KEEP_REACH
-    keeper = [Pos(-xk - W_KEEP, yk - W_KEEP, zt) * Box(2 * (xk + W_KEEP), yr - yk + W_KEEP, W_KEEP, align=MIN)]
+    keeper = [Pos(-xk - W_KEEP, yk, zt) * Box(2 * (xk + W_KEEP), yr - yk, W_KEEP, align=MIN)]       # top bar from the switch's front face back
+    # (it overhung the front by W_KEEP: the fingertip that pushes the switch in touched it, verify 2026-11-23)
     keeper += [Pos(sx * (xk + W_KEEP / 2) - W_KEEP / 2, yk - W_KEEP, zb) * Box(W_KEEP, yr - yk + W_KEEP, zt - zb, align=MIN) for sx in (-1, 1)]
     adds = cups + [stem] + [finger_root(f) for _, f, _ in snap_geometry()] + keeper
     b = b0.fuse(*adds)
@@ -436,16 +439,18 @@ def body_static():
             q = so.bounding_box(); cuts.append(Pos(q.min.X - r, q.min.Y - r, q.min.Z - r) * Box(q.size.X + 2 * r, q.size.Y + 2 * r, q.size.Z + 2 * r, align=MIN))
     cuts += [Pos(-STRIP_X, STRIP_Y0, STRIP_Z0) * Box(2 * STRIP_X, STRIP_Y1 - STRIP_Y0, STRIP_Z1 - STRIP_Z0, align=MIN),
              Pos(-STRIP_X2, STRIP_Y0 - 0.5, STRIP_Z0) * Box(2 * STRIP_X2, STRIP_Y1 - STRIP_Y0 + 0.5, STRIP_Z2 - STRIP_Z0, align=MIN)]
-    b = b.cut(*cuts); export_brep(b, p); return b
+    b = b.cut(*cuts); export_brep(b, p)
+    import cutters as CU
+    m = CU.mesh_of(b, 0.05, 0.3); np.savez(p + ".npz", v=m.vertices, f=m.faces); return b, m
 def body():
     """the body: its fixed features (body_static, cached), the legs' designed notches and pockets (cutters.body_cutters:
     one cut) and the frozen x-stop posts (one fuse). Then every leg is checked against it at its 24 poses and while the
     body is put on (cutters.body_gaps)."""
     import cutters as CU
     _T0[0] = time.time()
-    b = body_static(); tick("skin + fixed features")
+    b, bm = body_static(); tick("skin + fixed features")
     legs = {Lg: leg_mesh(Lg) for Lg in range(8)}
-    lc = CU.body_cutters(CU.mesh_of(b, 0.05, 0.3), {Lg: leg_mesh(Lg, samples=True) for Lg in range(8)}, leg_frame, PIV,
+    lc = CU.body_cutters(bm, {Lg: leg_mesh(Lg, samples=True) for Lg in range(8)}, leg_frame, PIV,
                          BRELD, F.NEIGHBOUR.side + 0.1, KC, CL.LIFTD, RIMR); tick(f"{len(lc)} leg cutters")
     from build123d import Plane, Polygon as BPoly, extrude
     def prism(poly, fr, dr):

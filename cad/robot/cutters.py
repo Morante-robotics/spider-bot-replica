@@ -215,7 +215,7 @@ def body_cutters(body, samples, frames, piv, r_pose, r_lift, kc, liftd, rimr, re
 
 def body_gaps(body, legs, frames, kc, liftd, need_pose=0.2, need_lift=0.1):
     """every leg against the body (trimesh) at the 24 poses, and while the body is put on from above at crank pose kc
-    (lowered from liftd + 30 mm to its seat): [(leg, what, min gap, where)], capped at 2 mm."""
+    (lowered from liftd + 30 mm to its seat): [(leg, what, min gap, where)], capped at 1 mm."""
     from manifold3d import Manifold, Mesh
     def M(m):
         x = Manifold(Mesh(vert_properties=np.asarray(m.vertices, np.float32), tri_verts=np.asarray(m.faces, np.uint32)))
@@ -224,10 +224,10 @@ def body_gaps(body, legs, frames, kc, liftd, need_pose=0.2, need_lift=0.1):
     b = M(body); rows = []
     for Lg in range(8):
         lm = M(legs[Lg])
-        g = min((b.min_gap(lm.transform(frames(Lg, k)[:3, :]), 2.0), k) for k in range(24)); rows.append((Lg, "poses", *g))
+        g = min((b.min_gap(lm.transform(frames(Lg, k)[:3, :]), 1.0), k) for k in range(24)); rows.append((Lg, "poses", *g))
         lk = lm.transform(frames(Lg, kc)[:3, :]); s, g = 0.0, (9.0, 0.0)                # lowered from liftd + 30 to its seat:
         while s <= liftd + 30.0:                                                            # it advances by the gap (a straight move
-            gg = b.translate([0, 0, s]).min_gap(lk, 5.0); g = min(g, (gg, round(s, 1)))      # cannot reach anything farther)
+            gg = b.translate([0, 0, s]).min_gap(lk, 2.0); g = min(g, (gg, round(s, 1)))      # cannot reach anything farther)
             s += max(0.25, gg - 0.02)
-        rows.append((Lg, f"lift@k{kc}", min(g[0], 2.0), g[1]))
+        rows.append((Lg, f"lift@k{kc}", min(g[0], 1.0), g[1]))
     return rows

@@ -143,6 +143,26 @@ An `ASSEMBLY` step in `verify.py` is `(part, side)` (the part comes in straight,
 a list of moves in mm, in the order the part moves going in, e.g. `("body", [[0, 0, -30], [0, 4, 0]])` = lowered
 30 mm, then slid 4 mm along +Y into place. The check starts at the place minus all the moves and sweeps each move
 against the parts already in; it reports «goes in: down 30 mm, then +Y 4 mm» or «blocked on move 2 at 1.75 mm».
+Against parts clear at the place it advances by the measured gap (a straight move cannot reach anything farther), so a
+long path costs a handful of gap queries. An optional `{"at": k}` in the step's options sets the crank pose the machine
+stands at for that step (turned by hand before it): spider-bot's legs 0 and 3 and the body go on at pose 12.
+
+## Time budget
+
+Any build or check over 40 s is a bug (Morante, 2026-11-23; aim for 10 s). `build.py` starts a watchdog
+(`tools/timebudget.py`): past `CAD_BUDGET` seconds (env, default 40; 0 = off) it names the stage and exits with code 3.
+What keeps it fast:
+- **Clearances are designed, not computed.** A cut that clears a moving part is one few-sided prism whose outline is
+  measured from the motion (`cad/robot/cutters.py`: the wall samples the part comes within its clearance of, seen
+  along the wall's normal). Never hulls of sampled points, never offset copies of parts in OpenCascade (each one
+  multiplied the faces: base 1669 s, body ≈ 3500 s; now 22 s and 32 s).
+- **One fuse, one cut** per part, never a boolean per feature with volume checks round each.
+- **The proof is on meshes**: `cutters.leg_gaps` / `body_gaps` (manifold3d `min_gap`, every leg at every pose and
+  along its path) in a few seconds, inside the build.
+- **One cache per slow input that does not depend on the moving parts** (a skin, a part's fixed features), keyed by the
+  text of the files it comes from. No chains of stage caches.
+- `cad/robot/fitcheck/check.py` (19 min) is the pre-CAD layout planner: not a gate. The gate is `cad_verify` on the
+  real parts.
 
 ## What is printed and kept in git
 
