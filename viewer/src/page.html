@@ -372,7 +372,7 @@ function select(idx) {
 
 const v = new THREE.Vector3();
 renderer.setAnimationLoop((t) => {
-  if (playing && t - lastStep > (reduce ? 600 : 140)) { lastStep = t; setPose((pose + 1) % 24); }
+  if (playing && t - lastStep > (reduce ? 600 : 140)) { lastStep = t; setPose((pose + 23) % 24); }   // walks forward (-y): the poses run backward (stance feet move +y as k falls)
   controls.update(); renderer.render(scene, camera);
   const w = stage.clientWidth, h = stage.clientHeight;
   for (const p of pins) {

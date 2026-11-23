@@ -50,6 +50,6 @@ current release.
 ## The preview GIF
 
 `turntable.gif` is made from the viewer itself: with the page open, the camera goes once round the robot at the
-home view's height, 1.25 × the home distance, with the sun turning with it (72 frames, 5° apart) while the crank advances one pose per frame (three walking cycles),
+home view's height, 1.25 × the home distance, with the sun turning with it (72 frames, 5° apart) while the crank steps one pose per frame in the walking direction, 23, 22, … (three walking cycles; the poses run backward: as k rises the robot would walk backward),
 each frame saved from the canvas on the page's background colour (640 × 440). The frames become the GIF with
 ffmpeg (12 fps, 480 px wide, 128 colours). Make it again when the robot changes enough to look different.
