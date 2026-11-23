@@ -9,12 +9,7 @@ as it is switched on (no remote control).
 **Hardware plan:** no microcontroller. One small gear motor drives the leg mechanism and the LED eyes light up.
 Since 2026-11-17 the robot is being redesigned looks-first, with the toy as the reference: a smaller motor and
 smaller batteries (button cells, like the toy's) so the whole robot can shrink. The earlier design (N20 motor,
-4×AAA, 120 % scale) is kept in the [archive tag](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17).
-
-<img src="cad/carcass-jenscolt/images/jenscolt-photo-2.jpg" width="480" alt="Spidey-Bot by jenscolt, the model this replica starts from">
-
-*The starting point: [Spidey-Bot by jenscolt](https://www.thingiverse.com/thing:5196618), a static display model
-(photo: jenscolt, CC BY-NC-SA).*
+4×AAA, 120 % scale) is kept in the [archive tag](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17). [Spidey-Bot by jenscolt](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17](https://www.thingiverse.com/thing:5196618)), the model this replica starts from.
 
 <a href="https://morante-robotics.github.io/spider-bot-replica/"><img src="viewer/turntable.gif" width="480" alt="The whole robot as it stands today, turning while the legs walk through the 24 crank poses"></a>
 
