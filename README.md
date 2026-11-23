@@ -16,6 +16,11 @@ smaller batteries (button cells, like the toy's) so the whole robot can shrink. 
 *The starting point: [Spidey-Bot by jenscolt](https://www.thingiverse.com/thing:5196618), a static display model
 (photo: jenscolt, CC BY-NC-SA).*
 
+<a href="https://morante-robotics.github.io/spider-bot-replica/"><img src="viewer/turntable.gif" width="480" alt="The whole robot as it stands today, turning while the legs walk through the 24 crank poses"></a>
+
+*The robot as it stands today. **[Open it in 3D](https://morante-robotics.github.io/spider-bot-replica/)** in the
+browser: turn it, look inside, step the legs, see the fit check's open problems.*
+
 **Follow the build:** the [build log](build-log.md) tells the story step by step, dead ends included, so it can be
 repeated. Its contents show where each step stands, and its **Open items** list what is left. The
 [AI log](ai-log.md) records what was designed with AI help and how it was checked.
@@ -37,7 +42,7 @@ repeated. Its contents show where each step stands, and its **Open items** list 
 |---|---|
 | [cad/carcass-jenscolt/](cad/carcass-jenscolt/) | Carcass model by jenscolt, unmodified (CC BY-NC-SA): the looks reference, legs included |
 | [cad/](cad/) | The rules every design follows: axes, folder layout, what is kept in git; [`_template/`](cad/_template/) to start a new design |
-| [viewer/](viewer/) | The whole robot in 3D as it stands today, with the fit check's open problems marked: open `viewer/index.html` |
+| [viewer/](viewer/) | The whole robot in 3D as it stands today, with the fit check's open problems marked: [open it in the browser](https://morante-robotics.github.io/spider-bot-replica/) |
 | [cad/motion.py](cad/motion.py) | The approved motion (from the N0 mock-up): where the 8 legs sit, their shape and how they move over a crank turn |
 | [cad/legs/](cad/legs/), [eyes/](cad/eyes/), [base/](cad/base/), [body/](cad/body/) | jenscolt's parts rebuilt as parameters (build123d), each checked against its mesh |
 | [cad/fits.py](cad/fits.py) | The measured clearances (fits) every design takes its holes, slots and gaps from |
