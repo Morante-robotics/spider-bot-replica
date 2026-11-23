@@ -861,7 +861,8 @@ def steps(spec):
     then the side the last move comes from). opts: "bench": the parts on
     the bench in this step (the step is done off the machine: the moving body is checked against these only, and
     the step places nothing in the machine; its parts go in with a later step); "except": {part: why} the moving
-    body may pass through (a press fit modelled at zero clearance); "note": what the step means."""
+    body may pass through (a press fit modelled at zero clearance); "note": what the step means; "at": the motion
+    step the machine stands at for this step (the crank turned by hand before it; default the first of MOTION)."""
     out = []
     for e in getattr(spec, "ASSEMBLY", None) or []:
         names, d = e[0], e[1]
@@ -875,7 +876,7 @@ def steps(spec):
         exc = exc if isinstance(exc, dict) else {n: "" for n in exc}
         out.append({"names": names, "d": None if d is None else np.asarray(d, float) / np.linalg.norm(d), "path": path,
                     "bench": list(opts["bench"]) if opts.get("bench") is not None else None, "except": exc,
-                    "note": opts.get("note", "")})
+                    "note": opts.get("note", ""), "at": opts.get("at")})
     return out
 
 
@@ -911,7 +912,10 @@ def move_words(m):
 
 def sweep_path(me, others, path):
     """Move `me` (at its place) along `path` (moves in mm, in order, ending at the place). Overlap above the one at
-    the place with any of `others` = blocked. Returns (move number, mm into that move) of the first block, or None."""
+    the place with any of `others` = blocked. Returns (move number, mm into that move) of the first block, or None.
+    A straight move cannot reach an obstacle farther than its gap: against obstacles clear at the place the part
+    advances by that gap (conservative advancement), not by 0.25 mm steps; obstacles it overlaps at the place (a press
+    fit) are scanned every 0.25 mm as before."""
     base = [overlap(me, o) for o in others]
     bme = mbox(me)
     pos = -sum(path)                          # offset of the start from the place
@@ -921,16 +925,29 @@ def sweep_path(me, others, path):
             continue
         u = mv / ln
         off = np.array([bme[0] + pos, bme[1] + pos])
-        grid = np.arange(0.0 if i == 0 else 0.25, ln, 0.25).tolist() + [ln]
         near = [(o, b0, box_span(off, mbox(o), u)) for o, b0 in zip(others, base)]
         near = [(o, b0, lo, hi) for o, b0, (lo, hi) in near if hi >= 0 and lo <= ln]
-        for s in grid:
+        s = 0.0 if i == 0 else 0.25
+        while True:
             live = [(o, b0) for o, b0, lo, hi in near if lo - 0.25 <= s <= hi + 0.25]
-            if not live:
-                continue
-            m2 = me.translate(list(pos + u * s))
-            if any(overlap(m2, o) > b0 + EPS_VOL for o, b0 in live):
-                return i + 1, s
+            step = 0.25
+            if live:
+                m2 = me.translate(list(pos + u * s))
+                if any(b0 > EPS_VOL and overlap(m2, o) > b0 + EPS_VOL for o, b0 in live):
+                    return i + 1, s
+                clear = [o for o, b0 in live if b0 <= EPS_VOL]
+                if clear:
+                    g = min(m2.min_gap(o, 5.0) for o in clear)
+                    if g <= 1e-4 and any(overlap(m2, o) > EPS_VOL for o in clear):
+                        return i + 1, s
+                    if all(b0 <= EPS_VOL for _, b0 in live):        # a press-fit obstacle in reach keeps the 0.25 scan
+                        step = max(step, g - 0.02)
+            else:                                 # nothing near this stretch: jump to the next obstacle's box
+                ahead = [lo - 0.25 for o, b0, lo, hi in near if lo - 0.25 > s]
+                step = max(0.25, min(ahead) - s) if ahead else ln - s
+            if s >= ln:
+                break
+            s = min(ln, s + step)
         pos = pos + mv
     return None
 
@@ -942,10 +959,14 @@ def check_assembly(spec, meshes, rep):
         rep.warn("no ASSEMBLY order in the spec: cannot tell whether the parts can be put together")
         return
     motion = list(getattr(spec, "MOTION", [0]))
-    ms = placed(spec, meshes, motion[0], bench=True)
+    at_cache = {}
     for k, st in enumerate(seq):
+        t_at = motion[0] if st.get("at") is None else st["at"]
+        if t_at not in at_cache:
+            at_cache[t_at] = placed(spec, meshes, t_at, bench=True)
+        ms = at_cache[t_at]
         names, d = st["names"], st["d"]
-        where = " on the bench" if st["bench"] is not None else ""
+        where = (" on the bench" if st["bench"] is not None else "") + (f" (machine at step {t_at})" if st.get("at") is not None else "")
         if d is None:
             if where:
                 rep.info(f"{step_label(st)}: set out{where}")
