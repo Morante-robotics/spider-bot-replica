@@ -1,20 +1,19 @@
 """Writes the viewer (viewer/index.html + viewer/robot-data.js) from the robot as it stands today.
 
-Runs the parts half of cad/robot/fitcheck/check.py (everything up to the pair checks, ≈ 10 s with its caches) and packs
-  - the shells as cad/robot builds them (cad/robot/out/base.stl and body.stl: windows, notches, pockets cut),
-  - the interior as the fit check's boxes and cylinders (plan, not modelled yet), one node per part,
-  - the real printed legs (cad/robot/out/leg-0..7.stl) and, per crank pose, each leg's matrix
-    (shells.leg_frame, as verify.py) and the crank webs and pins,
-  - the failing and at-tolerance rows of cad/robot/fitcheck/out/rows.json, each with the point where it happens
+Reads what the CAD already produced, runs no check:
+  - every part of cad/robot/verify.py's PARTS (the built STLs in cad/robot/out/, the bought parts as the spec models them),
+  - for each of the 24 crank poses, where verify.py puts each moving part (verify.poses(k): imported, nothing copied),
+  - the FAIL rows and the useful WARN rows of cad/robot/verify-result.txt (cad_verify's report), each placed where the two
+    parts come closest at pose 0.
 into robot-data.js (a GLB as base64 + JSON, as globals: no fetch, so index.html opens from disk), and wraps
 src/page.html into index.html.
 
-    .venv/bin/python viewer/src/export.py          # after a fit check run or a changed part
+    .venv/bin/python viewer/src/export.py          # after a new build or a new cad_verify run
     .venv/bin/python viewer/src/export.py --page   # only page.html changed: rewrite index.html
 """
 import os, sys, json, time, re, base64
 HERE = os.path.dirname(os.path.abspath(__file__)); VIEWER = os.path.dirname(HERE); ROOT = os.path.dirname(VIEWER)
-FC = os.path.join(ROOT, "cad", "robot", "fitcheck")
+RB = os.path.join(ROOT, "cad", "robot")
 
 SKELETON = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
@@ -32,119 +31,94 @@ if "--page" in sys.argv:
     write_page(); sys.exit(0)
 
 import numpy as np, trimesh
-t0 = time.time()
-sys.path.insert(0, FC); os.chdir(FC)
-src = open(os.path.join(FC, "check.py")).read()
-cut = src.index('print("hardware solids')
-NS = {"__name__": "check_parts", "__file__": os.path.join(FC, "check.py")}
-exec(compile(src[:cut], "check.py", "exec"), NS)
-print(f"parts built {time.time() - t0:.0f} s", flush=True)
-ALL, SOLIDS, ST = NS["ALL"], NS["SOLIDS"], NS["ST"]
-from fit_samplers import solids_of, inside_depth, EXTRA_SOLIDS
 from scipy.spatial import cKDTree
-import fit_env as FE, fit_legmesh
-motion = FE.motion; S = FE.S
+t0 = time.time()
+os.chdir(RB); sys.path.insert(0, RB)
+import verify as V                                       # the spec cad_verify runs: PARTS, poses(t), LABELS
+print(f"spec imported {time.time() - t0:.1f} s", flush=True)
 
 def group(n):
-    if n.startswith(("crank-gear", "idler-", "transfer-small", "transfer-big", "pinion")) and "axle" not in n: return "transmision"
-    if n.startswith(("n10-", "motor-")): return "motor"
-    if n.startswith(("ag13", "cell-springs", "nickel", "jst", "led", "resistor", "ss12d00")): return "electronica"
-    if "screw" in n or "axle" in n: return "tornilleria"
-    return "interior"
+    if n in ("base", "body"): return "carcasas"
+    if n.startswith("leg-"): return "patas"
+    if n in ("cell-holder", "cell-lid"): return "energia"
+    if V.PARTS[n].get("hardware"): return "comprado"
+    return "motriz"                                      # spine, cranks, idlers, sleeves, transfer, drive unit, pinion
 
-def prim_mesh(p):
-    if p["kind"] == "box":
-        lo, hi = np.asarray(p["lo"], float), np.asarray(p["hi"], float)
-        return trimesh.creation.box(extents=hi - lo, transform=trimesh.transformations.translation_matrix((lo + hi) / 2))
-    a, b, r = np.asarray(p["a"], float), np.asarray(p["b"], float), float(p["r"])
-    return trimesh.creation.cylinder(radius=r, segment=np.array([a, b]), sections=max(16, int(2 * np.pi * r / 0.6)))
+def load(n):
+    p = V.PARTS[n]
+    if "stl" in p: return trimesh.load(os.path.join(RB, p["stl"]), force="mesh")
+    return p["mesh"].copy()
 
-def covered(q, prims):
-    """fraction of a part's samples on or inside its primitives (inflated 0.06)"""
-    if not prims: return 0.0
-    inf = []
-    for p in prims:
-        if p["kind"] == "box": inf.append(dict(kind="box", lo=np.asarray(p["lo"]) - 0.06, hi=np.asarray(p["hi"]) + 0.06))
-        else:
-            a, b = np.asarray(p["a"], float), np.asarray(p["b"], float); u = (b - a) / np.linalg.norm(b - a)
-            inf.append(dict(kind="cyl", a=a - 0.06 * u, b=b + 0.06 * u, r=p["r"] + 0.06))
-    return float((inside_depth(q, inf) > 0).mean())
+meshes = {n: load(n) for n in V.PARTS}
+EN = {"base": "base", "body": "body", "n10-motor": "N10 motor, 3 V (metal gearbox, Ø3 D-shaft)",
+      "ag13-cells": "6 × AG13 / LR44 cell", "cell-springs": "3 × conical spring 7 mm", "nickel-strip": "nickel strip 0.3",
+      "ss12d00-switch": "SS12D00G3 switch", "leds": "2 × 5 mm LED + resistor", "jst-xh": "JST-XH 3-pin (pair)"}
+def en_label(n):                                          # the public viewer is in English; LABELS["es"] is the workshop kit's
+    if n in EN: return EN[n]
+    if n.startswith("leg-"): return f"leg {int(n[4:]) + 1}"
+    lab = V.PARTS[n].get("label", "")
+    if V.PARTS[n].get("hardware") and lab.startswith("M2"): return f"{lab.replace('x', '×').replace(' Allen', '').replace('.0', '')} socket screw ({n})"
+    return n.replace("-", " ")
+labels = {n: en_label(n) for n in V.PARTS}
+mats = [V.poses(k) for k in range(24)]                    # part -> 4x4, as verify.py places it
+moving = sorted({n for P in mats for n, T in P.items() if n in meshes and not np.allclose(np.asarray(T, float), np.eye(4), atol=1e-9)})
+print("moving parts:", moving, flush=True)
 
 scene = trimesh.Scene(); parts_meta = {}
-SKIP = {"crankshafts"}                                # drawn per pose (journals, webs, pins)
-for n, q in ALL.items():
-    if n in SKIP or len(q) < 4: continue
-    pr = (SOLIDS.get(n) or solids_of(q)) + EXTRA_SOLIDS.get(n, [])
-    cov = covered(q, pr)
-    if pr and cov > 0.9: m = trimesh.util.concatenate([prim_mesh(p) for p in pr]); how = "prims"
-    else: m = trimesh.convex.convex_hull(q); how = f"hull (prims cover {cov:.0%})"
-    parts_meta[n] = dict(group=group(n), how=how)
+for n, m in meshes.items():
     scene.add_geometry(m, node_name=n, geom_name=n)
-print("interior parts", len(parts_meta), {k: v["how"] for k, v in parts_meta.items() if v["how"] != "prims"}, flush=True)
+    parts_meta[n] = dict(group=group(n), label=labels[n],
+                         moving=n in moving, bought=bool(V.PARTS[n].get("hardware")))
+poses = [{n: np.round(np.asarray(P[n], float).T.reshape(-1), 5).tolist() for n in moving if n in P} for P in mats]   # column-major for three.js
 
-Oy, Oz, JR, wb0, wb1 = NS["Oy"], NS["Oz"], NS["JR"], NS["wb0"], NS["wb1"]
-jm = trimesh.util.concatenate([trimesh.creation.cylinder(radius=JR, segment=np.array([[-wb0, y, Oz], [wb0, y, Oz]]), sections=20) for y in Oy])
-scene.add_geometry(jm, node_name="journals", geom_name="journals"); parts_meta["journals"] = dict(group="transmision", how="prims")
+# ---- problems: cad_verify's report
+report = os.path.join(RB, "verify-result.txt")
+txt = open(report).read().splitlines()
+head = next((l for l in txt if l.startswith("cad_verify:")), "")
+sec = None; raw = []
+for l in txt:
+    m = re.match(r"== (\d+) ", l)
+    if m: sec = int(m.group(1)); continue
+    m = re.match(r"\s+(FAIL|WARN)\s+(.*)", l)
+    if m: raw.append((m.group(1), sec, m.group(2)))
 
-for n, f in (("base", "cad/robot/out/base.stl"), ("body", "cad/robot/out/body.stl")):   # robot frame already
-    m = trimesh.load(os.path.join(ROOT, f))
-    scene.add_geometry(m, node_name="shell-" + n, geom_name="shell-" + n)
-    parts_meta["shell-" + n] = dict(group="chasis" if n == "base" else "cuerpo", how="cad stl")
+def placed(n, k=0):
+    T = np.asarray(mats[k].get(n, np.eye(4)), float); m = meshes[n].copy(); m.apply_transform(T); return m
+def closest(a, b):
+    """point midway between the closest points of two parts at pose 0, and their distance"""
+    A, B = placed(a), placed(b)
+    pa = np.vstack([A.vertices, A.sample(3000)]); pb = np.vstack([B.vertices, B.sample(3000)])
+    d, j = cKDTree(pb).query(pa); i = int(np.argmin(d))
+    return ((pa[i] + pb[j[i]]) / 2).round(2).tolist(), float(d[i])
 
-# the real printed legs (cad/robot/out/leg-0..7.stl, robot frame, neutral pose: end tube, snap bead, root ball and
-# all); not mirrored from one side: leg-7 is not leg-3's exact mirror
-sys.path.insert(0, os.path.join(ROOT, "cad", "robot")); import shells as SH
-for Lg in range(8):
-    leg = trimesh.load(os.path.join(ROOT, "cad", "robot", "out", f"leg-{Lg}.stl"))
-    scene.add_geometry(leg, node_name=f"leg-mesh-{Lg}", geom_name=f"leg-mesh-{Lg}")
+issues = []; leg_base = []
+for lvl, sec_, msg in raw:
+    pair = re.match(r"(\S+) × (\S+?)(?: \(.*?\))?: (.*)", msg)
+    if lvl == "WARN" and sec_ not in (2, 9): continue                            # print-orientation and wall-thickness notes are not fit problems
+    if not pair:
+        issues.append(dict(level=lvl.lower(), kind="other", parts=[], at=[], text=msg[:200])); continue
+    a, b, rest = pair.groups()
+    if a not in meshes or b not in meshes: continue
+    at, dist = closest(a, b)
+    if lvl == "WARN" and sec_ == 9 and "not measured" in rest:
+        if a.startswith("leg-") and b == "base": leg_base.append((a, at)); continue
+        issues.append(dict(level="warn", kind="unmeasured", parts=[a, b], at=[at], dist=round(dist, 2), text=rest[:160]))
+    elif lvl == "WARN" and "coarse" in rest:
+        g = re.search(r"gap ([\d.]+) mm", rest)
+        issues.append(dict(level="warn", kind="coarse", parts=[a, b], at=[at], gap=float(g.group(1)) if g else None, text=rest[:160]))
+    elif lvl == "FAIL":
+        issues.append(dict(level="fail", kind="fail", parts=[a, b], at=[at], dist=round(dist, 2), text=rest[:200]))
+    elif lvl == "WARN":
+        issues.append(dict(level="warn", kind="other", parts=[a, b], at=[at], text=rest[:160]))
+if leg_base:
+    issues.append(dict(level="warn", kind="unmeasured", parts=["base"] + [a for a, _ in leg_base], at=[p for _, p in leg_base], group="legs-base",
+                       text="leg necks in the base's windows: fit not measured yet"))
+issues.sort(key=lambda i: (i["level"] != "fail", ))
+print("issues", [(i["level"], i["kind"], i["parts"][:2]) for i in issues], flush=True)
 
-# per pose: each leg's matrix (shells.leg_frame), crank webs and pins (plan)
-A_ALL, PIV, P = NS["A_ALL"], NS["PIV"], NS["P"]
-TAIL, SL, END_R, PB, PINR, WEBR, pin_x1 = NS["TAIL"], NS["SL"], NS["END_R"], NS["PB"], NS["PINR"], NS["WEBR"], NS["pin_x1"]
-poses = []
-for k in range(24):
-    legs, cyl, webs = [], [], []
-    for Lg in range(8):
-        T = SH.leg_frame(Lg, k)                                    # as verify.py carries the part
-        legs.append(np.round(T.T.reshape(-1), 5).tolist())          # column-major for three.js Matrix4.fromArray
-    for i in range(4):
-        for sx in (1, -1):
-            A = A_ALL[i if sx > 0 else i + 4, k]; x0, x1 = (wb0, wb1) if sx > 0 else (-wb1, -wb0)
-            webs.append([x0, x1, [Oy[i], Oz], [float(A[1]), float(A[2])], WEBR])
-            px = (wb1, pin_x1) if sx > 0 else (-pin_x1, -wb1)
-            cyl.append(["transmision", [px[0], float(A[1]), float(A[2])], [px[1], float(A[1]), float(A[2])], PINR])
-    poses.append(dict(legs=legs, cyl=cyl, webs=webs))
-balls = []                                            # the root ball is part of the real leg mesh
-
-rows = json.load(open(os.path.join(FC, "out", "rows.json")))
-def deepest(q, prims):
-    d = inside_depth(q, prims); j = int(np.argmax(d)); return q[j], float(d[j])
-up = np.array([0, 0, 1.0]); issues = []
-SETS = {"cell-holder": ["cell-holder", "holder-post", "cell-springs", "nickel-strip"],      # what moves together on a path
-        "drive-unit": ["drive-unit", "journal-caps", "drive-block-1", "drive-block-2", "drive-ear-1", "drive-ear-2"]}
-for g_, need, a, b, *_ in rows:
-    if g_ - need >= -0.05: continue                  # FAIL (< need - 0.1) and the at-tolerance rows clearly under need
-    it = dict(gap=round(g_, 2), need=need, a=a, b=b.strip(), fail=bool(g_ - need < -0.1 + 1e-9))
-    m = re.search(r"assembly path \+z.*?@([\d.]+) vs (\S+)", b)
-    if m:
-        t, other = float(m.group(1)), m.group(2)
-        names = [n for n in SETS.get(a, [a]) if n in ALL]; moved = np.vstack([ALL[n] for n in names]) + t * up
-        sol = SOLIDS.get(other, []) + EXTRA_SOLIDS.get(other, [])
-        if sol: pt, dep = deepest(moved, sol)
-        else: d, j = cKDTree(ALL[other]).query(moved); pt, dep = moved[int(np.argmin(d))], -float(d.min())
-        it.update(kind="path", t=t, other=other, at=pt.round(2).tolist(), depth=round(dep, 2), ghost=names, parts=[a, other])
-    elif b in ALL:
-        p1, d1 = deepest(ALL[b], SOLIDS.get(a, [])); p2, d2 = deepest(ALL[a], SOLIDS.get(b, []))
-        pt, dep = (p1, d1) if d1 >= d2 else (p2, d2)
-        it.update(kind="pair", at=pt.round(2).tolist(), depth=round(dep, 2), parts=[a, b])
-    else:
-        it.update(kind="other", parts=[a])
-    issues.append(it)
-print("issues", [(i["a"], i["b"][:40], i.get("at"), i.get("depth")) for i in issues], flush=True)
-
-stamp = time.localtime(os.path.getmtime(os.path.join(FC, "out", "rows.json")))
-meta = dict(S=S, date=time.strftime("%Y-%m-%d", stamp), generated=time.strftime("%Y-%m-%d %H:%M"), poses=poses, balls=balls, parts=parts_meta, issues=issues,
-            n_rows=len(rows), n_fail=sum(1 for r in rows if r[0] - r[1] < -0.1 + 1e-9))
+stamp = time.localtime(os.path.getmtime(report))
+meta = dict(date=time.strftime("%Y-%m-%d", stamp), generated=time.strftime("%Y-%m-%d %H:%M"), head=head, poses=poses, parts=parts_meta,
+            issues=issues, n_fail=sum(1 for i in issues if i["level"] == "fail"), n_warn=sum(1 for i in issues if i["level"] == "warn"))
 glb = scene.export(file_type="glb")
 with open(os.path.join(VIEWER, "robot-data.js"), "w") as f:
     f.write("window.ROBOT_GLB=\"" + base64.b64encode(glb).decode() + "\";\n")

@@ -116,13 +116,15 @@ body: the rebuild has the eye barrels, side scoop and rear lip but not the curve
 
 ### N2 round r00: the inside and the leg hold
 
-**Phase 3 · Mechanisms · 2026-11-23** · Status: 🔄 inside designed, one leg fault open
+**Phase 3 · Mechanisms · 2026-11-23** · Status: ✅ r00 is the robot, printing next
 
 > **In short.** The robot's shells had taken 71 minutes to build and its fit check 19, and the design was stuck on
 > tolerances of a few tenths of a millimetre in places that are not critical. Morante asked to relax them; with that,
 > the inside (drive and power) was designed for the first time and the whole-robot check came out with 0 failing and
-> 4 at tolerance of 318. The smoke check still fails on one real fault: with the body on, a leg can slide outward
-> along its crank pin and come off. Three fixes are on the table; Morante has not chosen.
+> 4 at tolerance of 318. The smoke check found one real fault: with the body on, a leg could slide outward along its
+> crank pin and come off; a snap groove on the pin fixed it. The full `cad_verify` of the whole robot then passed
+> with 0 failing, the looks judge gave 0.66 (threshold 0.6) and Morante said «se parece»: r00 is the robot, with no
+> refine round, and he goes straight to printing it.
 
 Context: the robot is `cad/robot/` at scale 0.70 (see [Open items](../build-log.md#open-items)). Each part is built
 from parameters, and the shells (base, body, legs) are carved by the legs' sweeps, which is hundreds of solid
@@ -184,11 +186,30 @@ its STL (joint radius 1.75 against a bore of 1.84): a model bug to fix whichever
   - **B:** a pin 1 mm longer; it does not solve leg 1.
   - **C:** a tab on the body; it depends on the pose and rebuilds body and base.
 
+#### Close of round r00
+
+`rounds.py status cad/robot`, 2026-11-23:
+
+| Round | Gates | Score | Passed | Caps |
+|---|---|---|---|---|
+| r00 | PASS | 0.66 | yes | none |
+
+- **Gates:** `cad_verify` of the whole robot, 0 FAIL (`verify-result.txt`). Two bookkeeping fixes: its section keys
+  are now the heading's first word («assembly order» became «assembly»), and plan m13 reads the «motion» check. Plan
+  m14 stays «failed» only because the judge cannot see code; checked by hand, the meshes are read only by `views.py`.
+- **Looks judge:** 0.66 against 0.6, passed, so no refine round was asked.
+- **Morante:** «se parece». r00 is the robot.
+- **Coupons skipped:** Morante prints the whole robot instead of the coupons. The leg snap is tested on the first
+  plate (the base and one leg) before the other seven legs are printed.
+- **Shopping list:** [`hardware.md`](../hardware.md) now counts every bought item from the code (motor, 6 cells,
+  3 springs, nickel strip, switch, JST-XH 3-pin, 2 LEDs with resistors and 7 M2 screws in four lengths).
+
 #### Next
 
-One cad-fixer for the chosen option: the cranks rebuild in seconds, the legs in about a minute. The fit check has
-one known bug: around line 260 of `cad/robot/fitcheck/check.py` it misses `- ORIGIN[1]` for the battery box (the same
-bug was fixed in `power.py`).
+Print the robot: the plater, a pre-print review and the workshop kit. The first plate is the base and one leg, to
+test the leg snap before the other seven legs.
+
+[↑ Contents](../build-log.md#contents)
 
 ### Fast shells: clearances designed, not computed
 

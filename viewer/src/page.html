@@ -80,6 +80,19 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .fact small { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em }
 .note { color: var(--muted); font-size: 13px; max-width: 75ch; margin: 0 }
 .note strong { color: var(--fg); font-weight: 600 }
+.plist { display: grid; gap: 6px }
+.pg { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); overflow: hidden }
+.pg > .gh { display: flex; align-items: center; gap: 8px; padding: 8px 12px; font: 600 14px var(--text) }
+.pg > .gh i { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.15); flex: none }
+.pg > .gh span { flex: 1 }
+.pg > .gh small { color: var(--muted); font: 400 12px var(--mono) }
+.pg.off > .gh { opacity: .5 }
+.pg ul { list-style: none; margin: 0; padding: 0 12px 8px 32px; display: none; gap: 2px; font-size: 13px; columns: 1 }
+.pg.open ul { display: grid }
+.pg li label { display: flex; gap: 6px; align-items: center; cursor: pointer }
+.pg li.off { color: var(--muted); text-decoration: line-through }
+.pg .tg { margin-left: auto; padding: 2px 9px; font-size: 12px }
+.issues-h { display: flex; align-items: baseline; justify-content: space-between; gap: 8px }
 </style>
 
 <div class="wrap">
@@ -94,39 +107,41 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
         <div class="loading" id="loading">Loading the model…</div>
         <div class="labels" id="labels"></div>
         <div class="tools">
-          <button id="xray" aria-pressed="true">See inside</button>
+          <button id="shells" aria-pressed="true">See inside: shells off</button>
+          <button id="xray" aria-pressed="false">See-through shells</button>
           <button id="spin" aria-pressed="false">Spin</button>
           <button id="reset">Reset view</button>
         </div>
-        <div class="hint">Drag to orbit · pinch or scroll to zoom</div>
+        <div class="hint">Drag to turn · pinch or scroll to zoom</div>
       </div>
       <div class="posebar">
         <button id="play" aria-pressed="false">Walk</button>
         <label for="pose" class="sub">Crank pose</label>
-        <input type="range" id="pose" min="0" max="23" step="1" value="12">
-        <output id="poseOut" for="pose">12 / 24 · 180°</output>
+        <input type="range" id="pose" min="0" max="23" step="1" value="0">
+        <output id="poseOut" for="pose">0 / 24 · 0°</output>
       </div>
-      <div class="chips" id="chips" aria-label="Show or hide part groups"></div>
-      <p class="note">Striped parts are the plan: placed and checked by the fit check, not modelled yet.</p>
+      <p class="note">Every part is the latest build's (<code>cad/robot/out/</code>), placed at each pose as <code>verify.py</code> places it. <strong>Bought</strong> parts (motor, cells, springs, screws, switch, LEDs, connector) are green.</p>
     </div>
 
-    <aside class="side" aria-label="Open problems">
-      <h2>Open problems</h2>
+    <aside class="side" aria-label="Parts and warnings">
+      <h2>Parts</h2>
+      <div class="plist" id="plist"></div>
+      <div class="issues-h"><h2>Check warnings</h2></div>
       <div class="summary" id="summary"></div>
       <div id="issues" style="display:grid;gap:8px"></div>
-      <p class="note">Select a problem to go to it: its parts stay solid and the rest fades. For an assembly problem, a red ghost shows the part where it collides on its way out.</p>
+      <p class="note">Pick a warning to go to it: its parts stay solid and the rest fades. Red = FAIL; amber = a warning worth a look (coarse gap, unmeasured fit).</p>
     </aside>
   </div>
 
   <div class="facts" id="facts">
-    <div class="fact"><small>Robot scale</small><b id="fS">70 %</b></div>
+    <div class="fact"><small>Robot scale</small><b>70 %</b></div>
     <div class="fact"><small>Size (mm)</small><b id="fSize">…</b></div>
-    <div class="fact"><small>Fit check</small><b id="fRows">…</b></div>
+    <div class="fact"><small>cad_verify</small><b id="fRows">…</b></div>
     <div class="fact"><small>Legs · poses</small><b>8 · 24</b></div>
-    <div class="fact"><small>Interior parts</small><b id="fParts">…</b></div>
+    <div class="fact"><small>Parts</small><b id="fParts">…</b></div>
   </div>
 
-  <p class="note"><strong>What you are seeing.</strong> The base and body are the <code>cad/base</code> and <code>cad/body</code> designs as they are, without the plan's leg windows, pockets and tabs yet (the shells are modelled next). The legs are the real <code>cad/legs</code> parts, carried over the 24 crank poses. <strong>The interior is the plan, not modelled yet</strong>: the boxes and cylinders the fit check uses to prove that everything fits and can be assembled. Size in mm (width × depth × height).</p>
+  <p class="note"><strong>What you see.</strong> Every part is the real STL of round r00 of <code>cad/robot</code>; no primitives, no plan. The moving parts (8 legs, 4 cranks, 3 idlers, the transfer gear and the pinion) move with the pose, as in <code>verify.py</code>. The warnings come from <code>cad/robot/verify-result.txt</code> (cad_verify), not from the fit check: they are listed on the right, with a marker where the two parts come closest at pose 0. Size in mm (width × depth × height).</p>
 </div>
 
 <script src="three-r147.js"></script>
@@ -138,75 +153,58 @@ const { toCreasedNormals } = THREE.BufferGeometryUtils;
 THREE.ColorManagement.legacyMode = false;          // as three r152+: hex colours are sRGB
 document.querySelectorAll('link[media="print"]').forEach(l => { l.media = "all"; });   // fonts: non-blocking, also where inline onload is not allowed
 const D = window.ROBOT_DATA;
-// key, label, colour, roughness, metalness, plan (striped: not modelled yet)
+// key (export.py's group), label, colour (null = one hue per part), roughness, metalness
 const GROUPS = [
-  ["body",        "Body",                  0xc8281e, 0.4,  0.0,  false],
-  ["base",        "Base",                  0x2f62b3, 0.5,  0.0,  false],
-  ["legs",        "Legs",                  0xb0201a, 0.45, 0.0,  false],
-  ["gears",       "Gears",                 0xe0a032, 0.45, 0.0,  true],
-  ["frame",       "Spine and mounts",      null,     0.6,  0.0,  true],
-  ["motor",       "N10 motor",             0xc9ccd0, 0.35, 0.3,  true],
-  ["electronics", "Cells, LEDs, switch",   0x2f9a62, 0.5,  0.0,  true],
-  ["hardware",    "Screws and axles",      0x8f98a3, 0.35, 0.4,  true],
+  ["carcasas", "Shells (base and body)", null,     0.45, 0.0],
+  ["patas",    "Legs",                     0xb0201a, 0.45, 0.0],
+  ["motriz",   "Drive",                    null,     0.5,  0.0],
+  ["energia",  "Power (cell holder, lid)", null,   0.5,  0.0],
+  ["comprado", "Bought",                   0x2fa36b, 0.4,  0.25],
 ];
-const GROUP_OF = { cuerpo: "body", chasis: "base", patas: "legs", transmision: "gears", interior: "frame",
-                   motor: "motor", electronica: "electronics", tornilleria: "hardware" };   // export.py's group names
 const GCOL = Object.fromEntries(GROUPS.map(g => [g[0], g]));
-// one colour per frame part (no reds: red marks problems); the other plan groups vary their own colour a little per part
-const FRAME_HUES = [190, 45, 265, 140, 30, 220, 95, 300, 165, 60, 245, 120];
+const SHELL_COL = { body: 0xc8281e, base: 0x2f62b3 };       // body red, base blue
+const PART_HUES = { motriz: [190, 45, 265, 215, 30, 300, 165, 75, 250, 330, 105, 20], energia: [275, 190, 50] };
 const seen = {};
 function partColor(g, name) {
-  const k = (seen[g] = (seen[g] || 0) + 1) - 1, c = new THREE.Color();
-  if (g === "frame") return c.setHSL(FRAME_HUES[k % FRAME_HUES.length] / 360, 0.45, k < FRAME_HUES.length ? 0.62 : 0.5);
-  c.setHex(GCOL[g][2]);
-  if (GCOL[g][5] && name) { const h = {}; c.getHSL(h); c.setHSL(h.h + ((k % 5) - 2) * 0.012, h.s, Math.min(0.8, h.l + ((k % 3) - 1) * 0.07)); }
-  return c;
-}
-function stripes(m) {                              // plan parts: dark diagonal stripes in world space (1.6 mm pitch)
-  m.onBeforeCompile = (sh) => {
-    sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\nvarying vec3 vStripeW;")
-      .replace("#include <project_vertex>", "#include <project_vertex>\nvStripeW = (modelMatrix * vec4(transformed, 1.0)).xyz;");
-    sh.fragmentShader = sh.fragmentShader.replace("#include <common>", "#include <common>\nvarying vec3 vStripeW;")
-      .replace("#include <color_fragment>", "#include <color_fragment>\nfloat stp = step(0.62, fract((vStripeW.x + vStripeW.y - vStripeW.z) / 1.6));\ndiffuseColor.rgb *= mix(1.0, 0.5, stp);");
-  };
-  m.customProgramCacheKey = () => "stripes";
-  return m;
+  const c = new THREE.Color();
+  if (g === "carcasas") return c.setHex(SHELL_COL[name]);
+  if (g === "comprado" || g === "patas") {
+    c.setHex(GCOL[g][2]); const k = (seen[g] = (seen[g] || 0) + 1) - 1, h = {}; c.getHSL(h);
+    return g === "patas" ? c.setHSL(h.h, h.s, h.l + ((k % 2) ? 0.03 : 0)) : c.setHSL(h.h + ((k % 4) - 1.5) * 0.01, h.s, Math.min(0.7, h.l + ((k % 3) - 1) * 0.06));
+  }
+  const k = (seen[g] = (seen[g] || 0) + 1) - 1, hs = PART_HUES[g];
+  return c.setHSL(hs[k % hs.length] / 360, 0.5, 0.6);
 }
 function mat(g, name) {                            // every mesh gets its own material (tinting and fading change it)
-  const [, , , r, mt, plan] = GCOL[g];
-  const m = new THREE.MeshStandardMaterial({ color: partColor(g, name), roughness: r, metalness: mt });
-  return plan ? stripes(m) : m;
+  const [, , , r, mt] = GCOL[g];
+  return new THREE.MeshStandardMaterial({ color: partColor(g, name), roughness: r, metalness: mt });
 }
+const label = (n) => (D.parts[n] && D.parts[n].label) || n;
 
-// plain words for each open row of the fit check (matched on the row's parts)
-const TEXT = [
-  { m: i => i.a === "cell-holder" && i.kind === "path",
-    t: "The cell holder cannot come out: it hits the motor",
-    d: "Lifted with its post, at 3 mm it is 2.79 mm inside the N10 motor. The holder's tab and screw head under the motor have to move or be recessed." },
-  { m: i => i.a === "n10-motor" && i.b === "holder-screw",
-    t: "The cell holder's screw head sits inside the motor",
-    d: "1.21 mm into the N10, where it needs 0.15 mm clearance. Same fix as problem 1: the tab or the head elsewhere, or a recess." },
-  { m: i => i.a === "ag13-cells",
-    t: "The cells pass through the springs on their way in",
-    d: "0.85 mm. Most likely a false fail: the springs compress as the cells go in. To be declared a designed contact." },
-  { m: i => i.a === "drive-unit",
-    t: "The drive unit goes down its slots very tight",
-    d: "0.01 mm from the spine on the way down, where 0.10 is asked. Within the sampling tolerance, so not a fail, but worth watching." },
-];
+// plain words for each warning of the report (kind + parts)
+const pl = (a, b) => `${label(a)} × ${label(b)}`;
+function words(it) {
+  if (it.kind === "coarse") return { t: `Coarse gap: ${pl(...it.parts)}`, d: `Fixed parts with no fit between them, ${it.gap != null ? it.gap.toFixed(2) : "?"} mm apart (asked ≥ 0.2). Within what a coarse seat accepts (≤ 0.4, the nozzle's line); checked at assembly.` };
+  if (it.kind === "unmeasured" && it.group === "legs-base") return { t: "Unmeasured fit: the 8 legs' necks in the base's windows", d: "The computed gaps are ≥ 0.40 mm a side, but never printed: tested on the first plate (the base and one leg). One marker per leg." };
+  if (it.kind === "unmeasured") {
+    const k = it.parts.slice().sort().join("|");
+    const T = { "base|body": ["Unmeasured fit: body on the base", "The front tabs and the rear one are press fits; not printed yet, tested when the robot is assembled."],
+                "drive-unit|n10-motor": ["Unmeasured fit: N10 motor in its clamp", "The pocket is the one computed for a short part; still to be tried with the metal motor."],
+                "cell-holder|cell-lid": ["Unmeasured fit: lid on the cell holder", "The snap lips and the key are not printed yet: tested when the robot is assembled."] }[k];
+    return { t: T ? T[0] : `Unmeasured fit: ${pl(...it.parts)}`, d: T ? T[1] : it.text };
+  }
+  if (it.kind === "fail") return { t: `FAIL: ${pl(...it.parts)}`, d: it.text };
+  return { t: it.parts.length ? pl(...it.parts) : "Warning", d: it.text };
+}
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const day = (s) => { const [y, m, d] = s.slice(0, 10).split("-").map(Number); return `${d} ${MONTHS[m - 1]} ${y}`; };
 const gen = D.generated || D.date;
-document.getElementById("sub").textContent =
-  `Current state at ${Math.round(D.S * 100)} % scale · generated ${day(gen)}${gen.length > 10 ? ", " + gen.slice(11, 16) : ""} · fit check of ${day(D.date)}`;
-document.getElementById("fS").textContent = `${Math.round(D.S * 100)} %`;
-const fmt = (v, n = 2) => v.toFixed(n);
-const issues = D.issues.map((it, k) => {
-  const tx = TEXT.find(t => t.m(it)) || { t: `${it.a} ↔ ${it.b}`, d: "" };
-  return { ...it, idx: k + 1, title: tx.t, desc: tx.d };
-});
+document.getElementById("sub").textContent = `Round r00 · built ${day(gen)}${gen.length > 10 ? ", " + gen.slice(11, 16) : ""} · checked ${day(D.date)}`;
+const fmt = (v, n = 2) => v.toFixed(n).replace(".", ",");
+const issues = D.issues.map((it, k) => ({ ...it, idx: k + 1, ...(() => { const w = words(it); return { title: w.t, desc: w.d }; })() }));
 
 const stage = document.getElementById("stage");
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -228,8 +226,9 @@ sun.shadow.bias = -0.0005; scene.add(sun);
 
 // robot frame is z-up, mm; three is y-up
 const robot = new THREE.Group(); robot.rotation.x = -Math.PI / 2; scene.add(robot);
-const groups = {}; for (const [k] of GROUPS) { groups[k] = new THREE.Group(); groups[k].name = k; robot.add(groups[k]); }
 const parts = {};                      // part name -> mesh
+const hidden = new Set();              // parts hidden by hand
+const groupOff = new Set();            // groups hidden
 
 function resize() {
   const w = stage.clientWidth, h = stage.clientHeight;
@@ -243,61 +242,38 @@ function glbBuffer() {
   return b.buffer;
 }
 
-const legMeshes = [];                  // 8 leg clones, matrices per pose
-const UNITCYL = new THREE.CylinderGeometry(1, 1, 1, 24); const SPHERE = new THREE.SphereGeometry(1, 24, 16);
-const poseCyl = [], poseWeb = [];
-const Y = new THREE.Vector3(0, 1, 0);
-function placeCyl(m, a, b, r) {
-  const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b), d = B.clone().sub(A), L = d.length();
-  m.position.copy(A).add(B).multiplyScalar(0.5);
-  m.quaternion.setFromUnitVectors(Y, d.normalize()); m.scale.set(r, L, r);
-}
-function add(g, geo, name) {
-  const m = new THREE.Mesh(geo, mat(g, name)); m.name = name || ""; m.userData.group = g;
-  m.castShadow = m.receiveShadow = true; groups[g].add(m); return m;
-}
-
 new GLTFLoader().parse(glbBuffer(), "", (gltf) => {
   const nodes = {};
   gltf.scene.traverse(o => { if (o.isMesh) nodes[o.name] = o; });
   for (const [name, meta] of Object.entries(D.parts)) {
     const src = nodes[name]; if (!src) continue;
-    const g = GROUP_OF[meta.group] || "frame";
-    parts[name] = add(g, toCreasedNormals(src.geometry, Math.PI / 6), name);   // the primitives come without normals
+    const g = meta.group;
+    const m = new THREE.Mesh(toCreasedNormals(src.geometry, Math.PI / 5), mat(g, name));
+    m.name = name; m.userData.group = g; m.castShadow = m.receiveShadow = true;
+    if (meta.moving) m.matrixAutoUpdate = false;
+    robot.add(m); parts[name] = m;
   }
-  for (let Lg = 0; Lg < 8; Lg++) {
-    const m = add("legs", toCreasedNormals(nodes["leg-mesh-" + Lg].geometry, Math.PI / 5));
-    m.matrixAutoUpdate = false; legMeshes.push(m);
-  }
-  for (const [c, r] of D.balls) { const s = add("legs", SPHERE); s.position.set(...c); s.scale.setScalar(r); }
-  for (const [g] of D.poses[0].cyl) poseCyl.push(add(GROUP_OF[g] || g, UNITCYL));
-  const BOX = new THREE.BoxGeometry(1, 1, 1);
-  for (const _ of D.poses[0].webs) poseWeb.push([add("gears", BOX), add("gears", UNITCYL), add("gears", UNITCYL)]);
-  setPose(12);
-  buildIssues(); buildChips(); setXray(true);
+  setPose(0);
+  buildList(); buildIssues(); applyVis(); setShellsOut(false);
   const box = new THREE.Box3().setFromObject(robot), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(800, 800), new THREE.ShadowMaterial({ opacity: 0.22 }));
   ground.rotation.x = -Math.PI / 2; ground.position.y = box.min.y; ground.receiveShadow = true; scene.add(ground);
   const d = size.length() * 1.3;
   home.target.copy(c); home.pos.set(c.x + d * 0.55, c.y + d * 0.45, c.z + d * 0.72); goHome();
   document.getElementById("fSize").textContent = `${Math.round(size.x)} × ${Math.round(size.z)} × ${Math.round(size.y)}`;
+  document.getElementById("fParts").textContent = Object.keys(D.parts).length;
+  document.getElementById("fRows").textContent = `${D.n_fail} fails · ${D.n_warn} warnings`;
   document.getElementById("loading").hidden = true;
+  window.VIEWER_READY = true;
 }, () => { document.getElementById("loading").textContent = "The model did not load. Reload the page."; });
 
 const home = { pos: new THREE.Vector3(), target: new THREE.Vector3() };
 function goHome() { camera.position.copy(home.pos); controls.target.copy(home.target); controls.update(); }
 
-let pose = 12;
+let pose = 0;
 function setPose(k) {
   pose = k; const P = D.poses[k];
-  legMeshes.forEach((m, i) => { m.matrix.fromArray(P.legs[i]); m.matrixWorldNeedsUpdate = true; });
-  P.cyl.forEach(([, a, b, r], i) => placeCyl(poseCyl[i], a, b, r));
-  P.webs.forEach(([x0, x1, o, a, r], i) => {
-    const [box, c1, c2] = poseWeb[i]; const dy = a[0] - o[0], dz = a[1] - o[1], L = Math.hypot(dy, dz);
-    box.position.set((x0 + x1) / 2, (o[0] + a[0]) / 2, (o[1] + a[1]) / 2);
-    box.rotation.set(Math.atan2(dz, dy), 0, 0); box.scale.set(x1 - x0, L, 2 * r);
-    placeCyl(c1, [x0, o[0], o[1]], [x1, o[0], o[1]], r); placeCyl(c2, [x0, a[0], a[1]], [x1, a[0], a[1]], r);
-  });
+  for (const [n, a] of Object.entries(P)) { const m = parts[n]; if (m) { m.matrix.fromArray(a); m.matrixWorldNeedsUpdate = true; } }
   document.getElementById("pose").value = k;
   document.getElementById("poseOut").textContent = `${k} / 24 · ${k * 15}°`;
 }
@@ -309,48 +285,67 @@ document.getElementById("play").onclick = (e) => {
   e.currentTarget.textContent = playing ? "Stop" : "Walk";
 };
 
-// ---- x-ray: shells see-through
+// ---- visibility: group and part toggles; the shells' see-through state
 let xray = false;
-function setXray(on) {
-  xray = on; document.getElementById("xray").setAttribute("aria-pressed", String(on));
-  for (const [n, op] of [["shell-body", 0.16], ["shell-base", 0.3]]) {
+function applyVis() {
+  for (const [n, m] of Object.entries(parts)) m.visible = !hidden.has(n) && !groupOff.has(D.parts[n].group);
+  for (const [n, op] of [["body", 0.16], ["base", 0.3]]) {
     const m = parts[n]; if (!m) continue;
-    Object.assign(m.material, { transparent: on, opacity: on ? op : 1, depthWrite: !on }); m.castShadow = !on; m.material.needsUpdate = true;
+    Object.assign(m.material, { transparent: xray, opacity: xray ? op : 1, depthWrite: !xray }); m.castShadow = !xray; m.material.needsUpdate = true;
   }
+  document.querySelectorAll(".pg").forEach(e => e.classList.toggle("off", groupOff.has(e.dataset.g)));
+  document.querySelectorAll(".pg li").forEach(e => e.classList.toggle("off", hidden.has(e.dataset.n)));
+  document.querySelectorAll(".pg li input").forEach(e => { e.checked = !hidden.has(e.closest("li").dataset.n); });
+  document.getElementById("shells").setAttribute("aria-pressed", String(groupOff.has("carcasas")));
+  document.getElementById("shells").textContent = groupOff.has("carcasas") ? "See inside: shells off" : "See inside (hide shells)";
 }
-document.getElementById("xray").onclick = () => setXray(!xray);
+function setShellsOut(on) { if (on) groupOff.add("carcasas"); else groupOff.delete("carcasas"); applyVis(); }
+document.getElementById("shells").onclick = () => setShellsOut(!groupOff.has("carcasas"));
+document.getElementById("xray").onclick = (e) => { xray = !xray; e.currentTarget.setAttribute("aria-pressed", String(xray)); applyVis(); };
 document.getElementById("spin").onclick = (e) => { controls.autoRotate = !controls.autoRotate; e.currentTarget.setAttribute("aria-pressed", String(controls.autoRotate)); };
 document.getElementById("reset").onclick = () => { select(null); goHome(); };
 
-// ---- problems: tinted parts, a pin at each point, ghosts of the part where the path fails
+function buildList() {
+  const box = document.getElementById("plist");
+  for (const [key, lab, color] of GROUPS) {
+    const names = Object.keys(D.parts).filter(n => D.parts[n].group === key);
+    if (!names.length) continue;
+    const g = document.createElement("div"); g.className = "pg"; g.dataset.g = key;
+    const bg = color === null ? "linear-gradient(90deg,#6fb7c9,#d9b45f,#9c86d6,#6fbf86)" : `#${color.toString(16).padStart(6, "0")}`;
+    g.innerHTML = `<div class="gh"><i style="background:${key === "carcasas" ? "linear-gradient(90deg,#c8281e 50%,#2f62b3 50%)" : bg}"></i><span>${lab}</span><small>${names.length}</small>` +
+      `<button class="tg" data-a="show">Show</button><button class="tg" data-a="hide">Hide</button><button class="tg" data-a="open" aria-label="List">▾</button></div><ul></ul>`;
+    const ul = g.querySelector("ul");
+    for (const n of names) {
+      const li = document.createElement("li"); li.dataset.n = n;
+      li.innerHTML = `<label><input type="checkbox" checked>${label(n)}</label>`;
+      li.querySelector("input").onchange = (e) => { e.target.checked ? hidden.delete(n) : hidden.add(n); applyVis(); };
+      ul.append(li);
+    }
+    g.querySelector('[data-a="show"]').onclick = () => { groupOff.delete(key); names.forEach(n => hidden.delete(n)); applyVis(); };
+    g.querySelector('[data-a="hide"]').onclick = () => { groupOff.add(key); applyVis(); };
+    g.querySelector('[data-a="open"]').onclick = () => g.classList.toggle("open");
+    box.append(g);
+  }
+}
+
+// ---- problems: tinted parts and a pin at each point
 const FAILC = new THREE.Color(0xd1281b), TOLC = new THREE.Color(0xd99a1b);
-const pins = [], ghosts = {};
-function tint(m, col) { m.material.emissive = col.clone(); m.material.emissiveIntensity = 0.35; m.material.color.lerp(col, 0.35); }
+const pins = [];
+function tint(m, col) { m.material.emissive = col.clone(); m.material.emissiveIntensity = 0.25; }
 function buildIssues() {
-  const nf = issues.filter(i => i.fail).length, nt = issues.length - nf;
   document.getElementById("summary").innerHTML =
-    `<span class="pill f">${nf} failing</span><span class="pill t">${nt} at tolerance</span><span>of ${D.n_rows} fit check rows</span>`;
-  document.getElementById("fRows").textContent = `${D.n_fail} fail / ${D.n_rows}`;
-  document.getElementById("fParts").textContent = Object.values(D.parts).filter(p => p.how !== "cad stl").length;
+    `<span class="pill f">${D.n_fail} fails</span><span class="pill t">${D.n_warn} warnings</span><span>${D.head.replace("cad_verify: ", "cad_verify ")}</span>`;
   const list = document.getElementById("issues"), labels = document.getElementById("labels");
   for (const it of issues) {
-    const col = it.fail ? FAILC : TOLC;
-    for (const n of it.parts) if (parts[n]) tint(parts[n], col);
-    if (it.kind === "path") {                                    // the part lifted to where it fails
-      const g = new THREE.Group(); g.position.z = it.t;
-      const gm = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.28, depthWrite: false });
-      const wm = new THREE.MeshBasicMaterial({ color: col, wireframe: true, transparent: true, opacity: 0.5 });
-      for (const n of it.ghost) if (parts[n]) { g.add(new THREE.Mesh(parts[n].geometry, gm)); g.add(new THREE.Mesh(parts[n].geometry, wm)); }
-      g.visible = false; robot.add(g); ghosts[it.idx] = g;
-    }
-    const pin = document.createElement("button"); pin.className = "pin" + (it.fail ? "" : " tol"); pin.textContent = it.idx;
-    pin.setAttribute("aria-label", it.title); pin.onclick = () => select(it.idx); labels.append(pin);
-    pins.push({ el: pin, at: new THREE.Vector3(...it.at), idx: it.idx });
-    const b = document.createElement("button"); b.className = "issue" + (it.fail ? "" : " tol"); b.id = "issue-" + it.idx;
+    const fail = it.level === "fail", col = fail ? FAILC : TOLC;
+    it.at.forEach((a, j) => {
+      const pin = document.createElement("button"); pin.className = "pin" + (fail ? "" : " tol"); pin.textContent = it.idx;
+      pin.setAttribute("aria-label", it.title); pin.onclick = () => select(it.idx); labels.append(pin);
+      pins.push({ el: pin, at: new THREE.Vector3(...a), idx: it.idx });
+    });
+    const b = document.createElement("button"); b.className = "issue" + (fail ? "" : " tol"); b.id = "issue-" + it.idx;
     b.setAttribute("aria-pressed", "false");
-    const num = it.gap < 0 ? `${fmt(-it.gap)} mm inside` + (it.kind === "path" ? ` when moved ${fmt(it.t, 1)} mm` : ` · needs ${fmt(it.need)} clearance`)
-      : `gap ${fmt(it.gap)} mm · needs ${fmt(it.need)}`;
-    b.innerHTML = `<span class="n">${it.idx}</span><b>${it.title}</b><span class="num">${it.fail ? "FAIL" : "AT TOLERANCE"} · ${num}</span><p>${it.desc}</p>`;
+    b.innerHTML = `<span class="n">${it.idx}</span><b>${it.title}</b><span class="num">${fail ? "FAIL" : "WARNING"}</span><p>${it.desc}</p>`;
     b.onclick = () => select(sel === it.idx ? null : it.idx); list.append(b);
   }
 }
@@ -359,32 +354,19 @@ function select(idx) {
   sel = idx;
   for (const it of issues) document.getElementById("issue-" + it.idx).setAttribute("aria-pressed", String(it.idx === idx));
   pins.forEach(p => p.el.classList.toggle("sel", p.idx === idx));
-  for (const [k, g] of Object.entries(ghosts)) g.visible = +k === idx;
-  const it = issues.find(i => i.idx === idx), keep = new Set(it ? [...it.parts, ...(it.ghost || [])] : []);
-  robot.traverse(o => {
-    if (!o.isMesh || !o.userData.group || o.name.startsWith("shell-")) return;
-    const dim = it && !keep.has(o.name);
-    Object.assign(o.material, { transparent: dim, opacity: dim ? 0.12 : 1, depthWrite: !dim }); o.material.needsUpdate = true;
-  });
-  if (it) {
-    if (!xray) setXray(true);
-    controls.autoRotate = false; document.getElementById("spin").setAttribute("aria-pressed", "false");
-    const p = robot.localToWorld(new THREE.Vector3(...it.at));
-    const dir = camera.position.clone().sub(controls.target).normalize();
-    controls.target.copy(p); camera.position.copy(p).add(dir.multiplyScalar(130)); controls.update();
+  const it = issues.find(i => i.idx === idx), keep = new Set(it ? it.parts : []);
+  for (const [n, o] of Object.entries(parts)) {
+    o.material.emissive.setHex(0); o.material.emissiveIntensity = 0;
+    if (it && keep.has(n) && n !== "base" && n !== "body") tint(o, it.level === "fail" ? FAILC : TOLC);
+    const dim = it && !keep.has(n), shell = n === "body" || n === "base";
+    const on = dim || (shell && xray), op = dim ? 0.12 : (shell && xray ? (n === "body" ? 0.16 : 0.3) : 1);
+    Object.assign(o.material, { transparent: on, opacity: op, depthWrite: !on }); o.material.needsUpdate = true;
   }
-}
-
-function buildChips() {
-  const box = document.getElementById("chips");
-  for (const [key, label, color, , , plan] of GROUPS) {
-    const b = document.createElement("button"); b.className = "chip"; b.id = "chip-" + key; b.setAttribute("aria-pressed", "true");
-    const bg = color === null
-      ? "background-image:repeating-linear-gradient(45deg, transparent 0 2px, rgba(0,0,0,.35) 2px 4px),linear-gradient(90deg,#6fb7c9,#d9b45f,#9c86d6,#6fbf86)"
-      : `background-color:#${color.toString(16).padStart(6, "0")}`;
-    b.innerHTML = `<i class="${plan ? "plan" : ""}" style="${bg}"></i>${label}`;
-    b.onclick = () => { const on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", String(on)); groups[key].visible = on; };
-    box.append(b);
+  if (it) {
+    controls.autoRotate = false; document.getElementById("spin").setAttribute("aria-pressed", "false");
+    const p = robot.localToWorld(new THREE.Vector3(...it.at[0]));
+    const dir = camera.position.clone().sub(controls.target).normalize();
+    controls.target.copy(p); camera.position.copy(p).add(dir.multiplyScalar(it.at.length > 1 ? 220 : 130)); controls.update();
   }
 }
 

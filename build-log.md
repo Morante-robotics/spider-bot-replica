@@ -60,7 +60,7 @@ The robot's story in four parts, then what is left to do and a glossary.
    - [N2 rev 5: the inside does not fit at 65 %](build-log/4-looks-first.md#n2-rev-5-the-inside-does-not-fit-at-65-) · 2026-11-19 · ↩️ restarted from scratch
    - [Meshes become parameters](build-log/4-looks-first.md#meshes-become-parameters) · 2026-11-20 · ✅ parts converted
    - [Only the parametric parts measure](build-log/4-looks-first.md#only-the-parametric-parts-measure) · 2026-11-20 · ✅ done
-   - [N2 round r00: the inside and the leg hold](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) · 2026-11-23 · 🔄 inside designed, one leg fault open
+   - [N2 round r00: the inside and the leg hold](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) · 2026-11-23 · ✅ r00 is the robot, printing next
    - [Fast shells: clearances designed, not computed](build-log/4-looks-first.md#fast-shells-clearances-designed-not-computed) · 2026-11-23 · ✅ under 40 s, 0 FAIL
 5. **[Open items](#open-items)**: everything still to do.
 6. **[Glossary](#glossary)**: the terms used in the entries.
@@ -78,11 +78,10 @@ archived in [Legs and drive](build-log/3-legs-and-drive.md).
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| `rounds.py round cad/robot 0`, the looks judge and Morante's «se parece» (`verify.py --quick` 0 FAIL in 37 s, base 22 s, body 28 s: [state](cad/robot/datasheet.md#state-2026-11-23)) | [Fast shells](build-log/4-looks-first.md#fast-shells-clearances-designed-not-computed) | 3 |
 | Workshop kit: legs 1, 2, 4–7 with the crank at pose 0, then half a turn for legs 0 and 3 and the body; switch glued from the front | [Fast shells](build-log/4-looks-first.md#fast-shells-clearances-designed-not-computed) | 3 |
 | Speed, optional: the body skin (cad/body, 17–20 s) and the body's fixed stage (cold 40 s) are cached, and `viewer/src/export.py` takes 127 s (it runs half of `check.py`); make them faster if they get used often | [Fast shells](build-log/4-looks-first.md#fast-shells-clearances-designed-not-computed) | 3 |
-| Test the leg snap's engagement on a coupon ([state](cad/robot/datasheet.md#state-2026-11-23)) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
-| Update the r00 entry when r00 closes | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
+| Coupon for the leg snap: skipped by Morante; the leg snap is tested on the first plate (base + one leg) before the other 7 legs ([state](cad/robot/datasheet.md#state-2026-11-23)) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
+| Print the robot: plater, pre-print review, workshop kit (shopping list: [`hardware.md`](hardware.md)) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 4 |
 | Body: the curved top panels and the chin grille, if Morante wants them later (a build takes 60–80 s) | [Meshes become parameters](build-log/4-looks-first.md#meshes-become-parameters) | 3 |
 | Buy the N10 motor (3 V, ≈ 100–150 rpm) and 6 × AG13 cells and measure the motor (body, shaft, mounting); sizing: [`sizing.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/mockup/sizing.py) | [Redesign: looks first](build-log/4-looks-first.md#redesign-looks-first) | 3 |
 | Print detail, one batch of coupons, the workshop kit and the one robot | [Redesign: looks first](build-log/4-looks-first.md#redesign-looks-first) | 4 |

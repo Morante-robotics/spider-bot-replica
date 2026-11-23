@@ -612,7 +612,7 @@
    "text": "when something collides: first layout; then the colliding part is reshaped locally to make room (a pocket, relief, notch or bulge), any bulge outward on the shell (base) or the body first; a larger S is not wanted and is only put to Morante when nothing else works (Morante, 2026-11-21: «cada vez que te encuentres con un problema de colisiones, modifica o deforma la pieza local para dar cabida a lo que falta… empiezas por fuera en la carcasa o en el cuerpo»; «no quiero aumentar la escala más»)",
    "how": "verify",
    "priority": "must",
-   "check": "keep-in"
+   "check": "motion"
   },
   {
    "id": "m14",
@@ -723,5 +723,5 @@
  ],
  "open_questions": [],
  "diagram": "base > keel M2 > spine set (spine, cranks in open slots, idlers, drive-unit caps 1-3, 3 M2 axles: 1 and 2 through its lugs) > legs (window, pin) > cell-holder (post on the wall tops, tongues cap 4, tab M2 into drive block 2) > N10 + pinion > cells > lid; body snaps",
- "_validated": "0235c7d97523054c:d2ebb4d92cef"
+ "_validated": "0235c7d97523054c:131438295e69"
 }

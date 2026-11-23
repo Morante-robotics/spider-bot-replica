@@ -264,7 +264,7 @@ class Report:
         checks, sec = {}, None
         for ln in self.lines:
             if ln.startswith("== "):
-                sec = checks.setdefault(re.sub(r"^\d+\s+", "", re.split(r"[:(]", ln[3:])[0].strip()),
+                sec = checks.setdefault(re.sub(r"^\d+\s+", "", re.split(r"[:(]", ln[3:])[0].strip()).split()[0],  # plan key
                                         {"ok": 0, "warn": 0, "fail": 0, "fails": [], "warns": []})
             elif sec is not None:
                 if ln.startswith("  ok "):
