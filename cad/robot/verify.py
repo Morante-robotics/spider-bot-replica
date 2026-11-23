@@ -73,7 +73,6 @@ if IV is not None:
                 + [s for s in ia if _st(s) > _cut] + ASSEMBLY[-1:])                  # holder, motor…, body last
     if any(s[0] == "ss12d00-switch" for s in ia):                                        # switch and LEDs are fitted to the body on the bench: they go on with it
         ASSEMBLY[-1] = (("body", "ss12d00-switch", "leds"), [0, 0, 1], {"note": "body with its switch and LEDs, pressed on from above"})
-# Gaps Morante accepted under 0.2 (2026-11-23): the snap bead against its groove's neck on crank 4 (0.19 at poses 19/7,
-# a turning part), and the four body hairlines at 0.20 (relaxed tolerances in places that are not critical)
-PAIR_GAP = {**globals().get("PAIR_GAP", {}), ("crank-4", "leg-3"): 0.18, ("crank-4", "leg-7"): 0.18,
-            **{("body", n): 0.19 for n in ("cell-holder", "cell-lid", "ss12d00-switch", "leds")}}
+# Gap Morante accepted under 0.2 (2026-11-23): the snap bead against its groove's neck on crank 4 (0.19 at poses 19/7,
+# a turning part). The body's hairlines to the fixed parts inside are the coarse class now (cad_verify COARSE).
+PAIR_GAP = {**globals().get("PAIR_GAP", {}), ("crank-4", "leg-3"): 0.18, ("crank-4", "leg-7"): 0.18}

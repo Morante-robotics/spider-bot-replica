@@ -35,6 +35,14 @@ one is at every step of the motion, and what is allowed. The tool then runs eigh
                   its reason and an optional bound (min_z): a keel allowed under the shell, but never below min_z
                   (base v2 chassis, 2026-11-14: 17 % of the module was outside the carcass and nothing said so)
 
+Two classes of tolerance (Morante, 2026-11-23: «ignorar cualquier cosa por debajo de 0.4 mm dada la boquilla»):
+  * fits: pairs where a part moves (over MOTION), GEARS, JOINTS, PAIR_GAP pairs, retention, seats, assembly paths:
+    checked to their fit as before (cad/fits.py, 0.05-0.1 mm: a print showed 0.1 makes a part jam or go loose)
+  * the rest is checked to COARSE (default 0.4 mm, the nozzle's line width): a gap between two fixed parts with no
+    fit declared that is under MIN_GAP but not an overlap, and a keep-in envelope or bound missed by at most COARSE,
+    are a WARN («coarse»), not a FAIL. An overlap between fixed parts is still a FAIL: they would not go together.
+  Declaring a fixed pair in PAIR_GAP or JOINTS moves it to the fits class.
+
 Spec file (all names optional except PARTS and poses):
 
     PARTS = {"frame": {"stl": "frame.stl", "fixed": True},
@@ -85,6 +93,7 @@ Spec file (all names optional except PARTS and poses):
                                               # allow: boxes (first match wins), skipped or checked at their own inset;
                                               # samples: surface points per part (default 20000)
     MIN_GAP, GEAR_GAP, MIN_WALL, BED = 0.2, (0.08, 0.5), 0.8, (256, 256, 256)
+    COARSE = 0.4                              # mm: tolerance of the coarse class (see «Two classes» above)
 
 Usage:
     python3 tools/cad_verify.py path/to/spec.py [--out check-result.txt] [--render images/check] [--quick]
@@ -136,6 +145,15 @@ import trimesh
 from manifold3d import Manifold, Mesh
 
 EPS_VOL = 1e-3          # mm³: anything below is numerical noise
+COARSE = 0.4            # mm: the nozzle's line width; the default tolerance of the coarse class (spec.COARSE)
+
+
+def coarse_pair(spec, k, static):
+    """A pair in the coarse class: both parts fixed over MOTION, and no fit declared for it (GEARS, JOINTS,
+    PAIR_GAP). Its gap below MIN_GAP is a WARN, not a FAIL; an overlap stays a FAIL."""
+    declared = {pair_key(*p) for p in getattr(spec, "GEARS", [])} | \
+        {pair_key(*p) for p in getattr(spec, "JOINTS", {})} | {pair_key(*p) for p in getattr(spec, "PAIR_GAP", {})}
+    return k not in declared and all(n in static for n in k)
 
 
 # ---------------------------------------------------------------- helpers for spec files
@@ -695,11 +713,16 @@ def check_motion(spec, meshes, rep, only=None, sweep=None):
         for k, last in st["learn"]:        # a pair scanned for being close last time: is it still close?
             close = any(pair_key(a, b) == k and (v > EPS_VOL or g < st["clear"]) for _, a, b, v, g in rows)
             NEW[last] = "close" if close else "clear"
+    coarse = getattr(spec, "COARSE", COARSE)
+    static = set(static_parts(spec))
     for k, (g, t) in sorted(closest.items(), key=lambda x: x[1][0]):
         if k in worst_overlap:
             continue
         need = pair_gap.get(k, min_gap)
-        if g < need:
+        if g < need and need - g <= coarse and coarse_pair(spec, k, static):
+            rep.warn(f"{' × '.join(sorted(k))}: gap {g:.2f} mm < {need} (at {t}): coarse, fixed parts with no fit, "
+                     f"within {coarse:g}")
+        elif g < need:
             rep.fail(f"{' × '.join(sorted(k))}: gap {g:.2f} mm < {need} (at {t})")
         elif g < 1.0:
             rep.info(f"{' × '.join(sorted(k))}: gap {g:.2f} mm (closest at {t})")
@@ -1219,6 +1242,11 @@ def check_keep_in(spec, meshes, rep, only=None):
     motion = list(getattr(spec, "MOTION", [0]))
     pose = spec.poses(motion[0]) if hasattr(spec, "poses") else {}
     static = set(static_parts(spec))
+    coarse = getattr(spec, "COARSE", COARSE)
+
+    def miss(by, msg):          # an envelope missed by at most COARSE is a WARN (coarse class), more is a FAIL
+        (rep.warn if by <= coarse else rep.fail)(msg + (f": coarse, within {coarse:g}" if by <= coarse else ""))
+
     for en, e in envs.items():
         inset, tol = e.get("inset", 0.0), e.get("tol", 0.02)
         env_key = mesh_hash(e["mesh"])
@@ -1268,18 +1296,18 @@ def check_keep_in(spec, meshes, rep, only=None):
                 if a.get("min_z") is not None:
                     bounds.append(f"z ≥ {a['min_z']}")
                     if low < a["min_z"] - tol:
-                        rep.fail(f"{en} / {an}: {pn} reaches z {low:.2f}, below its bound {a['min_z']} ({a['why']})")
+                        miss(a["min_z"] - low, f"{en} / {an}: {pn} reaches z {low:.2f}, below its bound {a['min_z']} ({a['why']})")
                 if a.get("max_z") is not None:
                     bounds.append(f"z ≤ {a['max_z']}")
                     if top > a["max_z"] + tol:
-                        rep.fail(f"{en} / {an}: {pn} reaches z {top:.2f}, above its bound {a['max_z']} ({a['why']})")
+                        miss(top - a["max_z"], f"{en} / {an}: {pn} reaches z {top:.2f}, above its bound {a['max_z']} ({a['why']})")
                 bound = f" (bound {', '.join(bounds)})" if bounds else ""
                 rep.info(f"{en} / {an}: {pn} allowed outside here, {inb.sum()} samples, z {low:.2f}..{top:.2f}"
                          f"{bound}: {a['why']}")
                 if a.get("inset") is not None:          # a smaller inset here instead of none
                     da = signed_distance(e["mesh"], env_key, pts[inb])
                     if (da < a["inset"] - tol).any():
-                        rep.fail(f"{en} / {an}: {pn} {(da < a['inset'] - tol).sum()} samples less than "
+                        miss(a["inset"] - da.min(), f"{en} / {an}: {pn} {(da < a['inset'] - tol).sum()} samples less than "
                                  f"{a['inset']} inside (worst {a['inset'] - da.min():.2f} mm out)")
                     else:
                         rep.ok(f"{en} / {an}: {pn} ≥ {a['inset']:g} inside here (closest {da.min() - a['inset']:+.2f})")
@@ -1290,7 +1318,7 @@ def check_keep_in(spec, meshes, rep, only=None):
             label = f"{en}: {pn} ({e.get('why', '')})"
             if bad.any():
                 w = int(np.argmin(d))
-                rep.fail(f"{label}: {bad.sum()} of {len(chk)} samples ({100 * bad.mean():.1f} %) less than {inset} "
+                miss(inset - d[w], f"{label}: {bad.sum()} of {len(chk)} samples ({100 * bad.mean():.1f} %) less than {inset} "
                          f"inside; worst {inset - d[w]:.2f} mm out at ({', '.join(f'{v:.1f}' for v in chk[w])})")
             else:
                 rep.ok(f"{label}: {len(chk)} samples ≥ {inset} inside (closest {d.min() - inset:+.2f} mm)"

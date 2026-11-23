@@ -528,3 +528,38 @@ def test_straight_step_is_unchanged():
     assert st["path"] is None and np.allclose(st["d"], [0, -1, 0])
     rep = run(cv.check_assembly, s)
     assert not rep.fails and "goes in from -Y" in rep.text(), rep.text()
+
+
+def two_blocks_spec(gap, **kw):
+    """Two fixed blocks side by side, gap mm apart along X (no motion), and an arm that turns past the second."""
+    return spec(PARTS={"a": {"mesh": box([10, 10, 10]), "fixed": True},
+                       "b": {"mesh": box([10, 10, 10], (10 + gap, 0, 0)), "fixed": True}},
+                MOTION=[0], MIN_GAP=0.2, poses=lambda t: {}, **kw)
+
+
+def test_fixed_pair_under_min_gap_is_coarse():
+    """Morante, 2026-11-23: under the nozzle's 0.4 mm, a gap between two fixed parts with no fit is a WARN."""
+    txt = motion_report(two_blocks_spec(0.1), True)
+    assert "WARN  a × b: gap 0.10 mm < 0.2" in txt and "coarse" in txt and "FAIL" not in txt, txt
+
+
+def test_declared_fit_stays_strict():
+    txt = motion_report(two_blocks_spec(0.1, PAIR_GAP={("a", "b"): 0.2}), True)
+    assert "FAIL  a × b: gap 0.10 mm < 0.2" in txt, txt
+
+
+def test_overlap_of_fixed_parts_still_fails():
+    txt = motion_report(two_blocks_spec(-0.1), True)
+    assert "FAIL  a × b: overlap" in txt, txt
+
+
+def test_moving_pair_stays_strict():
+    txt = motion_report(swing_spec(post_gap=0.1), True)
+    assert "FAIL  arm × post: gap 0.10 mm < 0.2 (at 90)" in txt, txt
+
+
+def test_keep_in_missed_by_less_than_coarse_warns():
+    rep = run(cv.check_keep_in, keep_in_spec(box([30, 30, 36.4])))      # 0.2 mm into the inset, top and bottom
+    assert not rep.fails and any("coarse" in ln for ln in rep.lines), rep.text()
+    rep = run(cv.check_keep_in, keep_in_spec(box([30, 30, 37.2])))      # 0.6 mm: more than COARSE
+    assert rep.fails
