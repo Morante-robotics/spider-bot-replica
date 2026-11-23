@@ -267,6 +267,7 @@ def pinion():
     return g - (bore - flat)
 
 
+NOTCH_HW = HUB_R + F.TURN.side                      # cheek rail notch half-width in y about the transfer axis: its hub (and the sleeve) go in from -z
 def drive_unit():
     my, mz = MC; g = G_CL; ty, tz = T
     q = [box((MX0 + 3, my - N10_W / 2 - g, mz - N10_H / 2 - g), (CLX1, my + N10_W / 2 + g, mz - N10_H / 2 - F.MOTOR_SEAT.side)),
@@ -287,8 +288,11 @@ def drive_unit():
             xa, xb = (WX0, WX1) if sx > 0 else (-WX1, -WX0); q.append(box((xa, y - DBH, YTOP), (xb, y + DBH, ZBLK[k] + 0.01)))
     for sx in (1, -1):                                                       # cheeks on the wall tops + tongues 1-3
         xa, xb = (WX0, WX1) if sx > 0 else (-WX1, -WX0)
-        q.append(box((xa, Oy[0] - SLW - W, YTOP), (xb, YB_END, ZCAP)))
-        for i in range(3): q.append(box((xa, Oy[i] - TG, ZTG), (xb, Oy[i] + TG, YTOP + 0.01)))
+        for ya, yb in ((Oy[0] - SLW - W, T[0] - NOTCH_HW), (T[0] + NOTCH_HW, YB_END)):   # cheek rail, notched over the transfer (bench path from -z)
+            q.append(box((xa, ya, YTOP), (xb, yb, ZCAP)))
+        for i in range(3):                                                   # tongue 2 is cut back to the notch edge: the transfer hub passes over its +y side
+            yb = min(Oy[i] + TG, T[0] - NOTCH_HW) if i == 1 else Oy[i] + TG
+            q.append(box((xa, Oy[i] - TG, ZTG), (xb, yb, YTOP + 0.01)))
     du = fuse(q)
     pr = rt(ZP) + F.NEIGHBOUR.side; gw = math.sqrt(pr ** 2 - (N10_H / 2 + F.MOTOR_SEAT.side) ** 2) + 0.1
     for sz in (-1, 1):                                                       # pinion path grooves in both clamp plates (it rides in along +x)

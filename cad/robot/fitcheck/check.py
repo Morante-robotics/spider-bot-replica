@@ -257,7 +257,7 @@ for sx, nm in ((1, "r"), (-1, "l")):
     BD[f"led-leads-{nm}"] = box((sx * ex - 1.6, ey + LEDB, ez - 0.4), (sx * ex + 1.6, ey + LEDB + 2.0, ez + 0.4)); HW.add(f"led-leads-{nm}")
     BD[f"resistor-{nm}"] = cyl_ax((sx * ex, ey + LEDB + RYO, ez + 1.4), (sx * ex, ey + LEDB + RYO, ez + 1.4 + 6.5), 1.15); HW.add(f"resistor-{nm}")  # up along the block's back face
 SWY, SWZ = E("SWY", 0.0), E("SWZ", 21.0)            # switch: in the body's back wall, lever out to +y (SWY = 0: on the inner wall)
-zsw = (SWZ / S + motion.ORIGIN[2]); _zs, _R = BODY_ROWS; bbk = np.interp(zsw, _zs, _R[:, 2]) * S
+zsw = (SWZ / S + motion.ORIGIN[2]); _zs, _R = BODY_ROWS; bbk = (np.interp(zsw, _zs, _R[:, 2]) - motion.ORIGIN[1]) * S   # robot frame, as power._skin_y
 swy1 = bbk - 0.01 if SWY == 0 else SWY
 BD["ss12d00-switch"] = box((-6, swy1 - 6, SWZ - 3), (6, swy1, SWZ + 3)); HW.add("ss12d00-switch")
 BD["switch-keeper"] = box((-7.2, swy1 - 6 - F.STEEL.side - W, SWZ - 4.2), (7.2, swy1 - 6 - F.STEEL.side, SWZ + 4.2))

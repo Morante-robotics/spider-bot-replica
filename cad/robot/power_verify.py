@@ -59,7 +59,7 @@ ACCESS = [{"at": "holder-screw", "tool": tool("hex-key", [0, PW.HSYY, PW.BZ + PW
           {"at": "nickel-strip", "tool": tool("finger", [0, PW.YBI - fits.STEEL.side - PW.STRIP_T / 2, PW.ZT - 0.25], UP, d=1.0, reach=30.0), "why": "tweezers tip (Ø1) on the strip's top edge, down into its slot"},
           {"at": "cell-springs", "tool": tool("finger", [0, PW.YFI + fits.STEEL.side + 3.0, PW.CZ + PW.SPR_R0], UP, d=3.0, reach=30.0), "why": "fingertip (Ø3) on the middle spring, pressed against the front wall"},
           {"at": "leds", "tool": tool("finger", [PW.led_axis(1)[0], PW.led_axis(1)[1] + PW.LED_H, PW.led_axis(1)[2]], [0, 1, 0], d=5.0, reach=30.0), "why": "fingertip on the LED's back, pushed forward into its bore"},
-          {"at": "ss12d00-switch", "tool": tool("finger", [0, PW.SWY1 - PW.SW_BODY[1], PW.SWZ], [0, -1, 0], d=4.0, reach=30.0), "why": "fingertip on the switch body, pushed back until the lever stands out"},
+          {"at": "ss12d00-switch", "tool": tool("finger", [0, PW.SWY1 - PW.SW_BODY[1], PW.SWZ], [0, -1, 0], d=4.0, reach=15.0), "why": "fingertip on the switch body, pushed back until the lever stands out"},
           {"at": "ag13-cells", "tool": tool("finger", [0, PW.CYC, PW.ZT], UP, d=10.0, reach=30.0), "why": "cells pressed down against the spring"},
           {"at": "cell-lid", "tool": tool("finger", [0, PW.CY, PW.ZT + PW.LIDT], UP, reach=30.0), "why": "lid pressed shut; lifted by its back lips"},
           {"at": "jst-xh", "tool": tool("finger", [PW.CL.JX, PW.CL.JY, PW.JZ + PW.JST[2] / 2], UP, d=10.0, reach=30.0), "why": "latched by hand"}]

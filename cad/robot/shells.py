@@ -17,7 +17,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 for p in (ROOT, ROOT + "/cad", HERE + "/fitcheck"):
     if p not in sys.path: sys.path.insert(0, p)
-from build123d import (Box, Cylinder, Sphere, Pos, Rot, Solid, Shell, Face, Wire, Compound, Vector, Align,
+from build123d import (Shape, Box, Cylinder, Sphere, Pos, Rot, Solid, Shell, Face, Wire, Compound, Vector, Align,
                        export_step, export_stl, import_brep, export_brep)
 from OCP.BRepBuilderAPI import BRepBuilderAPI_Transform
 from OCP.ShapeUpgrade import ShapeUpgrade_UnifySameDomain
@@ -49,6 +49,9 @@ OUT = os.path.join(HERE, "out"); CACHE = os.path.join(OUT, ".cache"); os.makedir
 # ---- numbers (sources in the comments; nothing typed that fits.py or the fit check holds)
 WALL_PAD = 1.2                          # mm robot, plan: pads 1.2 where loaded (rules §3.2), base wall is BA.WALL x S
 RN, WR = CL.RN, CL.WR                   # window: neck within RN of the pivot, dilated WR (LEG_PATH + sampling)
+STRIP_X, STRIP_X2, STRIP_Y0, STRIP_Y1, STRIP_Z0, STRIP_Z1, STRIP_Z2 = 20.05, 19.25, 6.4, 12.8, 19.0, 23.65, 23.9   # body strip under the cell holder, cut away
+WR_EXTRA = {4: 0.6}                     # leg 4: its window dilated 0.6 more (no path or crank pose cleared it, 24 poses tested); leg 0's block is the front relief (PATH_DROP)
+def wr_of(Lg): return WR + WR_EXTRA.get(Lg, 0.0)
 RELD, BRELD, PKR = CL.RELD, CL.BRELD, CL.PKR   # arm-sweep pockets: base front relief, body rim notch, eye block
 PKT = FE.PKT                            # back-sheet pocket (depth, |x|, z0, z1), Morante 2026-11-21
 SNX, SNW, SNT, SNZ, RIBD, SNG = CL.SNX, CL.SNW, CL.SNT, CL.SNZ, CL.RIBD, CL.SNG
@@ -259,16 +262,23 @@ def LP(Lg, k):
     return _LP[(Lg, k)]
 
 # ---- sweep cutters (hulls of the legs' samples, chunked along the leg and over 3 poses each)
-def sweep_hulls(near, r, legs=range(8), poses=range(24), group=3, cell=3.0, rn=None, lift=0.0, planes=False, reach=None):
+PATH_DROP = 30.0                         # verify.py LEG_DROP: the leg is lowered this far beside its pin, then slid in by LSL
+PATH_RELIEF = {0: True}                  # legs whose front relief also clears the assembly path's down move (leg 4 clears without)
+def path_samples(Lg, k=0, step=1.0):
+    """leg Lg's samples (crank pose k, the bench placement) along the down move of its assembly path: LSL outboard, 0..PATH_DROP above."""
+    u = PIV[Lg] - A_ALL[Lg, 0]; u /= np.linalg.norm(u); q = LP(Lg, k) + u * CL.LSL
+    return [q + [0, 0, t] for t in np.arange(0, PATH_DROP + 0.01, step)]
+def sweep_hulls(near, r, legs=range(8), poses=range(24), group=3, cell=3.0, rn=None, lift=0.0, planes=False, reach=None, path=False):
     """convex hulls (grown by r) covering the legs' sweep where it comes within r + 1 of the samples `near`.
     rn: only samples within rn of the pivot (window neck); lift: also slide the samples down by lift (body lift-off).
     reach: keep samples within reach of `near` (default r + 1): a cutter that must cover every sample another cutter (a bulge
     grown further) covers takes that cutter's reach."""
     tn = cKDTree(near); hulls = []
     for Lg in legs:
-        for g0 in range(0, len(poses), group):
-            ks = list(poses)[g0:g0 + group + 1]
-            Q = [LP(Lg, k % 24) for k in ks]
+        groups = [[LP(Lg, k % 24) for k in list(poses)[g0:g0 + group + 1]] for g0 in range(0, len(poses), group)]
+        if path:                                                # + the assembly path's down move (path_samples), same chunks
+            ps = path_samples(Lg); groups += [ps[g0:g0 + group + 1] for g0 in range(0, len(ps), group)]
+        for Q in groups:
             if rn is not None: Q = [q[np.linalg.norm(q - PIV[Lg], axis=1) <= rn] for q in Q]
             q = np.vstack(Q)
             if lift > 0: q = np.vstack([q - [0, 0, t] for t in np.arange(0, lift + 0.01, 1.0)])
@@ -296,6 +306,19 @@ def cut_many(sh, tools, batch=40):
     for j in range(0, len(tools), batch):
         sh = sh.cut(Compound(tools[j:j + batch]))
     return sh
+def unify(sh, faces_only=False):
+    """unify same-domain faces so coplanar fragments merge and the STL exports watertight. Default: clean() (on a copy: it
+    also alters the shape it is called on), faces-only if that is invalid. faces_only: straight to faces-only (no edges);
+    the base of 2026-11-23: clean() invalid, clean() of a copy valid but 18 open STL edges, faces-only 1 valid solid with a
+    watertight STL (3124.2 -> 3120.3 mm3, the BSpline volume's noise)."""
+    import copy
+    if not faces_only:
+        c = copy.deepcopy(sh).clean()
+        if c.is_valid: return c
+    from OCP.ShapeUpgrade import ShapeUpgrade_UnifySameDomain
+    u = ShapeUpgrade_UnifySameDomain(sh.wrapped, False, True, True); u.Build(); c = Shape.cast(u.Shape())
+    print(f"    [unify] faces-only, valid {c.is_valid}", flush=True)
+    return c
 def one(sh):
     """largest solid of a boolean result (a cut may leave slivers)."""
     ss = sh.solids(); return max(ss, key=lambda s: s.volume) if len(ss) > 1 else (ss[0] if ss else sh)
@@ -309,7 +332,7 @@ def window_cutter(Lg):
         q = np.vstack([LP(Lg, k % 24) for k in range(g0, g0 + 4)]); q = q[np.linalg.norm(q - PIV[Lg], axis=1) <= RN]
         q = np.vstack([q + t * u for t in np.linspace(0, LSL, 4)])
         q = np.vstack([q, q + [0, 0, ZTOP - q[:, 2].min()]])
-        hulls.append(plane_solid(q, WR))
+        hulls.append(plane_solid(q, wr_of(Lg)))
     return hulls
 def back_pocket(inner):
     """back sheet 1.6 outward in |x| <= PKT[1], z PKT[2..3]: cut on the cavity side, the same added on the scoop side."""
@@ -362,12 +385,12 @@ def tree_fuse(shs):
     return shs[0]
 def leg_window(Lg):
     """leg Lg's window cutter as one solid (its 8 hulls fused), cached by its inputs."""
-    key = ("win", Lg, S, RN, WR, CL.LSL, _K, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py"),
+    key = ("win", Lg, S, RN, wr_of(Lg), CL.LSL, _K, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py"),
            srch(window_cutter, plane_solid, plane_data, _fib, leg_points, leg_frame, fuse_one))
     return cached(f"win{Lg}", key, lambda: fuse_one(window_cutter(Lg)))
 def leg_ring(Lg):
     """leg Lg's pad ring (its window cutter's support polytope grown 1.5), cached by its inputs."""
-    key = ("ring", Lg, S, RN, WR, CL.LSL, _K, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py"),
+    key = ("ring", Lg, S, RN, wr_of(Lg), CL.LSL, _K, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py"),
            srch(window_cutter, plane_solid, plane_data, _fib, leg_points, leg_frame, fuse_one, samples))
     return cached(f"ring{Lg}", key, lambda: plane_solid(samples(leg_window(Lg)), 1.5))
 def local_box(tools, m=10.0):
@@ -430,7 +453,7 @@ def local_op(b, tools, fn, m=10.0):
     raise AssertionError(f"local_op: {len(ss)} solids, valid {out.is_valid}, volume {pvol(out):.1f} vs {want:.1f}")
 def _base():
     import time; _T0[0] = time.time()
-    key0 = ("base", S, WALL_PAD, RN, WR, RELD, PKT, SNX, SNW, SNZ, RIBD, CL.LSL, _K, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py"),
+    key0 = ("base", S, WALL_PAD, RN, WR, tuple(sorted(WR_EXTRA.items())), RELD, PKT, SNX, SNW, SNZ, RIBD, CL.LSL, _K, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py"),
             srch(to_robot, checked, _bool, local_box, pvol, fuse_cut, one, back_pocket, snap_geometry, tree_fuse, dense, sweep_hulls, plane_solid, plane_data, _fib,
                  leg_points, leg_frame, window_cutter, leg_window, leg_ring, samples, fuse_one, _close, cut_many))
     b = to_robot(BA.build(1.0)); tick("base skin + cuts")
@@ -458,11 +481,12 @@ def _base():
     near = dense(b)                                             # front leg windows: pocket RELD from the front arms' sweep
     def relief_tools(Lg):
         """leg Lg's relief pocket solid and outward bulge solid (hull cell RCELL), each cached by its inputs."""
-        kk = key0 + ("relief", Lg, RCELL, RELD, BA.WALL * S, H["base_win"])
+        kk = key0 + ("relief", Lg, RCELL, RELD, BA.WALL * S, H["base_win"], PATH_RELIEF.get(Lg, False), PATH_DROP)
+        pth = PATH_RELIEF.get(Lg, False)
         def mk():
-            rel = sweep_hulls(near, RELD, legs=(Lg,), planes=True, cell=RCELL, reach=RELD + BA.WALL * S + 1.0)   # same samples as the bulge's hulls:
+            rel = sweep_hulls(near, RELD, legs=(Lg,), planes=True, cell=RCELL, reach=RELD + BA.WALL * S + 1.0, path=pth)   # same samples as the bulge's hulls:
             # a leg sample inside the bulge but > RELD + 1 from the wall was left in it (relief cut 41 mm3, bulge 268 mm3 round the leg)
-            grown = sweep_hulls(near, RELD + BA.WALL * S, legs=(Lg,), planes=True, cell=RCELL)
+            grown = sweep_hulls(near, RELD + BA.WALL * S, legs=(Lg,), planes=True, cell=RCELL, path=pth)
             tick(f"leg {Lg} relief hulls: {len(rel)} + {len(grown)} grown, faces/hull {sorted(len(h.faces()) for h in rel + grown)[-1]} max")
             return rel, grown
         def rs_fn():
@@ -477,7 +501,7 @@ def _base():
             # not within reach of the wall) is inside it too (smoke: 459 leg-0 samples at pose 0). Carve it with the sweep of
             # every leg sample within RELD + 1 of the bulge itself: it keeps RELD from the leg, like the relief.
             b0 = gs - (outer & bx); nb = dense(b0)
-            return b0 - tree_fuse(sweep_hulls(nb, RELD, legs=(Lg,), planes=True, cell=RCELL))
+            return b0 - tree_fuse(sweep_hulls(nb, RELD, legs=(Lg,), planes=True, cell=RCELL, path=pth))
         bulge = cached(f"relb{Lg}", kk + ("bulge2",), bulge_fn); tick(f"leg {Lg} bulge")
         return rs, gs, bulge
     def relief_stage():
@@ -503,11 +527,11 @@ def fuse_cut(P, cuts, add=None):
     for t, lab in cuts: P = checked("cut", P, t, lab)
     return P
 def base():
-    key = ("base", S, WALL_PAD, RN, WR, RELD, PKT, SNX, SNW, SNZ, RIBD, CL.LSL, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py"), srch(_base),
+    key = ("base", S, WALL_PAD, RN, WR, tuple(sorted(WR_EXTRA.items())), RELD, PKT, SNX, SNW, SNZ, RIBD, CL.LSL, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py"), srch(_base),
            srch(to_robot, checked, _bool, local_box, pvol, fuse_cut, one, back_pocket, snap_geometry, tree_fuse, dense, sweep_hulls, plane_solid, plane_data, leg_window, leg_ring))
     # the booleans leave coplanar fragments that touch along a line (28 non-manifold STL edges); unifying same-domain faces
     # merges them (volume unchanged, 1 valid solid) and the STL exports watertight. Outside the cache so the stages stay valid.
-    b = one(cached("base", key, _base).clean())
+    b = one(unify(cached("base", key, _base), faces_only=True))
     assert b.is_valid and len(b.solids()) == 1, "base: clean() left it invalid"
     def keel_stage():
         """the keel's two M2 bosses (drive.py KEEL_SCREWS): a boss from the floor up to ZKEEL0 round each screw, the head's
@@ -522,7 +546,7 @@ def base():
             c = checked("cut", c, cyl(x, y, DR.M2_HOLE_R, zf + zh - 0.5, DR.ZKEEL0 + 1.0), f"keel hole {n}")
         return c
     import drive as _DR
-    b = one(cached("base_keel", ("base_keel", H["base"], srch(keel_stage, checked, _bool, local_box, pvol), KEEL_BOSS_R, _DR.KEEL_SCREWS, _DR.ZKEEL0, _DR.M2_HEAD_R,
+    b = one(cached("base_keel", ("base_keel", H["base"], srch(unify), "faces-only", srch(keel_stage, checked, _bool, local_box, pvol), KEEL_BOSS_R, _DR.KEEL_SCREWS, _DR.ZKEEL0, _DR.M2_HEAD_R,
                                  _DR.M2_HOLE_R, _DR.BASE_FLOOR), keel_stage))
     assert b.is_valid and len(b.solids()) == 1, "base: keel bosses left it invalid"
     return b
@@ -698,6 +722,11 @@ def _body():
         for nm, part, r in (("holder", PW.holder(), F.LOCATOR.side), ("lid", PW.lid(), F.LOCATOR.side), ("cells", PW.cells(), F.LOCATOR.side),
                             ("switch", PW.switch(), F.LOCATOR.side)):   # no LED pocket: the LEDs sit in their bores (power.py's leds() still stand at the small eyes: it was 86 mm3 there)
             ops.append(("cut", grow(part, r), f"pocket {nm}", False))
+        # the inner wall strip under the cell holder (x 17.6..20.05, y 8.5..12.8, z 19.95..23.85, found on body_power 2026-11-23) blocked the
+        # body's bench path (0.25 mm) and touched the cells: cut away, to the wall where the holder's pocket widens (|x| 19.25, z 23.65)
+        ops.append(("cut", fuse_one([Pos(-STRIP_X, STRIP_Y0, STRIP_Z0) * Box(2 * STRIP_X, STRIP_Y1 - STRIP_Y0, STRIP_Z1 - STRIP_Z0, align=MIN),
+                                     Pos(-STRIP_X2, STRIP_Y0 - 0.5, STRIP_Z0) * Box(2 * STRIP_X2, STRIP_Y1 - STRIP_Y0 + 0.5, STRIP_Z2 - STRIP_Z0, align=MIN)]),
+                    "holder strip", True))
         # the pockets round the holder and the lid leave two thin loose webs (17.5 mm3 each, x +-18, y 8..12, z 28..37) between them: not
         # printable and not attached, so they go (crumb limit 30 mm3, said in the log)
         c = local_seq(b, ops, "power", crumb=30.0); tick("LED bores, switch slot + keeper, pockets")
@@ -711,14 +740,14 @@ def _body():
             ops.append(("fuse", ps, f"stop post {Lg}", True)); ops.append(("fuse", mirror_x(ps), f"stop post {Lg + 4}", True))
         c = local_seq(c, ops, "posts") if ops else c; tick("stop posts"); return c
     import power as _PW
-    b = cached("body_power", key0 + ("power", srch(power_stage, xstop_post, post_solid, led_pos, grow), LEDB0, LEDB1, LED_R, BO.SEYE_BORE, SW_THROW, SW_SLOT_Y, SW_KEEP_REACH, W_KEEP, XS_RP, XS_HIT,
+    b = cached("body_power", key0 + ("power", STRIP_X, STRIP_X2, STRIP_Y0, STRIP_Y1, STRIP_Z0, STRIP_Z1, STRIP_Z2, srch(power_stage, xstop_post, post_solid, led_pos, grow), LEDB0, LEDB1, LED_R, BO.SEYE_BORE, SW_THROW, SW_SLOT_Y, SW_KEEP_REACH, W_KEEP, XS_RP, XS_HIT,
                                       stamp("cad/robot/power.py"), srch(_PW.holder, _PW.lid, _PW.cells, _PW.switch), H["body_lift"]), power_stage)
     assert len(b.solids()) == 1 and b.is_valid and pvol(b) > 0, f"body: {len(b.solids())} solids, valid {b.is_valid}"
     print(f"    [body] volume {pvol(b):.1f} mm3, valid, 1 solid", flush=True)
     return b
 def body():
     key = ("body", S, BRELD, PKT, SNX, SNW, SNT, SNZ, RIBD, SNG, KC, RCELL, stamp("cad/body/build.py", "cad/eyes/build.py", "cad/legs/build.py", "cad/motion.py"), srch(_body))
-    b0 = one(cached("body", key, _body)); b = one(b0.clean())          # coplanar fragments: unify as base() does, outside the cache
+    b0 = one(cached("body", key, _body)); b = one(unify(b0))          # coplanar fragments: unify as base() does, outside the cache
     if not (b.is_valid and len(b.solids()) == 1):
         print("    [body] WARN clean() left it invalid (the power stage's pockets/keeper): the unified faces are kept as built", flush=True)
         b = one(cached("body", key, _body))                            # clean() edits its argument in place (shared TShapes): reload the cached, valid one
