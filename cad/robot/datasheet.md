@@ -5,7 +5,8 @@ Numbers and paths that describe the robot's design as it stands. The story is in
 
 ## State 2026-11-23
 
-N2 round r00 of `cad/robot` at scale 0.70. **`verify.py --quick` of the whole robot: PASS, 0 FAIL, in 37 s.**
+N2 round r00 of `cad/robot` at scale 0.70. **Full `verify.py` of the whole robot: PASS, 0 FAIL, in ≈ 80 s (+ 15 s renders; `verify-result.txt`).** `--quick`
+(PARTIAL: retention at the first step only): 37–39 s.
 
 **Speed plan done (night 2026-11-23, branch `speed/designed-cutters`).** Any build or check over 40 s is a bug
 (Morante); `build.py` runs under the `tools/timebudget.py` watchdog (`CAD_BUDGET`, default 40 s).
@@ -15,6 +16,7 @@ N2 round r00 of `cad/robot` at scale 0.70. **`verify.py --quick` of the whole ro
 | base build | 1669 s | 22 s (skin cached; 28 s cold) |
 | body build | ≈ 3500 s | 28 s (fixed stage cached; 40 s when cad/body, cad/eyes or power.py change) |
 | `cad_verify verify.py --quick`, whole robot | 70 s, 5 FAIL | 37 s, 0 FAIL |
+| `cad_verify verify.py` (full), whole robot | not run | ≈ 80 s, 0 FAIL (retention 45 s: over the 40 s rule, open) |
 | body.step | 152 MB | a few MB |
 
 How (rules in `cad/README.md` «Time budget»):
@@ -29,8 +31,9 @@ How (rules in `cad/README.md` «Time budget»):
 - **Back pocket is a cup** (side walls of the wall's thickness): the bare sheet moved 1.6 out came loose.
 - **Assembly**: legs 1, 2, 4–7 at crank pose 0, then half a turn (pose 12) for legs 0 and 3 and the body
   (`cutters.ASM_POSE`; `cad_verify` takes `"at"` per ASSEMBLY step).
-- **Leg play**: legs 0 and 7 slide 1.4 / 1.6 towards their crank at pose 0 (only the groove stops them): accepted by
-  Morante (`RETAIN` play 1.65); outward their posts hold them at 0.70 / 0.75.
+- **Leg play**: the corner legs 0, 3, 4, 7 slide up to 1.40–1.50 mm towards their crank (0/7 near pose 0, 4 at pose
+  10, 3 at pose 12; measured at all 24 poses: only the groove stops them): accepted by Morante (`RETAIN` play 1.65);
+  outward every leg stays ≤ 1.15 mm. The full check's retention samples poses 0, 8, 16 only.
 - **x-stop posts frozen** (`XS_POSTS`: legs 0 and 3, and mirrors; none fits 1 and 2); `xstop_post` is re-run by hand
   only if the legs or the body wall move (60–100 s a leg).
 - Switch keeper's top bar no longer overhangs the switch (the fingertip touched it). Power pockets are the parts'

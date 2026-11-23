@@ -106,7 +106,7 @@ GROUPS = {name: [parts]} in a spec names one interface's parts, for --only <name
 the whole robot).
 --smoke checks the rest pose only, without the motion sweep, assembly, access and print checks: seconds, after
 every small fix (always PARTIAL).
---quick skips the wall thickness and checks retention at the first motion step only: use it while iterating.
+--quick skips the wall thickness and checks retention at the first motion step only: use it while iterating (PARTIAL).
 --only checks only what involves these parts (pairs with them, their retention, joints, marks): after a change to
 one part, run with --only that part, and the full check once at the end.
 Pairs whose relative position repeats (static parts, parts moving together) are computed once and reused, and the
@@ -1498,6 +1498,9 @@ def main():
     if args.smoke:
         rep.partial = True
         rep.lines.append("PARTIAL CHECK: smoke (rest pose only; no motion sweep, assembly, access or print checks)")
+    elif args.quick:                # --quick alone: every part, but retention at the first motion step only
+        rep.partial = True
+        rep.lines.append("PARTIAL CHECK: quick (no wall thickness; retention at the first motion step only)")
     if only:
         rep.partial = True
         rep.lines.append(f"PARTIAL CHECK: only what involves {', '.join(sorted(only))}. Run the full check before "

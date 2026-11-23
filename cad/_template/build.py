@@ -7,18 +7,20 @@ Coordinates as in ../README.md (mm, Z up, forward = -Y, +X = right). Every part 
 in its own print frame.
 
 Usage:
-    python3 build.py               # every part
-    python3 build.py --part <name> # one part (faster while iterating)
+    ../../.venv/bin/python build.py               # every part (coarse STL; --fine for the printed one)
+    ../../.venv/bin/python build.py --part <name> # one part (faster while iterating)
+Each part has its own CAD_BUDGET (tools/timebudget.py, default 40 s): past it the build names the stage and exits 3.
 """
-import argparse
 import os
 import sys
 
-from build123d import Box, export_step, export_stl
+from build123d import Box
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", ".."))
-from cad import fits  # noqa: E402,F401   another design's numbers: from cad import design; C = design("crankshafts")
+sys.path.insert(0, os.path.join(HERE, "..", "..", "tools"))
+import timebudget  # noqa: E402
+from cad import common, fits  # noqa: E402,F401   another design's numbers: from cad import design; C = design("crankshafts")
 
 OUT = os.path.join(HERE, "out")
 
@@ -39,15 +41,10 @@ PARTS = {"frame": frame, "example": example}   # name -> function that builds it
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--part", action="append", choices=sorted(PARTS), help="build only this part (repeatable)")
-    args = ap.parse_args()
-    os.makedirs(OUT, exist_ok=True)
+    args = common.part_args(__doc__, PARTS)     # --part, --fine, and the time-budget watchdog
     for name in args.part or PARTS:
-        shape = PARTS[name]()
-        export_step(shape, os.path.join(OUT, f"{name}.step"))
-        export_stl(shape, os.path.join(OUT, f"{name}.stl"), tolerance=0.02, angular_tolerance=0.15)
-        print(name)
+        timebudget.reset(name)                  # each part its own budget; a slow stage: with timebudget.stage("..."):
+        common.export(name, PARTS[name](), OUT, fine=args.fine)   # prints its size
 
 
 if __name__ == "__main__":
