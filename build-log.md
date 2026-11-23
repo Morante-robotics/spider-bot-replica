@@ -20,7 +20,7 @@ walk, driven by one motor, and lit eyes.</em></td>
 
 ## Contents
 
-The robot's story in three parts, then what is left to do and a glossary.
+The robot's story in four parts, then what is left to do and a glossary.
 
 1. **[Workshop](build-log/1-workshop.md#workshop)**: getting the printer ready.
    - [Printer calibration](build-log/1-workshop.md#printer-calibration) · 2026-10 · ✅ done
@@ -53,15 +53,16 @@ The robot's story in three parts, then what is left to do and a glossary.
    - [Chassis Part B2: the looks parts](build-log/3-legs-and-drive.md#chassis-part-b2-the-looks-parts) · 2026-11-17 · 🔄 whole robot passes in CAD; buying next
    - [Chassis Part E: the looks pass, planned and paused](build-log/3-legs-and-drive.md#chassis-part-e-the-looks-pass-planned-and-paused) · 2026-11-17 · 🔄 paused until the legs are rethought
    - [Legs v2: three plan rounds, paused](build-log/3-legs-and-drive.md#legs-v2-three-plan-rounds-paused) · 2026-11-17 · 🔄 paused, mass audit first
-   - [Redesign: looks first](build-log/3-legs-and-drive.md#redesign-looks-first) · 2026-11-17 · 🔄 in progress
-   - [N0 mock-up: the looks robot in simple shapes](build-log/3-legs-and-drive.md#n0-mock-up-the-looks-robot-in-simple-shapes) · 2026-11-18 · ✅ N0 look approved, N1 next
-   - [N1 form: the real looking parts as light meshes](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) · 2026-11-19 · ✅ N1 look approved, N2 next
-   - [N2 rev 5: the inside does not fit at 65 %](build-log/3-legs-and-drive.md#n2-rev-5-the-inside-does-not-fit-at-65-) · 2026-11-19 · ↩️ restarted from scratch
-   - [Meshes become parameters](build-log/3-legs-and-drive.md#meshes-become-parameters) · 2026-11-20 · ✅ parts converted
-   - [Only the parametric parts measure](build-log/3-legs-and-drive.md#only-the-parametric-parts-measure) · 2026-11-20 · ✅ done
-   - [N2 round r00: the inside and the leg hold](build-log/3-legs-and-drive.md#n2-round-r00-the-inside-and-the-leg-hold) · 2026-11-23 · 🔄 inside designed, one leg fault open
-4. **[Open items](#open-items)**: everything still to do.
-5. **[Glossary](#glossary)**: the terms used in the entries.
+4. **[Looks first](build-log/4-looks-first.md#looks-first)**: the second design, from the toy's looks inwards.
+   - [Redesign: looks first](build-log/4-looks-first.md#redesign-looks-first) · 2026-11-17 · 🔄 in progress
+   - [N0 mock-up: the looks robot in simple shapes](build-log/4-looks-first.md#n0-mock-up-the-looks-robot-in-simple-shapes) · 2026-11-18 · ✅ N0 look approved, N1 next
+   - [N1 form: the real looking parts as light meshes](build-log/4-looks-first.md#n1-form-the-real-looking-parts-as-light-meshes) · 2026-11-19 · ✅ N1 look approved, N2 next
+   - [N2 rev 5: the inside does not fit at 65 %](build-log/4-looks-first.md#n2-rev-5-the-inside-does-not-fit-at-65-) · 2026-11-19 · ↩️ restarted from scratch
+   - [Meshes become parameters](build-log/4-looks-first.md#meshes-become-parameters) · 2026-11-20 · ✅ parts converted
+   - [Only the parametric parts measure](build-log/4-looks-first.md#only-the-parametric-parts-measure) · 2026-11-20 · ✅ done
+   - [N2 round r00: the inside and the leg hold](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) · 2026-11-23 · 🔄 inside designed, one leg fault open
+5. **[Open items](#open-items)**: everything still to do.
+6. **[Glossary](#glossary)**: the terms used in the entries.
 
 Status: ✅ done · 🔄 in progress · ❌ ruled out · ↩️ reversed by a later entry.
 
@@ -71,20 +72,19 @@ Everything still to do on the build, in one place. Each row links to the entry w
 done, its row is removed and the entry that closes it says so. Plan-level tasks (study, purchases) are tracked
 outside the repo.
 
-Since 2026-11-17 the robot is redesigned **looks-first**: the toy (and jenscolt's model, legs included) is the
-specification, only parts with their final looks are modelled, and the mechanism is fitted inside them. Sizing runs
-from the bottom up: a smaller motor, the button cells that can feed it, and a robot as small as they allow. Work goes
-through three levels of detail: a quick mock-up of the whole robot in simple shapes (seconds per change), the real
-looking parts as light meshes with a motion check (minutes), and the print detail (fits, screws, the full check)
-once, before printing. Everything before the redesign is in the
-[archive tag](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17).
+Since 2026-11-17 the robot is designed looks-first ([Looks first](build-log/4-looks-first.md)); the first design is
+archived in [Legs and drive](build-log/3-legs-and-drive.md).
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| **First:** N2 round r00 of `cad/robot` at S 0.70, **in series, one heavy job at a time** (2 cores, 8 GB; every build under a watchdog, e.g. 100 min / 5 GB). **State 2026-11-23:** leg hold fixed (option A: snap groove on the pins, bead and slit in the leg tubes, commit 77161ac; leg RETAIN play 1.25 and crank-4 × leg-3/7 0.19 accepted by Morante, `verify.py` PAIR_GAP). Interior assembly and access reworked (axle heads counterbored, web 0.1 thinner, leg paths along each pin's axis, holder path down–slide–down, switch and LEDs on the body's bench step, lid and switch snaps declared, key hole in the clamp plate, motor path 38 mm). Viewer draws the 8 real leg STLs. `cad_verify verify.py --quick` (whole robot, ≈ 1 min): **5 FAIL, motion all ok.** **Next, in order:** (1) one cad-fixer: widen the base window cutters of legs 0 and 4 by ≈ 0.6 mm (shells.WR for those two; no path or crank pose clears them, all 24 poses tested), remove the body's inner wall strip under the cell holder (|x| < 20.05, y 6.4–12.8, z ≤ 23.65; it also touches the cells at x ±18, z 28), shorten the switch access finger to a fingertip (≈ 15 mm, not 30), and the transfer + sleeve bench path (blocked 0.5 mm, never looked at); (2) ONE rebuild of base then body (≈ 70 min); (3) `--quick` 0 FAIL; (4) `rounds.py round cad/robot 0` and the looks judge; (5) Morante's «se parece». Also: `fitcheck/check.py` ≈ line 260 misses `- ORIGIN[1]` for the battery box; the leg snap's radial engagement is 0.08–0.18 mm (fits.PRESS, coupon in the robot batch); the r00 build-log entry is updated by the documenter when r00 closes | [N2 round r00](build-log/3-legs-and-drive.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
-| Body: the curved top panels and the chin grille, if Morante wants them later (a build takes 60–80 s) | [Meshes become parameters](build-log/3-legs-and-drive.md#meshes-become-parameters) | 3 |
-| Buy the N10 (3 V, ≈ 100–150 rpm) and 6 × AG13, and measure it (body, shaft, mounting) to replace the mock-up's box at N2. Chosen bottom-up from the original Mini Spider-Bot (≈ 10 cm, 6 × AG13, walks on legs): the body held them at ≈ 60 % on jenscolt's mesh ([`sizing.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/mockup/sizing.py)); N2 sizes again | Redesign, looks first | 3 |
-| Print detail, one batch of coupons, the workshop kit and the one robot | Redesign, looks first | 4 |
+| N2 r00, one cad-fixer: widen the window cutters of legs 0 and 4, trim the body wall strip, shorten the switch finger, fix the bench path ([state](cad/robot/datasheet.md#state-2026-11-23)) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
+| One rebuild of base then body (≈ 70 min, one heavy job at a time under a watchdog), then `verify.py --quick` must give 0 FAIL | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
+| `rounds.py round cad/robot 0` and the looks judge, then Morante's «se parece» | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
+| Fix `fitcheck/check.py` (misses `- ORIGIN[1]` for the battery box) and test the leg snap's engagement on a coupon ([state](cad/robot/datasheet.md#state-2026-11-23)) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
+| Update the r00 entry when r00 closes | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
+| Body: the curved top panels and the chin grille, if Morante wants them later (a build takes 60–80 s) | [Meshes become parameters](build-log/4-looks-first.md#meshes-become-parameters) | 3 |
+| Buy the N10 motor (3 V, ≈ 100–150 rpm) and 6 × AG13 cells and measure the motor (body, shaft, mounting); sizing: [`sizing.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/mockup/sizing.py) | [Redesign: looks first](build-log/4-looks-first.md#redesign-looks-first) | 3 |
+| Print detail, one batch of coupons, the workshop kit and the one robot | [Redesign: looks first](build-log/4-looks-first.md#redesign-looks-first) | 4 |
 | Import the parts into Onshape as STEP and assemble them with mates | [Onshape assembly](build-log/3-legs-and-drive.md#onshape-assembly) | 3 |
 | Count the hardware in the workshop (the **Have** column) | [Hardware](hardware.md) | 3 |
 | Calibrate X-Y hole and contour compensation and save the standard settings as a Bambu Studio preset | [Standard settings](print/README.md#standard-settings) | 2 |
@@ -133,11 +133,11 @@ Terms used in the entries, in the order they first appear, with a link to that e
 | **Friction clutch** | A joint that transmits torque by friction and slips when the torque is too high, so a jam cannot break a gear. | [Part B1 and the clutch](build-log/3-legs-and-drive.md#chassis-part-b1-part-c-check-and-the-friction-clutch) |
 | **Wave washer** | A thin steel ring bent in waves, used as a spring that presses with a steady force. | [Part B1 and the clutch](build-log/3-legs-and-drive.md#chassis-part-b1-part-c-check-and-the-friction-clutch) |
 | **Shim** | A very thin flat washer added or taken away to set a gap or a spring's force. | [Part B1 and the clutch](build-log/3-legs-and-drive.md#chassis-part-b1-part-c-check-and-the-friction-clutch) |
-| **Mock-up (N0)** | The whole robot drawn and checked in simple shapes (tubes and boxes), so a change costs seconds. | [N0 mock-up](build-log/3-legs-and-drive.md#n0-mock-up-the-looks-robot-in-simple-shapes) |
-| **N1 form** | The real looking parts (body, base, eyes, legs) as light meshes of at most 25k triangles, checked over 24 crank poses. | [N1 form](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) |
-| **Window** | The opening cut in the body and base where a leg root passes, sized by the root's swing over a turn. | [N1 form](build-log/3-legs-and-drive.md#n1-form-the-real-looking-parts-as-light-meshes) |
-| **Reference mesh** | A downloaded STL kept only to measure a parametric rebuild against; no printed part is a mesh. | [Meshes become parameters](build-log/3-legs-and-drive.md#meshes-become-parameters) |
-| **Spine and sections** | A part's skin described by a curve of 5 points (spine) and a few cross-sections along it; changing the spine bends the part. | [Meshes become parameters](build-log/3-legs-and-drive.md#meshes-become-parameters) |
-| **Fidelity (p95, max)** | How far a rebuild's surface is from its reference, both ways: 95 % of points within p95, the max on the 99.9th percentile. | [Meshes become parameters](build-log/3-legs-and-drive.md#meshes-become-parameters) |
+| **Mock-up (N0)** | The whole robot drawn and checked in simple shapes (tubes and boxes), so a change costs seconds. | [N0 mock-up](build-log/4-looks-first.md#n0-mock-up-the-looks-robot-in-simple-shapes) |
+| **N1 form** | The real looking parts (body, base, eyes, legs) as light meshes of at most 25k triangles, checked over 24 crank poses. | [N1 form](build-log/4-looks-first.md#n1-form-the-real-looking-parts-as-light-meshes) |
+| **Window** | The opening cut in the body and base where a leg root passes, sized by the root's swing over a turn. | [N1 form](build-log/4-looks-first.md#n1-form-the-real-looking-parts-as-light-meshes) |
+| **Reference mesh** | A downloaded STL kept only to measure a parametric rebuild against; no printed part is a mesh. | [Meshes become parameters](build-log/4-looks-first.md#meshes-become-parameters) |
+| **Spine and sections** | A part's skin described by a curve of 5 points (spine) and a few cross-sections along it; changing the spine bends the part. | [Meshes become parameters](build-log/4-looks-first.md#meshes-become-parameters) |
+| **Fidelity (p95, max)** | How far a rebuild's surface is from its reference, both ways: 95 % of points within p95, the max on the 99.9th percentile. | [Meshes become parameters](build-log/4-looks-first.md#meshes-become-parameters) |
 
 [↑ Contents](#contents)

@@ -35,6 +35,13 @@ intro, Contents (linking into the files), Open items and Glossary. A new topic i
 in Contents. Links between files are relative (`3-legs-and-drive.md#anchor`, `../build-log.md#open-items`), and
 paths to images and CAD from a topic file start with `../`. Check that no link breaks before committing.
 
+**Keeping it small.** A topic file holds **one design**; a new design starts a new topic file. When a design or an
+entry is superseded, its entries collapse to the heading, the status line, the «In short» box, at most one figure and
+a `Full entry` link to the same anchor at an archive tag or commit SHA (a `blob/<tag-or-sha>/build-log/…` link, with
+the anchor checked to exist there). The full text stays in git; nothing is lost. Aim for at most ~60 KB per topic
+file, because agents read the latest one whole. Facts that other work needs (numbers, paths, accepted gaps) go to the
+design's `datasheet.md` (e.g. `cad/robot/datasheet.md`), not into Open items, whose rows are one short line each.
+
 ## READMEs
 
 READMEs describe what a folder holds and how to use it (files, how to rebuild, how to assemble, how to print). They
