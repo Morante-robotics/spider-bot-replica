@@ -36,8 +36,20 @@ RETAIN = {"body": {"spin": None, "slide": None, "play": 0.6},          # two fro
 ALLOWED_CONTACT = {("body", "base"): "body rim seated on the base ledge; snap hooks under the front ribs (fits.PRESS, coupon c1)"}
 JOINTS = {("body", "base"): {"fit": fits.PRESS, "why": "front snap fingers under the ribs and rear tab (plan body-front-snaps, body-rear-tab)"},
           **{(n, "base"): {"fit": fits.LEG_OPEN, "why": "leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)"} for n in LEGS}}
-ASSEMBLY = [("base", None)] + [(n, [0, 0, 1]) for n in LEGS] + [("body", [0, 0, 1])]
-ACCESS = [{"at": "body", "tool": tool("finger", [0, 0, 40], [0, 0, 1]), "why": "pressed down by hand: two front clicks"}]
+LEG_DROP = 30.0                                   # leg path: lowered LEG_DROP beside its pin with its tube LEG_SLIDE[k] outboard along the pin's own axis
+                                                  # (u: crank pin end -> leg pivot, shells.PIV/A_ALL: tilted up to 0.3 in y, 0.2 in z, not pure x), then slid
+                                                  # inward along -u: the bead clicks in. Slide = the base windows' LSL (shells.CL.LSL 6.6); legs 5 and 6
+                                                  # (-x side, behind the drive unit) start 10 mm out to clear the drive unit's lug on the way down
+LEG_SLIDE = {k: float(SH.CL.LSL) for k in range(8)}; LEG_SLIDE.update({5: 10.0, 6: 10.0})
+def _leg_u(k):
+    u = np.asarray(SH.PIV[k], float) - np.asarray(SH.A_ALL[k, 0], float)
+    return u / np.linalg.norm(u)
+_LEG_ASM = [(n, [[0, 0, -LEG_DROP], [float(x) for x in -_leg_u(k) * LEG_SLIDE[k]]],
+             {"except": {f"crank-{k % 4 + 1}": "the snap bead flexes over the pin tip (slit, fits.PRESS, coupon c1)"},
+              "note": "lowered beside the pin, then slid inward along the pin's axis: the bead clicks into the groove"}) for k, n in enumerate(LEGS)]
+ASSEMBLY = [("base", None)] + _LEG_ASM + [("body", [0, 0, 1])]
+BODY_TOP = 56.3                                   # body roof's top (z, body.stl bbox): the finger presses on the outside, not from inside the shell
+ACCESS = [{"at": "body", "tool": tool("finger", [0, 0, BODY_TOP], [0, 0, 1]), "why": "pressed down by hand on the roof: two front clicks"}]
 PRINT_ORIENT = {"base": np.eye(4),                                # foot down
                 "body": np.diag([1.0, -1.0, -1.0, 1.0])}           # rim up (roof on the bed): 180 deg about x
 MARKS = {"body": "body-on mark: crank pose 12 (plan step 17)"}
@@ -59,3 +71,9 @@ if IV is not None:
     _cut = getattr(IV, "LEGS_AFTER_STEP", 99)
     ASSEMBLY = ([ASSEMBLY[0]] + [s for s in ia if _st(s) <= _cut] + ASSEMBLY[1:-1]   # interior to step 9, then legs
                 + [s for s in ia if _st(s) > _cut] + ASSEMBLY[-1:])                  # holder, motor…, body last
+    if any(s[0] == "ss12d00-switch" for s in ia):                                        # switch and LEDs are fitted to the body on the bench: they go on with it
+        ASSEMBLY[-1] = (("body", "ss12d00-switch", "leds"), [0, 0, 1], {"note": "body with its switch and LEDs, pressed on from above"})
+# Gaps Morante accepted under 0.2 (2026-11-23): the snap bead against its groove's neck on crank 4 (0.19 at poses 19/7,
+# a turning part), and the four body hairlines at 0.20 (relaxed tolerances in places that are not critical)
+PAIR_GAP = {**globals().get("PAIR_GAP", {}), ("crank-4", "leg-3"): 0.18, ("crank-4", "leg-7"): 0.18,
+            **{("body", n): 0.19 for n in ("cell-holder", "cell-lid", "ss12d00-switch", "leds")}}

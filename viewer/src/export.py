@@ -3,7 +3,8 @@
 Runs the parts half of cad/robot/fitcheck/check.py (everything up to the pair checks, ≈ 10 s with its caches) and packs
   - the shells as they are in cad/base and cad/body (the plan's windows and pockets are not cut until shells.py builds),
   - the interior as the fit check's boxes and cylinders (plan, not modelled yet), one node per part,
-  - the 4 real cad/legs meshes (neutral frame) and, per crank pose, each leg's matrix, end tubes, crank webs and pins,
+  - the real printed legs (cad/robot/out/leg-0..7.stl) and, per crank pose, each leg's matrix
+    (shells.leg_frame, as verify.py) and the crank webs and pins,
   - the failing and at-tolerance rows of cad/robot/fitcheck/out/rows.json, each with the point where it happens
 into robot-data.js (a GLB as base64 + JSON, as globals: no fetch, so index.html opens from disk), and wraps
 src/page.html into index.html.
@@ -90,30 +91,22 @@ for n, f in (("base", "cad/base/out/base.stl"), ("body", "cad/body/out/body.stl"
     scene.add_geometry(m, node_name="shell-" + n, geom_name="shell-" + n)
     parts_meta["shell-" + n] = dict(group="chasis" if n == "base" else "cuerpo", how="cad stl")
 
-z = np.load(fit_legmesh.mesh_path()); HUBCUT = NS["HUBCUT"]; LEGN = []
-for i in range(4):                                    # arm from HUBCUT on + blade; the hub is replaced by the end tube
-    Pn, A0 = z[f"P{i}"], z[f"A{i}"]; u0 = (Pn - A0) / np.linalg.norm(Pn - A0)
-    arm = trimesh.Trimesh(z[f"a{i}"], z[f"af{i}"], process=False)
-    s = (arm.triangles_center - A0) @ u0; arm.update_faces(s >= HUBCUT); arm.remove_unreferenced_vertices()
-    leg = trimesh.util.concatenate([arm, trimesh.Trimesh(z[f"b{i}"], z[f"bf{i}"], process=False)])
-    scene.add_geometry(leg, node_name=f"leg-mesh-{i}", geom_name=f"leg-mesh-{i}")
-    LEGN.append((Pn, motion.frame(u0[None])[0]))
+# the real printed legs (cad/robot/out/leg-0..7.stl, robot frame, neutral pose: end tube, snap bead, root ball and
+# all); not mirrored from one side: leg-7 is not leg-3's exact mirror
+sys.path.insert(0, os.path.join(ROOT, "cad", "robot")); import shells as SH
+for Lg in range(8):
+    leg = trimesh.load(os.path.join(ROOT, "cad", "robot", "out", f"leg-{Lg}.stl"))
+    scene.add_geometry(leg, node_name=f"leg-mesh-{Lg}", geom_name=f"leg-mesh-{Lg}")
 
-# per pose, as fit_legs.load: W = P + (V - P) @ R0.T @ Rk, left legs mirrored in x
+# per pose: each leg's matrix (shells.leg_frame), crank webs and pins (plan)
 A_ALL, PIV, P = NS["A_ALL"], NS["PIV"], NS["P"]
 TAIL, SL, END_R, PB, PINR, WEBR, pin_x1 = NS["TAIL"], NS["SL"], NS["END_R"], NS["PB"], NS["PINR"], NS["WEBR"], NS["pin_x1"]
 poses = []
 for k in range(24):
     legs, cyl, webs = [], [], []
     for Lg in range(8):
-        Pn, R0 = LEGN[Lg % 4]; right = Lg < 4; A = A_ALL[Lg, k] * ([1, 1, 1] if right else [-1, 1, 1])
-        u = (Pn - A) / np.linalg.norm(Pn - A); M = R0.T @ motion.frame(u[None])[0]
-        T = np.eye(4); T[:3, :3] = M.T; T[:3, 3] = Pn - M.T @ Pn
-        if not right: T = np.diag([-1.0, 1, 1, 1]) @ T
+        T = SH.leg_frame(Lg, k)                                    # as verify.py carries the part
         legs.append(np.round(T.T.reshape(-1), 5).tolist())          # column-major for three.js Matrix4.fromArray
-        A = A_ALL[Lg, k]; u = (PIV[Lg] - A) / np.linalg.norm(PIV[Lg] - A); e1 = 1.0 + SL + 0.8
-        cyl.append(["patas", (A - TAIL * u).round(3).tolist(), (A + e1 * u).round(3).tolist(), END_R])
-        cyl.append(["patas", (A + e1 * u).round(3).tolist(), (A + HUBCUT * u).round(3).tolist(), P["r_inner"]])
     for i in range(4):
         for sx in (1, -1):
             A = A_ALL[i if sx > 0 else i + 4, k]; x0, x1 = (wb0, wb1) if sx > 0 else (-wb1, -wb0)
@@ -121,7 +114,7 @@ for k in range(24):
             px = (wb1, pin_x1) if sx > 0 else (-pin_x1, -wb1)
             cyl.append(["transmision", [px[0], float(A[1]), float(A[2])], [px[1], float(A[1]), float(A[2])], PINR])
     poses.append(dict(legs=legs, cyl=cyl, webs=webs))
-balls = [[PIV[Lg].round(3).tolist(), PB] for Lg in range(8)]
+balls = []                                            # the root ball is part of the real leg mesh
 
 rows = json.load(open(os.path.join(FC, "out", "rows.json")))
 def deepest(q, prims):

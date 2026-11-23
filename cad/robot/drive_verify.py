@@ -28,7 +28,8 @@ def motor():
 
 
 XL = -D.WX1 - D.W                                   # lug / inner cheek outer face (-x): heads of axles 1, 2 and t
-SCREWS = {"axle-1": (6, [XL, *D.I[0]], [1, 0, 0]), "axle-2": (6, [XL, *D.I[1]], [1, 0, 0]),
+XH = XL + D.CB_DEPTH                                # heads of axles 1, 2 sunk into the lug's counterbore
+SCREWS = {"axle-1": (6, [XH, *D.I[0]], [1, 0, 0]), "axle-2": (6, [XH, *D.I[1]], [1, 0, 0]),
           "axle-3": (5, [-D.WX1, *D.I[2]], [1, 0, 0]), "axle-t": (12, [XL, *D.T], [1, 0, 0]),
           **{f"keel-{k+1}": (L, [x, y, zh], [0, 0, 1]) for k, (x, y, zh, L) in enumerate(D.KEEL_SCREWS)}}
 PARTS = {**{n: {"stl": f"out/{n}.stl"} for n in PRINTED},
@@ -98,14 +99,18 @@ _A = [
      [0, 0, 1], {"note": "spine set onto the keel seat; crank 4 held by a rubber band until the holder caps it"})),
     *[_st(8, (f"keel-{k+1}", [0, 0, -1], {"except": {"spine": _SCREW_IN}})) for k in range(2)],
     _st(11, ("pinion", [1, 0, 0], {"bench": ["n10-motor"], "note": "pressed on the D-shaft to its stop, flat to the D"})),
-    _st(12, (("n10-motor", "pinion"), [-1, 0, 0], {"note": "after the cell holder: slid in along +x, pinion in the plates' grooves, meshes"})),
+    _st(12, (("n10-motor", "pinion"), [[38.0, 0, 0]], {"note": "after the cell holder: slid in along +x, pinion in the plates' grooves, meshes"})),
 ]
 ASSEMBLY = _A
 ACCESS = [*[{"at": n, "tool": tool("hex-key", np.asarray(SCREWS[n][1]) - [D.M2_HEAD_H, 0, 0], [-1, 0, 0]), "why": "1.5 mm hex key from -x"}
             for n in ("axle-1", "axle-2", "axle-3", "axle-t")],
           *[{"at": f"keel-{k+1}", "tool": tool("hex-key", [0, y, zh - D.M2_HEAD_H], [0, 0, -1]), "why": "1.5 mm hex key from below, base on its flank"}
             for k, (_x, y, zh, _L) in enumerate(D.KEEL_SCREWS)],
-          {"at": ("n10-motor", "pinion"), "tool": tool("finger", [D.MX0, D.MC[0], D.MC[1]], [-1, 0, 0]), "why": "pushed in along +x by hand"}]
+          {"at": ("drive-unit", "transfer", "transfer-sleeve", "axle-t"), "tool": tool("finger", [0, D.HOLDER_SCREW["y"], D.HOLDER_SCREW["ear_top_z"]], [0, 0, 1], d=10.0),
+           "why": "set down by hand on ear 2: tongues into slots 1-3"},
+          {"at": tuple(["spine"] + CRANKS + IDLERS + SLEEVES + ["drive-unit", "transfer", "transfer-sleeve", "axle-t", "axle-1", "axle-2", "axle-3"]),
+           "tool": tool("finger", [0, D.HOLDER_SCREW["y"], D.HOLDER_SCREW["ear_top_z"]], [0, 0, 1], d=10.0), "why": "set onto the keel seat by hand, pressed on ear 2"},
+          {"at": ("n10-motor", "pinion"), "tool": tool("finger", [D.MX0, D.MC[0], D.MC[1]], [-1, 0, 0], d=10.0), "why": "pushed in along +x by hand"}]
 _X2Z = np.array([[0, 0, -1, 0], [0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1.0]])   # axis x onto z (about y)
 PRINT_ORIENT = {"spine": np.eye(4), **{n: _X2Z for n in CRANKS + IDLERS + SLEEVES + ["transfer", "transfer-sleeve", "pinion"]},
                 "drive-unit": np.diag([1.0, -1.0, -1.0, 1.0])}                   # ear faces down

@@ -266,7 +266,7 @@ new GLTFLoader().parse(glbBuffer(), "", (gltf) => {
     parts[name] = add(g, toCreasedNormals(src.geometry, Math.PI / 6), name);   // the primitives come without normals
   }
   for (let Lg = 0; Lg < 8; Lg++) {
-    const m = add("legs", toCreasedNormals(nodes["leg-mesh-" + (Lg % 4)].geometry, Math.PI / 5));
+    const m = add("legs", toCreasedNormals(nodes["leg-mesh-" + Lg].geometry, Math.PI / 5));
     m.matrixAutoUpdate = false; legMeshes.push(m);
   }
   for (const [c, r] of D.balls) { const s = add("legs", SPHERE); s.position.set(...c); s.scale.setScalar(r); }

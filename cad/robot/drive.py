@@ -41,7 +41,8 @@ TH = F.GEAR_THRUST_CRANK.side; GX = GW / 2
 WX0, WX1 = GX + TH, GX + TH + W                     # spine walls at |x| WX0..WX1
 JR = 1.5                                            # crank journal Ø3 (check.py JR)
 PINR = CL.PINR                                      # crank pin Ø3 (legs' bore TURN over it)
-WEB_T = CL.WEB_T; WB0 = WX1 + TH; WB1 = WB0 + WEB_T  # webs just outside the walls (THRUST)
+WEB_TRIM = 0.1                                      # webs printed this much thinner than the fit check's WEB_T: leg-3/7's tube starts at x 4.54 (crank-4 gap 0.14 < 0.2)
+WEB_T = CL.WEB_T - WEB_TRIM; WB0 = WX1 + TH; WB1 = WB0 + WEB_T  # webs just outside the walls (THRUST)
 WEBR = PINR + CL.WEBW                               # web stadium half-width (check.py WEBR)
 PIN_X1 = P["XC"] + CL.PINX                          # pin tip (|x|)
 PIN_TIP_TRIM = 0.5                                  # printed pin ends this much short of PIN_X1: the leg's arm sits on the pin axis just past the tip (2026-11-23: 0.25 left crank-4 x leg-3 at 0.06 at pose 21 in --quick); the snap bead, not the tip, holds the leg
@@ -81,7 +82,8 @@ SHAFT_X1 = XB0 + GW
 XO = XB0 + GW + F.GEAR_AXIAL.side                   # transfer cheek inner face
 # drive unit (check.py)
 DZT = CL.DZT; DBH = CL.DBH; G_CL = F.MOTOR_SEAT.side + W
-CLX1 = min(MX1, CL.CLX1); CTX0 = max(MX0 + 3, CL.CTX0)
+CLX1 = min(MX1, CL.CLX1, -(CL.TABHW + F.NEIGHBOUR.side)); CTX0 = max(MX0 + 3, CL.CTX0)   # lower clamp plate edge trimmed to clear the holder tab (CL.TABHW a side)
+                                                    # that it slides in under it (plan: the holder goes in before the motor): the plate ended at -2.1, 0.5 over the tab
 LUGR = IPR + F.STEEL.side + W
 def _top_below(y):                                  # highest gear tip under y (between the walls)
     t = [c[1] + rt(ZI[i]) for i, c in enumerate(I) if abs(c[0] - y) < rt(ZI[i]) + 2.6] + \
@@ -91,6 +93,8 @@ BLOCK_Y = (T[0] - CL.DSY1, T[0] + CL.DSY2)
 ZBLK = [_top_below(y) + F.GEAR_TIP.side for y in BLOCK_Y]
 EAR_H = (2.4, CL.EARH2)                             # ear 2 lowered to 1.0 (plan drive-unit)
 EAR_HW = 2.6
+CB_DEPTH = 0.4                                      # idler axles 1, 2: M2 head sunk this deep into the -x lug (lug W 1.2 keeps 0.8): head clears the legs' end tubes
+CB_R = M2_HEAD_R + F.STEEL.side
 SLW = JR + F.TURN.side                              # journal slot half-width
 TG = SLW - F.TURN.side                              # cap tongue half-width
 ZTG = Oz + JR + F.TURN.side                         # tongue foot over the journal
@@ -290,14 +294,16 @@ def drive_unit():
     for sz in (-1, 1):                                                       # pinion path grooves in both clamp plates (it rides in along +x)
         z0, z1 = sorted((mz + sz * (N10_H / 2 + F.MOTOR_SEAT.side - 0.01), mz + sz * pr))
         du = du - box((MX0, my - gw, z0), (MX1 + 0.5, my + gw, z1))
-    for k in (0, 1):                                                         # lug holes (STEEL)
-        c = I[k]; du = du - cylx(c[0], c[1], M2_HOLE_R, -WX1 - W - 1, -WX1 + 0.01)
+    for k in (0, 1):                                                         # lug holes (STEEL) + head counterbore
+        c = I[k]; du = du - cylx(c[0], c[1], M2_HOLE_R, -WX1 - W - 1, -WX1 + 0.01) - cylx(c[0], c[1], CB_R, -WX1 - W - 1, -WX1 - W + CB_DEPTH)
     du = du - cylx(ty, tz, M2_HOLE_R, -WX1 - W - 1, -WX1 + 0.01) - cylx(ty, tz, M2_PILOT_R, XO - 0.01, XO + W + 1)   # transfer axle
     du = du - cylx(ty, tz, rt(ZS) + F.GEAR_TIP.side, -GX, GX) - cylx(ty, tz, HUB_R + F.TURN.side, GX - IDL_T, XB0) \
             - cylx(ty, tz, rt(ZB) + F.GEAR_TIP.side, XB0 - F.GEAR_AXIAL.side + 0.01, XO - 0.01) \
             - cylx(my, mz, rt(ZP) + F.GEAR_TIP.side, MX1 + 0.01, XO - 0.01)                   # the transfer's and pinion's sweeps
     HOLDER_SCREW["pilot_bottom_z"] = max(ZBLK[1] + 0.8, HOLDER_SCREW["ear_top_z"] - 7.0)
     du = du - cylz(0, HOLDER_SCREW["y"], M2_PILOT_R, HOLDER_SCREW["pilot_bottom_z"], HOLDER_SCREW["ear_top_z"] + 1)
+    KEY_R = 2.0 + F.STEEL.side                                               # 1.5 mm hex key access (cad_verify's hex-key tool is a Ø4 rod): hole in the upper clamp plate over the holder M2
+    du = du - cylz(0, HOLDER_SCREW["y"], KEY_R, mz + N10_H / 2 + F.MOTOR_SEAT.side - 1, mz + N10_H / 2 + g + 1)
     return du
 
 

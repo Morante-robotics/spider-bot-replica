@@ -43,15 +43,23 @@ if DRIVE:
     JOINTS[("cell-holder", "crank-4")] = {"fit": fits.TURN, "why": "crank-in-spine: post-cap tongue over journal 4 (TURN)"}
 
 UP = [0, 0, 1]
-ASSEMBLY = [("cell-holder", UP, {"step": 10}),               # plan step 10, before the motor
-            ("holder-screw", UP, {"step": 10}),              # M2 down through the tab, clamp empty
-            ("nickel-strip", UP, {"step": 13}), ("cell-springs", UP, {"step": 13}),   # contacts (wired) before the cells
+HOLDER_PATH = [[0, 0, -34.0], [0, -5.0, 0], [0, 0, -6.0]]   # the drive unit's upper clamp plate (z 40-41.2, y <= 5.3) is over the tab (y 1.3-5.5): the holder is
+                                                              # lowered with its tab 5 mm behind the plate, slid 5 mm toward -y at tab height z 33-34 (over the lower plate), then
+                                                              # lowered 6 mm: tab on ear 2, tongues in slot 4 (probed with cad_verify.sweep_path: 4.5-8 mm slides all clear)
+ASSEMBLY = [("cell-holder", HOLDER_PATH, {"step": 10, "note": "lowered behind the motor clamp's upper plate, slid 5 mm in under it, lowered onto ear 2"}),
+            ("holder-screw", UP, {"step": 10, "except": {"drive-unit": "self-tapping M2 in its pilot Ø1.6 (plan m2-screws, assumed, coupon c2)"}}),   # M2 down through the tab, clamp empty
+            ("nickel-strip", UP, {"step": 13}),              # contact (wired) before the cells
+            ("cell-springs", [[0, 0, -30.0], [0, -2.0, 0]], {"step": 13, "note": "dropped into the cradle, then pushed 2 mm into the front wall's socket (its top bridge is 0.2 over the cone)"}),
             ("ag13-cells", UP, {"step": 13}),                # + toward the strip
-            ("cell-lid", UP, {"step": 14}),
+            ("cell-lid", UP, {"step": 14, "except": {"cell-holder": "the lid's snap lips flex into the holder's grooves (fits.PRESS, coupon c1)"}}),
             ("jst-xh", UP, {"step": 15}),
-            ("leds", [0, 1, 0], {"step": 16}),               # into the body from inside
-            ("ss12d00-switch", [0, -1, 0], {"step": 17})]    # lever out the back
+            ("leds", [[0, 0, 10.0], [0, -12.0, 0]], {"step": 16, "bench": ["body"], "note": "bench: into the body's eye bores from inside, before the body goes on"}),
+            ("ss12d00-switch", [0, -1, 0], {"step": 17, "except": {"body": "the switch body snaps over the pocket's keeper (fits.PRESS, coupon c1)"}, "bench": ["body"], "note": "bench: lever out the back, its keeper in the body, before the body goes on"})]
 ACCESS = [{"at": "holder-screw", "tool": tool("hex-key", [0, PW.HSYY, PW.BZ + PW.M2_HEAD_H], UP), "why": "1.5 mm hex key from above, clamp empty"},
+          {"at": "nickel-strip", "tool": tool("finger", [0, PW.YBI - fits.STEEL.side - PW.STRIP_T / 2, PW.ZT - 0.25], UP, d=1.0, reach=30.0), "why": "tweezers tip (Ø1) on the strip's top edge, down into its slot"},
+          {"at": "cell-springs", "tool": tool("finger", [0, PW.YFI + fits.STEEL.side + 3.0, PW.CZ + PW.SPR_R0], UP, d=3.0, reach=30.0), "why": "fingertip (Ø3) on the middle spring, pressed against the front wall"},
+          {"at": "leds", "tool": tool("finger", [PW.led_axis(1)[0], PW.led_axis(1)[1] + PW.LED_H, PW.led_axis(1)[2]], [0, 1, 0], d=5.0, reach=30.0), "why": "fingertip on the LED's back, pushed forward into its bore"},
+          {"at": "ss12d00-switch", "tool": tool("finger", [0, PW.SWY1 - PW.SW_BODY[1], PW.SWZ], [0, -1, 0], d=4.0, reach=30.0), "why": "fingertip on the switch body, pushed back until the lever stands out"},
           {"at": "ag13-cells", "tool": tool("finger", [0, PW.CYC, PW.ZT], UP, d=10.0, reach=30.0), "why": "cells pressed down against the spring"},
           {"at": "cell-lid", "tool": tool("finger", [0, PW.CY, PW.ZT + PW.LIDT], UP, reach=30.0), "why": "lid pressed shut; lifted by its back lips"},
           {"at": "jst-xh", "tool": tool("finger", [PW.CL.JX, PW.CL.JY, PW.JZ + PW.JST[2] / 2], UP, d=10.0, reach=30.0), "why": "latched by hand"}]
