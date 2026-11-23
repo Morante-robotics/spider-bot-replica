@@ -19,7 +19,9 @@ S = float(json.load(open(os.path.join(HERE, "..", "spec.json")))["dims"]["S_star
 _LEN = ("r", "XC", "H", "DY", "knee_r", "knee_z", "foot_r", "foot_z", "up_arch", "blade_top", "blade_bow",
         "r_upper", "r_root", "r_blade", "r_inner")
 P = dict(motion.P0, S=S, **{k: motion.P0[k] * S / motion.P0["S"] for k in _LEN})   # every P0 length x S/0.60
-BASE_WALL_R = BA.WALL * S    # robot mm (base WALL 1.2 j = 0.72 robot today: plan raises it)
+BASE_WALL_R = BA.WALL * S    # robot mm: 0.84 everywhere. No 1.2 pads round the leg windows any more (2026-11-23): the windows are
+                             # open-top LEG_OPEN, the leg is held by its pin, so they carry no load; 1.2 everywhere put the wall
+                             # 0.14 from the front arms (decision 2: smooth front, 0.40 at 0.84)
 BODY_WALL_J = BO.WALL   # spec body_wall 1.6 robot mm (Morante 2026-11-21)
 def j2r(q): return motion.to_frame(q, P)
 def r2j(q): return np.asarray(q, float) / S + motion.ORIGIN

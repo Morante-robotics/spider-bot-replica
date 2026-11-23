@@ -48,7 +48,7 @@ CL = _Layout()
 OUT = os.path.join(HERE, "out"); CACHE = os.path.join(OUT, ".cache"); os.makedirs(CACHE, exist_ok=True)
 
 # ---- numbers (sources in the comments; nothing typed that fits.py or the fit check holds)
-WALL_PAD = 1.2                          # mm robot, plan: pads 1.2 where loaded (rules §3.2), base wall is BA.WALL x S
+BASE_WALL = FE.BASE_WALL_R              # mm robot: the base wall (BA.WALL x S, 0.84); no pads: the open-top windows carry no load
 RN, WR = CL.RN, CL.WR                   # window: neck within RN of the pivot, dilated WR (LEG_PATH + sampling)
 STRIP_X, STRIP_X2, STRIP_Y0, STRIP_Y1, STRIP_Z0, STRIP_Z1, STRIP_Z2 = 20.05, 19.25, 6.4, 12.8, 19.0, 23.65, 23.9   # body strip under the cell holder, cut away
 WR_EXTRA = {4: 0.6}                     # leg 4: its window dilated 0.6 more (no path or crank pose cleared it, 24 poses tested); leg 0's block is the front relief (PATH_DROP)
@@ -242,6 +242,22 @@ def leg(Lg):
     sh = cached(f"leg{i}", key, lambda: _leg_right(i))
     return sh if Lg < 4 else mirror_x(sh)
 
+_LM = {}
+def leg_mesh(Lg, samples=False):
+    """leg Lg as a trimesh (neutral pose, robot frame), or its surface samples (cutters.LEG_STEP apart), cached as arrays
+    beside its BREP: the checks and the designed cutters need its surface, not the solid (the 8 BREPs took 10.5 s)."""
+    import trimesh
+    i = Lg % 4
+    if i not in _LM:
+        leg(i); p = os.path.join(CACHE, f"legmesh{i}_{H[f'leg{i}']}.npz")
+        if not os.path.exists(p):
+            import cutters as CU
+            from trimesh.remesh import subdivide_to_size
+            m = CU.mesh_of(leg(i)); np.savez(p, v=m.vertices, f=m.faces, s=subdivide_to_size(m.vertices, m.faces, max_edge=CU.LEG_STEP)[0])
+        _LM[i] = dict(np.load(p))
+    d = _LM[i]; mx = np.array([-1.0, 1, 1]) if Lg >= 4 else np.ones(3)
+    if samples: return d["s"] * mx
+    return trimesh.Trimesh(d["v"] * mx, d["f"][:, ::-1] if Lg >= 4 else d["f"], process=False)
 FLARE_DEG = [round(pin_swing(i) + 1.0, 1) for i in range(4)]
 def bore_drift(i):
     """worst offset (mm, across the pin axis x) between the pin centre A_k and the bore axis the rigid leg carries over the 24
@@ -341,17 +357,19 @@ def window_cutter(Lg):
         q = np.vstack([q, q + [0, 0, ZTOP - q[:, 2].min()]])
         hulls.append(plane_solid(q, wr_of(Lg)))
     return hulls
-def back_pocket(inner):
-    """back sheet 1.6 outward in |x| <= PKT[1], z PKT[2..3]: cut on the cavity side, the same added on the scoop side."""
-    d = BA.WALL; cx, cy = (BA.CX - ORIGIN[0]) * S, (BA.BACK_Y - ORIGIN[1]) * S
+def back_pocket(inner=None):
+    """back sheet PKT[0] outward in |x| <= PKT[1], z PKT[2..3], as a cup: the sheet moved out by the depth, with side,
+    top and bottom walls of the wall's own thickness joining it to the bowl (moved out by more than the wall is thick,
+    a bare sheet came loose: 265 mm3 dropped, 2026-11-23). Returns (cut on the cavity side, cup added on the scoop side)."""
+    d = BASE_WALL / S; w = BASE_WALL; cx, cy = (BA.CX - ORIGIN[0]) * S, (BA.BACK_Y - ORIGIN[1]) * S
     rb_in, rb_out = (BA.BACK_R + d) * S, BA.BACK_R * S; dp, hx, z0, z1 = PKT
     # clip round the back sheet only (y cy - rb_in .. a few mm in front of it); it was y cy-30..cy, which misses the sheet
     # at S 0.70 (cy 82.4, sheet at y ~22-26), so the pocket was never cut (found by the volume check, 2026-11-22)
-    clip = Pos(0, cy - rb_in - 1.0, z0) * Box(2 * hx, 10.0, z1 - z0, align=(Align.CENTER, Align.MIN, Align.MIN))
-    ring = lambda r0, r1: (Pos(cx, cy, z0) * (Cylinder(r1, z1 - z0, align=(Align.CENTER, Align.CENTER, Align.MIN))
-                                               - Cylinder(r0, z1 - z0, align=(Align.CENTER, Align.CENTER, Align.MIN))))
-    cut = ring(rb_in - dp, rb_in) & clip
-    add = ring(rb_out - dp, rb_out) & clip
+    clip = lambda m: Pos(0, cy - rb_in - 1.0, z0 - m) * Box(2 * (hx + m), 10.0, z1 - z0 + 2 * m, align=(Align.CENTER, Align.MIN, Align.MIN))
+    ring = lambda r0, r1, m: (Pos(cx, cy, z0 - m) * (Cylinder(r1, z1 - z0 + 2 * m, align=(Align.CENTER, Align.CENTER, Align.MIN))
+                                                     - Cylinder(r0, z1 - z0 + 2 * m, align=(Align.CENTER, Align.CENTER, Align.MIN))))
+    cut = ring(rb_in - dp, rb_in, 0.0) & clip(0.0)
+    add = ring(rb_out - dp, rb_in - 0.05, w) & clip(w)
     return cut, add
 def snap_geometry():
     """front snap rib (base) and finger + hook (body) at x +-SNX, as check.py (innermost wall face yw from inside())."""
@@ -457,79 +475,6 @@ def local_op(b, tools, fn, m=10.0):
         out = _bool("fuse", rest, new, f); ss = out.solids()
         if len(ss) == 1 and out.is_valid and abs(pvol(out) - want) <= 1e-3 * want: return ss[0]
     raise AssertionError(f"local_op: {len(ss)} solids, valid {out.is_valid}, volume {pvol(out):.1f} vs {want:.1f}")
-def _base():
-    import time; _T0[0] = time.time()
-    key0 = ("base", S, WALL_PAD, RN, WR, tuple(sorted(WR_EXTRA.items())), RELD, PKT, SNX, SNW, SNZ, RIBD, CL.LSL, _K, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py"),
-            srch(to_robot, checked, _bool, local_box, pvol, fuse_cut, one, back_pocket, snap_geometry, tree_fuse, dense, sweep_hulls, plane_solid, plane_data, _fib,
-                 leg_points, leg_frame, window_cutter, leg_window, leg_ring, samples, fuse_one, _close, cut_many))
-    b = to_robot(BA.build(1.0)); tick("base skin + cuts")
-    wins = [leg_window(Lg) for Lg in range(8)]; tick("8 window cutters (cached per leg)")
-    rings = [leg_ring(Lg) for Lg in range(8)]; tick("8 pad rings (cached per leg)")
-    def pads_stage():
-        # pads: the wall round each window thickened to WALL_PAD on the inside (outer skin unchanged); each piece is cut
-        # from the wall inside its ring's own box, the 8 pieces are fused together, then into the base
-        outer = to_robot(BA.skin(0.0, 1.0)); inner = to_robot(BA.skin(WALL_PAD / S, 1.0)); wall = outer - inner
-        pcs = [(wall & local_box([r], 0.5)) & r for r in rings]; tick("8 pad pieces")
-        c = b
-        for Lg, pc in enumerate(pcs): c = checked("fuse", c, pc, f"pads leg {Lg}", touch=False)
-        tick("pads into base")
-        cut, add = back_pocket(None); c = checked("fuse", c, add, "pocket add", touch=False); c = checked("cut", c, cut, "pocket cut")
-        for n, (rib, _, _) in enumerate(snap_geometry()): c = checked("fuse", c, rib, f"snap rib {n}", touch=False)
-        tick("back pocket + snap ribs"); return one(c)
-    b = cached("base_pads", key0 + ("pads", srch(pads_stage), H["win0"], H["ring0"]), pads_stage)
-    def win_stage():
-        c = b
-        for side in (range(0, 4), range(4, 8)):         # checked() cuts each on its own local piece; a local_op round it
-            c = fuse_cut(c, [(wins[Lg], f"window leg {Lg}") for Lg in side])   # nested two local pieces and gave an inside-out one
-            tick(f"4 window cuts, side {side[0]}-{side[-1]}")
-        return c
-    b = cached("base_win", key0 + ("win", srch(win_stage), H["base_pads"]), win_stage)
-    near = dense(b)                                             # front leg windows: pocket RELD from the front arms' sweep
-    def relief_tools(Lg):
-        """leg Lg's relief pocket solid and outward bulge solid (hull cell RCELL), each cached by its inputs."""
-        kk = key0 + ("relief", Lg, RCELL, RELD, BA.WALL * S, H["base_win"], PATH_RELIEF.get(Lg, False), PATH_DROP, "slide")
-        pth = PATH_RELIEF.get(Lg, False)
-        def mk():
-            rel = sweep_hulls(near, RELD, legs=(Lg,), planes=True, cell=RCELL, reach=RELD + BA.WALL * S + 1.0, path=pth)   # same samples as the bulge's hulls:
-            # a leg sample inside the bulge but > RELD + 1 from the wall was left in it (relief cut 41 mm3, bulge 268 mm3 round the leg)
-            grown = sweep_hulls(near, RELD + BA.WALL * S, legs=(Lg,), planes=True, cell=RCELL, path=pth)
-            tick(f"leg {Lg} relief hulls: {len(rel)} + {len(grown)} grown, faces/hull {sorted(len(h.faces()) for h in rel + grown)[-1]} max")
-            return rel, grown
-        def rs_fn():
-            rel, grown = mk(); rs = tree_fuse(rel); tick(f"leg {Lg} relief fused"); return rs
-        rs = cached(f"relf{Lg}", kk + ("rs",), rs_fn)
-        def gs_fn():
-            rel, grown = mk(); return tree_fuse(grown)
-        gs = cached(f"relg{Lg}", kk + ("gs",), gs_fn)
-        outer = to_robot(BA.skin(0.0, 1.0)); bx = local_box([gs], 1.0)
-        def bulge_fn():
-            # the bulge (gs - outer) is the hull cutters' grown shell: the part of the leg between those hulls (samples that are
-            # not within reach of the wall) is inside it too (smoke: 459 leg-0 samples at pose 0). Carve it with the sweep of
-            # every leg sample within RELD + 1 of the bulge itself: it keeps RELD from the leg, like the relief.
-            b0 = gs - (outer & bx); nb = dense(b0)
-            b0 = b0 - tree_fuse(sweep_hulls(nb, RELD, legs=(Lg,), planes=True, cell=RCELL, path=pth))
-            # the bulge must not grow into a neighbour leg's window (base x leg 1 gap 0.00, 3 mm3 at (35,-10,16)): re-cut every other window
-            bb = b0.bounding_box(); nbw = [wins[j] for j in range(8) if j != Lg and _boxes_touch(wins[j].bounding_box(), bb)]
-            return (b0 - tree_fuse(nbw)) if nbw else b0
-        bulge = cached(f"relb{Lg}", kk + ("bulge3",), bulge_fn); tick(f"leg {Lg} bulge")
-        return rs, gs, bulge
-    def relief_stage():
-        c = b
-        for Lg in (0, 4):                                       # one local box per front leg
-            rs, gs, bulge = relief_tools(Lg)
-            c = fuse_cut(c, [(rs, f"relief leg {Lg}")], add=(bulge, f"bulge leg {Lg}")); tick(f"leg {Lg} bulge + relief (local)")
-        return c
-    b = cached("base_relief", key0 + ("relief", _K, srch(relief_stage, relief_tools), H["base_win"]), relief_stage)
-    b = one(b); ss = b.solids()
-    assert len(ss) == 1 and b.is_valid and pvol(b) > 0, f"base: {len(ss)} solids, valid {b.is_valid}, volume {pvol(b)}"
-    pv = []
-    for Lg in range(8):
-        bxl = Pos(*PIV[Lg]) * Box(14, 14, 18); pv.append(pvol(_bool("and", b, bxl)))
-    for i in range(4):
-        d = abs(pv[i] - pv[i + 4]) / max(pv[i], pv[i + 4])
-        print(f"    [base] pivot box leg {i}: {pv[i]:.1f}  leg {i + 4}: {pv[i + 4]:.1f} mm3  diff {100 * d:.2f} %{'  WARN > 1 %' if d > 0.01 else ''}", flush=True)
-    print(f"    [base] volume {pvol(b):.1f} mm3, valid, 1 solid", flush=True)
-    return b
 def _boxes_touch(a, b, m=0.5):
     A0, A1, B0, B1 = tuple(a.min), tuple(a.max), tuple(b.min), tuple(b.max)
     return all(A0[i] - m <= B1[i] and B0[i] - m <= A1[i] for i in range(3))
@@ -539,29 +484,44 @@ def fuse_cut(P, cuts, add=None):
     for t, lab in cuts: P = checked("cut", P, t, lab)
     return P
 def base():
-    key = ("base", S, WALL_PAD, RN, WR, tuple(sorted(WR_EXTRA.items())), RELD, PKT, SNX, SNW, SNZ, RIBD, CL.LSL, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py"), srch(_base),
-           srch(to_robot, checked, _bool, local_box, pvol, fuse_cut, one, back_pocket, snap_geometry, tree_fuse, dense, sweep_hulls, plane_solid, plane_data, leg_window, leg_ring))
-    # the booleans leave coplanar fragments that touch along a line (28 non-manifold STL edges); unifying same-domain faces
-    # merges them (volume unchanged, 1 valid solid) and the STL exports watertight. Outside the cache so the stages stay valid.
-    b = one(unify(cached("base", key, _base), faces_only=True))
-    assert b.is_valid and len(b.solids()) == 1, "base: clean() left it invalid"
-    def keel_stage():
-        """the keel's two M2 bosses (drive.py KEEL_SCREWS): a boss from the floor up to ZKEEL0 round each screw, the head's
-        counterbore (STEEL a side) from the foot up to the head's bearing face, the shank's STEEL hole above it. After the
-        clean(): clean() of a base with the bosses in it left an invalid shape (volume 18751 mm3)."""
-        import drive as DR
-        zf = b.bounding_box().min.Z; c = b; cyl = lambda x, y, r, z0, z1: Pos(x, y, z0) * Cylinder(r, z1 - z0, align=(Align.CENTER, Align.CENTER, Align.MIN))
-        for n, (x, y, zh, ln) in enumerate(DR.KEEL_SCREWS):
-            c = checked("fuse", c, cyl(x, y, KEEL_BOSS_R, zf + DR.BASE_FLOOR * 0.5, DR.ZKEEL0), f"keel boss {n}", touch=True)
-        for n, (x, y, zh, ln) in enumerate(DR.KEEL_SCREWS):
-            c = checked("cut", c, cyl(x, y, DR.M2_HEAD_R + F.STEEL.side, zf - 1.0, zf + zh), f"keel counterbore {n}")
-            c = checked("cut", c, cyl(x, y, DR.M2_HOLE_R, zf + zh - 0.5, DR.ZKEEL0 + 1.0), f"keel hole {n}")
-        return c
-    import drive as _DR
-    b = one(cached("base_keel", ("base_keel", H["base"], srch(unify), "faces-only", srch(keel_stage, checked, _bool, local_box, pvol), KEEL_BOSS_R, _DR.KEEL_SCREWS, _DR.ZKEEL0, _DR.M2_HEAD_R,
-                                 _DR.M2_HOLE_R, _DR.BASE_FLOOR), keel_stage))
-    assert b.is_valid and len(b.solids()) == 1, "base: keel bosses left it invalid"
+    """the base: jenscolt's bowl (cad/base, wall BASE_WALL) in the robot frame, the designed leg windows (cutters.py: one
+    few-sided prism per leg), the back-sheet pocket, the front snap ribs and the keel's two M2 bosses. One fuse, one cut;
+    then every leg is checked against it at its 24 poses and along its assembly path (cutters.leg_gaps)."""
+    import cutters as CU, drive as DR
+    from build123d import Plane, Polygon as BPoly, extrude
+    _T0[0] = time.time()
+    b0 = base_skin(); tick("skin")
+    legs = {Lg: leg_mesh(Lg) for Lg in range(8)}
+    W = CU.Windows(CU.mesh_of(b0, 0.02, 0.2), legs, leg_frame, PIV, A_ALL, wr_of, RN, b0.bounding_box().max.Z + 3.0,
+                   samples={Lg: leg_mesh(Lg, samples=True) for Lg in range(8)}); tick("window outlines")
+    def prism(poly, fr, dr):
+        t, z, n = fr; pl = Plane(origin=tuple(n * dr[0]), x_dir=tuple(t), z_dir=tuple(n))
+        return extrude(pl * BPoly(*[tuple(p) for p in CU.ccw(poly)], align=None), dr[1] - dr[0])
+    pk_cut, pk_add = back_pocket()
+    zf = b0.bounding_box().min.Z; cyl = lambda x, y, r, z0, z1: Pos(x, y, z0) * Cylinder(r, z1 - z0, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    adds = [pk_add] + [rib for rib, _, _ in snap_geometry()] + [cyl(x, y, KEEL_BOSS_R, zf + DR.BASE_FLOOR * 0.5, DR.ZKEEL0) for x, y, _, _ in DR.KEEL_SCREWS]
+    cuts = [prism(*W.window(Lg)) for Lg in range(8)] + [pk_cut] \
+        + [cyl(x, y, DR.M2_HEAD_R + F.STEEL.side, zf - 1.0, zf + zh) for x, y, zh, _ in DR.KEEL_SCREWS] \
+        + [cyl(x, y, DR.M2_HOLE_R, zf + zh - 0.5, DR.ZKEEL0 + 1.0) for x, y, zh, _ in DR.KEEL_SCREWS]
+    b = b0.fuse(*adds); tick(f"fuse {len(adds)}")
+    b = b.cut(*cuts); tick(f"cut {len(cuts)}")
+    ss = sorted(b.solids(), key=lambda x: -x.volume)
+    for x in ss[1:]:
+        bb = x.bounding_box(); print(f"    [base] dropped a loose piece of {x.volume:.2f} mm3 at {np.round([bb.min.X, bb.min.Y, bb.min.Z], 1).tolist()}..{np.round([bb.max.X, bb.max.Y, bb.max.Z], 1).tolist()}", flush=True)
+    b = one(unify(ss[0], faces_only=True)); tick("unify")
+    assert b.is_valid and len(b.solids()) == 1, f"base: valid {b.is_valid}, {len(b.solids())} solids"
+    rows = CU.leg_gaps(CU.mesh_of(b, 0.02, 0.2), legs, leg_frame, PIV, A_ALL)
+    for Lg, what, g, at in rows:
+        need = 0.4 if what == "poses" else 0.0
+        print(f"    [base] leg {Lg} {what:8s} min gap {g:.2f} at {at}{'  FAIL' if g <= need else ''}", flush=True)
+    tick("leg gaps"); print(f"    [base] volume {b.volume:.1f} mm3, {len(b.faces())} faces, valid, 1 solid", flush=True)
     return b
+def base_skin():
+    """cad/base's bowl at wall BASE_WALL in the robot frame (6 s), kept as a BREP keyed by cad/base/build.py's text."""
+    key = (hashlib.sha1(open(os.path.join(ROOT, "cad", "base", "build.py"), "rb").read()).hexdigest()[:12], BASE_WALL, S, srch(to_robot))
+    p = os.path.join(CACHE, f"base_skin_{khash(key)}.brep")
+    if os.path.exists(p): return import_brep(p)
+    sh = to_robot(BA.build(1.0, wall=BASE_WALL / S)); export_brep(sh, p); return sh
 
 # ---- leg x-stop: a post from the body wall that stops the leg sliding off its pin (plan leg-on-pin "-x window": the window is slid
 # LSL along u for assembly, so it does not hold x). Found per right leg (left = mirror) from the leg's own samples.
