@@ -31,6 +31,9 @@ def poses(t):
 UP = [0, 0, 1]
 RETAIN = {"body": {"spin": None, "slide": None, "play": 0.6},          # two front snap hooks under the ribs + rear tab
           **{n: {"spin": None, "slide": None, "play": 1.25} for n in LEGS}}  # snap bead in the pin's groove + window + body rim
+# legs 0 and 7 slide 1.4 / 1.6 towards their crank at pose 0 (only the groove stops them since the base front is smooth):
+# accepted by Morante 2026-11-23 («Aceptar 1,6 mm hacia dentro»); outward their x-stop posts hold them at 0.70 / 0.75
+RETAIN["leg-0"]["play"] = RETAIN["leg-7"]["play"] = 1.65
 # legs' play 1.25, not 1.0 (Morante, 2026-11-23): the groove lets the bead travel 1.4-1.7 mm over the 24 poses (tube
 # tilt + axial drift), so a leg rides up to 1.0 mm along its pin; inward it cannot come off, outward it stays <= 0.75
 ALLOWED_CONTACT = {("body", "base"): "body rim seated on the base ledge; snap hooks under the front ribs (fits.PRESS, coupon c1)"}

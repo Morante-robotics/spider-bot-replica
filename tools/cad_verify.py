@@ -937,7 +937,7 @@ def sweep_path(me, others, path):
                     return i + 1, s
                 clear = [o for o, b0 in live if b0 <= EPS_VOL]
                 if clear:
-                    g = min(m2.min_gap(o, 5.0) for o in clear)
+                    g = min(m2.min_gap(o, 2.0) for o in clear)
                     if g <= 1e-4 and any(overlap(m2, o) > EPS_VOL for o in clear):
                         return i + 1, s
                     if all(b0 <= EPS_VOL for _, b0 in live):        # a press-fit obstacle in reach keeps the 0.25 scan
@@ -1181,7 +1181,9 @@ def check_joints(spec, meshes, rep, only=None):
                     if ma.is_empty() or mb.is_empty():
                         rep.fail(f"{a} × {b}: the joint region {where} misses one of the parts (at {t})")
                         break
-                g = 0.0 if overlap(ma, mb) > EPS_VOL else ma.min_gap(mb, need + 1.0)
+                g = ma.min_gap(mb, need + 1.0)               # 0 when they touch or overlap: no boolean needed
+                if g <= 1e-6:
+                    g = 0.0
                 cache[ck] = g
             if g < worst[0]:
                 worst = (g, t)
@@ -1518,26 +1520,66 @@ def main():
     sys.exit(1 if rep.fails else 0)
 
 
+CHILD_SECTIONS = ("retention", "print")       # run in a second process when JOBS > 1 (the other half: assembly, motion...)
+
+
 def run_checks(spec, meshes, rep, args, only):
-    timing = []
+    """Every check, in its section order. With JOBS > 1 the CHILD_SECTIONS run in a forked process at the same time
+    (each section writes its own report; they are joined in order, so the report is the same as in one process)."""
     smoke = getattr(args, "smoke", False)
-    for label, fn in (("integrity", lambda: check_integrity(spec, meshes, rep, args.quick, only)),
-                      ("motion", lambda: check_motion(spec, meshes, rep, only)),
-                      ("retention", lambda: check_retention(spec, meshes, rep, args.quick, only)),
-                      ("assembly", None if smoke else lambda: check_assembly(spec, meshes, rep)),
-                      ("print", None if smoke else lambda: check_print(spec, meshes, rep)),
-                      ("keep-out", lambda: check_keep_out(spec, meshes, rep, only)),
-                      ("access", None if smoke else lambda: check_access(spec, meshes, rep)),
-                      ("joints", lambda: check_joints(spec, meshes, rep, only)),
-                      ("seats", lambda: check_seats(spec, meshes, rep, only)),
-                      ("keep-in", lambda: check_keep_in(spec, meshes, rep, only)),
-                      ("marks", lambda: check_marks(spec, rep, only))):
-        if fn is None:
-            continue
-        t0 = time.perf_counter()
-        fn()
-        timing.append(f"{label} {time.perf_counter() - t0:.0f} s")
-        print(f"[{timing[-1]}]", file=sys.stderr, flush=True)
+    sections = [("integrity", lambda r: check_integrity(spec, meshes, r, args.quick, only)),
+                ("motion", lambda r: check_motion(spec, meshes, r, only)),
+                ("retention", lambda r: check_retention(spec, meshes, r, args.quick, only)),
+                ("assembly", None if smoke else lambda r: check_assembly(spec, meshes, r)),
+                ("print", None if smoke else lambda r: check_print(spec, meshes, r)),
+                ("keep-out", lambda r: check_keep_out(spec, meshes, r, only)),
+                ("access", None if smoke else lambda r: check_access(spec, meshes, r)),
+                ("joints", lambda r: check_joints(spec, meshes, r, only)),
+                ("seats", lambda r: check_seats(spec, meshes, r, only)),
+                ("keep-in", lambda r: check_keep_in(spec, meshes, r, only)),
+                ("marks", lambda r: check_marks(spec, r, only))]
+    sections = [(lb, fn) for lb, fn in sections if fn is not None]
+
+    def run(names):
+        out = {}
+        for lb, fn in sections:
+            if lb not in names:
+                continue
+            r, t0 = Report(), time.perf_counter()
+            fn(r)
+            out[lb] = (r.lines, r.fails, r.warns)
+            print(f"[{lb} {time.perf_counter() - t0:.0f} s]", file=sys.stderr, flush=True)
+        return out
+
+    child = [lb for lb, _ in sections if lb in CHILD_SECTIONS] if JOBS > 1 and not smoke else []
+    res, pid, path = {}, None, None
+    if child:
+        import pickle
+        import tempfile
+        fd, path = tempfile.mkstemp(suffix=".cad_verify"); os.close(fd)
+        pid = os.fork()
+        if pid == 0:                                  # the child: its sections, pickled to `path`, then out
+            try:
+                with open(path, "wb") as f:
+                    pickle.dump(run(child), f)
+            finally:
+                os._exit(0)
+    try:
+        res.update(run([lb for lb, _ in sections if lb not in child]))
+    finally:
+        if pid:
+            os.waitpid(pid, 0)
+            import pickle
+            try:
+                with open(path, "rb") as f:
+                    res.update(pickle.load(f))
+            except (OSError, EOFError, pickle.UnpicklingError):
+                rep.fail(f"the checks run in a second process ({', '.join(child)}) did not finish: run with --jobs 1")
+            os.unlink(path)
+    for lb, _ in sections:
+        if lb in res and rep is not None:
+            lines, fails, warns = res[lb]
+            rep.lines += lines; rep.fails += fails; rep.warns += warns
 
 
 if __name__ == "__main__":

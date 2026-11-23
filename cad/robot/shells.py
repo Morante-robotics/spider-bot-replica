@@ -121,8 +121,13 @@ def fuse_all(shs):
     return out
 
 # ---- legs: one solid per leg, neutral pose (robot frame); right legs 0-3, left 4-7 their mirror
+_LF = {}
 def leg_frame(Lg, k):
-    """4x4 that carries leg Lg's neutral-pose part to crank pose k (motion.legs: V' = P + (V - P) @ R0.T @ R_k)."""
+    """4x4 that carries leg Lg's neutral-pose part to crank pose k (motion.legs: V' = P + (V - P) @ R0.T @ R_k).
+    Memoised (a copy is returned): the checks ask for it ~11 000 times and each call rebuilt the leg's shape (9 s)."""
+    if (Lg, k) not in _LF: _LF[(Lg, k)] = _leg_frame(Lg, k)
+    return _LF[(Lg, k)].copy()
+def _leg_frame(Lg, k):
     i = Lg % 4; right = Lg < 4
     P_, A0 = motion.neutral_leg(i, P, n=13)[:2]
     u0 = (P_ - A0) / np.linalg.norm(P_ - A0); R0 = motion.frame(u0[None])[0]
