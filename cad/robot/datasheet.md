@@ -17,27 +17,52 @@ under a watchdog, e.g. 100 min / 5 GB).
   the clamp plate, motor path 38 mm.
 - The viewer draws the 8 real leg STLs.
 
-**Done 2026-11-23 (afternoon, uncommitted)**
+**Done 2026-11-23 (afternoon, commit 7ad2b9b)**
 
 - Leg 4 window WR + 0.6 (`WR_EXTRA`); leg 0's front relief and bulge also follow its 30 mm down move (`PATH_RELIEF`, `path_samples`).
 - Body: the inner wall strip under the cell holder cut (`STRIP_*`): the body + switch + LEDs bench path now clears.
 - Drive unit: cheek rails notched over the transfer (`NOTCH_HW`), tongue 2 cut back to the notch edge (3.00 → 1.56 mm, Morante's choice); the transfer's bench path clears, crank 2 retention ok. The hub cannot be shortened: it is the only link between the transfer's two gears.
-- `fitcheck/check.py` switch y: `- ORIGIN[1]` added.
-- `unify()` in shells.py: base clean() left it invalid and clean() also alters its input; the base uses faces-only unify (valid, watertight STL); the keel stage is keyed on it.
-- Stage times (2 cores, cold stages): base ≈ 50 min, leg 0 bulge + relief ≈ 19 min of it; body 58 min (rim cuts 846 s, lift cuts 884 s, power 591 s, stop posts 318 s). Speed tips (clean=False etc.) measured: tenths of a second, not worth it.
+- `fitcheck/check.py` switch y: `- ORIGIN[1]`; `unify()` faces-only for the base.
 
-**Check** `cad_verify verify.py --quick` after the rebuild: **5 FAIL**:
+**Evening 2026-11-23 (uncommitted, unverified)**
 
-1. base × leg-1 gap 0.00 at pose 0 (was 0.89), also as a LEG_OPEN joint FAIL: probably leg 0's path bulge (`path=pth` on the bulge carve) grew into leg 1's sweep. Check the bulge first.
-2. leg-0 and leg-4 now pass the down move but block on move 2 (the slide along the pin) at 2.00 / 3.25 mm.
-3. ss12d00-switch: the fingertip tool still hits the body (14 mm³): the reach 30 → 15 in power_verify.py did not change it; find which ACCESS entry verify.py uses and what the tool hits.
+The 5 FAIL of `verify.py --quick` were diagnosed with probes (seconds each):
+1. base × leg-1 gap 0.00: leg 0's bulge, grown along its path, put 3.04 mm³ into leg 1's window (box 3 × 2 × 2.5 at
+   (35.0, -10.25, 16.3); `base_win` had 0 there).
+2. legs 0 / 4 block on the slide along the pin: only the base, 0.01 mm³ at (15, -24, 10–12) and < 0.005 mm³ at
+   (-28.5, -14.6, 11.2); `path_samples` covered the down move, not the slide.
+3. Switch: the body boxed it in (floor, top bar, ribs and a rigid 1.2 mm front plate): it could not go in. **Morante:
+   «Con pegamento»**: front plate removed, switch pushed in from the front and glued, like the LEDs and JST.
 
-**Next, in order**
+A cad-fixer edited `shells.py` (bulge carved for leg 1, slide samples for legs 0/4, keeper plate removed) and
+`power_verify.py` (switch in GLUED); the base was rebuilt (1669 s), the body build was stopped. Not checked: the next
+step replaces these cutters anyway (below). The switch decision stays.
 
-1. Diagnose 1–3 with probes on the built STLs (seconds each), then one cad-fixer for the three.
-2. Rebuild only the stages they touch (one heavy job, watchdog script as in this step), `--quick` with 0 FAIL.
-3. `rounds.py round cad/robot 0` and the looks judge, then Morante's «se parece».
-4. Optimizer on the stage times above (leg 0 bulge, body rim and lift cuts).
+**Speed (Morante, 2026-11-23): any build or check over 40 s is a bug; aim for 10 s.** Measured cause: the shells'
+clearances are hundreds of convex hulls of sampled leg points cut in OpenCascade (base 1669 s: leg 0 and 4 hulls,
+bulges and reliefs ≈ 22 min; body ≈ 3500 s: rim 846 s, lift 884 s, power 551 s, posts 318 s; body.step 152 MB).
+Probes (2 cores, 8 GB): the base skin builds in 6.2 s; the same skin with 10 designed cutters (a slot per leg, two
+pockets) cuts in **3.2 s** in OpenCascade; manifold3d cuts the skin with finished cutters in 0.3–0.6 s but chokes on
+the same hundreds of hulls (50–190 s); `min_gap` of 8 legs × 24 poses against the base takes 4.2 s; a band-limited
+hull shortcut failed (14–16 mm³ left at the pivot blocks).
+
+Phase 0 of the speed plan (time budget) was started and stopped half way, untested: `tools/timebudget.py` (watchdog,
+`CAD_BUDGET` default 40 s, exit 3; stage times to `out/build-times.csv`), hooks in `tools/stage_cache.py` and
+`shells.py cached()`, lazy build123d import in `cad/common.py` (`part_args` starts the watchdog).
+
+**Next, in order** (no cold base or body build before step 2: they take 30–60 min)
+
+1. Finish Phase 0: test a warm `build.py --part`, a dummy stage killed at `CAD_BUDGET=5`, `cad_verify --smoke --only
+   leg-0` unchanged plus its total time (a total over 40 s is a WARN until checks are fast); a «Time budget» paragraph
+   in `cad/README.md`. cad-fixer, Sonnet.
+2. Phase 1: the shells' clearances designed, not computed: each leg's window a slot (neck over 24 poses + slide + 0.4),
+   legs 0/4 relief a rounded box and the bulge a smooth simple shape, the body's rim and lift cuts one notch per leg,
+   the power pockets boxes (no `grow()` offsets). Sized in numpy from the measured motion, proved with `min_gap`.
+   Target: base and body ≤ 40 s each (aim 10). The windows' look changes: judge and Morante see it. cad-designer, Opus
+   (200–400k), Morante already agreed.
+3. Phase 2 only if phase 1 is over 40 s: carve in manifold3d (STL only; STEP of the shells lost: Morante decides).
+4. Phase 3: checks ≤ 40 s on light meshes (`min_gap`), `fitcheck/check.py` (19 min) and the assembly paths (44 s).
+5. Then `verify.py --quick` 0 FAIL, `rounds.py round cad/robot 0`, the looks judge, Morante's «se parece».
 
 **Known issues**
 

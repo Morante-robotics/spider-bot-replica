@@ -13,7 +13,7 @@ DRIVE = importlib.util.find_spec("drive_verify") is not None
 HW = {"ag13-cells": "6 x pila AG13 / LR44", "cell-springs": "3 x muelle conico 7 mm", "nickel-strip": "tira de niquel 0.3",
       "holder-screw": "M2x6 Allen", "ss12d00-switch": "interruptor SS12D00G3", "leds": "2 x LED 5 mm + resistencia",
       "jst-xh": "JST-XH 3 pines (pareja)"}
-GLUED = ("leds", "jst-xh")          # held by a drop of glue (Morante 2026-11-23: lax on small non-critical fits): not retention-checked
+GLUED = ("leds", "jst-xh", "ss12d00-switch")          # held by a drop of glue (Morante 2026-11-23: lax on small non-critical fits): not retention-checked
 PARTS = {"cell-holder": {"stl": "out/cell-holder.stl"}, "cell-lid": {"stl": "out/cell-lid.stl"},
          **{n: {"stl": f"out/{n}.stl", "hardware": True, "label": l, **({"fixed": True} if n in GLUED else {})} for n, l in HW.items()}}
 PAIR_GAP = {("ag13-cells", "cell-holder"): fits.STEEL.side - 0.01, ("cell-holder", "cell-springs"): fits.STEEL.side - 0.01,
@@ -26,7 +26,7 @@ RETAIN = {"cell-holder": {"spin": None, "slide": None, "play": 0.6},     # M2 th
           "cell-springs": {"spin": [0, 1, 0], "slide": None, "play": 0.6},    # between the front wall and the cells
           "nickel-strip": {"spin": None, "slide": None, "play": 0.6},    # between the cells and the back wall
           "holder-screw": {"spin": [0, 0, 1], "slide": None, "play": 0.6},   # threaded into drive block 2 / ear 2
-          "ss12d00-switch": {"spin": None, "slide": None, "play": 0.6},  # lever slot + keeper in the body (open decision)
+          "ss12d00-switch": {"spin": None, "slide": None, "play": 0.6},  # lever slot + keeper in the body; glued (Morante 2026-11-23)
           "leds": {"spin": None, "slide": None, "play": 0.6},            # dome on the bore mouth (+y keeper: open decision)
           "jst-xh": {"spin": None, "slide": None, "play": 1.0}}          # on the lid, hangs on its wires (open decision)
 ALLOWED_CONTACT = {("cell-lid", "cell-holder"): "lid plate rests on the wall tops; lips snap in the grooves (PRESS, coupon)",
@@ -54,7 +54,7 @@ ASSEMBLY = [("cell-holder", HOLDER_PATH, {"step": 10, "note": "lowered behind th
             ("cell-lid", UP, {"step": 14, "except": {"cell-holder": "the lid's snap lips flex into the holder's grooves (fits.PRESS, coupon c1)"}}),
             ("jst-xh", UP, {"step": 15}),
             ("leds", [[0, 0, 10.0], [0, -12.0, 0]], {"step": 16, "bench": ["body"], "note": "bench: into the body's eye bores from inside, before the body goes on"}),
-            ("ss12d00-switch", [0, -1, 0], {"step": 17, "except": {"body": "the switch body snaps over the pocket's keeper (fits.PRESS, coupon c1)"}, "bench": ["body"], "note": "bench: lever out the back, its keeper in the body, before the body goes on"})]
+            ("ss12d00-switch", [0, -1, 0], {"step": 17, "bench": ["body"], "note": "bench: lever out the back, in from the front against the keeper, a drop of glue (Morante 2026-11-23), before the body goes on"})]
 ACCESS = [{"at": "holder-screw", "tool": tool("hex-key", [0, PW.HSYY, PW.BZ + PW.M2_HEAD_H], UP), "why": "1.5 mm hex key from above, clamp empty"},
           {"at": "nickel-strip", "tool": tool("finger", [0, PW.YBI - fits.STEEL.side - PW.STRIP_T / 2, PW.ZT - 0.25], UP, d=1.0, reach=30.0), "why": "tweezers tip (Ø1) on the strip's top edge, down into its slot"},
           {"at": "cell-springs", "tool": tool("finger", [0, PW.YFI + fits.STEEL.side + 3.0, PW.CZ + PW.SPR_R0], UP, d=3.0, reach=30.0), "why": "fingertip (Ø3) on the middle spring, pressed against the front wall"},

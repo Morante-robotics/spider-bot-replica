@@ -77,10 +77,11 @@ archived in [Legs and drive](build-log/3-legs-and-drive.md).
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| N2 r00, one cad-fixer: widen the window cutters of legs 0 and 4, trim the body wall strip, shorten the switch finger, fix the bench path ([state](cad/robot/datasheet.md#state-2026-11-23)) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
-| One rebuild of base then body (≈ 70 min, one heavy job at a time under a watchdog), then `verify.py --quick` must give 0 FAIL | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
-| `rounds.py round cad/robot 0` and the looks judge, then Morante's «se parece» | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
-| Fix `fitcheck/check.py` (misses `- ORIGIN[1]` for the battery box) and test the leg snap's engagement on a coupon ([state](cad/robot/datasheet.md#state-2026-11-23)) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
+| Speed, phase 0: finish and test the time budget (`tools/timebudget.py`, 40 s, started, untested) ([state](cad/robot/datasheet.md#state-2026-11-23)) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
+| Speed, phase 1: base and body clearances as designed simple shapes, each shell ≤ 40 s (today 28 and 58 min) ([state](cad/robot/datasheet.md#state-2026-11-23)) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
+| Speed, phase 3: checks ≤ 40 s (`fitcheck/check.py` 19 min, assembly paths 44 s) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
+| Then `verify.py --quick` 0 FAIL (legs 0/1/4 and the glued switch), `rounds.py round cad/robot 0`, the looks judge and Morante's «se parece» | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
+| Test the leg snap's engagement on a coupon ([state](cad/robot/datasheet.md#state-2026-11-23)) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
 | Update the r00 entry when r00 closes | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
 | Body: the curved top panels and the chin grille, if Morante wants them later (a build takes 60–80 s) | [Meshes become parameters](build-log/4-looks-first.md#meshes-become-parameters) | 3 |
 | Buy the N10 motor (3 V, ≈ 100–150 rpm) and 6 × AG13 cells and measure the motor (body, shaft, mounting); sizing: [`sizing.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/mockup/sizing.py) | [Redesign: looks first](build-log/4-looks-first.md#redesign-looks-first) | 3 |

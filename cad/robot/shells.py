@@ -11,11 +11,11 @@ imported, never copied:
          printed pin, wall 1.2, tail TAIL 0.7) and the root ball r_root at the pivot
 Robot frame, mm. Legs are written in their neutral pose (verify.py carries them per pose as motion.legs does).
 """
-import os, sys, math, hashlib, pickle
+import os, sys, math, hashlib, pickle, time
 import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-for p in (ROOT, ROOT + "/cad", HERE + "/fitcheck"):
+for p in (ROOT, ROOT + "/cad", HERE + "/fitcheck", ROOT + "/tools"):
     if p not in sys.path: sys.path.insert(0, p)
 from build123d import (Shape, Box, Cylinder, Sphere, Pos, Rot, Solid, Shell, Face, Wire, Compound, Vector, Align,
                        export_step, export_stl, import_brep, export_brep)
@@ -25,6 +25,7 @@ from OCP.gp import gp_Trsf, gp_Vec, gp_Ax2, gp_Pnt, gp_Dir
 from scipy.spatial import ConvexHull, cKDTree
 import fit_env as FE                    # S, P (motion lengths x S/0.60), PIV, A_ALL (cranks 2/3 D23 patch), inside()
 from cad import design, fits as F
+import timebudget as _tb
 motion = FE.motion
 class _Layout:
     """the fit check's numbers, read from check.py's source (importing it would run the 8-minute check): LAYOUT
@@ -151,8 +152,12 @@ def hull_solid(pts, r=0.0):
 def cached(name, key, fn):
     """BREP cache in out/.cache, keyed by a hash of key (inputs and parameters)."""
     h = khash(key); p = os.path.join(CACHE, f"{name}_{h}.brep"); H[name] = h
-    if os.path.exists(p): return import_brep(p)
-    sh = fn(); export_brep(sh, p); return sh
+    t = time.time()
+    if os.path.exists(p):
+        sh = import_brep(p); _tb.log(name, time.time() - t, False); return sh
+    _tb.start()
+    with _tb.stage(name): sh = fn()
+    export_brep(sh, p); _tb.log(name, time.time() - t, True); return sh
 H = {}                                   # name -> hash of the last key a stage was cached under (the next stage chains on it)
 def stamp(*rel): return [int(os.path.getmtime(os.path.join(ROOT, r))) for r in rel]
 def srch(*fns):
@@ -263,11 +268,13 @@ def LP(Lg, k):
 
 # ---- sweep cutters (hulls of the legs' samples, chunked along the leg and over 3 poses each)
 PATH_DROP = 30.0                         # verify.py LEG_DROP: the leg is lowered this far beside its pin, then slid in by LSL
-PATH_RELIEF = {0: True}                  # legs whose front relief also clears the assembly path's down move (leg 4 clears without)
+PATH_RELIEF = {0: True, 4: True}         # legs whose front relief also clears the assembly path (down move + slide along -u)
 def path_samples(Lg, k=0, step=1.0):
     """leg Lg's samples (crank pose k, the bench placement) along the down move of its assembly path: LSL outboard, 0..PATH_DROP above."""
     u = PIV[Lg] - A_ALL[Lg, 0]; u /= np.linalg.norm(u); q = LP(Lg, k) + u * CL.LSL
-    return [q + [0, 0, t] for t in np.arange(0, PATH_DROP + 0.01, step)]
+    down = [q + [0, 0, t] for t in np.arange(0, PATH_DROP + 0.01, step)]
+    slide = [LP(Lg, k) + u * s for s in np.arange(0, CL.LSL, step)]       # move 2: slid along -u from LSL outboard to the pin (z 0)
+    return down + slide
 def sweep_hulls(near, r, legs=range(8), poses=range(24), group=3, cell=3.0, rn=None, lift=0.0, planes=False, reach=None, path=False):
     """convex hulls (grown by r) covering the legs' sweep where it comes within r + 1 of the samples `near`.
     rn: only samples within rn of the pivot (window neck); lift: also slide the samples down by lift (body lift-off).
@@ -371,7 +378,6 @@ def finger_root(fing):
     return fing.fuse(plate, block).clean()
 _T0 = [0.0]
 def tick(msg):
-    import time
     t = time.time(); print(f"    [base] {msg}: {t - _T0[0]:.1f} s", flush=True); _T0[0] = t
 def fuse_one(shs):
     """one solid from overlapping solids (a single multi-argument fuse)."""
@@ -481,7 +487,7 @@ def _base():
     near = dense(b)                                             # front leg windows: pocket RELD from the front arms' sweep
     def relief_tools(Lg):
         """leg Lg's relief pocket solid and outward bulge solid (hull cell RCELL), each cached by its inputs."""
-        kk = key0 + ("relief", Lg, RCELL, RELD, BA.WALL * S, H["base_win"], PATH_RELIEF.get(Lg, False), PATH_DROP)
+        kk = key0 + ("relief", Lg, RCELL, RELD, BA.WALL * S, H["base_win"], PATH_RELIEF.get(Lg, False), PATH_DROP, "slide")
         pth = PATH_RELIEF.get(Lg, False)
         def mk():
             rel = sweep_hulls(near, RELD, legs=(Lg,), planes=True, cell=RCELL, reach=RELD + BA.WALL * S + 1.0, path=pth)   # same samples as the bulge's hulls:
@@ -501,8 +507,11 @@ def _base():
             # not within reach of the wall) is inside it too (smoke: 459 leg-0 samples at pose 0). Carve it with the sweep of
             # every leg sample within RELD + 1 of the bulge itself: it keeps RELD from the leg, like the relief.
             b0 = gs - (outer & bx); nb = dense(b0)
-            return b0 - tree_fuse(sweep_hulls(nb, RELD, legs=(Lg,), planes=True, cell=RCELL, path=pth))
-        bulge = cached(f"relb{Lg}", kk + ("bulge2",), bulge_fn); tick(f"leg {Lg} bulge")
+            b0 = b0 - tree_fuse(sweep_hulls(nb, RELD, legs=(Lg,), planes=True, cell=RCELL, path=pth))
+            # the bulge must not grow into a neighbour leg's window (base x leg 1 gap 0.00, 3 mm3 at (35,-10,16)): re-cut every other window
+            bb = b0.bounding_box(); nbw = [wins[j] for j in range(8) if j != Lg and _boxes_touch(wins[j].bounding_box(), bb)]
+            return (b0 - tree_fuse(nbw)) if nbw else b0
+        bulge = cached(f"relb{Lg}", kk + ("bulge3",), bulge_fn); tick(f"leg {Lg} bulge")
         return rs, gs, bulge
     def relief_stage():
         c = b
@@ -521,6 +530,9 @@ def _base():
         print(f"    [base] pivot box leg {i}: {pv[i]:.1f}  leg {i + 4}: {pv[i + 4]:.1f} mm3  diff {100 * d:.2f} %{'  WARN > 1 %' if d > 0.01 else ''}", flush=True)
     print(f"    [base] volume {pvol(b):.1f} mm3, valid, 1 solid", flush=True)
     return b
+def _boxes_touch(a, b, m=0.5):
+    A0, A1, B0, B1 = tuple(a.min), tuple(a.max), tuple(b.min), tuple(b.max)
+    return all(A0[i] - m <= B1[i] and B0[i] - m <= A1[i] for i in range(3))
 def fuse_cut(P, cuts, add=None):
     """P (+ add = (solid, label)), minus each of cuts in turn ((solid, label)), every op with its volume invariant."""
     if add is not None: P = checked("fuse", P, add[0], add[1], touch=False)
@@ -715,8 +727,7 @@ def _body():
         slot = Pos(-(lx / 2 + SW_THROW / 2 + st), y1 - 0.5, zs - lz / 2 - st) * Box(lx + SW_THROW + 2 * st, SW_SLOT_Y, lz + 2 * st, align=MIN)
         ops.append(("cut", slot, "switch lever slot", True))
         yk = y1 - by - st; xk = bx / 2 + st; zb, zt = zs - bz / 2, zs + bz / 2 + st; yr = y1 + SW_KEEP_REACH
-        keeper = [Pos(-xk - W_KEEP, yk - W_KEEP, zb) * Box(2 * (xk + W_KEEP), W_KEEP, zt + W_KEEP - zb, align=MIN),        # plate behind the switch
-                  Pos(-xk - W_KEEP, yk - W_KEEP, zt) * Box(2 * (xk + W_KEEP), yr - yk + W_KEEP, W_KEEP, align=MIN)]          # top bar to the wall
+        keeper = [Pos(-xk - W_KEEP, yk - W_KEEP, zt) * Box(2 * (xk + W_KEEP), yr - yk + W_KEEP, W_KEEP, align=MIN)]          # top bar to the wall (no plate behind the switch: it goes in from the front, glued; Morante 2026-11-23)
         for sx in (-1, 1): keeper.append(Pos(sx * (xk + W_KEEP / 2) - W_KEEP / 2, yk - W_KEEP, zb) * Box(W_KEEP, yr - yk + W_KEEP, zt - zb, align=MIN))   # side ribs
         ops.append(("fuse", fuse_one(keeper), "switch keeper", True))
         for nm, part, r in (("holder", PW.holder(), F.LOCATOR.side), ("lid", PW.lid(), F.LOCATOR.side), ("cells", PW.cells(), F.LOCATOR.side),

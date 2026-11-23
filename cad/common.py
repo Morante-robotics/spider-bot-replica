@@ -10,7 +10,7 @@ import os
 import sys
 
 import numpy as np
-from build123d import Box, Cylinder, Plane, Polygon, Pos, Sphere, export_step, export_stl, extrude, mirror
+# build123d is imported inside the helpers that use it (a check that never builds does not pay its ~3.6 s import)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SIM = os.path.join(HERE, "..", "sim")
@@ -47,6 +47,7 @@ def unit(v):
 
 def bar(a, b, w, h, wdir):
     """Box from point a to b (local coordinates), w across along wdir, h in the remaining direction."""
+    from build123d import Box, Plane
     a, b = np.asarray(a, float), np.asarray(b, float)
     d = unit(b - a)
     wd = unit(np.asarray(wdir, float) - np.dot(wdir, d) * d)
@@ -57,6 +58,7 @@ def bar(a, b, w, h, wdir):
 
 def cyl(c, axis, r, length):
     """Cylinder centred on c along axis."""
+    from build123d import Cylinder, Plane
     ax = unit(axis)
     x = unit(np.cross(ax, [0, 0, 1]) if abs(ax[2]) < 0.9 else np.cross(ax, [1, 0, 0]))
     return Plane(origin=tuple(np.asarray(c, float)), x_dir=tuple(x), z_dir=tuple(ax)).location * Cylinder(r, length)
@@ -64,6 +66,7 @@ def cyl(c, axis, r, length):
 
 def hexagon(af, h, corner_dir):
     """Hexagonal prism (nut pocket) across flats af, height h (z from 0), with a corner pointing along corner_dir (2D)."""
+    from build123d import Polygon, extrude
     a0 = np.arctan2(corner_dir[1], corner_dir[0])
     r = af / np.sqrt(3)
     pts = [(r * np.cos(a0 + j * np.pi / 3), r * np.sin(a0 + j * np.pi / 3)) for j in range(6)]
@@ -78,6 +81,7 @@ def dice(n, pitch=1.3):
 
 def marks(n, x, yc, zc, sx=1):
     """Index dots (dice face n) sunk into a face at x whose outward normal is sx·X, centred on (yc, zc)."""
+    from build123d import Pos, Sphere
     out = None
     for u, v in dice(n):
         s = Pos(x, yc + u, zc + v) * Sphere(MARK_D / 2 + 0.1)
@@ -89,6 +93,7 @@ def marks(n, x, yc, zc, sx=1):
 # --- placement ----------------------------------------------------------------------------------------------------
 def place(shape, R, t):
     """Shape moved by rotation matrix R (right-handed) and translation t."""
+    from build123d import Plane
     pl = Plane(origin=tuple(t), x_dir=tuple(R[:, 0]), z_dir=tuple(R[:, 2]))
     return pl.location * shape
 
@@ -104,6 +109,7 @@ def rot_z(a):
 
 
 def mirror_x(shape):
+    from build123d import Plane, mirror
     return mirror(shape, Plane(origin=(CX, 0, 0), z_dir=(1, 0, 0)))
 
 
@@ -131,6 +137,7 @@ STL_TOL = {True: (0.02, 0.15), False: (0.05, 0.3)}
 
 def export(name, p, out, fine=None):
     """STEP (Onshape) and STL (printing) of part p into folder out, and its size."""
+    from build123d import export_step, export_stl
     fine = FINE if fine is None else fine
     os.makedirs(out, exist_ok=True)
     export_step(p, os.path.join(out, f"{name}.step"))
@@ -158,5 +165,7 @@ def part_args(doc, parts, extra=None):
         extra(ap)
     args = ap.parse_args()
     global FINE
+    sys.path.insert(0, os.path.join(HERE, "..", "tools"))
+    import timebudget; timebudget.start()
     FINE = FINE or args.fine
     return args

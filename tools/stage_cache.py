@@ -19,12 +19,19 @@ import hashlib
 import inspect
 import os
 import pickle
+import sys
 import time
 import types
 
 import numpy as np
 import trimesh
 from shapely.geometry.base import BaseGeometry
+
+try:
+    import timebudget as _tb
+except ImportError:                                          # tools/ not on sys.path: no time budget
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import timebudget as _tb
 
 _SIMPLE = (int, float, str, bool, type(None), complex, bytes)
 
@@ -176,14 +183,18 @@ class Stages:
             with open(path, "rb") as f:
                 out = _unpack(pickle.load(f))
             self.log.append((name, time.time() - t, True))
+            _tb.log(name, time.time() - t, False)
             return out
-        out = fn(*args)
+        _tb.start()
+        with _tb.stage(name):
+            out = fn(*args)
         with open(path + ".tmp", "wb") as f:
             pickle.dump(_pack(out), f, protocol=pickle.HIGHEST_PROTOCOL)
         os.replace(path + ".tmp", path)
         # results are re-read as arrays: return the same arrays the cache holds, so a cold and a warm run agree
         out = _unpack(_pack(out))
         self.log.append((name, time.time() - t, False))
+        _tb.log(name, time.time() - t, True)
         return out
 
     def prune(self, keep_last=4):
