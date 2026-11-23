@@ -33,7 +33,7 @@ RETAIN = {"body": {"spin": None, "slide": None, "play": 0.6},          # two fro
           **{n: {"spin": None, "slide": None, "play": 1.0} for n in LEGS}}   # pin (interior) + window + body rim
 ALLOWED_CONTACT = {("body", "base"): "body rim seated on the base ledge; snap hooks under the front ribs (fits.PRESS, coupon c1)"}
 JOINTS = {("body", "base"): {"fit": fits.PRESS, "why": "front snap fingers under the ribs and rear tab (plan body-front-snaps, body-rear-tab)"},
-          **{(n, "base"): {"fit": fits.LEG_PATH, "why": "leg neck in its open-top window (plan leg-path)"} for n in LEGS}}
+          **{(n, "base"): {"fit": fits.LEG_OPEN, "why": "leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)"} for n in LEGS}}
 ASSEMBLY = [("base", None)] + [(n, [0, 0, 1]) for n in LEGS] + [("body", [0, 0, 1])]
 ACCESS = [{"at": "body", "tool": tool("finger", [0, 0, 40], [0, 0, 1]), "why": "pressed down by hand: two front clicks"}]
 PRINT_ORIENT = {"base": np.eye(4),                                # foot down
@@ -47,7 +47,13 @@ if IV is not None:
     for nm in ("RETAIN", "JOINTS", "MARKS", "PRINT_ORIENT", "ALLOWED_CONTACT"):
         globals()[nm].update(getattr(IV, nm, {}))
     LABELS["es"].update(getattr(IV, "LABELS", {}).get("es", {}))
+    GEARS = list(getattr(IV, "GEARS", []))
+    if getattr(IV, "PAIR_GAP", None): PAIR_GAP = dict(IV.PAIR_GAP)
+    if getattr(IV, "KEEP_OUT", None): KEEP_OUT = dict(IV.KEEP_OUT)
     MEASURE += getattr(IV, "MEASURE", [])
     ACCESS += getattr(IV, "ACCESS", [])
     ia = [s for s in getattr(IV, "ASSEMBLY", []) if s[0] != "base"]
-    ASSEMBLY = [ASSEMBLY[0]] + ia[:0] + ia + ASSEMBLY[1:]      # interior first (plan steps 2-7), then legs, body last
+    _st = lambda e: (e[2] if len(e) > 2 else {}).get("step", 99)
+    _cut = getattr(IV, "LEGS_AFTER_STEP", 99)
+    ASSEMBLY = ([ASSEMBLY[0]] + [s for s in ia if _st(s) <= _cut] + ASSEMBLY[1:-1]   # interior to step 9, then legs
+                + [s for s in ia if _st(s) > _cut] + ASSEMBLY[-1:])                  # holder, motor…, body last

@@ -55,6 +55,7 @@ SNX, SNW, SNT, SNZ, RIBD, SNG = CL.SNX, CL.SNW, CL.SNT, CL.SNZ, CL.RIBD, CL.SNG
 PINR = CL.PINR                          # printed crank pin r (Ø3)
 END_R = PINR + F.TURN.side + CL.W       # leg end tube: bore TURN over the pin, wall W 1.2
 TAIL, HUBCUT = CL.TAIL, CL.HUBCUT       # tail past the pin (m21), real arm kept from HUBCUT past the pin
+KEEL_BOSS_R = 3.0                       # keel boss radius: counterbore (M2 head 1.9 + STEEL) + 0.95 of wall
 PB = P["r_root"]                        # root ball radius at the pivot
 RIMR = (BO.Z_RIM - ORIGIN[2]) * S       # body rim height, robot
 def pin_swing(i):
@@ -127,10 +128,16 @@ def hull_solid(pts, r=0.0):
     return Solid(Shell(faces))
 def cached(name, key, fn):
     """BREP cache in out/.cache, keyed by a hash of key (inputs and parameters)."""
-    h = hashlib.sha1(pickle.dumps(key)).hexdigest()[:12]; p = os.path.join(CACHE, f"{name}_{h}.brep")
+    h = khash(key); p = os.path.join(CACHE, f"{name}_{h}.brep"); H[name] = h
     if os.path.exists(p): return import_brep(p)
     sh = fn(); export_brep(sh, p); return sh
+H = {}                                   # name -> hash of the last key a stage was cached under (the next stage chains on it)
 def stamp(*rel): return [int(os.path.getmtime(os.path.join(ROOT, r))) for r in rel]
+def srch(*fns):
+    """short hash of the source of the functions a stage calls: an edit to another function leaves the stage's cache warm."""
+    import inspect
+    return hashlib.sha1("".join(inspect.getsource(f) for f in fns).encode()).hexdigest()[:10]
+def khash(key): return hashlib.sha1(pickle.dumps(key)).hexdigest()[:12]
 def fuse_all(shs):
     out = shs[0]
     for s in shs[1:]: out = out.fuse(s)
@@ -170,8 +177,8 @@ def _leg_right(i):
         c2 = Pos(xm, A0[1], A0[2]) * Rot(0, 90, 0) * Cone(r, r + (x1 - xm) * math.tan(th), x1 - xm, align=(Align.CENTER, Align.CENTER, Align.MIN))
         return c1 + c2
     tube = dcone(END_R)
-    bore = Pos(-0.01, 0, 0) * dcone(PINR + F.TURN.side)
-    bore = bore + Pos(0.02, 0, 0) * dcone(PINR + F.TURN.side)
+    bore = Pos(-0.01, 0, 0) * dcone(PINR + F.TURN.side + BORE_DRIFT[i])
+    bore = bore + Pos(0.02, 0, 0) * dcone(PINR + F.TURN.side + BORE_DRIFT[i])
     joint = _along(Cylinder(P["r_inner"], HUBCUT - 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN)), A0 + 1.5 * u, u)
     ball = Pos(*P_) * Sphere(PB)
     leg = fuse_all([blade, arm, tube, joint, ball]) - bore
@@ -186,11 +193,21 @@ def _along(sh, p0, u):
     return Pos(*p0) * sh
 def leg(Lg):
     i = Lg % 4
-    key = ("leg3", i, FLARE_DEG[i], CL.PINX, S, HUBCUT, TAIL, END_R, PB, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C)
+    key = ("leg4", i, FLARE_DEG[i], BORE_DRIFT[i], CL.PINX, S, HUBCUT, TAIL, END_R, PB, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C,
+           srch(_leg_right, _along))
     sh = cached(f"leg{i}", key, lambda: _leg_right(i))
     return sh if Lg < 4 else mirror_x(sh)
 
 FLARE_DEG = [round(pin_swing(i) + 1.0, 1) for i in range(4)]
+def bore_drift(i):
+    """worst offset (mm, across the pin axis x) between the pin centre A_k and the bore axis the rigid leg carries over the 24
+    poses: leg_frame keeps the pivot P fixed while |P - A| changes by SL, so the neutral A0 lands off the pin (smoke 2026-11-23:
+    gaps 0.08 / 0.14 / 0.19 against TURN 0.25). The bore is widened by it: a loose leg on its pin is fine in this toy."""
+    P_, A0 = motion.neutral_leg(i, P, n=13)[:2]; A0 = np.asarray(A0, float); w = 0.0
+    for k in range(24):
+        d = (leg_frame(i, k) @ np.r_[A0, 1.0])[:3] - A_ALL[i, k]; w = max(w, float(np.hypot(d[1], d[2])))
+    return round(w + 0.01, 2)
+BORE_DRIFT = [bore_drift(i) for i in range(4)]
 
 _LV = {}
 def leg_points(Lg, k, edge=0.8):
@@ -309,11 +326,13 @@ def tree_fuse(shs):
     return shs[0]
 def leg_window(Lg):
     """leg Lg's window cutter as one solid (its 8 hulls fused), cached by its inputs."""
-    key = ("win", Lg, S, RN, WR, CL.LSL, _K, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py", "cad/robot/shells.py"))
+    key = ("win", Lg, S, RN, WR, CL.LSL, _K, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py"),
+           srch(window_cutter, plane_solid, plane_data, _fib, leg_points, leg_frame, fuse_one))
     return cached(f"win{Lg}", key, lambda: fuse_one(window_cutter(Lg)))
 def leg_ring(Lg):
     """leg Lg's pad ring (its window cutter's support polytope grown 1.5), cached by its inputs."""
-    key = ("ring", Lg, S, RN, WR, CL.LSL, _K, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py", "cad/robot/shells.py"))
+    key = ("ring", Lg, S, RN, WR, CL.LSL, _K, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py"),
+           srch(window_cutter, plane_solid, plane_data, _fib, leg_points, leg_frame, fuse_one, samples))
     return cached(f"ring{Lg}", key, lambda: plane_solid(samples(leg_window(Lg)), 1.5))
 def local_box(tools, m=10.0):
     """axis box round the union bbox of tools, m mm wider on every side (fully contains the tools)."""
@@ -375,7 +394,9 @@ def local_op(b, tools, fn, m=10.0):
     raise AssertionError(f"local_op: {len(ss)} solids, valid {out.is_valid}, volume {pvol(out):.1f} vs {want:.1f}")
 def _base():
     import time; _T0[0] = time.time()
-    key0 = ("base", S, WALL_PAD, RN, WR, RELD, PKT, SNX, SNW, SNZ, RIBD, CL.LSL, _K, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py", "cad/robot/shells.py"))
+    key0 = ("base", S, WALL_PAD, RN, WR, RELD, PKT, SNX, SNW, SNZ, RIBD, CL.LSL, _K, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py"),
+            srch(to_robot, checked, _bool, local_box, pvol, fuse_cut, one, back_pocket, snap_geometry, tree_fuse, dense, sweep_hulls, plane_solid, plane_data, _fib,
+                 leg_points, leg_frame, window_cutter, leg_window, leg_ring, samples, fuse_one, _close, cut_many))
     b = to_robot(BA.build(1.0)); tick("base skin + cuts")
     wins = [leg_window(Lg) for Lg in range(8)]; tick("8 window cutters (cached per leg)")
     rings = [leg_ring(Lg) for Lg in range(8)]; tick("8 pad rings (cached per leg)")
@@ -390,18 +411,18 @@ def _base():
         cut, add = back_pocket(None); c = checked("fuse", c, add, "pocket add", touch=False); c = checked("cut", c, cut, "pocket cut")
         for n, (rib, _, _) in enumerate(snap_geometry()): c = checked("fuse", c, rib, f"snap rib {n}", touch=False)
         tick("back pocket + snap ribs"); return one(c)
-    b = cached("base_pads", key0 + ("pads",), pads_stage)
+    b = cached("base_pads", key0 + ("pads", srch(pads_stage), H["win0"], H["ring0"]), pads_stage)
     def win_stage():
         c = b
         for side in (range(0, 4), range(4, 8)):         # checked() cuts each on its own local piece; a local_op round it
             c = fuse_cut(c, [(wins[Lg], f"window leg {Lg}") for Lg in side])   # nested two local pieces and gave an inside-out one
             tick(f"4 window cuts, side {side[0]}-{side[-1]}")
         return c
-    b = cached("base_win", key0 + ("win",), win_stage)
+    b = cached("base_win", key0 + ("win", srch(win_stage), H["base_pads"]), win_stage)
     near = dense(b)                                             # front leg windows: pocket RELD from the front arms' sweep
     def relief_tools(Lg):
         """leg Lg's relief pocket solid and outward bulge solid (hull cell RCELL), each cached by its inputs."""
-        kk = key0 + ("relief", Lg, RCELL, RELD, BA.WALL * S)
+        kk = key0 + ("relief", Lg, RCELL, RELD, BA.WALL * S, H["base_win"])
         def mk():
             rel = sweep_hulls(near, RELD, legs=(Lg,), planes=True, cell=RCELL, reach=RELD + BA.WALL * S + 1.0)   # same samples as the bulge's hulls:
             # a leg sample inside the bulge but > RELD + 1 from the wall was left in it (relief cut 41 mm3, bulge 268 mm3 round the leg)
@@ -429,7 +450,7 @@ def _base():
             rs, gs, bulge = relief_tools(Lg)
             c = fuse_cut(c, [(rs, f"relief leg {Lg}")], add=(bulge, f"bulge leg {Lg}")); tick(f"leg {Lg} bulge + relief (local)")
         return c
-    b = cached("base_relief", key0 + ("relief", _K), relief_stage)
+    b = cached("base_relief", key0 + ("relief", _K, srch(relief_stage, relief_tools), H["base_win"]), relief_stage)
     b = one(b); ss = b.solids()
     assert len(ss) == 1 and b.is_valid and pvol(b) > 0, f"base: {len(ss)} solids, valid {b.is_valid}, volume {pvol(b)}"
     pv = []
@@ -446,12 +467,68 @@ def fuse_cut(P, cuts, add=None):
     for t, lab in cuts: P = checked("cut", P, t, lab)
     return P
 def base():
-    key = ("base", S, WALL_PAD, RN, WR, RELD, PKT, SNX, SNW, SNZ, RIBD, CL.LSL, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py", "cad/robot/shells.py"))
+    key = ("base", S, WALL_PAD, RN, WR, RELD, PKT, SNX, SNW, SNZ, RIBD, CL.LSL, stamp("cad/base/build.py", "cad/legs/build.py", "cad/motion.py"), srch(_base),
+           srch(to_robot, checked, _bool, local_box, pvol, fuse_cut, one, back_pocket, snap_geometry, tree_fuse, dense, sweep_hulls, plane_solid, plane_data, leg_window, leg_ring))
     # the booleans leave coplanar fragments that touch along a line (28 non-manifold STL edges); unifying same-domain faces
     # merges them (volume unchanged, 1 valid solid) and the STL exports watertight. Outside the cache so the stages stay valid.
     b = one(cached("base", key, _base).clean())
     assert b.is_valid and len(b.solids()) == 1, "base: clean() left it invalid"
+    def keel_stage():
+        """the keel's two M2 bosses (drive.py KEEL_SCREWS): a boss from the floor up to ZKEEL0 round each screw, the head's
+        counterbore (STEEL a side) from the foot up to the head's bearing face, the shank's STEEL hole above it. After the
+        clean(): clean() of a base with the bosses in it left an invalid shape (volume 18751 mm3)."""
+        import drive as DR
+        zf = b.bounding_box().min.Z; c = b; cyl = lambda x, y, r, z0, z1: Pos(x, y, z0) * Cylinder(r, z1 - z0, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        for n, (x, y, zh, ln) in enumerate(DR.KEEL_SCREWS):
+            c = checked("fuse", c, cyl(x, y, KEEL_BOSS_R, zf + DR.BASE_FLOOR * 0.5, DR.ZKEEL0), f"keel boss {n}", touch=True)
+        for n, (x, y, zh, ln) in enumerate(DR.KEEL_SCREWS):
+            c = checked("cut", c, cyl(x, y, DR.M2_HEAD_R + F.STEEL.side, zf - 1.0, zf + zh), f"keel counterbore {n}")
+            c = checked("cut", c, cyl(x, y, DR.M2_HOLE_R, zf + zh - 0.5, DR.ZKEEL0 + 1.0), f"keel hole {n}")
+        return c
+    import drive as _DR
+    b = one(cached("base_keel", ("base_keel", H["base"], srch(keel_stage, checked, _bool, local_box, pvol), KEEL_BOSS_R, _DR.KEEL_SCREWS, _DR.ZKEEL0, _DR.M2_HEAD_R,
+                                 _DR.M2_HOLE_R, _DR.BASE_FLOOR), keel_stage))
+    assert b.is_valid and len(b.solids()) == 1, "base: keel bosses left it invalid"
     return b
+
+# ---- leg x-stop: a post from the body wall that stops the leg sliding off its pin (plan leg-on-pin "-x window": the window is slid
+# LSL along u for assembly, so it does not hold x). Found per right leg (left = mirror) from the leg's own samples.
+XS_RP = 0.4                              # post radius (Ø0.8: two lines)
+XS_EMB = 0.8                             # mm the post goes into the wall
+XS_HIT = 0.9                             # the leg may move this far in its sliding direction before the post stops it (< 1 mm)
+XS_GRID = 0.25
+XS_NCAND, XS_REACH = 1500, 10.0           # candidate free ends tried (nearest the wall first) and the wall reach for the post's other end
+def xstop_post(Lg, near):
+    """(a, b) end points of leg Lg's stop post (Lg 0..3, sliding +x): a free end in the +x shadow of the leg's neutral pose,
+    b inside the wall. The post keeps LEG_PATH (+ its radius) from the leg over the 24 poses and from every other leg, and
+    NEIGHBOUR from the leg at the lift pose KC slid down by LIFTD (the body lifts off over the posts). None if no post fits."""
+    import trimesh
+    P_ = PIV[Lg]; sh = leg(Lg); V, Fc = sh.tessellate(0.1, 0.3); V = np.array([[v.X, v.Y, v.Z] for v in V])
+    T = leg_frame(Lg, 0); m0 = trimesh.Trimesh(V @ T[:3, :3].T + T[:3, 3], np.array(Fc))
+    c24 = cKDTree(np.vstack([leg_points(Lg, k, edge=0.4) for k in range(24)]))
+    q = leg_points(Lg, KC, edge=0.4); lift = cKDTree(np.vstack([q - [0, 0, t] for t in np.arange(0, CL.LIFTD + 0.01, 0.5)]))
+    oth = cKDTree(np.vstack([leg_points(L, k, edge=0.8) for L in range(8) if L != Lg for k in range(0, 24, 2)]))
+    q0 = leg_points(Lg, 0, edge=0.3); rl = F.NEIGHBOUR.side + 0.1; lp = F.LEG_PATH.side
+    g = np.arange(-9, 9.01, XS_GRID); X, Y, Z = np.meshgrid(g, g, g, indexing="ij"); pts = np.c_[X.ravel(), Y.ravel(), Z.ravel()] + P_
+    d24 = c24.query(pts)[0]; pts = pts[d24 >= lp + XS_RP + 0.02]
+    sh_ = np.zeros(len(pts), bool)
+    for t in (0.6, 0.8, 1.0, 1.2): sh_ |= m0.contains(pts - [t, 0, 0])
+    R = pts[sh_]; R = R[(lift.query(R)[0] >= rl + XS_RP) & (oth.query(R)[0] >= lp + XS_RP)]
+    kn = cKDTree(near); dw = kn.query(R)[0]; order = np.argsort(dw)
+    for i in order[:XS_NCAND]:
+        a = R[i]
+        for j in kn.query_ball_point(a, XS_REACH)[::7][:60]:
+            w = near[j]; dr = (w - a) / np.linalg.norm(w - a); b = w + XS_EMB * dr; path = a + np.linspace(0, 1, 16)[:, None] * (b - a)
+            if (c24.query(path)[0] < lp + XS_RP).any() or (lift.query(path)[0] < rl + XS_RP).any() or (oth.query(path)[0] < lp + XS_RP).any(): continue
+            ab = b - a; hit = None
+            for t in np.arange(0, 3.01, 0.05):
+                pp = q0 + [t, 0, 0]; u_ = np.clip(((pp - a) @ ab) / (ab @ ab), 0, 1)
+                if np.linalg.norm(pp - (a + u_[:, None] * ab), axis=1).min() < XS_RP: hit = t; break
+            if hit is not None and hit <= XS_HIT: return a, b, hit
+    return None
+def post_solid(a, b, r=XS_RP):
+    a, b = np.asarray(a, float), np.asarray(b, float); L = np.linalg.norm(b - a)
+    return one(_along(Cylinder(r, L, align=(Align.CENTER, Align.CENTER, Align.MIN)), a, (b - a) / L).fuse(Pos(*a) * Sphere(r)).clean())
 
 # ---- body
 EYES = [(BO.CX - BO.EYE_DX, -50.0, BO.EYE_Z, "eye"), (BO.CX + BO.EYE_DX, -50.0, BO.EYE_Z, "eye"),     # x, back y, z
@@ -467,9 +544,33 @@ def eye_cups():
         cups.append(Pos(x, yb - L, z) * c)
     cups.append(EY.build("sensor"))
     return cups
+LED_R = 2.5                                  # 5 mm LED (datasheet: Ø5 body, flange Ø5.8 x 1): the bore is LED_R + TURN a side, the floor's back face stops the flange
+SW_THROW = 1.5                               # SS12D00 lever travel between positions: 1.5 mm (the usual SS12D00 pitch; hardware.md gives no figure)
+SW_SLOT_Y = 12.0                             # lever slot length along y (through the back wall)
+SW_KEEP_REACH = 0.0                          # keeper ribs/top bar reach this far behind the switch's back face (the switch sits embedded in the wall: they end on that face, inside the skin)
+W_KEEP = 1.2                                 # keeper wall (loaded, rules 3.2)
+def grow(part, r):
+    """part grown by r: each solid offset by r (sharp corners, else rounded), else its bounding box grown by r."""
+    from build123d import offset, Kind
+    out = []
+    for so in part.solids():
+        for kind in (Kind.INTERSECTION, Kind.ARC):
+            try:
+                g = offset(so, amount=r, kind=kind)
+                if g.is_valid and g.volume > so.volume: out.append(g); break
+            except Exception: pass
+        else:
+            bb = so.bounding_box(); out.append(Pos((bb.min.X + bb.max.X) / 2, (bb.min.Y + bb.max.Y) / 2, (bb.min.Z + bb.max.Z) / 2) *
+                                               Box(bb.size.X + 2 * r, bb.size.Y + 2 * r, bb.size.Z + 2 * r))
+            print(f"    [grow] solid {len(out)}: offset failed, bounding box grown by {r}", flush=True)
+    return fuse_one(out)
+def led_pos(sx):
+    """LED sx (+-1) axis point on the big eye's bore floor, robot frame (check.py: ex, ey, ez)."""
+    return sx * BO.EYE_DX * S, (BO.EYE_BORE_BACK - ORIGIN[1]) * S, (BO.EYE_Z - ORIGIN[2]) * S
 LEDB0, LEDB1 = 0.3, 1.3  # LED through-bore: from 0.3 behind the bore floor to 1.3 past it (cavity face is 0.7 past, ray scan of body.stl)
+LEDF = 0.7                                   # the bore floor's back (cavity) face, behind led_pos's y (ray scan of body.stl): the LED's flange stops on it
 CRUMB = 0.1          # mm3: a loose solid under this left by a cut is dropped with a note (a 0.4 mm nozzle lays ~0.03 mm3 a mm)
-def local_seq(P, ops, label):
+def local_seq(P, ops, label, crumb=None):
     """ops = [(kind, tool, label, touch)] applied in turn to P, each on its own local piece: checked() sees only the piece
     (pvol of the whole BSpline skin costs about a minute), the piece goes back by one fuse with the rest. The whole
     volume is integrated only once, at the end of _body."""
@@ -479,7 +580,7 @@ def local_seq(P, ops, label):
         new = checked(kind, piece, T, lab, touch=touch); dv = pvol(new) - vp
         for f in (0.0, 1e-4, 1e-3):                          # no whole-skin volume per op (pvol of the rest is 30 s)
             out = _bool("fuse", rest, new, f)
-            ss = out.solids(); crumbs = [s for s in ss if s.volume < CRUMB]
+            ss = out.solids(); crumbs = [s for s in ss if s.volume < (CRUMB if crumb is None else crumb)]
             if crumbs and len(ss) - len(crumbs) == 1:            # a cut can leave a loose crumb between hulls (rim leg 3:
                 print(f"    [{lab}] dropped {len(crumbs)} loose crumb(s), {sum(s.volume for s in crumbs):.3f} mm3", flush=True)
                 out = max(ss, key=lambda s: s.volume)             # 0.01 mm3, 0.6 x 0.6 x 0.2 mm): not printable, said, not silent
@@ -493,24 +594,20 @@ def local_seq(P, ops, label):
 def one_count(sh): return sh.solids()
 def _body():
     import time; _T0[0] = time.time()
-    key0 = ("body", S, BRELD, PKT, SNX, SNW, SNT, SNZ, RIBD, SNG, KC, RCELL, stamp("cad/body/build.py", "cad/eyes/build.py", "cad/legs/build.py", "cad/motion.py", "cad/robot/shells.py"))
+    key0 = ("body", S, BRELD, PKT, SNX, SNW, SNT, SNZ, RIBD, SNG, KC, RCELL, stamp("cad/body/build.py", "cad/eyes/build.py", "cad/legs/build.py", "cad/motion.py"),
+            srch(to_robot, checked, _bool, local_box, pvol, one, tree_fuse, dense, sweep_hulls, plane_solid, plane_data, _fib, leg_points, leg_frame, snap_geometry, finger_root))
     def skin_stage():
         b = to_robot(BO.body(k=1.0)); tick("body skin"); return b
-    b = cached("body_skin", key0 + ("skin",), skin_stage)
+    b = cached("body_skin", key0 + ("skin", srch(skin_stage)), skin_stage)
     def eyes_stage():
         ops = [("fuse", to_robot(cup), f"cup {n}", False) for n, cup in enumerate(eye_cups())]
         # the sensor dome floats 4.07 mm under the body's chin (jenscolt's separate mesh): a 1.2 mm stem up into the chin
         bb = to_robot(eye_cups()[-1]).bounding_box()
         stem = Pos((bb.min.X + bb.max.X) / 2, (bb.min.Y + bb.max.Y) / 2, bb.max.Z - 2.4) * Cylinder(1.2, 27.4 - (bb.max.Z - 2.4), align=(Align.CENTER, Align.CENTER, Align.MIN))
         ops.insert(len(ops) - 1, ("fuse", stem, "sensor stem", False))      # stem before the sensor cup
-        # the small eyes' bore (r SEYE_BORE, floor at SEYE_BACK) stops 0.7 mm short of the body cavity and the cup closes its
-        # mouth: a sealed void (-262 mm3 each) with no way in for the LED. Through-bore: same radius, floor to cavity.
-        for sx in (-1, 1):
-            led = Pos((BO.CX + sx * BO.SEYE_DX - ORIGIN[0]) * S, (BO.SEYE_BACK - ORIGIN[1]) * S - LEDB0, (BO.SEYE_Z - ORIGIN[2]) * S) * \
-                  Rot(-90, 0, 0) * Cylinder(BO.SEYE_BORE * S, LEDB1 + LEDB0, align=(Align.CENTER, Align.CENTER, Align.MIN))
-            ops.append(("cut", led, f"led bore {sx:+d}", True))
+        # the LEDs sit in the big eyes (power_stage); the small eyes' LED through-bores (Ø4.2) are gone
         c = local_seq(b, ops, "eyes"); tick("eye cups + sensor stem"); return c
-    b = cached("body_eyes", key0 + ("eyes", "stem", LEDB0, LEDB1), eyes_stage)
+    b = cached("body_eyes", key0 + ("eyes", "stem", srch(eyes_stage, eye_cups), H["body_skin"]), eyes_stage)
     def fit_stage():
         ops = []
         for n, (_, fing, _) in enumerate(snap_geometry()):       # finger lengthened up into the front wall (finger_root), else it
@@ -519,7 +616,7 @@ def _body():
         dp, hx, z0, z1 = PKT
         notch = Pos(0, ty - 1.0, z0 - 0.5) * Box(2 * hx + 1.0, dp + 1.0, z1 - z0 + 1.0, align=(Align.CENTER, Align.MIN, Align.MIN))
         ops.append(("cut", notch, "tab notch", True)); c = local_seq(b, ops, "fit"); tick("snap fingers + tab notch"); return c
-    b = cached("body_fit", key0 + ("fit",), fit_stage)
+    b = cached("body_fit", key0 + ("fit", srch(fit_stage), H["body_eyes"]), fit_stage)
     near = dense(b)
     def per_leg(name, r, **kw):
         """one fused cutter per leg (its hulls tree-fused, cached per leg), cut in turn with the volume invariant."""
@@ -529,22 +626,67 @@ def _body():
                 hs = sweep_hulls(near, r, legs=(Lg,), planes=True, cell=RCELL, **kw)
                 tick(f"{name} leg {Lg}: {len(hs)} hulls")
                 return tree_fuse(hs) if hs else None
-            t = cached(f"body_{name}{Lg}", key0 + (name, Lg), lambda: mk() or Box(0.01, 0.01, 0.01))
+            # cutter keyed on the skin, not the stages after it: the cut is the legs' sweep against the wall, and what the later
+            # stages change (eye bores, LED bores) is far from it
+            t = cached(f"body_{name}{Lg}", key0 + (name, Lg, r, repr(sorted(kw.items())), H["body_skin"]), lambda: mk() or Box(0.01, 0.01, 0.01))
             if pvol(t) > 0.01: ops.append(("cut", t, f"{name} leg {Lg}", False))
         return local_seq(b, ops, name)
     def rim_stage():
         c = per_leg("rim", BRELD); tick("rim cuts"); return c
-    b = cached("body_rim", key0 + ("rim",), rim_stage)
+    b = cached("body_rim", key0 + ("rim", srch(rim_stage, per_leg), H["body_fit"]), rim_stage)
     def lift_stage():
         c = per_leg("lift", F.NEIGHBOUR.side + 0.1, poses=[KC], group=1, lift=CL.LIFTD); tick("lift cuts"); return c
-    b = cached("body_lift", key0 + ("lift",), lift_stage)
+    b = cached("body_lift", key0 + ("lift", srch(lift_stage), H["body_rim"]), lift_stage)
+    def power_stage():
+        """what the power parts need from the body: the two 5 mm LED bores (big eyes, where check.py has them, flange stop on
+        the floor's back face), the switch's lever slot and keeper, the pockets round the cell holder, lid, cells, switch and
+        LEDs, and a stop post per leg against its sliding off the pin."""
+        import power as PW
+        ops = []
+        for sx in (-1, 1):                                      # LED bores
+            x, y, z = led_pos(sx)
+            ops.append(("cut", Pos(x, y - LEDB0, z) * Rot(-90, 0, 0) * Cylinder(LED_R + F.TURN.side, LEDB1 + LEDB0, align=(Align.CENTER, Align.CENTER, Align.MIN)),
+                        f"led bore {sx:+d}", True))
+        for sx in (-1, 1):                                      # the small eyes' tube bores would be sealed voids under their cups: opened to the cavity
+            ops.append(("cut", Pos((BO.CX + sx * BO.SEYE_DX - ORIGIN[0]) * S, (BO.SEYE_BACK - ORIGIN[1]) * S - LEDB0, (BO.SEYE_Z - ORIGIN[2]) * S) * Rot(-90, 0, 0)
+                        * Cylinder(BO.SEYE_BORE * S, LEDB1 + LEDB0, align=(Align.CENTER, Align.CENTER, Align.MIN)), f"small-eye vent {sx:+d}", True))
+        bx, by, bz = PW.SW_BODY; lx, ly, lz = PW.SW_LEVER; y1 = PW.SWY1; zs = PW.SWZ; st = F.STEEL.side
+        MIN = (Align.MIN, Align.MIN, Align.MIN)
+        slot = Pos(-(lx / 2 + SW_THROW / 2 + st), y1 - 0.5, zs - lz / 2 - st) * Box(lx + SW_THROW + 2 * st, SW_SLOT_Y, lz + 2 * st, align=MIN)
+        ops.append(("cut", slot, "switch lever slot", True))
+        yk = y1 - by - st; xk = bx / 2 + st; zb, zt = zs - bz / 2, zs + bz / 2 + st; yr = y1 + SW_KEEP_REACH
+        keeper = [Pos(-xk - W_KEEP, yk - W_KEEP, zb) * Box(2 * (xk + W_KEEP), W_KEEP, zt + W_KEEP - zb, align=MIN),        # plate behind the switch
+                  Pos(-xk - W_KEEP, yk - W_KEEP, zt) * Box(2 * (xk + W_KEEP), yr - yk + W_KEEP, W_KEEP, align=MIN)]          # top bar to the wall
+        for sx in (-1, 1): keeper.append(Pos(sx * (xk + W_KEEP / 2) - W_KEEP / 2, yk - W_KEEP, zb) * Box(W_KEEP, yr - yk + W_KEEP, zt - zb, align=MIN))   # side ribs
+        ops.append(("fuse", fuse_one(keeper), "switch keeper", True))
+        for nm, part, r in (("holder", PW.holder(), F.LOCATOR.side), ("lid", PW.lid(), F.LOCATOR.side), ("cells", PW.cells(), F.LOCATOR.side),
+                            ("switch", PW.switch(), F.LOCATOR.side)):   # no LED pocket: the LEDs sit in their bores (power.py's leds() still stand at the small eyes: it was 86 mm3 there)
+            ops.append(("cut", grow(part, r), f"pocket {nm}", False))
+        # the pockets round the holder and the lid leave two thin loose webs (17.5 mm3 each, x +-18, y 8..12, z 28..37) between them: not
+        # printable and not attached, so they go (crumb limit 30 mm3, said in the log)
+        c = local_seq(b, ops, "power", crumb=30.0); tick("LED bores, switch slot + keeper, pockets")
+        near = dense(c); posts = []
+        for Lg in range(4):
+            r = xstop_post(Lg, near)
+            if r is None: print(f"    [power] leg {Lg}: no stop post fits", flush=True); continue
+            ps = post_solid(r[0], r[1]); posts.append((Lg, ps)); print(f"    [power] leg {Lg}: stop post {np.round(r[0], 1)} -> {np.round(r[1], 1)}, leg moves {r[2]:.2f} before it", flush=True)
+        ops = []
+        for Lg, ps in posts:
+            ops.append(("fuse", ps, f"stop post {Lg}", True)); ops.append(("fuse", mirror_x(ps), f"stop post {Lg + 4}", True))
+        c = local_seq(c, ops, "posts") if ops else c; tick("stop posts"); return c
+    import power as _PW
+    b = cached("body_power", key0 + ("power", srch(power_stage, xstop_post, post_solid, led_pos, grow), LEDB0, LEDB1, LED_R, BO.SEYE_BORE, SW_THROW, SW_SLOT_Y, SW_KEEP_REACH, W_KEEP, XS_RP, XS_HIT,
+                                      stamp("cad/robot/power.py"), srch(_PW.holder, _PW.lid, _PW.cells, _PW.switch), H["body_lift"]), power_stage)
     assert len(b.solids()) == 1 and b.is_valid and pvol(b) > 0, f"body: {len(b.solids())} solids, valid {b.is_valid}"
     print(f"    [body] volume {pvol(b):.1f} mm3, valid, 1 solid", flush=True)
     return b
 def body():
-    key = ("body", S, BRELD, PKT, SNX, SNW, SNT, SNZ, RIBD, SNG, KC, RCELL, stamp("cad/body/build.py", "cad/eyes/build.py", "cad/legs/build.py", "cad/motion.py", "cad/robot/shells.py"))
-    b = one(cached("body", key, _body).clean())          # coplanar fragments: unify as base() does, outside the cache
-    assert b.is_valid and len(b.solids()) == 1, "body: clean() left it invalid"
+    key = ("body", S, BRELD, PKT, SNX, SNW, SNT, SNZ, RIBD, SNG, KC, RCELL, stamp("cad/body/build.py", "cad/eyes/build.py", "cad/legs/build.py", "cad/motion.py"), srch(_body))
+    b0 = one(cached("body", key, _body)); b = one(b0.clean())          # coplanar fragments: unify as base() does, outside the cache
+    if not (b.is_valid and len(b.solids()) == 1):
+        print("    [body] WARN clean() left it invalid (the power stage's pockets/keeper): the unified faces are kept as built", flush=True)
+        b = one(cached("body", key, _body))                            # clean() edits its argument in place (shared TShapes): reload the cached, valid one
+    assert b.is_valid and len(b.solids()) == 1, "body: not valid"
     return b
 
 PARTS = {"base": base, "body": body, **{f"leg-{Lg}": (lambda Lg=Lg: leg(Lg)) for Lg in range(8)}}

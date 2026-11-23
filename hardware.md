@@ -14,6 +14,9 @@ count per robot or test.
 | Socket head screw | M3 × 16 | ? | [test leg](build-log/3-legs-and-drive.md#test-leg-first-assembly-and-clearance-result) | |
 | Nut | M3 | ? | gear train test v2: 3; test frame v2: 2; [chassis Part A](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/chassis): 4 (cap front, cap and clamp shared, clamp rear, pin keeper) + 4 (I7, module to chassis) | 5.5 mm across flats, 2.4 mm thick |
 | Screw | M2 | ? | test leg, first assembly (instead of M3) | |
+| Socket head screw | M2 × 6 | ? | [N2 robot](build-log/3-legs-and-drive.md#n2-round-r00-the-inside-and-the-leg-hold): 1 (cell holder to the drive unit, head flush) | To buy |
+| Socket head screw | M2 × 4 | ? | N2 robot: 2 (base keel from below, heads in counterbores) | To buy; was × 6 |
+| Socket head screw | M2 × 12 | ? | N2 robot: 1 (transfer axle) | To buy; not in the plan's count |
 | Steel pin | Ø3 | ? | [base v1](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/base): idler axles; [chassis Part A](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/chassis): Ø3 × 10 × 3 (idler pins) | Length per design |
 | Socket head screw | M3 × 6 | ? | [chassis Part B](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/design-plan-b.md): 3 (I7: front, under the can, -X boss; nuts in the M3 nut row) | To buy |
 | Socket head screw | M3 × 8 | ? | [chassis Part A](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/chassis): 1 (pin keeper; its nut in the M3 nut row); [chassis Part B](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/chassis/design-plan-b.md): 1 (body rear screw, from below into the body lug) + 1 (I7, behind the can) | |

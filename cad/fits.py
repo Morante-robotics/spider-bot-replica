@@ -50,6 +50,10 @@ LEG_PATH = Fit("moving leg to anything it sweeps past", 0.5, "assumed",
                "the measured WINDOW: test leg v2 swung in its fork with 0.5 a side (2026-11-11). Was 0.8, base v1's "
                "LEG_CLR, never printed; lowered with Morante, 2026-11-21 («relaja las condiciones»). Coupon in the "
                "robot's batch")
+LEG_OPEN = Fit("moving leg neck in an open-top window: the leg is located by its pin, the window only clears it, "
+               "a rub is sanded", 0.4, "assumed",
+               "Morante, 2026-11-23: «Se laxo con tolerancias muy pequeñas en sitios no críticos»; leg-3 cleared the "
+               "base's neck window by 0.41 a side against LEG_PATH 0.5. Coupon in the robot's batch")
 NEIGHBOUR = Fit("two fixed printed parts side by side, with no joint between them (only must not touch once "
                 "printed)", 0.1, "assumed",
                 "Morante, 2026-11-21: was LOCATOR 0.2, a centring fit that never applied here; 0.1 covers the walls "

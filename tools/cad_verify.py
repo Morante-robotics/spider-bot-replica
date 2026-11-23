@@ -325,8 +325,10 @@ def check_integrity(spec, meshes, rep, quick, only=None):
         if bodies != p.get("bodies", 1):
             bad.append(f"{bodies} separate bodies (expected {p.get('bodies', 1)})")
         degen = int((m.area_faces < 1e-9).sum())
-        if degen:
+        if degen and not m.is_watertight:
             bad.append(f"{degen} zero-area faces")
+        elif degen:   # a sliver on a closed mesh: the slicer drops it (Morante, 2026-11-23: lax on non-critical)
+            rep.warn(f"{name}: {degen} zero-area faces on a watertight mesh (harmless for slicing)")
         o = m.copy()
         if name in orient:
             o.apply_transform(orient[name])
