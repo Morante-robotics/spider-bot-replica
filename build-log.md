@@ -77,10 +77,9 @@ archived in [Legs and drive](build-log/3-legs-and-drive.md).
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| Speed, phase 0: finish and test the time budget (`tools/timebudget.py`, 40 s, started, untested) ([state](cad/robot/datasheet.md#state-2026-11-23)) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
-| Speed, phase 1: base and body clearances as designed simple shapes, each shell ≤ 40 s (today 28 and 58 min) ([state](cad/robot/datasheet.md#state-2026-11-23)) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
-| Speed, phase 3: checks ≤ 40 s (`fitcheck/check.py` 19 min, assembly paths 44 s) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
-| Then `verify.py --quick` 0 FAIL (legs 0/1/4 and the glued switch), `rounds.py round cad/robot 0`, the looks judge and Morante's «se parece» | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
+| `rounds.py round cad/robot 0`, the looks judge and Morante's «se parece» (`verify.py --quick` 0 FAIL in 37 s, base 22 s, body 28 s: [state](cad/robot/datasheet.md#state-2026-11-23)) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
+| Workshop kit: legs 1, 2, 4–7 with the crank at pose 0, then half a turn for legs 0 and 3 and the body; switch glued from the front | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
+| Speed, optional: the body skin (cad/body, 17–20 s) and the body's fixed stage (cold 40 s) are cached; make them faster if they get rebuilt often | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
 | Test the leg snap's engagement on a coupon ([state](cad/robot/datasheet.md#state-2026-11-23)) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
 | Update the r00 entry when r00 closes | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
 | Body: the curved top panels and the chin grille, if Morante wants them later (a build takes 60–80 s) | [Meshes become parameters](build-log/4-looks-first.md#meshes-become-parameters) | 3 |
