@@ -54,6 +54,25 @@ PKT = FE.PKT                            # back-sheet pocket (depth, |x|, z0, z1)
 SNX, SNW, SNT, SNZ, RIBD, SNG = CL.SNX, CL.SNW, CL.SNT, CL.SNZ, CL.RIBD, CL.SNG
 PINR = CL.PINR                          # printed crank pin r (Ø3)
 END_R = PINR + F.TURN.side + CL.W       # leg end tube: bore TURN over the pin, wall W 1.2
+# leg snap on the crank pin (option A, build-log N2 r00): a groove on the pin, a ring bead in the end tube's bore, an axial slit
+# in the tube so it opens over the pin tip. The snap fit is fits.PRESS (assumed): coupon list, not printed now.
+SNAP_NECK_R = 1.0                       # pin neck r in the groove (Ø2.0, brief: neck Ø >= 2.0)
+SNAP_BW = 0.5                           # bead width (axial)
+SNAP_END = 1.0                          # tube mouth past the pin tip (was 1.5: leg-1 and leg-2 tube ends came within 0.11)
+SNAP_SLIT = 0.6                         # slit width (tangential)
+def snap_bead_r(i): return SNAP_NECK_R + F.TURN.side + BORE_DRIFT[i]       # bead inner r: turns on the neck (TURN), bore axis drift as the bore
+SNAP_MARGIN = F.TURN.side             # axial room each side of the bead's travel (TURN; 0.10 left crank x leg 0.06-0.09 over the poses; slide stays within RETAIN 1.25)
+def snap_groove(i):
+    """(x0, x1) of the pin groove (robot |x|, right side): the axial span the bead's inner edge sweeps where it is within the pin's
+    shoulder radius (PINR), over the 24 poses (tilt of the tube on the pin and the leg's axial drift), plus SNAP_MARGIN a side."""
+    P_, A0 = motion.neutral_leg(i, P, n=13)[:2]; A0 = np.asarray(A0, float); rb = snap_bead_r(i); lo = 1e9; hi = -1e9
+    th = np.linspace(0, 2 * np.pi, 181)
+    ring = np.array([[A0[0], A0[1] + r * np.cos(t), A0[2] + r * np.sin(t), 1.0] for r in (rb, (rb + PINR) / 2) for t in th])
+    for k in range(24):
+        Q = (leg_frame(i, k) @ ring.T).T[:, :3]
+        rho = np.hypot(Q[:, 1] - A_ALL[i, k][1], Q[:, 2] - A_ALL[i, k][2]); m = rho < PINR
+        if m.any(): lo = min(lo, Q[m, 0].min() - SNAP_BW / 2); hi = max(hi, Q[m, 0].max() + SNAP_BW / 2)
+    return round(float(lo - SNAP_MARGIN), 2), round(float(hi + SNAP_MARGIN), 2)
 TAIL, HUBCUT = CL.TAIL, CL.HUBCUT       # tail past the pin (m21), real arm kept from HUBCUT past the pin
 KEEL_BOSS_R = 3.0                       # keel boss radius: counterbore (M2 head 1.9 + STEEL) + 0.95 of wall
 PB = P["r_root"]                        # root ball radius at the pivot
@@ -169,7 +188,7 @@ def _leg_right(i):
     hs = _along(hs, A0 + HUBCUT * u, u)
     arm = arm - hs
     th = math.radians(FLARE_DEG[i])                  # bore and tube flare: the pin's swing in the leg frame + 1 deg
-    x0, xm, x1 = A0[0] - TAIL, A0[0], P["XC"] + CL.PINX + 1.5        # tail .. pin point .. past the pin tip
+    x0, xm, x1 = A0[0] - TAIL, A0[0], P["XC"] + CL.PINX + SNAP_END   # tail .. pin point .. past the pin tip
     def dcone(r):
         a = Cylinder(1, 1)
         from build123d import Cone
@@ -181,7 +200,24 @@ def _leg_right(i):
     bore = bore + Pos(0.02, 0, 0) * dcone(PINR + F.TURN.side + BORE_DRIFT[i])
     joint = _along(Cylinder(P["r_inner"], HUBCUT - 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN)), A0 + 1.5 * u, u)
     ball = Pos(*P_) * Sphere(PB)
+    rb = snap_bead_r(i)
+    ring = Pos(xm - SNAP_BW / 2, A0[1], A0[2]) * Rot(0, 90, 0) * (Cylinder(PINR + F.TURN.side + BORE_DRIFT[i] + 0.4, SNAP_BW, align=(Align.CENTER, Align.CENTER, Align.MIN))
+                                                                  - Cylinder(rb, SNAP_BW, align=(Align.CENTER, Align.CENTER, Align.MIN)))
     leg = fuse_all([blade, arm, tube, joint, ball]) - bore
+    uh = u - np.dot(u, [1.0, 0, 0]) * np.array([1.0, 0, 0]); uh = uh / np.linalg.norm(uh)             # the arm's side of the tube
+    if sorted(x.volume for x in leg.solids())[-2:-1] and sorted(x.volume for x in leg.solids())[-2] > 30:     # a piece bigger than the hub's 12 mm3 sliver
+        # the arm leaves the tube's flare cone (leg 2/6: u mostly along x), so the joint never reaches the wall and the tube came off
+        # (r00: «leg-2's tube detached»). A strut from the wall at the tube's mouth to the joint axis ties them.
+        xw = x1 - 0.3; rw = (rb + END_R) / 2 + (xw - xm) * math.tan(th) + 0.2
+        W_ = np.array([xw, A0[1], A0[2]]) + rw * np.array([0, uh[1], uh[2]]) ; J_ = A0 + 6.0 * u
+        v_ = J_ - W_; strut = _along(Cylinder(1.0, float(np.linalg.norm(v_)), align=(Align.CENTER, Align.CENTER, Align.MIN)), W_, v_)
+        leg = fuse_all([leg, strut]) - bore
+    leg = fuse_all([leg, ring])
+    up_ = u - np.dot(u, [1.0, 0, 0]) * np.array([1.0, 0, 0]); up_ = -up_ / np.linalg.norm(up_)     # slit on the side away from the arm
+    sx0 = x0 + 0.2
+    slit = Box(x1 + 1 - sx0, SNAP_SLIT, END_R + 1.5, align=(Align.MIN, Align.CENTER, Align.MIN))     # x, tangent, radial
+    slit = Pos(sx0, A0[1], A0[2]) * Rot(math.degrees(math.atan2(up_[2], up_[1])) - 90, 0, 0) * slit   # +z of the box -> up_
+    leg = leg - (slit & tube)
     return one(leg)          # a 12 mm3 sliver of the cut hub dropped
 def _along(sh, p0, u):
     """sh built along +z from the origin, turned onto u and moved to p0."""
@@ -193,7 +229,7 @@ def _along(sh, p0, u):
     return Pos(*p0) * sh
 def leg(Lg):
     i = Lg % 4
-    key = ("leg4", i, FLARE_DEG[i], BORE_DRIFT[i], CL.PINX, S, HUBCUT, TAIL, END_R, PB, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C,
+    key = ("leg8", i, SNAP_END, SNAP_NECK_R, SNAP_BW, SNAP_SLIT, FLARE_DEG[i], BORE_DRIFT[i], CL.PINX, S, HUBCUT, TAIL, END_R, PB, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C,
            srch(_leg_right, _along))
     sh = cached(f"leg{i}", key, lambda: _leg_right(i))
     return sh if Lg < 4 else mirror_x(sh)

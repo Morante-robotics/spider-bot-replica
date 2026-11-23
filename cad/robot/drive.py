@@ -44,6 +44,7 @@ PINR = CL.PINR                                      # crank pin Ø3 (legs' bore 
 WEB_T = CL.WEB_T; WB0 = WX1 + TH; WB1 = WB0 + WEB_T  # webs just outside the walls (THRUST)
 WEBR = PINR + CL.WEBW                               # web stadium half-width (check.py WEBR)
 PIN_X1 = P["XC"] + CL.PINX                          # pin tip (|x|)
+PIN_TIP_TRIM = 0.5                                  # printed pin ends this much short of PIN_X1: the leg's arm sits on the pin axis just past the tip (2026-11-23: 0.25 left crank-4 x leg-3 at 0.06 at pose 21 in --quick); the snap bead, not the tip, holds the leg
 # pin collar (leg-on-pin "+x crank web"): the leg's end tube starts at XC - TAIL; the collar stops it TURN short, less
 # the tube face's tilt at the collar radius (the leg swings FLARE_DEG on its pin, shells.py), so the leg is held in x
 COLLAR = False                                      # tried 2026-11-23: STL split into bodies, legs 3/4 overlap it at pose 0
@@ -215,8 +216,12 @@ def crank(i):
         d = math.hypot(A[1] - o[0], A[2] - o[1]); ang = math.degrees(math.atan2(A[2] - o[1], A[1] - o[0]))
         parts.append(cylx(o[0], o[1], WEBR, x0, x1)); parts.append(cylx(A[1], A[2], WEBR, x0, x1))
         parts.append(Pos((x0 + x1) / 2, (o[0] + A[1]) / 2, (o[1] + A[2]) / 2) * Rot(ang, 0, 0) * Box(x1 - x0, d, 2 * WEBR))
-        pa, pb = (WB1 - 0.01, PIN_X1) if sx > 0 else (-PIN_X1, -WB1 + 0.01)
-        parts.append(cylx(A[1], A[2], PINR, pa, pb))
+        pa, pb = (WB1 - 0.01, PIN_X1 - PIN_TIP_TRIM) if sx > 0 else (-PIN_X1 + PIN_TIP_TRIM, -WB1 + 0.01)
+        pin = cylx(A[1], A[2], PINR, pa, pb)
+        gx0, gx1 = SH.snap_groove(i)                                                          # snap groove: the bead's travel over the 24 poses
+        gx0, gx1 = (gx0, gx1) if sx > 0 else (-gx1, -gx0)
+        pin = pin - (cylx(A[1], A[2], PINR + 0.5, gx0, gx1) - cylx(A[1], A[2], SH.SNAP_NECK_R, gx0 - 0.01, gx1 + 0.01))
+        parts.append(pin)
         ca, cb = (WB1 - 0.01, COLLAR_X1) if sx > 0 else (-COLLAR_X1, -WB1 + 0.01)
         if COLLAR: parts.append(cylx(A[1], A[2], COLLAR_R, ca, cb))          # collar: the leg's inner stop along x (off: see report)
     c = fuse(parts)
