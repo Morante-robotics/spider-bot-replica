@@ -60,6 +60,23 @@ PRINT_ORIENT = {"base": np.eye(4),                                # foot down
 MARKS = {"body": "body-on mark: crank pose 12 (plan step 17)"}
 LABELS = {"es": {"base": "base", "body": "cuerpo", **{n: f"pata {k + 1}" for k, n in enumerate(LEGS)}}}
 MEASURE = []
+def _junction_sections():
+    """The thinnest plane through each leg's tube -> neck rod -> arm junction (shells.JOINT_R, SNAP_WALL): planes normal to the
+    rod from the pin tip's plane to the hub cut, and normal to x through the tube's closed end (the part's own STL frame)."""
+    from cad import motion
+    out = []
+    for k, n in enumerate(LEGS):
+        P_, A0, *_ = motion.neutral_leg(k % 4, SH.P, n=13)
+        u = (P_ - A0) / np.linalg.norm(P_ - A0); sx = 1.0 if k < 4 else -1.0
+        mir = np.array([sx, 1.0, 1.0]); A0m, um = A0 * mir, u * mir
+        tip = SH.P["XC"] + SH.CL.PINX
+        sa = (tip - A0[0]) / u[0]
+        out.append({"part": n, "origin": [float(v) for v in A0m], "axis": [float(v) for v in um], "s0": float(sa), "s1": float(SH.HUBCUT - 0.25),
+                    "min": 15.0, "why": "tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)"})
+        out.append({"part": n, "origin": [float(sx * (SH.P["XC"] + SH.CL.PINX + SH.SNAP_END + 0.1)), float(A0[1]), float(A0[2])], "axis": [sx, 0.0, 0.0],
+                    "s0": 0.0, "s1": float(SH.SNAP_WALL - 0.2), "min": 15.0, "why": "the tube's closed end wall and the rod running into it"})
+    return out
+SECTION_MIN = _junction_sections()
 SECTIONS = [([0, 0, 12], [0, 0, 1]), ([0, 0, 0], [1, 0, 0])]
 if IV is not None:
     PARTS.update(getattr(IV, "PARTS", {}))

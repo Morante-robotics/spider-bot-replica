@@ -17,9 +17,9 @@
   },
   {
    "plate": "print/robot-red.3mf (leg-3 only)",
-   "what_for": "Only leg-3, to test the snap. In Bambu Studio it is called «leg-3-7.stl». In the red plate picture (print/images/robot-red.png) it is at the top, right of the body (first row, second part). Remove the other parts from the plate before slicing. Since 2026-11-24 the joint between the cone (the pin tube) and the leg is thicker (Ø4.7 with a blend): reprint leg-3 if it broke. When removing the support, hold the leg by the arm near the body, never by the tube: the support does not touch the joint, but levering the arm bends it.",
-   "grams": 6.52,
-   "hours": 0.44
+   "what_for": "Only leg-3, to test the snap. In Bambu Studio it is called «leg-3-7.stl». In the red plate picture (print/images/robot-red.png) it is at the top, right of the body (first row, second part). Remove the other parts from the plate before slicing. Since 2026-11-24 the cone (the pin tube) is closed at its tip and the rod (Ø4.7) is fused to that wall: before, it only touched the rim. Reprint leg-3 if it broke. When removing the support, hold the leg by the arm near the body, never by the tube: the support does not touch the joint, but levering the arm bends it.",
+   "grams": 6.45,
+   "hours": 0.42
   }
  ],
  "not_yet": [

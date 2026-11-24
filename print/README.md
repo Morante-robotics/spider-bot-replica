@@ -20,7 +20,7 @@ mechanisms, blue base.
 
 | Plate | Parts | Time | PLA |
 |---|---|---|---|
-| [`robot-red.3mf`](robot-red.3mf) | The body and legs 0–7 (legs 4–7 mirrored) | 5 h 22 min | 86.5 g |
+| [`robot-red.3mf`](robot-red.3mf) | The body and legs 0–7 (legs 4–7 mirrored) | 5 h 11 min | 86.3 g |
 | [`robot-yellow-inner.3mf`](robot-yellow-inner.3mf) | Spine, cranks 1–4, idlers 1–3 and their sleeves, transfer gear and its sleeve, drive unit, pinion, cell holder and lid | 1 h 14 min | 14.5 g |
 | [`robot-blue-base.3mf`](robot-blue-base.3mf) | The base, foot down | 52 min | 8.0 g |
 

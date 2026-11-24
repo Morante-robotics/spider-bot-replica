@@ -64,6 +64,10 @@ Spec file (all names optional except PARTS and poses):
                                               # machine (only assembly, integrity, print and pictures see it)
     PRINT_ORIENT = {"shaft": 4x4}             # how each part lies on the bed (default: as in its STL)
     SECTIONS = [([0, 0, 0], [1, 0, 0])]       # cut planes (point, normal) for the pictures
+    SECTION_MIN = [{"part": "leg", "origin": [x, y, z], "axis": [ux, uy, uz], "s0": 3.0, "s1": 9.0, "min": 15.0,
+                    "why": "neck: no plane through it thinner than this (mm2)"}]
+                                              # planes normal to axis through origin + s * axis, s0..s1 (0.25 steps), in the
+                                              # part's own STL frame: the section's piece nearest the axis must be >= min mm2
     PAIR_GAP = {("pin", "shaft"): 0.1}       # smallest gap for a pair, where MIN_GAP does not fit (a pin in its bore)
     KEEP_OUT = {"gear-faces": {"part": "shaft", "mesh": m, "except": ["frame"], "why": "0.8 mm axial"}}
                                               # m in the part's own frame, moves with it; "except": parts allowed in
@@ -1202,6 +1206,36 @@ def check_joints(spec, meshes, rep, only=None):
             rep.warn(f"{a} × {b}: fit not measured yet ({getattr(fit, 'source', '')}): prove it on a coupon first")
 
 
+def check_min_sections(spec, meshes, rep, only=None):
+    """SECTION_MIN: the thinnest plane through a junction (planes normal to an axis, in the part's STL frame): the piece of the
+    section nearest the axis point must keep `min` mm2 at every step (a neck that only butts a rim shows up as ~0)."""
+    from shapely.geometry import Point
+    items = getattr(spec, "SECTION_MIN", [])
+    if not items:
+        return
+    rep.head("9b junction sections: no thin plane through a neck")
+    for e in items:
+        if not involves(only, e["part"]):
+            continue
+        o, ax = np.asarray(e["origin"], float), np.asarray(e["axis"], float)
+        ax = ax / np.linalg.norm(ax)
+        worst = (1e9, None)
+        for sv in np.arange(e["s0"], e["s1"] + 1e-9, e.get("step", 0.25)):
+            pt = o + sv * ax
+            sec = meshes[e["part"]].section(plane_origin=pt, plane_normal=ax)
+            area = 0.0
+            if sec is not None:
+                p2, T = sec.to_2D()
+                q = np.linalg.solve(T, np.append(pt, 1.0))[:2]
+                gs = list(p2.polygons_full)
+                if gs:
+                    area = min(gs, key=lambda g: g.distance(Point(q))).area
+            if area < worst[0]:
+                worst = (area, sv)
+        msg = f"{e['part']}: thinnest plane {worst[0]:.1f} mm2 at s {worst[1]:.2f} (>= {e['min']:.1f}; s {e['s0']:.2f}..{e['s1']:.2f}): {e.get('why', '')}"
+        (rep.ok if worst[0] >= e["min"] else rep.fail)(msg)
+
+
 def check_seats(spec, meshes, rep, only=None):
     """A part that must sit fully home (a gear in its pocket, a block on its ledge) touches its seat: pushed further
     along its direction it is stopped at once. If it can move further, it floats above its seat as designed (base v1,
@@ -1537,7 +1571,7 @@ def run_checks(spec, meshes, rep, args, only):
                 ("print", None if smoke else lambda r: check_print(spec, meshes, r)),
                 ("keep-out", lambda r: check_keep_out(spec, meshes, r, only)),
                 ("access", None if smoke else lambda r: check_access(spec, meshes, r)),
-                ("joints", lambda r: check_joints(spec, meshes, r, only)),
+                ("joints", lambda r: (check_joints(spec, meshes, r, only), check_min_sections(spec, meshes, r, only))),
                 ("seats", lambda r: check_seats(spec, meshes, r, only)),
                 ("keep-in", lambda r: check_keep_in(spec, meshes, r, only)),
                 ("marks", lambda r: check_marks(spec, r, only))]
