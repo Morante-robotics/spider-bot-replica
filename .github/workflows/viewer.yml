@@ -1,12 +1,12 @@
 name: viewer
 
-# Publishes viewer/ (only that folder) on GitHub Pages, so the robot opens in the browser without a download:
-# https://morante-robotics.github.io/spider-bot-replica/
+# Publishes viewer/ (at the site's root) and kits/ (under /kits/) on GitHub Pages, so the robot and the workshop
+# kits open in the browser without a download: https://morante-robotics.github.io/spider-bot-replica/
 on:
   workflow_dispatch:          # run by hand from the Actions tab
   push:
     branches: [main]
-    paths: ["viewer/**", ".github/workflows/viewer.yml"]
+    paths: ["viewer/**", "kits/**", ".github/workflows/viewer.yml"]
 
 permissions:
   contents: read
@@ -26,8 +26,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Site = viewer/ at the root, kits/ under /kits/
+        run: mkdir _site && cp -r viewer/. _site/ && cp -r kits _site/kits
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: viewer
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
