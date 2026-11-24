@@ -9,7 +9,7 @@ toy: the specification is now the toy and jenscolt's model, and the mechanism is
 went through a mock-up in simple shapes (N0), the real parts as light meshes (N1), and a first print-detail attempt
 that did not fit at 65 % (N2 rev 5). Meshes then proved a dead end, so every part was rebuilt as parameters and only
 those measure. Round r00 of N2 designed the inside (drive and power); the shells then took an hour to build, so their
-leg clearances were redesigned as simple shapes and every build and check came under 40 s, with 0 failures. Last, the unused front sensor was removed and the mouth closed with a front panel. Older
+leg clearances were redesigned as simple shapes and every build and check came under 40 s, with 0 failures. Then the unused front sensor was removed and the mouth closed with a front panel, and the robot was split into one print plate per colour for a first test batch. Older
 entries are shortened to their summary; the full text is in git (links).
 
 ### Redesign: looks first
@@ -206,8 +206,7 @@ its STL (joint radius 1.75 against a bore of 1.84): a model bug to fix whichever
 
 #### Next
 
-Print the robot: the plater, a pre-print review and the workshop kit. The first plate is the base and one leg, to
-test the leg snap before the other seven legs.
+Print the robot: see [Print plates by colour](#print-plates-by-colour).
 
 [↑ Contents](../build-log.md#contents)
 
@@ -318,5 +317,57 @@ front down to the base. The two views are at different zoom.*
 - **Close at the front, not inside.** A first try cut the chin arch as a 1.4 mm recess closed behind it. Morante:
   «No está bien. Tiene que cerrar por delante no por dentro». The panel version: «Me gusta».
 - `cad/body/build.py` is unchanged (its chin arch cut stays): the panel is a feature of the robot frame.
+
+[↑ Contents](../build-log.md#contents)
+
+### Print plates by colour
+
+**Phase 5 · Final build · 2026-11-24** · Status: 🔄 plates ready, batch 1 not printed yet
+
+> **In short.** The robot is printed in three colours, so the parts are split into one plate per colour: red for the
+> body and the eight legs, yellow for the inner mechanisms, blue for the base. Every part is its own object, so
+> Morante chooses in Bambu Studio which ones to print. The first batch is the test: the blue and yellow plates whole
+> and only leg 4 from the red one, to see that the leg snaps onto its crank pin and that the M2 screws bite in
+> their pilot holes. The rest of the red plate follows when leg 4 works.
+
+Morante's rule: carcass and legs red, base blue, inner mechanisms yellow. The plates are made with
+[`tools/bambu_plate.py`](../tools/bambu_plate.py) with the repo's standard settings ([`print/README.md`](../print/README.md)).
+Support is tree(auto), on the build plate only.
+
+#### Result
+
+<table>
+<tr>
+<td width="33%"><img src="../print/images/robot-red.png" alt="Red plate: body and eight legs"></td>
+<td width="33%"><img src="../print/images/robot-yellow-inner.png" alt="Yellow plate: 17 inner parts"></td>
+<td width="33%"><img src="../print/images/robot-blue-base.png" alt="Blue plate: the base"></td>
+</tr>
+<tr>
+<td><em>Fig. 1a · Red: the body and legs 0 to 7 (leg 3 is the second piece of the top row).</em></td>
+<td><em>Fig. 1b · Yellow: the 17 inner parts, each labelled.</em></td>
+<td><em>Fig. 1c · Blue: the base, foot down.</em></td>
+</tr>
+</table>
+
+*Previews are labelled by part and drawn in green; the colours are chosen in Bambu Studio.*
+
+| Plate | Parts | Time | PLA | Support |
+|---|---|---|---|---|
+| [`robot-red.3mf`](../print/robot-red.3mf) | body and legs 0–7 (legs 4–7 mirrored) | 5 h 25 min | 86.81 g | 13.35 g (18 %) |
+| [`robot-yellow-inner.3mf`](../print/robot-yellow-inner.3mf) | spine, cranks 1–4, idlers 1–3, sleeves 1–3, transfer gear and sleeve, drive unit, pinion, cell holder, cell lid | 1 h 16 min | 14.27 g | 4.17 g (41 %) |
+| [`robot-blue-base.3mf`](../print/robot-blue-base.3mf) | base, foot down | 52 min | 8.02 g | 4.24 g (112 %, outside the bowl) |
+
+Leg 3 alone is 26 min 33 s and 6.48 g; Bambu Studio names it `leg-3-7.stl` (a suffix from the tool). Support over
+30 % of the part's weight is on the base, the cranks (about 140 %), the drive unit (66 %), the transfer gear (46 %)
+and the spine (30 %).
+
+#### Decisions
+
+- **Support marks stay.** Morante: «Me vale así». The marks are on non-functional faces and get sanded.
+- **No pre-print review.** Morante: «No sé para qué sirve esta revisión. Lo tengo que imprimir igual, diga lo que
+  diga el revisor, ¿no?». Right: the first batch is itself the test, so the review is dropped.
+- **Batch 1** (≈ 2 h 35 min): blue plate, yellow plate and leg 3 from the red one. Check the crank pins, snap bead and
+  collar for support residue, the bore of leg 3 for roundness, and that sleeves and idlers stuck to the bed.
+- **Batch 2** (≈ 5 h): the rest of the red plate, after leg 3 snaps well.
 
 [↑ Contents](../build-log.md#contents)

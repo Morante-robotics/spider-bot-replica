@@ -5,6 +5,9 @@ Basic, 0.20 mm Standard). Open one in Bambu Studio, check it and send it: **Slic
 
 | Plate | Parts | Time | PLA |
 |---|---|---|---|
+| [`robot-red.3mf`](robot-red.3mf) | The robot's body and legs 0–7 (legs 4–7 mirrored), every part its own object; [preview](images/robot-red.png) | 5 h 25 min | 86.8 g |
+| [`robot-yellow-inner.3mf`](robot-yellow-inner.3mf) | The inner mechanisms: spine, cranks, idlers, sleeves, transfer gear, drive unit, pinion, cell holder and lid; [preview](images/robot-yellow-inner.png) | 1 h 16 min | 14.3 g |
+| [`robot-blue-base.3mf`](robot-blue-base.3mf) | The base, foot down; [preview](images/robot-blue-base.png) | 52 min | 8.0 g |
 | [`test-leg-plate.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/test-leg-plate.3mf) | [Test frame](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/test-frame), middle leg (right), fork, crankshaft 2, [clearance block and pin](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/clearance-test) | 1 h 28 min | 29.6 g |
 | [`test-frame-v2.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/test-frame-v2.3mf) | Test frame v2 with a keeper for the crankshaft, the fork on M3 pins, and the leg, with the clearances from the block | 1 h 18 min | 25.6 g |
 | [`gear-train-test.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/print/gear-train-test.3mf) | First gear train test: [spine](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/gear-train-test) on its own, the 4 crankshafts and the 3 idlers (made with the earlier parts; the STLs it was built from have changed) | 47 min | 16.5 g |
@@ -20,6 +23,14 @@ print to the next: P2S, 0.4 mm nozzle, Textured PEI plate, Bambu PLA Basic, **0.
 **tree(auto)**, **On build plate only**, X-Y hole and contour compensation left at 0.
 [`bambu_plate.py --standard`](../tools/bambu_plate.py) adds them. A plate that needs something else says so,
 with the reason, in its section below. A plate is committed once, for the version that is printed.
+
+## Robot plates (one per colour)
+
+`robot-red.3mf`, `robot-yellow-inner.3mf` and `robot-blue-base.3mf` hold the whole robot, split by filament colour
+(red body and legs, yellow inner mechanisms, blue base). Every part is a separate object: in Bambu Studio delete the
+ones you do not want before slicing, e.g. keep only `leg-3` (named `leg-3-7.stl`) of the red plate to test the leg
+snap. Same standard settings as above; the previews are labelled by part and drawn in green. Which parts to print
+first and why: see [Print plates by colour](../build-log/4-looks-first.md#print-plates-by-colour).
 
 ## Test leg plate
 
