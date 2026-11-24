@@ -93,6 +93,7 @@ BLOCK_Y = (T[0] - CL.DSY1, T[0] + CL.DSY2)
 ZBLK = [_top_below(y) + F.GEAR_TIP.side for y in BLOCK_Y]
 EAR_H = (2.4, CL.EARH2)                             # ear 2 lowered to 1.0 (plan drive-unit)
 EAR_HW = 2.6
+DU_W = 2.0                                          # drive unit plates 2.0 (5 nozzle lines; print 2026-11-24: the 1.2 plates broke at support removal), grown away from the fit faces
 CB_DEPTH = 0.4                                      # idler axles 1, 2: M2 head sunk this deep into the -x lug (lug W 1.2 keeps 0.8): head clears the legs' end tubes
 CB_R = M2_HEAD_R + F.STEEL.side
 SLW = JR + F.TURN.side                              # journal slot half-width
@@ -269,18 +270,18 @@ def pinion():
 
 NOTCH_HW = HUB_R + F.TURN.side                      # cheek rail notch half-width in y about the transfer axis: its hub (and the sleeve) go in from -z
 def drive_unit():
-    my, mz = MC; g = G_CL; ty, tz = T
-    q = [box((MX0 + 3, my - N10_W / 2 - g, mz - N10_H / 2 - g), (CLX1, my + N10_W / 2 + g, mz - N10_H / 2 - F.MOTOR_SEAT.side)),
-         box((CTX0, my - N10_W / 2 - g, mz + N10_H / 2 + F.MOTOR_SEAT.side), (MX1, my + N10_W / 2 + g, mz + N10_H / 2 + g)),
-         box((XO, min(ty, my) - 3, min(tz, mz) - 3), (XO + W, max(ty, my) + 3, mz + rt(ZP) + F.GEAR_TIP.side + W)),   # transfer cheek, up to the bridge
-         box((-WX1 - W, min(ty, my) - CL.DSY1 - 2.6, DZT), (-WX1, max(ty, my) + 3, mz - N10_H / 2 - g + W)),   # -x web: ears to the lower clamp
-         box((MX1 - 1.0, my - 3, mz + rt(ZP) + F.GEAR_TIP.side), (XO + W, my + 3, mz + rt(ZP) + F.GEAR_TIP.side + W)),  # bridge over the pinion: upper clamp to the transfer cheek
-         box((-WX1 - W, ty - 3, tz - 3), (-WX1, ty + 3, tz + 3))]                                     # inner cheek
+    my, mz = MC; g = G_CL; ty, tz = T; Wd = DU_W; gd = F.MOTOR_SEAT.side + Wd    # plates Wd thick, grown away from their fit faces
+    q = [box((MX0 + 3, my - N10_W / 2 - g, mz - N10_H / 2 - gd), (CLX1, my + N10_W / 2 + g, mz - N10_H / 2 - F.MOTOR_SEAT.side)),
+         box((CTX0, my - N10_W / 2 - g, mz + N10_H / 2 + F.MOTOR_SEAT.side), (MX1, my + N10_W / 2 + gd, mz + N10_H / 2 + gd)),
+         box((XO, min(ty, my) - 3, min(tz, mz) - 3), (XO + Wd, max(ty, my) + 3, mz + rt(ZP) + F.GEAR_TIP.side + Wd)),   # transfer cheek, up to the bridge
+         box((-WX1 - Wd, min(ty, my) - CL.DSY1 - 2.6, DZT), (-WX1, max(ty, my) + 3, mz - N10_H / 2 - F.MOTOR_SEAT.side)),   # -x web: ears to the lower clamp
+         box((MX1 - 1.0, my - 3, mz + rt(ZP) + F.GEAR_TIP.side), (XO + Wd, my + 3, mz + rt(ZP) + F.GEAR_TIP.side + Wd)),  # bridge over the pinion: upper clamp to the transfer cheek
+         box((-WX1 - Wd, ty - 3, tz - 3), (-WX1, ty + 3, tz + 3))]                                     # inner cheek
     for sy in (-1, 1):                                                       # clamp side rails (motor +-y, MOTOR_SEAT)
-        ya, yb = my + sy * (N10_W / 2 + F.MOTOR_SEAT.side), my + sy * (N10_W / 2 + g)
-        q.append(box((CTX0, min(ya, yb), mz - N10_H / 2 - g), (CTX0 + 3, max(ya, yb), mz + N10_H / 2 + g)))
+        ya, yb = my + sy * (N10_W / 2 + F.MOTOR_SEAT.side), my + sy * (N10_W / 2 + gd)
+        q.append(box((CTX0, min(ya, yb), mz - N10_H / 2 - gd), (CTX0 + 3, max(ya, yb), mz + N10_H / 2 + gd)))
     for k in (0, 1):                                                         # lugs on the -x plate, idler axles 1, 2
-        c = I[k]; q.append(cylx(c[0], c[1], LUGR, -WX1 - W, -WX1)); q.append(box((-WX1 - W, c[0] - LUGR, c[1]), (-WX1, c[0] + LUGR, DZT + 0.5)))
+        c = I[k]; q.append(cylx(c[0], c[1], LUGR, -WX1 - W, -WX1)); q.append(box((-WX1 - W, c[0] - LUGR, c[1]), (-WX1, c[0] + LUGR, DZT + 0.5)))      # lugs stay W: the axle heads (legs' end tubes) and the cranks' webs bound them
     for k, y in enumerate(BLOCK_Y):                                          # blocks + ears
         q.append(box((-WX1, y - DBH, ZBLK[k]), (WX1, y + DBH, DZT + 0.01)))
         q.append(box((-EAR_HW, y - DBH, DZT), (EAR_HW, y + DBH, DZT + EAR_H[k])))
@@ -300,14 +301,14 @@ def drive_unit():
         du = du - box((MX0, my - gw, z0), (MX1 + 0.5, my + gw, z1))
     for k in (0, 1):                                                         # lug holes (STEEL) + head counterbore
         c = I[k]; du = du - cylx(c[0], c[1], M2_HOLE_R, -WX1 - W - 1, -WX1 + 0.01) - cylx(c[0], c[1], CB_R, -WX1 - W - 1, -WX1 - W + CB_DEPTH)
-    du = du - cylx(ty, tz, M2_HOLE_R, -WX1 - W - 1, -WX1 + 0.01) - cylx(ty, tz, M2_PILOT_R, XO - 0.01, XO + W + 1)   # transfer axle
+    du = du - cylx(ty, tz, M2_HOLE_R, -WX1 - Wd - 1, -WX1 + 0.01) - cylx(ty, tz, CB_R, -WX1 - Wd - 1, -WX1 - W) - cylx(ty, tz, M2_PILOT_R, XO - 0.01, XO + Wd + 1)   # transfer axle
     du = du - cylx(ty, tz, rt(ZS) + F.GEAR_TIP.side, -GX, GX) - cylx(ty, tz, HUB_R + F.TURN.side, GX - IDL_T, XB0) \
             - cylx(ty, tz, rt(ZB) + F.GEAR_TIP.side, XB0 - F.GEAR_AXIAL.side + 0.01, XO - 0.01) \
             - cylx(my, mz, rt(ZP) + F.GEAR_TIP.side, MX1 + 0.01, XO - 0.01)                   # the transfer's and pinion's sweeps
     HOLDER_SCREW["pilot_bottom_z"] = max(ZBLK[1] + 0.8, HOLDER_SCREW["ear_top_z"] - 7.0)
     du = du - cylz(0, HOLDER_SCREW["y"], M2_PILOT_R, HOLDER_SCREW["pilot_bottom_z"], HOLDER_SCREW["ear_top_z"] + 1)
     KEY_R = 2.0 + F.STEEL.side                                               # 1.5 mm hex key access (cad_verify's hex-key tool is a Ø4 rod): hole in the upper clamp plate over the holder M2
-    du = du - cylz(0, HOLDER_SCREW["y"], KEY_R, mz + N10_H / 2 + F.MOTOR_SEAT.side - 1, mz + N10_H / 2 + g + 1)
+    du = du - cylz(0, HOLDER_SCREW["y"], KEY_R, mz + N10_H / 2 + F.MOTOR_SEAT.side - 1, mz + N10_H / 2 + gd + 1)
     return du
 
 

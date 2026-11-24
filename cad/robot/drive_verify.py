@@ -114,7 +114,7 @@ ACCESS = [*[{"at": n, "tool": tool("hex-key", np.asarray(SCREWS[n][1]) - [D.M2_H
           {"at": ("n10-motor", "pinion"), "tool": tool("finger", [D.MX0, D.MC[0], D.MC[1]], [-1, 0, 0], d=10.0), "why": "pushed in along +x by hand"}]
 _X2Z = np.array([[0, 0, -1, 0], [0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1.0]])   # axis x onto z (about y)
 PRINT_ORIENT = {"spine": np.eye(4), **{n: _X2Z for n in CRANKS + IDLERS + SLEEVES + ["transfer", "transfer-sleeve", "pinion"]},
-                "drive-unit": np.diag([1.0, -1.0, -1.0, 1.0])}                   # ear faces down
+                "drive-unit": np.array([[1.0, 0, 0, 0], [0, 0, 1.0, 0], [0, -1.0, 0, 0], [0, 0, 0, 1.0]])}   # -90° about X: clamp plates stand upright, no support in the motor seat; 34 % support vs 51 % ear-down (sliced 2026-11-24)
 MARKS = {**{c: f"{i+1} dots on the +x web hub (which crank, which end right); its gear is printed at its phase: set at crank pose 0" for i, c in enumerate(CRANKS)},
          **{n: "any tooth: the cranks' phases are printed in their gears, the idler meshes as it drops in at pose 0" for n in IDLERS},
          "transfer": "any tooth (meshes idler 2 and the pinion as it goes in)", "pinion": "any tooth"}

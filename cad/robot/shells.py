@@ -137,6 +137,8 @@ def _leg_frame(Lg, k):
     if not right:
         Mx = np.diag([-1.0, 1, 1, 1]); T = Mx @ T @ Mx
     return T
+JOINT_R = 2.35            # mm, the neck between the end tube and the arm (was P["r_inner"] 1.8: leg-3 broke there, print 2026-11-24)
+JOINT_BLEND_DR, JOINT_BLEND_L = 1.0, 2.0     # mm, cone at the tube end of the neck: r +1 tapering over 2 mm
 def _leg_right(i):
     P_, A0, ang, pts, rad, ni = motion.neutral_leg(i, P, n=13)
     rd = np.array([np.cos(ang), np.sin(ang), 0.0]); across = np.cross([0, 0, 1.0], rd)
@@ -161,7 +163,9 @@ def _leg_right(i):
     tube = dcone(END_R)
     bore = Pos(-0.01, 0, 0) * dcone(PINR + F.TURN.side + BORE_DRIFT[i])
     bore = bore + Pos(0.02, 0, 0) * dcone(PINR + F.TURN.side + BORE_DRIFT[i])
-    joint = _along(Cylinder(P["r_inner"], HUBCUT - 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN)), A0 + 1.5 * u, u)
+    from build123d import Cone
+    joint = _along(Cylinder(JOINT_R, HUBCUT - 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN)), A0 + 1.5 * u, u)
+    joint = joint + _along(Cone(JOINT_R + JOINT_BLEND_DR, JOINT_R, JOINT_BLEND_L, align=(Align.CENTER, Align.CENTER, Align.MIN)), A0 + 1.5 * u, u)   # blends into the tube wall
     ball = Pos(*P_) * Sphere(PB)
     rb = snap_bead_r(i)
     ring = Pos(xm - SNAP_BW / 2, A0[1], A0[2]) * Rot(0, 90, 0) * (Cylinder(PINR + F.TURN.side + BORE_DRIFT[i] + 0.4, SNAP_BW, align=(Align.CENTER, Align.CENTER, Align.MIN))
@@ -192,7 +196,7 @@ def _along(sh, p0, u):
     return Pos(*p0) * sh
 def leg(Lg):
     i = Lg % 4
-    key = ("leg8", i, SNAP_END, SNAP_NECK_R, SNAP_BW, SNAP_SLIT, FLARE_DEG[i], BORE_DRIFT[i], CL.PINX, S, HUBCUT, TAIL, END_R, PB, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C,
+    key = ("leg8", i, SNAP_END, SNAP_NECK_R, SNAP_BW, SNAP_SLIT, FLARE_DEG[i], BORE_DRIFT[i], CL.PINX, S, HUBCUT, TAIL, END_R, PB, JOINT_R, JOINT_BLEND_DR, JOINT_BLEND_L, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C,
            srch(_leg_right, _along))
     sh = cached(f"leg{i}", key, lambda: _leg_right(i))
     return sh if Lg < 4 else mirror_x(sh)
