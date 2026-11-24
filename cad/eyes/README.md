@@ -1,7 +1,9 @@
 # Eyes
 
 jenscolt's eye domes as one parametric cup: the large eye, the small eye and the front sensor, each in its
-reference frame. N1 form parts, not printed.
+reference frame. N1 form parts: [`../robot/`](../robot/) places the eye cups in the printed body, with a 5 mm LED
+in each large eye. The front sensor is still built here but no longer placed on the robot (2026-11-24): the mouth is
+closed by a front panel instead.
 
 **License:** derived from jenscolt's [Spidey-Bot](https://www.thingiverse.com/thing:5196618), so [CC BY-NC-SA](../carcass-jenscolt/LICENSE.txt): non-commercial, share-alike, with credit to jenscolt; unlike the rest of the repo (see [`carcass-jenscolt/README.md`](../carcass-jenscolt/README.md)).
 
@@ -11,7 +13,7 @@ reference frame. N1 form parts, not printed.
 |---|---|---|---|
 | `eye.stl` / `.step` | large eye cup | 17.5 × 8.5 × 17.7 | 1 |
 | `small-eye.stl` / `.step` | small eye cup | 7.3 × 4.8 × 7.4 | 1 |
-| `sensor.stl` / `.step` | front sensor cup | 7.6 × 4.8 × 7.6 | 1 |
+| `sensor.stl` / `.step` | front sensor cup (not used by the robot) | 7.6 × 4.8 × 7.6 | 0 |
 
 Hardware: none.
 

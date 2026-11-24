@@ -1,6 +1,6 @@
 # base
 
-jenscolt's base reduced to its outer bowl, rim and front leg windows, as parameters (N1 conversion; his posts, mounts and tabs are left out, our mechanism goes inside at N2).
+jenscolt's base reduced to its outer bowl, rim and front leg windows, as parameters (N1 conversion; his posts, mounts and tabs are left out). [`../robot/`](../robot/) scales it to 70 % and adds the leg windows, the snap ribs and the pockets the mechanism needs: that is the printed base.
 
 **License:** derived from jenscolt's [Spidey-Bot](https://www.thingiverse.com/thing:5196618), so [CC BY-NC-SA](../carcass-jenscolt/LICENSE.txt): non-commercial, share-alike, with credit to jenscolt; unlike the rest of the repo (see [`carcass-jenscolt/README.md`](../carcass-jenscolt/README.md)).
 

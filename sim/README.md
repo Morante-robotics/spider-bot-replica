@@ -1,15 +1,20 @@
 # Leg simulator
 
+The studies that chose the robot's leg: the toy leg on four lateral crankshafts. They were made for the first design
+(120 % of jenscolt's model, archived); the robot today still takes its leg from them:
+[`../cad/motion.py`](../cad/motion.py) reads the geometry in [`toy_leg_3d_rows_cad.json`](toy_leg_3d_rows_cad.json)
+and the notches, centre and gait groups in [`toy_leg_3d.py`](toy_leg_3d.py), and scales them to the robot.
+
 [`legs.py`](legs.py) simulates three walking legs driven by one crank (toy crank + sliding leg, Klann, Jansen),
 scaled so the crank axle is 55 mm above the ground, and prints the numbers used to choose one. It also checks the
 Grashof condition of a four-bar. It is 2D: the toy leg (the one chosen) moves in 3D, so its numbers here
 under-rate it; the 3D model is [`toy_leg_3d.py`](toy_leg_3d.py), below. How it was used and the results: [build log](../build-log/3-legs-and-drive.md#leg-simulator-and-comparison).
 
 ```
-python3 legs.py --png images/foot-paths.png --gif images/legs.gif   # --hip 60 for another axle height
+uv run python legs.py --png images/foot-paths.png --gif images/legs.gif   # --hip 60 for another axle height
 ```
 
-Needs numpy, matplotlib and pillow.
+From this folder; `uv sync` at the repo root installs numpy, matplotlib and pillow.
 
 ![Foot paths](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/foot-paths.png?raw=true)
 
@@ -37,11 +42,11 @@ the rim), the geometry used for the CAD is [toy_leg_3d_rows_cad.json](toy_leg_3d
 ([build log](../build-log/3-legs-and-drive.md#legs-and-drive-in-cad), parts in [../cad/legs/](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/legs) and [../cad/crankshafts/](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/crankshafts)).
 
 ```
-python3 toy_leg_3d.py --search 3000 --only lateral/crank --json lateral-crank.json   # search one combination
-python3 toy_leg_3d.py --params toy_leg_3d.json --png images/toy-3d-comparison.png --gif images/toy-3d.gif
+uv run python toy_leg_3d.py --search 3000 --only lateral/crank --json lateral-crank.json   # search one combination
+uv run python toy_leg_3d.py --params toy_leg_3d.json --png images/toy-3d-comparison.png --gif images/toy-3d.gif
 ```
 
-Needs numpy, scipy, matplotlib and pillow. The `shaft` axle (one crankshaft for all 8 legs) and the check that the
+`uv sync` installs numpy, scipy, matplotlib and pillow. The `shaft` axle (one crankshaft for all 8 legs) and the check that the
 cranks stay inside the base read the 120 % carcass mesh and are archived at
 [pre-redesign-2026-11-17](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/toy_leg_3d.py): that fit is N2's, on the parametric parts.
 
@@ -49,11 +54,13 @@ cranks stay inside the base read the 120 % carcass mesh and are archived at
 
 ![Toy leg in 3D, animated](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/toy-3d.gif?raw=true)
 
-## N20 motor sizing
+## Motor sizing (archived)
 
-The motor sizing (`motor_sizing.py`) weighed the robot from meshes and designs that no longer exist; it is archived
-([script](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/motor_sizing.py), [result](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/motor-sizing-result.txt)).
-Results: [build log](../build-log/3-legs-and-drive.md#whole-robot-first-motor-sizing-and-chassis-plan). The N2 design sizes the motor again from its
-own parts.
+The first design's N20 sizing (`motor_sizing.py`) weighed the robot from meshes and designs that no longer exist
+([script](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/motor_sizing.py), [result](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/motor-sizing-result.txt),
+[build log](../build-log/3-legs-and-drive.md#whole-robot-first-motor-sizing-and-chassis-plan)). The robot today uses
+an N10 and six AG13 cells, sized by
+[`sizing.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/mockup/sizing.py)
+([build log](../build-log/4-looks-first.md#redesign-looks-first)); the motor is measured once it is bought.
 
 ![N20 candidates](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/sim/images/motor-sizing.png?raw=true)

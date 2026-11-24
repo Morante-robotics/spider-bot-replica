@@ -4,11 +4,11 @@ The check that answers «does everything fit inside the looks robot, and can it 
 still a plan. It does not need the parts modelled in build123d. It samples every part, screw, contact and resistor as
 a point cloud. It reads the body and base cavities from their own build modules' section functions and the real
 `cad/legs` parts over 24 crank poses. Every gap is signed against its clearance in [`../../fits.py`](../../fits.py).
-Once `cad/robot/build.py` exists, the full `cad_verify` (`verify.py`) is the gate before printing. This check is
-how the layout is found before that.
+It found the layout of round r00. Now that the parts are modelled, it is **not a gate**: the full `cad_verify` of
+the real parts ([`../verify.py`](../verify.py)) is. Run it again only to try a new layout before modelling it.
 
 ```bash
-uv run python cad/robot/fitcheck/check.py > cad/robot/fitcheck/out/report.txt    # ≈ 8 min on 2 cores, ≈ 10 min cold
+uv run python cad/robot/fitcheck/check.py > cad/robot/fitcheck/out/report.txt    # ≈ 19 min
 ```
 
 Progress goes to stderr. The report lists the least margins first, then `FAILING: n AT TOLERANCE …: m of N checks`.

@@ -2,21 +2,22 @@
 
 Every part of the robot is modelled in code ([build123d](https://github.com/gumyr/build123d)), one folder per
 design. No printed part is a mesh: a part that exists only as a mesh (a downloaded model, a scan) is first converted
-to parameters (see «From a mesh»), and the mesh stays only as its reference. This page holds the rules every design follows, so a new one starts from the same layout,
-the same axes and the same clearances. Set up the Python environment once from the repo root with `uv sync`.
+to parameters (see «From a mesh»), and the mesh stays only as its reference. The whole robot is [`robot/`](robot/): it places
+every design in one frame and fits the drive and power inside. This page holds the rules every design follows, so a
+new one starts from the same layout, the same axes and the same clearances. Set up the Python environment once from the repo root with `uv sync`.
 
 ## Conventions
 
 | What | Rule |
 |---|---|
 | Units | Millimetres, degrees in arguments, radians inside the maths |
-| Axes | As the carcass ([carcass-120](https://github.com/Morante-robotics/spider-bot-replica/tree/pre-redesign-2026-11-17/cad/carcass-120)) and the [simulator](../sim/): **Z up**, **forward = −Y**, **+X = the robot's right** (the right legs' side) |
-| Origin | The carcass's origin at 120 %; every design places its parts in this frame (`poses()` in its spec), and exports each part in its own print frame |
+| Axes | As [`motion.py`](motion.py) and the [simulator](../sim/): **Z up**, **forward = −Y**, **+X = the robot's right** (the right legs' side) |
+| Origin | The robot frame: on the body's axis, z = 0 at the base's bottom, at the robot's scale (0.70 of jenscolt). The converted parts keep jenscolt's frame and `robot/shells.py` moves them into it (`motion.to_frame`); each part is exported in its own print frame |
 | Crank angle | 0° = every crank level; it turns positive about +X |
 | Left and right | Seen from behind the robot, looking forward: as the robot's own right and left |
 | Clearances | Only from [`fits.py`](fits.py): measured on real prints, never typed in a design |
 | Fidelity to a reference mesh | p95 ≤ 3 % and max ≤ 6 % of the reference's largest extent, never below 1.0 / 2.0 mm (max checked on the 99.9th percentile: one stray sample does not decide), both ways, at the reference's scale: [`mesh_ref.py`](../tools/mesh_ref.py) `limits()` (Morante, 2026-11-21: «more or less» like the Spider-Bot; the judge and Morante decide the look). Other limits for one part only as an approved exception (`rounds.py except`, «From a mesh») |
-| Names | Parts in kebab-case (`leg-front-left`), numbered front to rear (`crankshaft-1` is the front one); versions as `-v2`, never «new» or «final» |
+| Names | Parts in kebab-case (`cell-holder`), numbered front to rear (`crank-1` is the front one; legs 0–3 right, 4–7 left); versions as `-v2`, never «new» or «final» |
 
 ## A design folder
 
@@ -86,9 +87,9 @@ VERIFY_STEP=30 ../../.venv/bin/python ../../tools/cad_verify.py verify.py --quic
 Designs that use another design's parameters import its `build.py` as a module (one source per number), never
 copy a value: with the repo root on `sys.path`, `from cad import design` and `C = design("crankshafts")`
 ([`__init__.py`](__init__.py)); a design loads its own `build.py` the same way. What several designs share (the
-simulator's geometry, hardware sizes, build123d helpers) is in [`common.py`](common.py). The robot master model,
-[`robot.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/pre-redesign-2026-11-17/cad/robot.py), holds the datums, the carcass envelope, the interfaces between designs and the bought parts'
-sizes (catalogue values until they are measured): a design takes these numbers from it, never a copy.
+simulator's geometry, build123d helpers) is in [`common.py`](common.py). The interfaces between
+designs and the bought parts' sizes (catalogue values until they are measured) live in [`robot/`](robot/)
+(`shells.py`, `drive.py`, `power.py`): every other file takes these numbers from there, never a copy.
 
 Geometry stays light: no cut or check runs against a reference mesh (jenscolt's body is 102k triangles); checks
 read the parametric parts' coarse STL, cached, or boxes. That STL is the model's own export, so `cad_verify` (and

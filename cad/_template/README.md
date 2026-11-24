@@ -9,7 +9,7 @@ One sentence: what this design is for and where it goes in the robot.
 | File (`out/`) | What it is | Size (mm) | Quantity |
 |---|---|---|---|
 
-Hardware: <exact sizes and counts, e.g. 2 × M3×12 socket head, 2 × M3 nut>.
+Hardware: <exact sizes and counts, e.g. 2 × M2×6 socket head>; every item is in [`../../hardware.md`](../../hardware.md) first.
 
 ## Print
 

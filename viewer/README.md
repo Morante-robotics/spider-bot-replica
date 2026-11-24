@@ -15,7 +15,7 @@ page uses the system fonts.
 | Drive: spine, 4 cranks, 3 idlers and sleeves, transfer and its sleeve, drive unit, pinion | `out/*.stl`; cranks, idlers, transfer and pinion move per pose | Real parts, one colour each |
 | Power: cell holder, cell lid | `out/cell-holder.stl`, `cell-lid.stl` | Real parts |
 | Bought (green): N10 motor, AG13 cells, springs, nickel strip, JST-XH, switch, LEDs, screws and axles | `out/*.stl` of the bought parts; the motor and the screws as the spec models them | Real or as modelled in the spec |
-| Warnings | The FAIL rows and the fit-relevant WARN rows of `cad/robot/verify-result.txt` (coarse gaps, joints «not measured yet»). The pin is where the two parts come closest at pose 0 | From the last cad_verify run (0 FAIL on 2026-11-23) |
+| Warnings | The FAIL rows and the fit-relevant WARN rows of `cad/robot/verify-result.txt` (coarse gaps, joints «not measured yet»). The pin is where the two parts come closest at pose 0 | From the last cad_verify run (PASS, 0 FAIL on 2026-11-24) |
 
 The part list has a toggle per group (show, hide, open the list) and a checkbox per part. «See inside» hides the shells; «See-through shells» keeps them as ghosts. The fit check's rows are no longer shown: it is the pre-CAD planner, not a gate.
 

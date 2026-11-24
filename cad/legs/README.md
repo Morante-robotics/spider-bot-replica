@@ -1,7 +1,7 @@
 # legs
 
 jenscolt's leg (blade `L_leg1`, arm `L_leg2`; the right ones `R_leg1`, `R_leg2` the same model mirrored) as parametric
-build123d code instead of meshes. Both parts lie on spines, so N1 bends them onto the approved leg path ([`../motion.py`](../motion.py)) with `leg()`. Level N1 (form only, not printed).
+build123d code instead of meshes. Both parts lie on spines, so N1 bends them onto the approved leg path ([`../motion.py`](../motion.py)) with `leg()`. Level N1 (form): these files are not printed as they are; [`../robot/`](../robot/) bends, scales and builds the eight printed legs from them, with the crank-pin snap.
 
 **License:** derived from jenscolt's [Spidey-Bot](https://www.thingiverse.com/thing:5196618), so [CC BY-NC-SA](../carcass-jenscolt/LICENSE.txt): non-commercial, share-alike, with credit to jenscolt; unlike the rest of the repo (see [`carcass-jenscolt/README.md`](../carcass-jenscolt/README.md)).
 
