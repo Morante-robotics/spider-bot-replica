@@ -119,7 +119,13 @@ def step_words(st, spec, lang):
 def path_words(path, lang):
     """The moves of an ASSEMBLY path in order: «down 30 mm, then +Y 4 mm»."""
     from cad_verify import move_words
-    return (", then " if lang == "en" else ", luego ").join(move_words(m) for m in path)
+    def words(m):                                     # cad_verify says «down 30 mm»; the kit is in the reader's language
+        w = move_words(m)
+        for k in ("down", "up"):
+            if w.startswith(k + " "):
+                return BENCH_WORDS[lang][k] + w[len(k):]
+        return w
+    return (", then " if lang == "en" else ", luego ").join(words(m) for m in path)
 
 
 # ---------------------------------------------------------------- the renderer
