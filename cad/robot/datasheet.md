@@ -3,6 +3,36 @@
 Numbers and paths that describe the robot's design as it stands. The story is in the build log
 ([Looks first](../../build-log/4-looks-first.md)); what is left is in [Open items](../../build-log.md#open-items).
 
+## State 2026-11-24 (start here)
+
+Batch 1 (blue base, yellow inner plate, leg-3) was printed and assembled: **it fails as a robot**
+([Batch 1 result](../../build-log/4-looks-first.md#batch-1-result-the-mechanism-is-not-printable-at-this-size)).
+Before that, two fixes went in: drive unit plates 2.0 mm (`DU_W`), printed −90° about X (`7c37dfb`); leg tube
+closed at its tip with the Ø4.7 rod fused to it (`SNAP_WALL`, `JOINT_R`) and the `SECTION_MIN` check 9b in
+`cad_verify` (`1fb1b20`). Full `verify.py`: PASS, 0 FAIL.
+
+Morante's five faults, each with the design number behind it:
+
+| Fault | Design number | Status of the fit |
+|---|---|---|
+| No mark can be seen | dots `Sphere(0.35)` at 1.0 pitch (`common.dice`): Ø0.7 × 0.35 deep, under one 0.4 line | — |
+| Parts come out wrong | gears module `M = 0.6` (12/15/16/20 teeth): tooth ≈ 0.94 mm, two lines | — |
+| Parts snap when touched | walls `W = 1.2` (3 lines); drive unit ear 2 `EARH2` 1.0 high (the «orejeras») | — |
+| No gear turns | `GEAR_TIP` 0.4 radial | assumed, never on a coupon |
+| No screw or pin goes in | M2 holes Ø2.3 (`STEEL` 0.15, measured on M3/Ø3.3 only), pilots Ø1.6; X-Y hole compensation never calibrated | assumed |
+
+**Open decision, Morante's (asked 2026-11-24, not answered):** how to make the mechanism printable. Options, none
+dropped: (1) **calibration coupons first**, recommended and needed by every other option: one
+plate ≈ 20–30 min with M2 holes and pilots in 0.1 steps, pin/sleeve fits, gear pairs at module 0.6/0.8/1.0 and two
+tip clearances, mark samples (dots and engraved numbers of several sizes), walls 1.2/1.6/2.0; the measured values go
+into `cad/fits.py`; (2) a larger scale (no number until code counts every part); (3) same
+scale with printable minimums (module ≥ 0.8, walls 1.6–2.0, big numbers as marks), likely does not fit inside;
+(4) a 0.2 mm nozzle for the P2S (a purchase, 2–3× slower, not stronger); (5) a simpler mechanism (fewer, larger
+parts, e.g. one crankshaft + side bars). Whatever he picks, the faults above become `cad_verify` checks (smallest
+printed feature, gear module, mark size) so a design cannot pass with them again.
+
+Next session: start from this section and the open item, ask the one question above with a picture.
+
 ## State 2026-11-23
 
 N2 round r00 of `cad/robot` at scale 0.70. **Full `verify.py` of the whole robot: PASS, 0 FAIL, in ≈ 80 s (+ 15 s renders; `verify-result.txt`).** `--quick`

@@ -9,7 +9,7 @@ toy: the specification is now the toy and jenscolt's model, and the mechanism is
 went through a mock-up in simple shapes (N0), the real parts as light meshes (N1), and a first print-detail attempt
 that did not fit at 65 % (N2 rev 5). Meshes then proved a dead end, so every part was rebuilt as parameters and only
 those measure. Round r00 of N2 designed the inside (drive and power); the shells then took an hour to build, so their
-leg clearances were redesigned as simple shapes and every build and check came under 40 s, with 0 failures. Then the unused front sensor was removed and the mouth closed with a front panel, and the robot was split into one print plate per colour for a first test batch. Older
+leg clearances were redesigned as simple shapes and every build and check came under 40 s, with 0 failures. Then the unused front sensor was removed and the mouth closed with a front panel, and the robot was split into one print plate per colour for a first test batch. That batch failed as a robot: the parts print, but the mechanism is too fine for the printer at this size. Older
 entries are shortened to their summary; the full text is in git (links).
 
 ### Redesign: looks first
@@ -322,7 +322,7 @@ front down to the base. The two views are at different zoom.*
 
 ### Print plates by colour
 
-**Phase 5 · Final build · 2026-11-24** · Status: 🔄 plates ready, batch 1 not printed yet
+**Phase 5 · Final build · 2026-11-24** · Status: ✅ plates made; batch 1 was printed, see [Batch 1 result](#batch-1-result-the-mechanism-is-not-printable-at-this-size)
 
 > **In short.** The robot is printed in three colours, so the parts are split into one plate per colour: red for the
 > body and the eight legs, yellow for the inner mechanisms, blue for the base. Every part is its own object, so
@@ -374,5 +374,96 @@ and the spine (30 %).
   step, served by GitHub Pages. This step's kit: [`kits/01-batch-1-test-leg`](../kits/01-batch-1-test-leg/)
   ([open it](https://morante-robotics.github.io/spider-bot-replica/kits/01-batch-1-test-leg/kit.html)): the two
   batches, 37 assembly steps with a picture each, what to measure and what to film.
+
+### Batch 1 result: the mechanism is not printable at this size
+
+**Phase 5 · Final build · 2026-11-24** · Status: ❌ batch 1 failed as a robot; how to fix it is open
+
+> **In short.** Morante printed batch 1 (the blue base, the yellow inner plate and leg 3) at scale 0.70 and tried to
+> assemble it. Two parts broke while he removed the support, and after two fixes the assembly still failed on five
+> counts: no marks can be seen, the parts are tiny, they snap when touched, no gear turns and no screw or pin goes
+> through its hole. Almost every size the design asks for is within one or two lines of the 0.4 mm nozzle, and the
+> fits for it were assumed, never printed on a test piece. The next step is open: Morante chooses how to make the
+> mechanism printable.
+
+Batch 1 was the first print of the whole-robot design, and the test of fits that the ready-to-print check had marked
+«assumed»: the D-shaft bore, the gear tip room, the leg path, the motor seat and the press fits. The plan was to
+print it as the coupon for all of them at once. It did, and the answer is in this entry. The kit that guided the
+assembly is [`kits/01-batch-1-test-leg`](../kits/01-batch-1-test-leg/).
+
+#### What broke while printing
+
+- **The drive unit** broke while the support was being removed: its plates were 1.2 mm. Fixed in `7c37dfb`: plates
+  2.0 mm, and the part printed turned -90°, which cuts its support from 66 % to 34 %.
+- **Leg 3** snapped at the joint between its pin tube and the arm. First fix (`7c37dfb`): the joint Ø3.6 became Ø4.7.
+  Then Morante saw light between the rod and the tube in Bambu Studio: the rod only butted against the tube's open rim,
+  and the thinnest plane through the junction was 1.9 mm². Second fix (`1fb1b20`): the tube is closed at its tip and
+  the rod fused to it, 17.3 mm² (the rod's own section). A new check, `cad_verify` 9b `SECTION_MIN`, fails all 8 legs
+  of the old design and passes the new one; the full verify of the robot passes.
+
+#### Morante's result
+
+Morante, 2026-11-24, assembling what he could (the original Spanish and a translation):
+
+- «No se ve ninguna marca impresa en ninguna pieza así que no sé cómo montarlas.» · No printed mark can be seen on
+  any part, so I do not know how to assemble them.
+- «Las piezas son tan pequeñas, que por la resolución de la impresora salen las cosas mal.» · The parts are so small
+  that, because of the printer's resolution, things come out wrong.
+- «Las piezas son tan finas y endebles que se rompen con tocarlas (como las orejeras que se me han roto y he tenido que
+  imprimir de nuevo).» · The parts are so thin and weak that they break just by touching them (like the ears that broke
+  and I had to print again).
+- «No gira ningún engranaje porque rozan.» · No gear turns because they rub.
+- «No cabe ningún tornillo ni pasador por agujeros.» · No screw or pin fits through any hole.
+
+<table>
+<tr>
+<td width="50%"><img src="images/batch1-result-1.jpg" width="440" alt="The yellow inner parts assembled on the spine, seen from above"></td>
+<td width="50%"><img src="images/batch1-result-2.jpg" width="400" alt="The inner assembly held between two fingers, the cranks with their axles, and a loose gear"></td>
+</tr>
+<tr>
+<td><em>Fig. 1a · The inner assembly on the spine. The gears are there, but they do not turn.</em></td>
+<td><em>Fig. 1b · The same from the cranks' end, with a loose gear on the mat. The parts are small next to a fingertip.</em></td>
+</tr>
+<tr>
+<td width="50%"><img src="images/batch1-result-3.jpg" width="440" alt="The blue base held between two fingers, thin and flexible"></td>
+<td width="50%"><img src="images/batch1-result-4.jpg" width="440" alt="Two yellow sleeves on a ruler, each about 3 mm"></td>
+</tr>
+<tr>
+<td><em>Fig. 1c · The blue base: a thin, flexible shell.</em></td>
+<td><em>Fig. 1d · Two sleeves on a ruler (cm), each about 3 mm. The idlers turn on these.</em></td>
+</tr>
+</table>
+
+#### Why: the sizes against the printer
+
+From the design numbers (not yet measured on a printed part): the marks are dots Ø0.7 mm and 0.35 mm deep at 1.0 mm
+pitch (`common.dice` and `Sphere(0.35)` in `drive.py`), under one 0.4 mm line, so they do not print. The gears are
+module 0.6 with 12, 15, 16 and 20 teeth, a tooth about 0.94 mm thick at the pitch circle, and a tip room of 0.4 mm
+(`GEAR_TIP`, «assumed», never printed on a coupon). The walls are 1.2 mm (three lines) and the drive unit's ear 2 was
+1.0 mm high. The M2 holes are Ø2.3 mm and the self-tapping pilots Ø1.6 mm, both «assumed»: `STEEL` was measured only
+on M3 in Ø3.3, and the X-Y hole compensation was never calibrated (an open item).
+
+<img src="images/batch1-limits.png" alt="Bars of the designed sizes against one line, two lines and one layer">
+
+*Fig. 2 · Sizes the design asks of the printer, against one 0.4 mm line, two lines and one 0.2 mm layer. Red: under
+two lines; orange: under three. The marks and the gear tip room are the clearest misses.*
+
+What it proves: the failures are not a handful of bugs but a size problem. The two breaks were fixed, but the marks,
+the gears and the holes are the design at 0.70 scale meeting a 0.4 mm nozzle. It also shows that the ready-to-print
+gate was right to call the assumed fits risky: batch 1 was their coupon, and they all failed together, so the
+result does not say which of them would have worked alone.
+
+#### Decisions
+
+- **Batch 2 (the rest of the red plate) is not printed.** There is no point printing seven more legs of a mechanism
+  that does not turn.
+- **Cold leg build.** A leg built from nothing takes over 40 s under load (`CAD_BUDGET`); it is now an open item.
+
+#### Next
+
+Open decision, Morante's: how to make the mechanism printable. The options on the table are calibration coupons
+first (gear tooth, marks, M2 holes and pilots, wall and plate minimums), then a larger scale, or the same scale
+with printable minimums, or a 0.2 mm nozzle, or a simpler mechanism. The open item says coupons first, so that the
+choice can rest on printed numbers.
 
 [↑ Contents](../build-log.md#contents)
