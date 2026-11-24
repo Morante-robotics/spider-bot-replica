@@ -43,6 +43,7 @@ print plates, one per colour. The first test batch (base, inner mechanisms and o
 | [cad/](cad/) | The rules every design follows: axes, folder layout, rounds, time budget; [`_template/`](cad/_template/) to start a new design |
 | [cad/motion.py](cad/motion.py), [cad/fits.py](cad/fits.py) | The approved leg motion over a crank turn, and the measured clearances every design takes its holes and gaps from |
 | [print/](print/) | The three print plates (red, yellow, blue) and the standard print settings |
+| [kits/](kits/) | The workshop kits: what to print, assemble, measure and film at each step, [one page per step](kits/README.md) for the phone |
 | [viewer/](viewer/) | The whole robot in 3D: [open it in the browser](https://morante-robotics.github.io/spider-bot-replica/) |
 | [hardware.md](hardware.md) | The shopping list: motor, cells, springs, switch, connector, screws, LEDs |
 | [measurements.csv](measurements.csv) | Every caliper measurement of a printed part, the source of the fits |

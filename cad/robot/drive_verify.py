@@ -33,9 +33,10 @@ SCREWS = {"axle-1": (6, [XH, *D.I[0]], [1, 0, 0]), "axle-2": (6, [XH, *D.I[1]], 
           "axle-3": (5, [-D.WX1, *D.I[2]], [1, 0, 0]), "axle-t": (12, [XL, *D.T], [1, 0, 0]),
           **{f"keel-{k+1}": (L, [x, y, zh], [0, 0, 1]) for k, (x, y, zh, L) in enumerate(D.KEEL_SCREWS)}}
 PARTS = {**{n: {"stl": f"out/{n}.stl"} for n in PRINTED},
-         "n10-motor": {"mesh": motor(), "hardware": True, "label": "motor N10 3 V (caja metálica, eje D Ø3)"}}
+         "n10-motor": {"mesh": motor(), "hardware": True, "label": "motor N10 3 V (caja metálica, eje D Ø3)",
+                       "label_en": "N10 motor 3 V (metal gearbox, D shaft Ø3)"}}
 for n, (L, p, a) in SCREWS.items():
-    PARTS[n] = {"mesh": m2(L, p, a), "hardware": True, "label": f"M2×{L} Allen"}
+    PARTS[n] = {"mesh": m2(L, p, a), "hardware": True, "label": f"M2×{L:g} Allen", "label_en": f"M2×{L:g} socket head"}
 
 
 def _rx(a, c):

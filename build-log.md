@@ -80,10 +80,9 @@ archived in [Legs and drive](build-log/3-legs-and-drive.md).
 
 | Pending | Came up in | Phase |
 |---|---|---|
-| Workshop kit: legs 1, 2, 4–7 with the crank at pose 0, then half a turn for legs 0 and 3 and the body; switch glued from the front | [Fast shells](build-log/4-looks-first.md#fast-shells-clearances-designed-not-computed) | 3 |
 | Speed, optional: the body skin (cad/body, 17–20 s) and the body's fixed stage (cold 40 s) are cached; make them faster if they get used often (`viewer/src/export.py` is down to 5 s) | [Fast shells](build-log/4-looks-first.md#fast-shells-clearances-designed-not-computed) | 3 |
 | Coupon for the leg snap: skipped by Morante; the leg snap is tested on the first plate (base + one leg) before the other 7 legs ([state](cad/robot/datasheet.md#state-2026-11-23)) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
-| Print batch 1 (blue plate, yellow plate and leg 3 from the red one, ≈ 2 h 35 min), check the leg snap and the M2 pilots; then batch 2, the rest of the red plate (≈ 5 h). Shopping list: [`hardware.md`](hardware.md) | [Print plates by colour](build-log/4-looks-first.md#print-plates-by-colour) | 5 |
+| Print batch 1 (blue plate, yellow plate and leg 3 from the red one, ≈ 2 h 35 min), check the leg snap and the M2 pilots; then batch 2, the rest of the red plate (≈ 5 h). Kit: [`kits/01-batch-1-test-leg`](kits/01-batch-1-test-leg/); shopping list: [`hardware.md`](hardware.md) | [Print plates by colour](build-log/4-looks-first.md#print-plates-by-colour) | 5 |
 | Body: the curved top panels and the chin grille, if Morante wants them later (a build takes 60–80 s) | [Meshes become parameters](build-log/4-looks-first.md#meshes-become-parameters) | 3 |
 | Buy the N10 motor (3 V, ≈ 100–150 rpm) and 6 × AG13 cells and measure the motor (body, shaft, mounting); sizing: [`sizing.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/mockup/sizing.py) | [Redesign: looks first](build-log/4-looks-first.md#redesign-looks-first) | 3 |
 | Import the parts into Onshape as STEP and assemble them with mates | [Onshape assembly](build-log/3-legs-and-drive.md#onshape-assembly) | 3 |

@@ -369,5 +369,10 @@ and the spine (30 %).
 - **Batch 1** (≈ 2 h 35 min): blue plate, yellow plate and leg 3 from the red one. Check the crank pins, snap bead and
   collar for support residue, the bore of leg 3 for roundness, and that sleeves and idlers stuck to the bed.
 - **Batch 2** (≈ 5 h): the rest of the red plate, after leg 3 snaps well.
+- **Kits in the repo.** Morante liked the workshop kit enough to keep it: «quiero que a partir de ahora los kits
+  formen parte del repo». From now on every kit is made in English in [`kits/`](../kits/README.md), one folder per
+  step, served by GitHub Pages. This step's kit: [`kits/01-batch-1-test-leg`](../kits/01-batch-1-test-leg/)
+  ([open it](https://morante-robotics.github.io/spider-bot-replica/kits/01-batch-1-test-leg/kit.html)): the two
+  batches, 37 assembly steps with a picture each, what to measure and what to film.
 
 [↑ Contents](../build-log.md#contents)

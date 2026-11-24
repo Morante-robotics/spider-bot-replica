@@ -13,9 +13,12 @@ DRIVE = importlib.util.find_spec("drive_verify") is not None
 HW = {"ag13-cells": "6 x pila AG13 / LR44", "cell-springs": "3 x muelle conico 7 mm", "nickel-strip": "tira de niquel 0.3",
       "holder-screw": "M2x6 Allen", "ss12d00-switch": "interruptor SS12D00G3", "leds": "2 x LED 5 mm + resistencia",
       "jst-xh": "JST-XH 3 pines (pareja)"}
+HW_EN = {"ag13-cells": "6 x AG13 / LR44 cell", "cell-springs": "3 x conical spring 7 mm", "nickel-strip": "nickel strip 0.3",
+         "holder-screw": "M2×6 socket head", "ss12d00-switch": "SS12D00G3 switch", "leds": "2 x 5 mm LED + resistor",
+         "jst-xh": "JST-XH 3-pin (pair)"}          # the English kit (tools/workshop_kit.py --lang en)
 GLUED = ("leds", "jst-xh", "ss12d00-switch")          # held by a drop of glue (Morante 2026-11-23: lax on small non-critical fits): not retention-checked
 PARTS = {"cell-holder": {"stl": "out/cell-holder.stl"}, "cell-lid": {"stl": "out/cell-lid.stl"},
-         **{n: {"stl": f"out/{n}.stl", "hardware": True, "label": l, **({"fixed": True} if n in GLUED else {})} for n, l in HW.items()}}
+         **{n: {"stl": f"out/{n}.stl", "hardware": True, "label": l, "label_en": HW_EN[n], **({"fixed": True} if n in GLUED else {})} for n, l in HW.items()}}
 PAIR_GAP = {("ag13-cells", "cell-holder"): fits.STEEL.side - 0.01, ("cell-holder", "cell-springs"): fits.STEEL.side - 0.01,
             ("ag13-cells", "cell-lid"): fits.STEEL.side - 0.01,
             ("cell-holder", "nickel-strip"): fits.STEEL.side - 0.01, ("cell-lid", "nickel-strip"): fits.STEEL.side - 0.01}   # bought parts in printed seats: STEEL a side is the design gap

@@ -1,0 +1,228 @@
+<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Spider-Bot: batch 1 (test of the leg snap and the M2 screws) and robot assembly</title><style>body{font:17px/1.45 -apple-system,system-ui,sans-serif;margin:0 auto;max-width:760px;padding:16px;color:#1a1a1a;
+background:#fff}h1{font-size:1.5em;margin:.2em 0}h2{font-size:1.2em;border-bottom:2px solid #1a1a1a;margin-top:1.6em}
+img{width:100%;height:auto;border:1px solid #ddd;border-radius:6px}table{border-collapse:collapse;width:100%}
+td,th{border-bottom:1px solid #ddd;padding:6px 4px;text-align:left;vertical-align:top}.falta{color:#c0392b;
+font-weight:bold}.paso{border:1px solid #ccc;border-radius:8px;padding:10px;margin:14px 0}.n{display:inline-block;
+background:#1a1a1a;color:#fff;border-radius:50%;width:1.8em;height:1.8em;text-align:center;line-height:1.8em;
+font-weight:bold;margin-right:.4em}.ok{color:#1e7e34}.mark{background:#fff3cd;padding:2px 6px;border-radius:4px}</style>
+<h1>Spider-Bot: batch 1 (test of the leg snap and the M2 screws) and robot assembly</h1>
+<h2>1 · What this tests</h2>
+<p>First print of the robot. Batch 1 tests two things never tried before: that a leg clicks onto its crank pin (the snap bead) and that the self-tapping M2 screws bite in their Ø1.6 pilot holes. Print the blue plate (base) whole, the yellow plate (inner mechanisms) whole and, from the red plate, only leg-3.</p>
+<p><b>Works if:</b> Crank pins, snap beads and collars free of support residue; leg-3&#x27;s tube round and clean inside; sleeves and idlers stuck to the bed; and on assembly, leg-3 clicks onto its pin and the M2 screws bite without splitting the plastic. Any fault: a photo to Claude, and only that part is fixed.</p>
+<h2>2 · What to print</h2>
+<table><tr><th>Plate</th><th>What for</th><th>g</th><th>h</th></tr><tr><td>print/robot-blue-base.3mf</td><td>Base (blue). Printed foot down; the support (4.2 g) is on the outside of the bowl and is sanded off.</td><td>8.02</td><td>0.87</td></tr><tr><td>print/robot-yellow-inner.3mf</td><td>Inner mechanisms (yellow): 17 parts (spine, cranks 1-4, idlers 1-3, sleeves, transfer gear, drive unit, pinion, cell holder and lid).</td><td>14.27</td><td>1.27</td></tr><tr><td>print/robot-red.3mf (leg-3 only)</td><td>Only leg-3, to test the snap. In Bambu Studio it is called «leg-3-7.stl». In the red plate picture (print/images/robot-red.png) it is at the top, right of the body (first row, second part). Remove the other parts from the plate before slicing.</td><td>6.48</td><td>0.44</td></tr></table>
+<p><b>Do not print yet:</b></p><ul><li>The rest of the red plate (body and the other 7 legs, about 80 g and ≈ 5 h): batch 2, only once leg-3 has snapped on well.</li><li>Everything red in the picture except leg-3.</li></ul>
+<h2>3 · What you need</h2>
+<p><b>Printed parts</b></p><ul><li>base</li><li>body</li><li>leg-0</li><li>leg-1</li><li>leg-2</li><li>leg-3</li><li>leg-4</li><li>leg-5</li><li>leg-6</li><li>leg-7</li><li>spine</li><li>crank-1</li><li>crank-2</li><li>crank-3</li><li>crank-4</li><li>idler-1</li><li>idler-2</li><li>idler-3</li><li>sleeve-1</li><li>sleeve-2</li><li>sleeve-3</li><li>transfer</li><li>transfer-sleeve</li><li>drive-unit</li><li>pinion</li><li>cell-holder</li><li>cell-lid</li></ul>
+<p><b>Hardware</b></p><table><tr><td>1 ×</td><td>2 x 5 mm LED + resistor</td></tr><tr><td>1 ×</td><td>3 x conical spring 7 mm</td></tr><tr><td>1 ×</td><td>6 x AG13 / LR44 cell</td></tr><tr><td>1 ×</td><td>JST-XH 3-pin (pair)</td></tr><tr><td>1 ×</td><td>M2×12 socket head</td></tr><tr><td>2 ×</td><td>M2×4 socket head</td></tr><tr><td>1 ×</td><td>M2×5 socket head</td></tr><tr><td>3 ×</td><td>M2×6 socket head</td></tr><tr><td>1 ×</td><td>N10 motor 3 V (metal gearbox, D shaft Ø3)</td></tr><tr><td>1 ×</td><td>SS12D00G3 switch</td></tr><tr><td>1 ×</td><td>nickel strip 0.3</td></tr></table>
+<p><b>Tools:</b> 1.5 mm hex key, pliers, fine tweezers, caliper, rubber band, a drop of glue, sandpaper or a craft knife for the support</p>
+<h2>4 · Assembly</h2>
+<p>Every part, with its step number:</p><img src="exploded.png" loading="lazy">
+<div class="paso"><p><span class="n">1</span><b>base</b> · start with</p>
+<img src="step-01.png" loading="lazy">
+
+
+</div>
+<div class="paso"><p><span class="n">2</span><b>crank-1</b> · on the bench: in from above</p>
+<img src="step-02.png" loading="lazy">
+<p>Put the spine (the long yellow box) on the table. Lower crank 1 (one dot on the hub, +X side) into its slots, with the cranks at pose 0: the one the dots mark.</p>
+<p><span class="mark">Mark: 1 dots on the +x web hub (which crank, which end right); its gear is printed at its phase: set at crank pose 0</span></p>
+<p class="ok">✓ The crank drops into its two slots without forcing and sits with the cranks at pose 0. If the pin, snap bead or collar carry support residue, clean them first.</p>
+</div>
+<div class="paso"><p><span class="n">3</span><b>crank-2</b> · on the bench: in from above</p>
+<img src="step-03.png" loading="lazy">
+<p>Same as before: crank 2 (2 dots on the hub) into its slots, cranks at pose 0.</p>
+<p><span class="mark">Mark: 2 dots on the +x web hub (which crank, which end right); its gear is printed at its phase: set at crank pose 0</span></p>
+<p class="ok">✓ Level with the ones before, cranks at pose 0 (dot marks lined up).</p>
+</div>
+<div class="paso"><p><span class="n">4</span><b>crank-3</b> · on the bench: in from above</p>
+<img src="step-04.png" loading="lazy">
+<p>Same as before: crank 3 (3 dots on the hub) into its slots, cranks at pose 0.</p>
+<p><span class="mark">Mark: 3 dots on the +x web hub (which crank, which end right); its gear is printed at its phase: set at crank pose 0</span></p>
+<p class="ok">✓ Level with the ones before, cranks at pose 0 (dot marks lined up).</p>
+</div>
+<div class="paso"><p><span class="n">5</span><b>crank-4</b> · on the bench: in from above</p>
+<img src="step-05.png" loading="lazy">
+<p>Same as before: crank 4 (4 dots on the hub) into its slots, cranks at pose 0.</p>
+<p><span class="mark">Mark: 4 dots on the +x web hub (which crank, which end right); its gear is printed at its phase: set at crank pose 0</span></p>
+<p class="ok">✓ Level with the ones before, cranks at pose 0 (dot marks lined up).</p>
+</div>
+<div class="paso"><p><span class="n">6</span><b>idler-1 + sleeve-1</b> · on the bench: in from above</p>
+<img src="step-06.png" loading="lazy">
+<p>Put sleeve 1 into idler 1 and lower them between the neighbouring cranks; the teeth mesh by themselves because the phase is printed into the gears.</p>
+<p><span class="mark">Mark: any tooth: the cranks&#x27; phases are printed in their gears, the idler meshes as it drops in at pose 0</span></p>
+<p class="ok">✓ It drops to the bottom and both neighbouring cranks turn a little when the idler turns. Nothing to tighten yet; the screw comes later.</p>
+</div>
+<div class="paso"><p><span class="n">7</span><b>idler-2 + sleeve-2</b> · on the bench: in from above</p>
+<img src="step-07.png" loading="lazy">
+<p>Put sleeve 2 into idler 2 and lower them between the neighbouring cranks; the teeth mesh by themselves because the phase is printed into the gears.</p>
+<p><span class="mark">Mark: any tooth: the cranks&#x27; phases are printed in their gears, the idler meshes as it drops in at pose 0</span></p>
+<p class="ok">✓ It drops to the bottom and both neighbouring cranks turn a little when the idler turns. Nothing to tighten yet; the screw comes later.</p>
+</div>
+<div class="paso"><p><span class="n">8</span><b>idler-3 + sleeve-3</b> · on the bench: in from above</p>
+<img src="step-08.png" loading="lazy">
+<p>Put sleeve 3 into idler 3 and lower them between the neighbouring cranks; the teeth mesh by themselves because the phase is printed into the gears.</p>
+<p><span class="mark">Mark: any tooth: the cranks&#x27; phases are printed in their gears, the idler meshes as it drops in at pose 0</span></p>
+<p class="ok">✓ It drops to the bottom and both neighbouring cranks turn a little when the idler turns. Nothing to tighten yet; the screw comes later.</p>
+</div>
+<div class="paso"><p><span class="n">9</span><b>transfer + transfer-sleeve</b> · on the bench: in from below</p>
+<img src="step-09.png" loading="lazy">
+<p>Put the drive unit upside down. Fit the transfer gear with its sleeve between the two cheeks.</p>
+<p><span class="mark">Mark: any tooth (meshes idler 2 and the pinion as it goes in)</span></p>
+<p class="ok">✓ The transfer gear turns freely between the cheeks and the holes of the sleeve and the cheeks line up.</p>
+</div>
+<div class="paso"><p><span class="n">10</span><b>axle-t</b> · on the bench: in from the −X side</p>
+<img src="step-10.png" loading="lazy">
+<p>With the 1.5 mm hex key, drive the M2×12 screw from the −X side through the cheeks and the sleeve. It self-taps in the Ø1.6 hole: it goes in with pressure, without forcing.</p>
+<p class="ok">✓ The transfer gear still turns freely with the screw in, and the screw is firm.</p>
+</div>
+<div class="paso"><p><span class="n">11</span><b>drive-unit + transfer + transfer-sleeve + axle-t</b> · on the bench: in from above</p>
+<img src="step-11.png" loading="lazy">
+<p>Turn the drive unit, with the transfer gear in, over and lower it onto the spine: the tongues go into slots 1 to 3 and the lugs lie flat on the −X wall. Seat it with a hand on lug 2.</p>
+<p class="ok">✓ The tongues are inside slots 1 to 3 and the drive unit does not move when touched.</p>
+</div>
+<div class="paso"><p><span class="n">12</span><b>axle-1</b> · on the bench: in from the −X side</p>
+<img src="step-12.png" loading="lazy">
+<p>M2×6 screw from the −X side with the 1.5 mm hex key: it goes through sleeve 1 and its tip into the pilot hole in the spine&#x27;s +X wall. It is idler 1&#x27;s axle.</p>
+<p class="ok">✓ Idler 1 turns freely and the screw is firm, with no play in the spine.</p>
+</div>
+<div class="paso"><p><span class="n">13</span><b>axle-2</b> · on the bench: in from the −X side</p>
+<img src="step-13.png" loading="lazy">
+<p>M2×6 screw from the −X side, as before, for idler 2.</p>
+<p class="ok">✓ Idler 2 turns freely and the screw is firm.</p>
+</div>
+<div class="paso"><p><span class="n">14</span><b>axle-3</b> · on the bench: in from the −X side</p>
+<img src="step-14.png" loading="lazy">
+<p>M2×5 screw (this one is shorter, careful) from the −X side for idler 3.</p>
+<p class="ok">✓ Idler 3 turns freely and the screw is firm.</p>
+</div>
+<div class="paso"><p><span class="n">15</span><b>spine + crank-1 + crank-2 + crank-3 + crank-4 + idler-1 + idler-2 + idler-3 + sleeve-1 + sleeve-2 + sleeve-3 + drive-unit + transfer + transfer-sleeve + axle-t + axle-1 + axle-2 + axle-3</b> · in from above</p>
+<img src="step-15.png" loading="lazy">
+<p>Carry the whole spine assembly onto the keel seat in the base. Crank 4 comes loose: hold it with a rubber band until the cell holder covers it. Seat it with a hand on lug 2.</p>
+<p class="ok">✓ The assembly rests on the keel without rocking and the keel&#x27;s holes are under the spine&#x27;s.</p>
+</div>
+<div class="paso"><p><span class="n">16</span><b>keel-1</b> · in from below</p>
+<img src="step-16.png" loading="lazy">
+<p>Rest the base on its side and drive one M2×4 from below with the 1.5 mm key.</p>
+<p class="ok">✓ The screw is firm and the spine does not move in the base.</p>
+</div>
+<div class="paso"><p><span class="n">17</span><b>keel-2</b> · in from below</p>
+<img src="step-17.png" loading="lazy">
+<p>The second M2×4 from below, the same way.</p>
+<p class="ok">✓ With both screws the spine does not move in the base.</p>
+</div>
+<div class="paso"><p><span class="n">18</span><b>leg-1</b> · down 30 mm, then -X+Y-Z 6.6 mm</p>
+<img src="step-18.png" loading="lazy">
+<p>Cranks at pose 0 (dot marks). Lower the leg beside the pin and slide it inwards along the pin: the bead clicks into the groove.</p>
+<p class="ok">✓ You hear or feel the click, the leg does not come off when moved and does not turn more than it should. If it does not go on or breaks, take a photo and send it to Claude: only that part is fixed.</p>
+</div>
+<div class="paso"><p><span class="n">19</span><b>leg-2</b> · down 30 mm, then -X-Y-Z 6.6 mm</p>
+<img src="step-19.png" loading="lazy">
+<p>Cranks at pose 0 (dot marks). Lower the leg beside the pin and slide it inwards along the pin: the bead clicks into the groove.</p>
+<p class="ok">✓ You hear or feel the click, the leg does not come off when moved and does not turn more than it should. If it does not go on or breaks, take a photo and send it to Claude: only that part is fixed.</p>
+</div>
+<div class="paso"><p><span class="n">20</span><b>leg-4</b> · down 30 mm, then +X-Y-Z 6.6 mm</p>
+<img src="step-20.png" loading="lazy">
+<p>Cranks at pose 0 (dot marks). Lower the leg beside the pin and slide it inwards along the pin: the bead clicks into the groove.</p>
+<p class="ok">✓ You hear or feel the click, the leg does not come off when moved and does not turn more than it should. If it does not go on or breaks, take a photo and send it to Claude: only that part is fixed.</p>
+</div>
+<div class="paso"><p><span class="n">21</span><b>leg-5</b> · down 30 mm, then +X-Y-Z 10 mm</p>
+<img src="step-21.png" loading="lazy">
+<p>Cranks at pose 0 (dot marks). Lower the leg beside the pin and slide it inwards along the pin: the bead clicks into the groove.</p>
+<p class="ok">✓ You hear or feel the click, the leg does not come off when moved and does not turn more than it should. If it does not go on or breaks, take a photo and send it to Claude: only that part is fixed.</p>
+</div>
+<div class="paso"><p><span class="n">22</span><b>leg-6</b> · down 30 mm, then +X+Y-Z 10 mm</p>
+<img src="step-22.png" loading="lazy">
+<p>Cranks at pose 0 (dot marks). Lower the leg beside the pin and slide it inwards along the pin: the bead clicks into the groove.</p>
+<p class="ok">✓ You hear or feel the click, the leg does not come off when moved and does not turn more than it should. If it does not go on or breaks, take a photo and send it to Claude: only that part is fixed.</p>
+</div>
+<div class="paso"><p><span class="n">23</span><b>leg-7</b> · down 30 mm, then +X-Y-Z 6.6 mm</p>
+<img src="step-23.png" loading="lazy">
+<p>Cranks at pose 0 (dot marks). Lower the leg beside the pin and slide it inwards along the pin: the bead clicks into the groove.</p>
+<p class="ok">✓ You hear or feel the click, the leg does not come off when moved and does not turn more than it should. If it does not go on or breaks, take a photo and send it to Claude: only that part is fixed.</p>
+</div>
+<div class="paso"><p><span class="n">24</span><b>leg-0</b> · down 30 mm, then -X-Y-Z 6.6 mm</p>
+<img src="step-24.png" loading="lazy">
+<p>First turn the cranks half a turn (pose 12 instead of 0). Lower the leg beside the pin and slide it inwards along the pin: the bead clicks into the groove.</p>
+<p class="ok">✓ You hear or feel the click, the leg does not come off when moved and does not turn more than it should. If it does not go on or breaks, take a photo and send it to Claude: only that part is fixed.</p>
+</div>
+<div class="paso"><p><span class="n">25</span><b>leg-3</b> · down 30 mm, then -X-Y-Z 6.6 mm</p>
+<img src="step-25.png" loading="lazy">
+<p>The leg printed alone in batch 1 to test the snap. First turn the cranks half a turn (pose 12). Lower the leg beside the pin and slide it inwards along the pin: the bead clicks into the groove.</p>
+<p class="ok">✓ This is batch 1&#x27;s test: the leg goes on with a click, its tube turns round and clean on the pin and it does not come off. If so, print batch 2.</p>
+</div>
+<div class="paso"><p><span class="n">26</span><b>cell-holder</b> · down 34 mm, then -Y 5 mm, then down 6 mm</p>
+<img src="step-26.png" loading="lazy">
+<p>Lower the cell holder behind the top plate of the motor clamp, slide it 5 mm inwards underneath and lower it onto lug 2.</p>
+<p class="ok">✓ It sits on lug 2 and covers crank 4 (take the rubber band off).</p>
+</div>
+<div class="paso"><p><span class="n">27</span><b>holder-screw</b> · in from above</p>
+<img src="step-27.png" loading="lazy">
+<p>M2×6 screw with the 1.5 mm key from above, with the motor clamp still empty. It self-taps.</p>
+<p class="ok">✓ The cell holder is fixed to the drive unit, with no play.</p>
+</div>
+<div class="paso"><p><span class="n">28</span><b>pinion</b> · on the bench: in from the +X side</p>
+<img src="step-28.png" loading="lazy">
+<p>Press the pinion onto the motor shaft as far as it goes, with the pinion&#x27;s flat on the shaft&#x27;s flat (the shaft is D-shaped).</p>
+<p><span class="mark">Mark: any tooth</span></p>
+<p class="ok">✓ It is all the way on and does not turn freely on the shaft.</p>
+</div>
+<div class="paso"><p><span class="n">29</span><b>n10-motor + pinion</b> · +X 38 mm</p>
+<img src="step-29.png" loading="lazy">
+<p>With the pinion on, slide the motor by hand towards +X: the pinion goes into the plates&#x27; slots and meshes with the transfer gear.</p>
+<p class="ok">✓ The motor sits in its clamp and turning the pinion by hand moves the gear train.</p>
+</div>
+<div class="paso"><p><span class="n">30</span><b>nickel-strip</b> · in from above</p>
+<img src="step-30.png" loading="lazy">
+<p>With the tweezers (Ø1 tip) push the nickel strip by its top edge into its slot.</p>
+<p class="ok">✓ The strip is at the bottom of its slot, towards the back.</p>
+</div>
+<div class="paso"><p><span class="n">31</span><b>cell-springs</b> · down 30 mm, then -Y 2 mm</p>
+<img src="step-31.png" loading="lazy">
+<p>Drop the 3 conical springs into the cradle and push the middle one 2 mm with a fingertip against the front wall, into its recess.</p>
+<p class="ok">✓ The three springs stand straight in place.</p>
+</div>
+<div class="paso"><p><span class="n">32</span><b>ag13-cells</b> · in from above</p>
+<img src="step-32.png" loading="lazy">
+<p>Put the 6 cells in with the + side towards the nickel strip (back); the holder&#x27;s back wall has a «+» engraved. Press them against the spring.</p>
+<p><span class="mark">Mark: + face toward the nickel strip (back); &#x27;+&#x27; engraved on the holder&#x27;s back wall</span></p>
+<p class="ok">✓ All with + to the back, resting against their spring.</p>
+</div>
+<div class="paso"><p><span class="n">33</span><b>cell-lid</b> · in from above</p>
+<img src="step-33.png" loading="lazy">
+<p>The lid goes on one way only: the back lips over the back wall and the key in the back notch. Press until it closes.</p>
+<p><span class="mark">Mark: keyed: back lips over the back wall, key in the back notch (goes on one way)</span></p>
+<p class="ok">✓ It closes with a click and opens by lifting the back lips.</p>
+</div>
+<div class="paso"><p><span class="n">34</span><b>jst-xh</b> · in from above</p>
+<img src="step-34.png" loading="lazy">
+<p>Plug in the 3-pin JST-XH (the pair). The motor is wired so the cranks turn with the pose falling; if the robot walks backwards on test, swap the two motor wires.</p>
+<p class="ok">✓ The connector snaps in and holds.</p>
+</div>
+<div class="paso"><p><span class="n">35</span><b>leds</b> · on the bench: up 10 mm, then -Y 12 mm</p>
+<img src="step-35.png" loading="lazy">
+<p>On the bench: push each LED from inside the body into its eye hole, with a fingertip on the back of the LED pushing forward. Do this before fitting the body.</p>
+<p class="ok">✓ Both LEDs sit in their eye holes and do not fall out when the body is moved.</p>
+</div>
+<div class="paso"><p><span class="n">36</span><b>ss12d00-switch</b> · on the bench: in from the −Y side</p>
+<img src="step-36.png" loading="lazy">
+<p>On the bench: lever to the back, push the switch in from the front against the body&#x27;s stop; press with a fingertip until the lever sticks out. A drop of glue. Do this before putting the body on the base.</p>
+<p class="ok">✓ The switch does not move, with its lever out at the back.</p>
+</div>
+<div class="paso"><p><span class="n">37</span><b>body + ss12d00-switch + leds</b> · in from above</p>
+<img src="step-37.png" loading="lazy">
+<p>Set the cranks at pose 12 (half a turn) and press the body, with the switch and LEDs, on from above with a hand on the roof: two clicks at the front.</p>
+<p><span class="mark">Mark: body-on mark: crank pose 12 (plan step 17)</span></p>
+<p class="ok">✓ Two clicks at the front, the legs move without rubbing the body. Switch on: the robot walks forwards (−y, towards the mouth face).</p>
+</div>
+<h2>5 · Measure</h2>
+<img src="measure.png" loading="lazy">
+<table><tr><th>Measurement</th><th>When</th></tr>
+<tr><td>1. crank pin Ø3</td><td>when the yellow plate comes off, before assembly</td></tr>
+<tr><td>2. journal slot width</td><td>with the spine printed, before assembly</td></tr>
+<tr><td>3. cradle Ø (cell + 0.15 a side)</td><td>with the cell holder printed, before the cells go in</td></tr>
+<tr><td>4. tab hole Ø (M2 + STEEL)</td><td>with the base printed, before assembly</td></tr>
+<tr><td>5. post-cap tongue width (slot 4 - TURN)</td><td>with the cell holder printed, before assembly</td></tr>
+</table>
+<h2>6 · What to film</h2>
+<ul><li>A photo of each plate fresh off the bed, from above, with side light, before the support comes off.</li><li>Close-ups of the cranks&#x27; pins and snap beads, and of leg-3&#x27;s tube looking inside.</li><li>A short video (10-15 s, side-on) of leg-3 sliding onto its pin and clicking.</li><li>A photo of any fault, close up with a ruler or caliper beside it.</li></ul>

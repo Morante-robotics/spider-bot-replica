@@ -914,6 +914,11 @@ def spec_names(path):
     return names, unlabelled
 
 
+def _missing(kit_html):
+    """Lines the workshop kit could not fill: «MISSING:» (English kit) or «FALTA:» (Spanish)."""
+    return kit_html.count("MISSING:") + kit_html.count("FALTA:")
+
+
 def ready_items(plan, rs, verify_txt, names, unlabelled, fit_status, kit_html, coupons):
     """The ready-to-print checklist as (state, text): PASS, FAIL, or HAND (only a person or an agent's reply can
     tell). Pure: the tests feed it the files' contents."""
@@ -950,8 +955,8 @@ def ready_items(plan, rs, verify_txt, names, unlabelled, fit_status, kit_html, c
                 "assumed fits: " + (", ".join(assumed) or "none") +
                 (" (this print is their coupon)" if assumed and coupons else
                  " (print their coupons first, or pass --coupons)" if assumed else "")))
-    out.append(("FAIL", "kit: not given or not found (--kit .../Montaje/<step>/kit.html)") if kit_html is None
-               else ("FAIL" if "FALTA:" in kit_html else "PASS", f"kit FALTA: {kit_html.count('FALTA:')}"))
+    out.append(("FAIL", "kit: not given or not found (--kit kits/<NN-step>/kit.html)") if kit_html is None
+               else ("FAIL" if _missing(kit_html) else "PASS", f"kit MISSING/FALTA: {_missing(kit_html)}"))
     out.append(("HAND", "design-reviewer APPROVE at the pre-print gate; every WARN explained in design-review.md"))
     out.append(("HAND", "print-plater PASS, grams and hours known"))
     return out
