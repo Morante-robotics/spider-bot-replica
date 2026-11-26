@@ -3,7 +3,38 @@
 Numbers and paths that describe the robot's design as it stands. The story is in the build log
 ([Looks first](../../build-log/4-looks-first.md)); what is left is in [Open items](../../build-log.md#open-items).
 
-## State 2026-11-24 (start here)
+## State 2026-11-26 (start here)
+
+**Morante's decision (2026-11-26), answering the open decision of 2026-11-24:** make the mechanism printable by
+**thickening its parts in place (same layout), plus simplifications A and B**. No calibration coupons: the measured
+values of the first design (archive tag `pre-redesign-2026-11-17`: clearance test, test leg v2, gear train v2) are
+used instead. **Re-laying the inside is the last option; a larger scale only after this, if it does not fit, and
+only his call.** Option C (one-way keys) and D (motor held by the base) were declined: D would make the pinion's
+centre distance depend on two parts; its gain (no slide-in pinion grooves) goes into A.
+
+| | Change | Source of the number |
+|---|---|---|
+| Thicken | walls and plates 1.2 → **2.0** | fork side wall 2.0, test leg v2 (measurements.csv 2026-11-11) |
+| | gears module 0.6 → **1.0**, idler teeth re-derived by `_zfor` | gear train v2 turned at module 1 (2026-11-12); its tip room and backlash from the archive tag's `cad/gear-train-test/` |
+| | crank journals Ø3 → **Ø4**, `TURN` 0.25 | crankshaft journal 4.0 printed 3.9–4.0; `TURN` measured |
+| | M2 → **M3** everywhere (holes `STEEL` on Ø3.3) | clearance test, M3 column (2026-11-11); M3 self-tap pilots from the same block, else `assumed` |
+| | marks: dots → **engraved numbers ≈ 3 mm high** | not measured; the only new assumption |
+| A | drive unit split into **3 flat parts screwed with M3**: (1) motor U open on top, closed by a flat strap with 2 M3, on the same part as the transfer axle (centre distance on one part; motor and pinion go in from above, no pinion grooves); (2) one flat cap over the journal slots (replaces tongues, blocks, ears); (3) the transfer cheek. Each prints flat, no support | Morante: the central part is hard to print and assemble |
+| B | idlers and transfer turn on **steel pins or M3 shanks**: no printed sleeves (sleeve-1..3, transfer-sleeve go) | `STEEL` measured on M3 |
+
+Rules for this step: crank centres, leg motion (`cad/motion.py`) and the carcass stay; legs and shells change only
+where the bigger gears or pins need it, and the looks judge then says if they still pass. When something collides,
+report «cabe sin X» with the gap, never a scale number. A new mechanism layout is a PLAN: `cad-designer` (Opus),
+then the design-reviewer's PLAN gate, then Morante with the diagram before any code.
+
+**Next session, in order:**
+1. Coordinator, no agent: add the minimum checks to `tools/cad_verify.py` for the mechanism parts: gear module
+   ≥ 1.0, wall ≥ 2.0 (`SECTION_MIN`-style thinnest section), mark feature ≥ 3 mm high; they must FAIL the current
+   design and pass the plan's.
+2. `cad-designer` · opus (≈ 200–400k, 20–30 min): `plan.json` for the change above, `rounds.py validate` PASS, PLAN
+   with the collision list. 3. `design-reviewer` PLAN gate. 4. Morante: diagram, acceptance table, questions.
+
+## State 2026-11-24
 
 Batch 1 (blue base, yellow inner plate, leg-3) was printed and assembled: **it fails as a robot**
 ([Batch 1 result](../../build-log/4-looks-first.md#batch-1-result-the-mechanism-is-not-printable-at-this-size)).
@@ -21,7 +52,7 @@ Morante's five faults, each with the design number behind it:
 | No gear turns | `GEAR_TIP` 0.4 radial | assumed, never on a coupon |
 | No screw or pin goes in | M2 holes Ø2.3 (`STEEL` 0.15, measured on M3/Ø3.3 only), pilots Ø1.6; X-Y hole compensation never calibrated | assumed |
 
-**Open decision, Morante's (asked 2026-11-24, not answered):** how to make the mechanism printable. Options, none
+**Decision asked 2026-11-24 (answered 2026-11-26, above):** how to make the mechanism printable. Options, none
 dropped: (1) **calibration coupons first**, recommended and needed by every other option: one
 plate ≈ 20–30 min with M2 holes and pilots in 0.1 steps, pin/sleeve fits, gear pairs at module 0.6/0.8/1.0 and two
 tip clearances, mark samples (dots and engraved numbers of several sizes), walls 1.2/1.6/2.0; the measured values go
@@ -31,7 +62,6 @@ scale with printable minimums (module ≥ 0.8, walls 1.6–2.0, big numbers as m
 parts, e.g. one crankshaft + side bars). Whatever he picks, the faults above become `cad_verify` checks (smallest
 printed feature, gear module, mark size) so a design cannot pass with them again.
 
-Next session: start from this section and the open item, ask the one question above with a picture.
 
 ## State 2026-11-23
 
