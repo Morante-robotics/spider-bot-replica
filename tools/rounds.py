@@ -53,7 +53,7 @@ RUBRICS = os.path.join(TOOLS, "rubrics")
 LEVELS = ("N0", "N1", "N2")
 HOWS = ("verify", "measure", "visual", "morante", "print")
 VERIFY_CHECKS = ("integrity", "motion", "gears", "retention", "assembly", "print", "keep-out", "access", "joints",
-                 "seats", "keep-in", "marks")
+                 "seats", "keep-in", "marks", "minimums")
 KEBAB = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 PLACEHOLDER = re.compile(r"<[A-Za-z][\w ./-]{0,40}>|\bTODO\b|\bTBD\b|\?\?\?")
 

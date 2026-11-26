@@ -86,6 +86,8 @@ if IV is not None:
     GEARS = list(getattr(IV, "GEARS", []))
     if getattr(IV, "PAIR_GAP", None): PAIR_GAP = dict(IV.PAIR_GAP)
     if getattr(IV, "KEEP_OUT", None): KEEP_OUT = dict(IV.KEEP_OUT)
+    for nm in ("MINIMUMS", "GEAR_GEOM", "MARK_GEOM"):
+        if getattr(IV, nm, None) is not None: globals()[nm] = getattr(IV, nm)
     MEASURE += getattr(IV, "MEASURE", [])
     ACCESS += getattr(IV, "ACCESS", [])
     ia = [s for s in getattr(IV, "ASSEMBLY", []) if s[0] != "base"]

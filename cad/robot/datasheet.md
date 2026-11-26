@@ -28,9 +28,16 @@ report «cabe sin X» with the gap, never a scale number. A new mechanism layout
 then the design-reviewer's PLAN gate, then Morante with the diagram before any code.
 
 **Next session, in order:**
-1. Coordinator, no agent: add the minimum checks to `tools/cad_verify.py` for the mechanism parts: gear module
-   ≥ 1.0, wall ≥ 2.0 (`SECTION_MIN`-style thinnest section), mark feature ≥ 3 mm high; they must FAIL the current
-   design and pass the plan's.
+1. ~~Coordinator, no agent: minimum checks~~ **done 2026-11-26**: `cad_verify` check **13 minimums** (spec
+   `MINIMUMS`, `GEAR_GEOM`, `MARK_GEOM`; `drive_verify.py` lists the drive's printed parts). All read from the meshes:
+   module from each gear's section (teeth counted, tip radius), walls by ray thickness outside the teeth and the
+   marks' cuts (FAIL over 1 % of the surface under 2.0), each mark cutter cut from its part with every body ≥ 3 mm
+   long. Current design: 28 FAIL, all here (module 0.60 on all 10 gears, dots 0.9–1.1 mm, walls: spine 0.56,
+   drive unit 0.29, idler rims 0.98, sleeves 0.80); synthetic plan sizes (module 1.0, 2.0 plate with M3 holes, digit
+   3 × 0.6) pass (`tools/tests/test_cad_verify.py`, 74 passed). The plan's design must declare `GEAR_GEOM` for every
+   gear, export each engraving's cutter as `out/<part>-marks.stl` into `MARK_GEOM` (None with the MARKS reason when a
+   part needs no mark), and give any deliberately thin feature (a flexing snap) as a `MINIMUMS["except"]` box with
+   its reason.
 2. `cad-designer` · opus (≈ 200–400k, 20–30 min): `plan.json` for the change above, `rounds.py validate` PASS, PLAN
    with the collision list. 3. `design-reviewer` PLAN gate. 4. Morante: diagram, acceptance table, questions.
 

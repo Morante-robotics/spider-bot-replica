@@ -118,6 +118,16 @@ PRINT_ORIENT = {"spine": np.eye(4), **{n: _X2Z for n in CRANKS + IDLERS + SLEEVE
 MARKS = {**{c: f"{i+1} dots on the +x web hub (which crank, which end right); its gear is printed at its phase: set at crank pose 0" for i, c in enumerate(CRANKS)},
          **{n: "any tooth: the cranks' phases are printed in their gears, the idler meshes as it drops in at pose 0" for n in IDLERS},
          "transfer": "any tooth (meshes idler 2 and the pinion as it goes in)", "pinion": "any tooth"}
+MINIMUMS = {"parts": PRINTED, "module": 1.0, "wall": 2.0, "mark": 3.0}   # Morante 2026-11-26 (datasheet): module 1.0, walls 2.0, numbers ≈ 3 high
+_GX = lambda n, x, c, z: {"part": n, "origin": [x, *c], "axis": [1, 0, 0], "width": D.GW, "teeth": z}
+GEAR_GEOM = [*[_GX(c, 0.0, D.CENTRE[c], D.ZT) for c in CRANKS], *[_GX(n, 0.0, D.I[i], D.ZI[i]) for i, n in enumerate(IDLERS)],
+             _GX("transfer", 0.0, D.T, D.ZS), _GX("transfer", D.XB0 + D.GW / 2, D.T, D.ZB), _GX("pinion", D.XB0 + D.GW / 2, D.MC, D.ZP)]
+def _dots(i):                                       # crank i's dice dots as built (drive.crank: Sphere(0.35) on the +x web face)
+    o = D.CENTRE[CRANKS[i]]; out = []
+    for u, v in D.common.dice(i + 1, 1.0):
+        s = trimesh.creation.icosphere(subdivisions=2, radius=0.35); s.apply_translation([D.WB1, o[0] + u, o[1] + v]); out.append(s)
+    return trimesh.util.concatenate(out)
+MARK_GEOM = {**{c: _dots(i) for i, c in enumerate(CRANKS)}, **{n: None for n in IDLERS + ["transfer", "pinion"]}}
 LABELS = {"es": {"spine": "espina", **{c: f"cigüeñal {i+1}" for i, c in enumerate(CRANKS)},
                  **{n: f"engranaje loco {i+1}" for i, n in enumerate(IDLERS)}, **{n: f"casquillo {i+1}" for i, n in enumerate(SLEEVES)},
                  "transfer": "engranaje doble", "transfer-sleeve": "casquillo del doble", "drive-unit": "soporte del motor",

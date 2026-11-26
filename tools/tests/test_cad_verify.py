@@ -563,3 +563,78 @@ def test_keep_in_missed_by_less_than_coarse_warns():
     assert not rep.fails and any("coarse" in ln for ln in rep.lines), rep.text()
     rep = run(cv.check_keep_in, keep_in_spec(box([30, 30, 37.2])))      # 0.6 mm: more than COARSE
     assert rep.fails
+
+
+# ---------------------------------------------------------------- 13 minimums (Batch 1, 2026-11-24)
+
+def spur(z, m, width=3.0, bore=3.3):
+    """Spur gear along X centred at the origin: z trapezoid teeth, tip m(z+2)/2, root m(z-2.5)/2, a bore."""
+    from shapely.geometry import Point, Polygon
+    rt, rr = m * (z + 2) / 2, m * (z - 2.5) / 2
+    pts = []
+    for k in range(z):
+        a = 2 * np.pi * k / z
+        for da, r in ((-0.5, rr), (-0.2, rt), (0.2, rt), (0.5, rr)):
+            b = a + da * 2 * np.pi / z
+            pts.append((r * np.cos(b), r * np.sin(b)))
+    g = Polygon(pts).union(Point(0, 0).buffer(rr, 64)).difference(Point(0, 0).buffer(bore / 2, 64))
+    mesh = trimesh.creation.extrude_polygon(g, width)
+    mesh.apply_translation([0, 0, -width / 2])
+    mesh.apply_transform(cv.rot([0, 1, 0], 90))          # extruded along z, turned onto x
+    return mesh
+
+
+def plate(t, mark=None):
+    """A 30 x 20 plate t thick (normal z) with two Ø3.3 M3 holes; mark: the cutter of an engraving on its top."""
+    p = cut(box([30, 20, t]), join(*[cv.rod(3.3, t + 2, [x, 0, -t / 2 - 1], [0, 0, 1]) for x in (-10, 10)]))
+    return p if mark is None else cut(p, mark)
+
+
+DIGIT = box([0.6, 3.0, 1.0], (0, 0, 1.0 - 0.6))           # a «1» 3 high, 0.6 deep into a 2.0 plate's top (z 1.0)
+DOTS = join(*[trimesh.creation.icosphere(2, 0.35).apply_translation([u, u, 0.6]) for u in (-0.5, 0.5)])   # on a 1.2 plate's top
+
+
+def minimums_spec(parts, gear_geom=(), mark_geom=None, gears=()):
+    return spec(PARTS={n: {"mesh": m} for n, m in parts.items()}, GEARS=list(gears), GEAR_GEOM=list(gear_geom),
+                MARK_GEOM=mark_geom or {}, MINIMUMS={"parts": list(parts), "module": 1.0, "wall": 2.0, "mark": 3.0})
+
+
+def test_gear_reading():
+    z, m, rr, rt = cv.gear_reading(spur(14, 1.0), [0, 0, 0], [1, 0, 0])
+    assert z == 14 and abs(m - 1.0) < 0.02, (z, m)
+
+
+def test_minimums_pass_the_plans_sizes():
+    """Module 1.0, walls 2.0 with M3 holes, an engraved digit 3 mm high: nothing fails."""
+    g = spur(14, 1.0)
+    s = minimums_spec({"gear": g, "plate": plate(2.0, DIGIT), "other": spur(14, 1.0)},
+                      [{"part": "gear", "origin": [0, 0, 0], "axis": [1, 0, 0], "teeth": 14},
+                       {"part": "other", "origin": [0, 0, 0], "axis": [1, 0, 0], "teeth": 14}],
+                      {"gear": None, "other": None, "plate": DIGIT}, gears=[("gear", "other")])
+    rep = run(cv.check_minimums, s)
+    assert not rep.fails, rep.text()
+
+
+def test_minimums_fail_batch1_sizes():
+    """Batch 1: module 0.6, 1.2 walls, Ø0.7 dots. Each fails on its own."""
+    s = minimums_spec({"gear": spur(12, 0.6, bore=2.3), "plate": plate(1.2, DOTS)},
+                      [{"part": "gear", "origin": [0, 0, 0], "axis": [1, 0, 0], "teeth": 12}],
+                      {"gear": None, "plate": DOTS}, gears=[("gear", "gear")])
+    txt = run(cv.check_minimums, s).text()
+    assert "FAIL  gear gear at [0.0, 0.0, 0.0]: module 0.60" in txt, txt
+    assert "FAIL  plate: mark feature" in txt, txt
+    assert "FAIL  plate:" in txt and "thinner than 2.0 mm" in txt, txt
+
+
+def test_minimums_need_gear_and_mark_geometry():
+    """A meshing part with no GEAR_GEOM or no MARK_GEOM entry fails: what is not described cannot be checked."""
+    s = minimums_spec({"gear": spur(14, 1.0)}, gears=[("gear", "gear")])
+    txt = run(cv.check_minimums, s).text()
+    assert "no GEAR_GEOM entry" in txt and "no MARK_GEOM entry" in txt, txt
+
+
+def test_minimums_mark_must_be_cut():
+    """A mark cutter that was never subtracted (2026-11-22: a pocket never cut, «valid») fails."""
+    s = minimums_spec({"plate": plate(2.0)}, mark_geom={"plate": DIGIT})
+    txt = run(cv.check_minimums, s).text()
+    assert "still material: the mark is not cut" in txt, txt

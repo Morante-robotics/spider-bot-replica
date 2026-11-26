@@ -34,6 +34,9 @@ one is at every step of the motion, and what is allowed. The tool then runs eigh
                   least `inset` inside the mesh. Named exceptions are boxes where samples may be outside, each with
                   its reason and an optional bound (min_z): a keel allowed under the shell, but never below min_z
                   (base v2 chassis, 2026-11-14: 17 % of the module was outside the carcass and nothing said so)
+ 13. minimums     on the MINIMUMS parts, what a 0.4 nozzle prints (Batch 1, 2026-11-24): every gear's module read
+                  from its mesh ≥ module, walls (ray thickness outside teeth and marks) ≥ wall, every mark cutter cut
+                  from its part with each body ≥ mark long
 
 Two classes of tolerance (Morante, 2026-11-23: «ignorar cualquier cosa por debajo de 0.4 mm dada la boquilla»):
   * fits: pairs where a part moves (over MOTION), GEARS, JOINTS, PAIR_GAP pairs, retention, seats, assembly paths:
@@ -98,6 +101,12 @@ Spec file (all names optional except PARTS and poses):
                                               # samples: surface points per part (default 20000)
     MIN_GAP, GEAR_GAP, MIN_WALL, BED = 0.2, (0.08, 0.5), 0.8, (256, 256, 256)
     COARSE = 0.4                              # mm: tolerance of the coarse class (see «Two classes» above)
+    MINIMUMS = {"parts": ["shaft", "idler"], "module": 1.0, "wall": 2.0, "mark": 3.0, "wall_frac": 0.01,
+                "except": [{"part": "idler", "box": ((x0, y0, z0), (x1, y1, z1)), "why": "snap finger: flexes"}]}
+    GEAR_GEOM = [{"part": "shaft", "origin": [0, 0, 0], "axis": [1, 0, 0], "width": 3.0, "teeth": 12}]
+                                              # origin: on the gear's axis at its mid-face, the part's STL frame
+    MARK_GEOM = {"shaft": "out/shaft-marks.stl", "idler": None}   # the engraving's cutter (mesh or STL path), or
+                                              # None: no mark feature (MARKS says why, e.g. «any tooth»)
 
 Usage:
     python3 tools/cad_verify.py path/to/spec.py [--out check-result.txt] [--render images/check] [--quick]
@@ -1398,6 +1407,156 @@ def check_marks(spec, rep, only=None):
         rep.info(f"{n}: {marks[n]}")
 
 
+def gear_reading(mesh, origin, axis, bins=720):
+    """A spur gear read from its part's mesh: the section through origin normal to axis (the gear's mid-face, on its
+    axis), the outer ring of the piece nearest the axis in polar coordinates about it. Tip radius = the largest radius,
+    teeth = the times the ring rises through the radius halfway between root and tip; module = 2 r_tip / (z + 2).
+    Returns (teeth, module, r_root, r_tip), or None when the plane misses the part."""
+    from shapely.geometry import Point
+    o, ax = np.asarray(origin, float), np.asarray(axis, float)
+    ax = ax / np.linalg.norm(ax)
+    sec = mesh.section(plane_origin=o, plane_normal=ax)
+    if sec is None:
+        return None
+    p2, T = sec.to_2D()
+    q = np.linalg.solve(T, np.append(o, 1.0))[:2]
+    gs = list(p2.polygons_full)
+    if not gs:
+        return None
+    ring = np.asarray(min(gs, key=lambda g: g.distance(Point(q))).exterior.coords) - q
+    seg = np.diff(ring, axis=0)
+    pts = np.vstack([ring[:-1] + seg * f for f in np.linspace(0, 1, 8, endpoint=False)])   # densified edges
+    r, th = np.hypot(*pts.T), np.arctan2(pts[:, 1], pts[:, 0])
+    b = ((th + np.pi) / (2 * np.pi) * bins).astype(int) % bins
+    env = np.full(bins, -1.0)
+    np.maximum.at(env, b, r)
+    for i in range(bins):                     # a bin no edge reached: the one before it (circular)
+        if env[i] < 0:
+            env[i] = env[i - 1]
+    rt, rr = float(env.max()), float(env.min())
+    up = env > (rt + rr) / 2
+    z = int(np.sum(up & ~np.roll(up, 1)))
+    return z, (2 * rt / (z + 2) if z else 0.0), rr, rt
+
+
+def _mark_mesh(v):
+    """A MARK_GEOM value: a mesh, or an STL path relative to the spec."""
+    if v is None or isinstance(v, trimesh.Trimesh):
+        return v
+    return trimesh.load(os.path.join(os.path.dirname(SPEC_PATH or "."), v), force="mesh")
+
+
+def check_minimums(spec, meshes, rep, only=None):
+    """MINIMUMS: the smallest features a 0.4 mm nozzle prints well, on the parts listed (Batch 1, 2026-11-24: module
+    0.6 teeth came out wrong, 1.2 walls snapped when touched, Ø0.7 dots could not be seen). Three readings, all from
+    the parts' meshes, none from a declared number:
+      module  every gear in GEAR_GEOM (and every GEARS part listed must have one): read by gear_reading
+      wall    local thickness (rays inward from surface samples), outside the gears' teeth, the marks' cuts and
+              the declared exceptions: FAIL when more than `wall_frac` of the samples is thinner than `wall`
+      mark    every MARK_GEOM cutter (the engraving's tool solid, in the part's STL frame) is cut from its part
+              (none of it left as material, touching it) and each of its bodies (a digit) is at least `mark` long;
+              every listed part that must be lined up (GEARS, "phased") needs a MARK_GEOM entry, None when MARKS
+              says why it needs no mark feature (e.g. «any tooth»)"""
+    mn = getattr(spec, "MINIMUMS", None)
+    if not mn:
+        return
+    rep.head("13 minimums: printable features (gear module, walls, marks)")
+    parts = [n for n in mn["parts"] if n in spec.PARTS and involves(only, n)]
+    for n in sorted(set(mn["parts"]) - set(spec.PARTS)):
+        rep.fail(f"MINIMUMS lists {n}, which is not in PARTS")
+    m_min, w_min, k_min = mn.get("module", 1.0), mn.get("wall", 2.0), mn.get("mark", 3.0)
+    gg = getattr(spec, "GEAR_GEOM", [])
+    marks = getattr(spec, "MARK_GEOM", {})
+    gear_parts = {x for p in getattr(spec, "GEARS", []) for x in p}
+    teeth_zone = {}                                    # part -> [(origin, axis, half width, root radius)]
+    for e in gg:
+        n = e["part"]
+        if n not in parts:
+            continue
+        got = gear_reading(meshes[n], e["origin"], e["axis"])
+        label = f"{n} gear at {[round(float(v), 1) for v in e['origin']]}"
+        if got is None or not got[0]:
+            rep.fail(f"{label}: the plane through its origin normal to its axis cuts no teeth")
+            continue
+        z, m, rr, rt = got
+        ax = np.asarray(e["axis"], float)
+        teeth_zone.setdefault(n, []).append((np.asarray(e["origin"], float), ax / np.linalg.norm(ax),
+                                             e.get("width", 3.0) / 2 + 0.3, rr - 0.3))
+        if e.get("teeth") and z != e["teeth"]:
+            rep.fail(f"{label}: read {z} teeth, GEAR_GEOM says {e['teeth']}: the plane misses this gear's teeth")
+        elif m < m_min - 0.02:
+            rep.fail(f"{label}: module {m:.2f} ({z} T, tip Ø{2 * rt:.1f}) < {m_min:.1f}: its teeth are {np.pi * m / 2:.2f} "
+                     f"mm thick, {np.pi * m / 2 / 0.4:.1f} lines")
+        else:
+            rep.ok(f"{label}: module {m:.2f} ({z} T, tip Ø{2 * rt:.1f}) ≥ {m_min:.1f}")
+    for n in sorted(gear_parts & set(parts) - set(teeth_zone)):
+        if not any(e["part"] == n for e in gg):
+            rep.fail(f"{n}: meshes (GEARS) but has no GEAR_GEOM entry: its module cannot be read")
+    phased = {n for n, p in spec.PARTS.items() if p.get("phased")}
+    cutters = {}
+    for n in parts:
+        if n not in marks:
+            if n in gear_parts | phased:
+                rep.fail(f"{n}: must be lined up but has no MARK_GEOM entry: give its mark's cutter, or None when MARKS "
+                         f"says why it needs no mark feature")
+            continue
+        c = _mark_mesh(marks[n])
+        if c is None:
+            rep.ok(f"{n}: no mark feature ({getattr(spec, 'MARKS', {}).get(n, 'MARKS says nothing: say why')})")
+            continue
+        cutters[n] = c
+        pm, cm = to_manifold(meshes[n]), to_manifold(c)
+        left = overlap(pm, cm)
+        if left > 0.01 * max(c.volume, 1e-6):
+            rep.fail(f"{n}: {left:.2f} mm³ of its mark cutter is still material: the mark is not cut")
+            continue
+        if pm.min_gap(cm, 0.1) > 1e-3:
+            rep.fail(f"{n}: its mark cutter does not reach the part's surface: no mark is cut")
+            continue
+        bodies = c.split(only_watertight=False)
+        sizes = sorted(float(b.bounding_box_oriented.extents.max()) for b in bodies)
+        if sizes[0] < k_min - 0.05:
+            rep.fail(f"{n}: mark feature {sizes[0]:.1f} mm long ({len(bodies)} bodies, largest {sizes[-1]:.1f}) "
+                     f"< {k_min:.1f}: it cannot be read on the print")
+        else:
+            rep.ok(f"{n}: mark cut, {len(bodies)} bodies, each ≥ {sizes[0]:.1f} mm (≥ {k_min:.1f})")
+    exc = mn.get("except", [])
+    frac_max = mn.get("wall_frac", 0.01)
+    for n in parts:
+        if spec.PARTS[n].get("hardware"):
+            continue
+        m = meshes[n]
+        pts, t = wall_thickness(m, n=int(np.clip(m.area / 2, 2000, 20000)))
+        keep = np.ones(len(pts), bool)
+        for o, ax, hw, rr in teeth_zone.get(n, []):
+            d = pts - o
+            s = d @ ax
+            keep &= ~((np.abs(s) <= hw) & (np.linalg.norm(d - np.outer(s, ax), axis=1) >= rr))
+        if n in cutters:
+            b = cutters[n].bounds
+            keep &= ~np.all((pts >= b[0] - 0.6) & (pts <= b[1] + 0.6), axis=1)
+        for e in exc:
+            if e["part"] == n:
+                b0, b1 = np.asarray(e["box"][0], float), np.asarray(e["box"][1], float)
+                inside = np.all((pts >= b0) & (pts <= b1), axis=1)
+                rep.info(f"{n}: {inside.mean():.1%} of its surface excepted from the wall minimum: {e['why']}")
+                keep &= ~inside
+        tk = t[keep]
+        if not len(tk):
+            rep.warn(f"{n}: every wall sample is excepted: no wall minimum checked")
+            continue
+        thin = tk < w_min - 0.05
+        where = pts[keep][thin]
+        msg = (f"{n}: {thin.mean():.1%} of its surface (outside teeth and marks) thinner than {w_min:.1f} mm, thinnest "
+               f"{tk.min():.2f}" + (f", e.g. at {where[np.argmin(tk[thin])].round(1).tolist()}" if thin.any() else ""))
+        if thin.mean() > frac_max:
+            rep.fail(msg + ": it snaps when handled")
+        elif thin.any():
+            rep.warn(msg + f" (≤ {frac_max:.0%}: edges or a few samples; look at it)")
+        else:
+            rep.ok(f"{n}: walls ≥ {w_min:.1f} mm outside teeth and marks (thinnest {tk.min():.2f})")
+
+
 # ---------------------------------------------------------------- pictures
 
 def render(spec, meshes, outdir):
@@ -1574,7 +1733,8 @@ def run_checks(spec, meshes, rep, args, only):
                 ("joints", lambda r: (check_joints(spec, meshes, r, only), check_min_sections(spec, meshes, r, only))),
                 ("seats", lambda r: check_seats(spec, meshes, r, only)),
                 ("keep-in", lambda r: check_keep_in(spec, meshes, r, only)),
-                ("marks", lambda r: check_marks(spec, r, only))]
+                ("marks", lambda r: check_marks(spec, r, only)),
+                ("minimums", lambda r: check_minimums(spec, meshes, r, only))]
     sections = [(lb, fn) for lb, fn in sections if fn is not None]
 
     def run(names):
