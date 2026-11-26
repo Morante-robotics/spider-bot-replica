@@ -3,43 +3,58 @@
 Numbers and paths that describe the robot's design as it stands. The story is in the build log
 ([Looks first](../../build-log/4-looks-first.md)); what is left is in [Open items](../../build-log.md#open-items).
 
-## State 2026-11-26 (start here)
+## State 2026-11-26, top-down plan (start here)
 
-**Morante's decision (2026-11-26), answering the open decision of 2026-11-24:** make the mechanism printable by
-**thickening its parts in place (same layout), plus simplifications A and B**. No calibration coupons: the measured
-values of the first design (archive tag `pre-redesign-2026-11-17`: clearance test, test leg v2, gear train v2) are
-used instead. **Re-laying the inside is the last option; a larger scale only after this, if it does not fit, and
-only his call.** Option C (one-way keys) and D (motor held by the base) were declined: D would make the pinion's
-centre distance depend on two parts; its gain (no slide-in pinion grooves) goes into A.
+Batch 1 failed because the mechanism is too small to print at S 0.70 (faults below, 2026-11-24). Two probe agents then
+tried to thicken in place and bisect a scale part by part (≈ 270k tokens, FAIL: no number). Morante stopped that:
+«falta razonamiento espacial y te centras en solucionar problemas pequeños antes de saber qué tenemos que hacer. Yo
+quiero una aproximación Top-down». The work goes in three phases, each closed by his call on a picture; no phase starts
+before the one above is validated, and no local fix is worked before phase 3.
 
-| | Change | Source of the number |
-|---|---|---|
-| Thicken | walls and plates 1.2 → **2.0** | fork side wall 2.0, test leg v2 (measurements.csv 2026-11-11) |
-| | gears module 0.6 → **1.0**, idler teeth re-derived by `_zfor` | gear train v2 turned at module 1 (2026-11-12); its tip room and backlash from the archive tag's `cad/gear-train-test/` |
-| | crank journals Ø3 → **Ø4**, `TURN` 0.25 | crankshaft journal 4.0 printed 3.9–4.0; `TURN` measured |
-| | M2 → **M3** everywhere (holes `STEEL` on Ø3.3) | clearance test, M3 column (2026-11-11); M3 self-tap pilots from the same block, else `assumed` |
-| | marks: dots → **engraved numbers ≈ 3 mm high** | not measured; the only new assumption |
-| A | drive unit split into **3 flat parts screwed with M3**: (1) motor U open on top, closed by a flat strap with 2 M3, on the same part as the transfer axle (centre distance on one part; motor and pinion go in from above, no pinion grooves); (2) one flat cap over the journal slots (replaces tongues, blocks, ears); (3) the transfer cheek. Each prints flat, no support | Morante: the central part is hard to print and assemble |
-| B | idlers and transfer turn on **steel pins or M3 shanks**: no printed sleeves (sleeve-1..3, transfer-sleeve go) | `STEEL` measured on M3 |
+**Phase 1, size: how much must the robot grow?** (coordinator, no agent)
+1. Printable minimum per feature type, only from what was printed and measured (archive tag `pre-redesign-2026-11-17`):
 
-Rules for this step: crank centres, leg motion (`cad/motion.py`) and the carcass stay; legs and shells change only
-where the bigger gears or pins need it, and the looks judge then says if they still pass. When something collides,
-report «cabe sin X» with the gap, never a scale number. A new mechanism layout is a PLAN: `cad-designer` (Opus),
-then the design-reviewer's PLAN gate, then Morante with the diagram before any code.
+   | Feature | Now (S 0.70) | Measured minimum | Factor | Source |
+   |---|---|---|---|---|
+   | gear module | 0.6 | 1.0 | ×1.67 | gear train v2 turned at module 1 (2026-11-12) |
+   | wall / plate | 1.2 (spine 0.56, drive unit 0.29, idler rims 0.98) | 2.0 | ×1.67 | fork side wall, test leg v2 (measurements.csv 2026-11-11) |
+   | crank journal | Ø3 | Ø4, `TURN` 0.25 | ×1.33 | crankshaft journal 4.0 printed 3.9–4.0 |
+   | screw | M2 (Ø2.3 holes, never measured) | M3, `STEEL` on Ø3.3 | ×1.5 | clearance test, M3 column (2026-11-11) |
+   | mark | dots Ø0.7 × 0.35 | engraved numbers ≈ 3 mm | new type | not measured: the only assumption |
 
-**Next session, in order:**
-1. ~~Coordinator, no agent: minimum checks~~ **done 2026-11-26**: `cad_verify` check **13 minimums** (spec
-   `MINIMUMS`, `GEAR_GEOM`, `MARK_GEOM`; `drive_verify.py` lists the drive's printed parts). All read from the meshes:
-   module from each gear's section (teeth counted, tip radius), walls by ray thickness outside the teeth and the
-   marks' cuts (FAIL over 1 % of the surface under 2.0), each mark cutter cut from its part with every body ≥ 3 mm
-   long. Current design: 28 FAIL, all here (module 0.60 on all 10 gears, dots 0.9–1.1 mm, walls: spine 0.56,
-   drive unit 0.29, idler rims 0.98, sleeves 0.80); synthetic plan sizes (module 1.0, 2.0 plate with M3 holes, digit
-   3 × 0.6) pass (`tools/tests/test_cad_verify.py`, 74 passed). The plan's design must declare `GEAR_GEOM` for every
-   gear, export each engraving's cutter as `out/<part>-marks.stl` into `MARK_GEOM` (None with the MARKS reason when a
-   part needs no mark), and give any deliberately thin feature (a flexing snap) as a `MINIMUMS["except"]` box with
-   its reason.
-2. `cad-designer` · opus (≈ 200–400k, 20–30 min): `plan.json` for the change above, `rounds.py validate` PASS, PLAN
-   with the collision list. 3. `design-reviewer` PLAN gate. 4. Morante: diagram, acceptance table, questions.
+2. Split what scales (printed parts) from what does not (N10 motor, AG13 cells, switch, screws, fit clearances
+   0.1–0.4 mm): a larger S gives the bought parts room.
+3. Range of S (fraction of jenscolt's size): pure scaling to the minimums gives 0.70 × 1.67 ≈ **1.17**; scaling less
+   and thickening in place, the scale probe pointed at ≈ 1.0–1.05 (crank 4 against the back shell was its only
+   scale-bound gap). Estimate to be confirmed by this phase, not a result.
+4. Morante: the robot at 0.70, 1.0 and 1.17 next to jenscolt, with the motor, the cells and one smallest part of each
+   type at true size. He picks the target S (± 0.05). It does not yet promise a fit: phase 2 checks that.
+
+**Phase 2, motion: where does everything go so the whole mechanism turns?**
+1. Scale the whole robot to the chosen S and apply the minimums; every fit tweak made at 0.70 is deleted (D23/D23C,
+   arm pockets, reliefs, x-stop posts, spacings).
+2. Spatial reasoning before modelling: side and top sections with the swept volume of each moving part over a turn
+   (legs, cranks, gears) and where the motor and cells go.
+3. Collisions are solved by large layout moves (motor place, crank spread, gear train route), not sub-mm reliefs.
+4. Done when the whole mechanism runs the 24 poses with no collision, every part counted, at N1 (1 mm).
+5. Morante: animation and sections. Agent: `cad-designer` · opus for the layout PLAN (≈ 200k), one N1 check.
+
+**Phase 3, simplify: what can go, and how?**
+1. Count parts, screws, assembly steps, supported parts.
+2. Proposals with their gain, e.g. fewer gears, merged parts, and the two already approved (2026-11-26):
+   **A** drive unit as 3 flat parts screwed with M3 (motor U closed by a strap on the same part as the transfer axle;
+   one flat journal cap; the transfer cheek), **B** idlers and transfer on steel pins or M3 shanks, no printed sleeves.
+   Declined: C (one-way keys), D (motor held by the base: pinion centre distance on two parts).
+3. Morante picks. Only then the local work: fits, retention, marks, the N2 `cad_verify`, coupons, the print.
+
+**Kept from earlier work:** `cad_verify` check **13 minimums** (commit `69c342b`; spec `MINIMUMS`, `GEAR_GEOM`,
+`MARK_GEOM`): module, walls and marks read from the meshes; the 0.70 design fails it 28 times. It is phase 1's measure
+of «now» and phase 3's gate. A design must declare `GEAR_GEOM` for every gear, export each engraving's cutter as
+`out/<part>-marks.stl` into `MARK_GEOM`, and give a deliberately thin feature as a `MINIMUMS["except"]` box with its
+reason. Morante's answer «1.a» (module 1.0 at 9 T) stands as the minimum; tooth counts, the leg end tubes («2.a») and
+the motor place are re-derived in phase 2. The scale probe's scripts and box list (`probe2.py`, `boxes.csv`,
+`out_<S>.json`) are in the session scratchpad of 2026-11-26 (may be cleared); its partial results are not a size.
+`plan.json` / `design-plan.md` are still the 0.70 design's; phase 2 rewrites them.
 
 ## State 2026-11-24
 
