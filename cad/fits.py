@@ -81,6 +81,10 @@ GEAR_TIP = Fit("radial room round a gear's tip circle in its printed pocket", 0.
 # Removed 2026-11-21 (Morante: checks inherited from designs that no longer exist): TONGUE (base v1's 70 mm cap),
 # SLIP_BORE (the friction clutch), MOTOR_PRELOAD (the N20 clamp). Archive tag pre-redesign-2026-11-17 has them.
 
+# printable minimums (datasheet robot «Phase 1 result», measured on prints 2026-11-11/12): wall or plate, gear module
+WALL_MIN = 2.0
+MODULE_MIN = 1.0
+
 # gears: backlash at the pitch circle, per mesh (gear train test v2, 2026-11-12: turned with 0.20)
 GEAR_BACKLASH = 0.20
 # first layers come out wider (elephant's foot): add this to a fit that sits on the bed, or chamfer the edge 0.4 mm

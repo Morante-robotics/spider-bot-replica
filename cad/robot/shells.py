@@ -1,12 +1,10 @@
-"""Robot shells at S (spec.json S_start, 0.70): cad/base, cad/body, cad/eyes and cad/legs built as they are, moved into
+"""Robot shells at S (spec.json S_start, 1.0): cad/base, cad/body, cad/eyes and cad/legs built as they are, moved into
 the robot frame (motion.to_frame: (q - ORIGIN) x S) and given the plan's local features here, without editing those
 designs. Every shell number is the fit check's (cad/robot/fitcheck/check.py LAYOUT and fit_env.py, 0 failing of 327),
 imported, never copied:
   base   leg windows (the real legs' neck sweep, RN 8 + WR 0.9, pushed up past the rim, slid LSL off the pin),
-         1.2 mm pads round each window, front-window reliefs (RELD 0.85 from the arms' 24-pose sweep), back-sheet pocket
-         (PKT 1.6 outward, |x| <= 11, z 7..17), two front snap ribs
-  body   two front snap fingers (SNT 0.8 x SNW 5, L RIMR - SNZ), rear tab notched over the back-sheet pocket, rim notch
-         and eye-block pocket (BRELD / PKR 0.85 from the arms' sweep), the two eye cups (cad/eyes) in their bores
+         two front snap ribs
+  body   two front snap fingers (SNT 0.8 x SNW 5, L RIMR - SNZ), the two eye cups (cad/eyes) in their bores
   legs   cad/legs leg() bent on motion's neutral leg; the jenscolt hub replaced by the end tube (bore TURN on the Ø3
          printed pin, wall 1.2, tail TAIL 0.7) and the root ball r_root at the pivot
 Robot frame, mm. Legs are written in their neutral pose (verify.py carries them per pose as motion.legs does).
@@ -23,13 +21,17 @@ from OCP.BRepBuilderAPI import BRepBuilderAPI_Transform
 from OCP.ShapeUpgrade import ShapeUpgrade_UnifySameDomain
 from OCP.gp import gp_Trsf, gp_Vec, gp_Ax2, gp_Pnt, gp_Dir
 from scipy.spatial import ConvexHull, cKDTree
-import fit_env as FE                    # S, P (motion lengths x S/0.60), PIV, A_ALL (cranks 2/3 D23 patch), inside()
+import fit_env as FE                    # S, P (motion lengths x S/0.60), PIV, A_ALL, inside()
 from cad import design, fits as F
 import timebudget as _tb
 motion = FE.motion
 class _Layout:
     """the fit check's numbers, read from check.py's source (importing it would run the 8-minute check): LAYOUT
     first, then each E("NAME", default) and the plain constants it uses."""
+    FIXED = {"MANG", "TANG", "BSA", "KEELFIX", "HSZ", "N", "TI", "HNOTCH", "HOPEN", "DSCREW", "POSTSPINE", "LEGLEG",
+             "LEGSONLY", "PSOLID", "SEATS", "FIG", "FIGLEG", "SNG", "WR", "LIFTC", "SPR", "HSINK2"}   # angles, flags, fits, bought spring
+    WALLS = {"W", "WEB_T", "LIDT", "HNS", "SNAP_WALL"}                                         # walls / plates: fits.WALL_MIN
+    DELETED = {"RELD", "BRELD", "PKR", "TAIL"}                                                  # 0.70 fit tweaks (phase 2 step 1)
     def __init__(self):
         import re, ast
         src = open(os.path.join(HERE, "fitcheck", "check.py")).read()
@@ -39,6 +41,11 @@ class _Layout:
         for k in ("PINR", "W", "HUBCUT", "GW", "WEB_T"):
             setattr(self, k, float(re.search(rf"\b{k} = ([\d.]+)", src).group(1)))
         for k, v in lay.items(): setattr(self, k, float(v))
+        for k in list(vars(self)):
+            if k in self.FIXED: continue
+            setattr(self, k, max(F.WALL_MIN, getattr(self, k)) if k in self.WALLS else getattr(self, k) * FE.K)
+        for k in self.DELETED: delattr(self, k)
+        self.TAIL = self.W                 # end tube closed one wall past the pin's web side (the 0.7 tail shortening deleted)
         TH = F.GEAR_THRUST_CRANK.side; wb1 = self.GW / 2 + TH + self.W + TH + self.WEB_T
         self.LSL = (P["XC"] + self.PINX) - wb1 + 1.0
 CL = None
@@ -50,21 +57,18 @@ OUT = os.path.join(HERE, "out"); CACHE = os.path.join(OUT, ".cache"); os.makedir
 # ---- numbers (sources in the comments; nothing typed that fits.py or the fit check holds)
 BASE_WALL = FE.BASE_WALL_R              # mm robot: the base wall (BA.WALL x S, 0.84); no pads: the open-top windows carry no load
 RN, WR = CL.RN, CL.WR                   # window: neck within RN of the pivot, dilated WR (LEG_PATH + sampling)
-STRIP_X, STRIP_X2, STRIP_Y0, STRIP_Y1, STRIP_Z0, STRIP_Z1, STRIP_Z2 = 20.05, 19.25, 6.4, 12.8, 19.0, 23.65, 23.9   # body strip under the cell holder, cut away
-WR_EXTRA = {4: 0.6}                     # leg 4: its window dilated 0.6 more (no path or crank pose cleared it, 24 poses tested); leg 0 clears the smooth front wall by 0.40 (no relief)
-def wr_of(Lg): return WR + WR_EXTRA.get(Lg, 0.0)
-RELD, BRELD, PKR = CL.RELD, CL.BRELD, CL.PKR   # arm-sweep pockets: base front relief, body rim notch, eye block
-PKT = FE.PKT                            # back-sheet pocket (depth, |x|, z0, z1), Morante 2026-11-21
+STRIP_X, STRIP_X2, STRIP_Y0, STRIP_Y1, STRIP_Z0, STRIP_Z1, STRIP_Z2 = (FE.K * v for v in (20.05, 19.25, 6.4, 12.8, 19.0, 23.65, 23.9))   # body strip under the cell holder, cut away
+def wr_of(Lg): return WR
 SNX, SNW, SNT, SNZ, RIBD, SNG = CL.SNX, CL.SNW, CL.SNT, CL.SNZ, CL.RIBD, CL.SNG
 PINR = CL.PINR                          # printed crank pin r (Ø3)
 END_R = PINR + F.TURN.side + CL.W       # leg end tube: bore TURN over the pin, wall W 1.2
 # leg snap on the crank pin (option A, build-log N2 r00): a groove on the pin, a ring bead in the end tube's bore, an axial slit
 # in the tube so it opens over the pin tip. The snap fit is fits.PRESS (assumed): coupon list, not printed now.
-SNAP_NECK_R = 1.0                       # pin neck r in the groove (Ø2.0, brief: neck Ø >= 2.0)
-SNAP_BW = 0.5                           # bead width (axial)
-SNAP_END = 1.0                          # bore floor past XC+PINX: the old open mouth, kept (the pin tip is 0.5 inside it; the leg slides up to 1.5 towards its crank: a floor at TURN 0.25 overlapped crank x leg 0.22 mm3)
-SNAP_WALL = 1.0                         # solid end wall closing the tube beyond the bore floor: the neck rod runs into it (print 2026-11-24: the rod only butted the open rim, leg 3 snapped)
-SNAP_SLIT = 0.6                         # slit width (tangential)
+SNAP_NECK_R = 1.0 * FE.K                       # pin neck r in the groove (Ø2.0, brief: neck Ø >= 2.0)
+SNAP_BW = 0.5 * FE.K                           # bead width (axial)
+SNAP_END = 1.0 * FE.K                          # bore floor past XC+PINX: the old open mouth, kept (the pin tip is 0.5 inside it; the leg slides up to 1.5 towards its crank: a floor at TURN 0.25 overlapped crank x leg 0.22 mm3)
+SNAP_WALL = F.WALL_MIN                         # solid end wall closing the tube beyond the bore floor: the neck rod runs into it (print 2026-11-24: the rod only butted the open rim, leg 3 snapped)
+SNAP_SLIT = 0.6 * FE.K                         # slit width (tangential)
 def snap_bead_r(i): return SNAP_NECK_R + F.TURN.side + BORE_DRIFT[i]       # bead inner r: turns on the neck (TURN), bore axis drift as the bore
 SNAP_MARGIN = F.TURN.side             # axial room each side of the bead's travel (TURN; 0.10 left crank x leg 0.06-0.09 over the poses; slide stays within RETAIN 1.25)
 def snap_groove(i):
@@ -79,7 +83,7 @@ def snap_groove(i):
         if m.any(): lo = min(lo, Q[m, 0].min() - SNAP_BW / 2); hi = max(hi, Q[m, 0].max() + SNAP_BW / 2)
     return round(float(lo - SNAP_MARGIN), 2), round(float(hi + SNAP_MARGIN), 2)
 TAIL, HUBCUT = CL.TAIL, CL.HUBCUT       # tail past the pin (m21), real arm kept from HUBCUT past the pin
-KEEL_BOSS_R = 3.0                       # keel boss radius: counterbore (M2 head 1.9 + STEEL) + 0.95 of wall
+KEEL_BOSS_R = 2.75 + F.STEEL.side + F.WALL_MIN                       # keel boss radius: counterbore (M2 head 1.9 + STEEL) + 0.95 of wall
 PB = P["r_root"]                        # root ball radius at the pivot
 RIMR = (BO.Z_RIM - ORIGIN[2]) * S       # body rim height, robot
 def pin_swing(i):
@@ -138,8 +142,8 @@ def _leg_frame(Lg, k):
     if not right:
         Mx = np.diag([-1.0, 1, 1, 1]); T = Mx @ T @ Mx
     return T
-JOINT_R = 2.35            # mm, the neck between the end tube and the arm (was P["r_inner"] 1.8: leg-3 broke there, print 2026-11-24)
-JOINT_BLEND_DR, JOINT_BLEND_L = 1.0, 2.0     # mm, cone at the tube end of the neck: r +1 tapering over 2 mm
+JOINT_R = 2.35 * FE.K            # mm, the neck between the end tube and the arm (was P["r_inner"] 1.8: leg-3 broke there, print 2026-11-24)
+JOINT_BLEND_DR, JOINT_BLEND_L = 1.0 * FE.K, 2.0 * FE.K     # mm, cone at the tube end of the neck: r +1 tapering over 2 mm
 def _leg_right(i):
     from build123d import Cone
     P_, A0, ang, pts, rad, ni = motion.neutral_leg(i, P, n=13)
@@ -184,7 +188,7 @@ def _leg_right(i):
         # (r00: «leg-2's tube detached»). A strut from the wall at the tube's mouth to the joint axis ties them.
         xw = xe - 0.3; rw = (rb + END_R) / 2 + (xw - xm) * math.tan(th) + 0.2
         W_ = np.array([xw, A0[1], A0[2]]) + rw * np.array([0, uh[1], uh[2]]) ; J_ = A0 + 6.0 * u
-        v_ = J_ - W_; strut = _along(Cylinder(1.0, float(np.linalg.norm(v_)), align=(Align.CENTER, Align.CENTER, Align.MIN)), W_, v_)
+        v_ = J_ - W_; strut = _along(Cylinder(1.0 * FE.K, float(np.linalg.norm(v_)), align=(Align.CENTER, Align.CENTER, Align.MIN)), W_, v_)
         leg = fuse_all([leg, strut]) - bore
     leg = fuse_all([leg, ring])
     up_ = u - np.dot(u, [1.0, 0, 0]) * np.array([1.0, 0, 0]); up_ = -up_ / np.linalg.norm(up_)     # slit on the side away from the arm
@@ -203,7 +207,7 @@ def _along(sh, p0, u):
     return Pos(*p0) * sh
 def leg(Lg):
     i = Lg % 4
-    key = ("leg9", i, SNAP_END, SNAP_WALL, SNAP_NECK_R, SNAP_BW, SNAP_SLIT, FLARE_DEG[i], BORE_DRIFT[i], CL.PINX, S, HUBCUT, TAIL, END_R, PB, JOINT_R, JOINT_BLEND_DR, JOINT_BLEND_L, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C,
+    key = ("leg9", i, SNAP_END, SNAP_WALL, SNAP_NECK_R, SNAP_BW, SNAP_SLIT, FLARE_DEG[i], BORE_DRIFT[i], CL.PINX, S, HUBCUT, TAIL, END_R, PB, JOINT_R, JOINT_BLEND_DR, JOINT_BLEND_L, stamp("cad/legs/build.py", "cad/motion.py"),
            srch(_leg_right, _along))
     sh = cached(f"leg{i}", key, lambda: _leg_right(i))
     return sh if Lg < 4 else mirror_x(sh)
@@ -262,20 +266,6 @@ def one(sh):
     ss = sh.solids(); return max(ss, key=lambda s: s.volume) if len(ss) > 1 else (ss[0] if ss else sh)
 
 # ---- base
-def back_pocket(inner=None):
-    """back sheet PKT[0] outward in |x| <= PKT[1], z PKT[2..3], as a cup: the sheet moved out by the depth, with side,
-    top and bottom walls of the wall's own thickness joining it to the bowl (moved out by more than the wall is thick,
-    a bare sheet came loose: 265 mm3 dropped, 2026-11-23). Returns (cut on the cavity side, cup added on the scoop side)."""
-    d = BASE_WALL / S; w = BASE_WALL; cx, cy = (BA.CX - ORIGIN[0]) * S, (BA.BACK_Y - ORIGIN[1]) * S
-    rb_in, rb_out = (BA.BACK_R + d) * S, BA.BACK_R * S; dp, hx, z0, z1 = PKT
-    # clip round the back sheet only (y cy - rb_in .. a few mm in front of it); it was y cy-30..cy, which misses the sheet
-    # at S 0.70 (cy 82.4, sheet at y ~22-26), so the pocket was never cut (found by the volume check, 2026-11-22)
-    clip = lambda m: Pos(0, cy - rb_in - 1.0, z0 - m) * Box(2 * (hx + m), 10.0, z1 - z0 + 2 * m, align=(Align.CENTER, Align.MIN, Align.MIN))
-    ring = lambda r0, r1, m: (Pos(cx, cy, z0 - m) * (Cylinder(r1, z1 - z0 + 2 * m, align=(Align.CENTER, Align.CENTER, Align.MIN))
-                                                     - Cylinder(r0, z1 - z0 + 2 * m, align=(Align.CENTER, Align.CENTER, Align.MIN))))
-    cut = ring(rb_in - dp, rb_in, 0.0) & clip(0.0)
-    add = ring(rb_out - dp, rb_in - 0.05, w) & clip(w)
-    return cut, add
 def snap_geometry():
     """front snap rib (base) and finger + hook (body) at x +-SNX, as check.py (innermost wall face yw from inside())."""
     out = []
@@ -289,7 +279,7 @@ def snap_geometry():
         hook = bx(np.array([x0, yw + F.WINDOW.side, SNZ]), np.array([x1, yf + 0.01, SNZ + 0.8]))
         out.append((rib, finger + hook, yw))
     return out
-FING_Z0, FING_Z1, FING_IN = 24.5, 27.5, 1.2   # snap finger root: a block from z FING_Z0 to FING_Z1, FING_IN mm further out than the
+FING_Z0, FING_Z1, FING_IN = 24.5 * FE.K, 27.5 * FE.K, 1.2 * FE.K   # snap finger root: a block from z FING_Z0 to FING_Z1, FING_IN mm further out than the
 # finger (-y), embedded in the body's front wall (inner face y -29.6 at z 26 .. -30.4 at 27.5 at x +-6, outer -33.7 .. -34.0)
 def finger_root(fing):
     """the finger (top at z RIMR + 0.6) did not reach the body: its front wall starts at z 25.5 there (7.2 mm above the finger).
@@ -300,10 +290,10 @@ def finger_root(fing):
     block = Pos((x0 + x1) / 2, (y1 - SNT - FING_IN + y1) / 2, (FING_Z0 + FING_Z1) / 2) * Box(x1 - x0, SNT + FING_IN, FING_Z1 - FING_Z0)
     return fing.fuse(plate, block).clean()
 PANEL_T = CL.W                           # front panel thickness 1.2 (rules 3.2: PLA wall >= 1.2); the face sits in the body's outer 1.2, the finger plates (y +1.4 behind) stay free
-PANEL_XW = 18.0                          # panel half-width: the arch (BO.CHIN[0] x S = 17.5) + 0.5, where the base's front wall meets the body rim (brief 2026-11-24: by |x| 18)
-PANEL_M = 0.8                            # the panel's top follows the arch ellipse grown by this: it fuses into the wall round the arch (wall 3.2)
+PANEL_XW = 18.0 * FE.K                          # panel half-width: the arch (BO.CHIN[0] x S = 17.5) + 0.5, where the base's front wall meets the body rim (brief 2026-11-24: by |x| 18)
+PANEL_M = 0.8 * FE.K                            # the panel's top follows the arch ellipse grown by this: it fuses into the wall round the arch (wall 3.2)
 PANEL_RAY = 0.15                         # the outer face is the skin's y this far above the arch edge (step to the skin <= 0.4)
-PANEL_BASE_TOP = ((0, 12.96), (4, 13.22), (8, 14.00), (12, 15.35), (14, 16.27), (16, 16.80), (18, 17.01))   # |x|, base front wall top z: measured on the base (robot frame, brief 2026-11-24); 18 = body rim RIMR
+PANEL_BASE_TOP = tuple((FE.K * a, FE.K * b) for a, b in ((0, 12.96), (4, 13.22), (8, 14.00), (12, 15.35), (14, 16.27), (16, 16.80), (18, 17.01)))   # |x|, base front wall top z: measured on the base (robot frame, brief 2026-11-24); 18 = body rim RIMR
 PANEL_GAP = F.LOCATOR.side               # fixed-part gap panel to base top (large parts keep LOCATOR 0.2)
 def front_panel(b0):
     """closes the mouth at the front face: the skin's outer face over the chin arch (at the arch edge, y(x) of the skin just above
@@ -350,12 +340,11 @@ def base():
     def prism(poly, fr, dr):
         t, z, n = fr; pl = Plane(origin=tuple(n * dr[0]), x_dir=tuple(t), z_dir=tuple(n))
         return extrude(pl * BPoly(*[tuple(p) for p in CU.ccw(poly)], align=None), dr[1] - dr[0])
-    pk_cut, pk_add = back_pocket()
     zf = b0.bounding_box().min.Z; cyl = lambda x, y, r, z0, z1: Pos(x, y, z0) * Cylinder(r, z1 - z0, align=(Align.CENTER, Align.CENTER, Align.MIN))
-    adds = [pk_add] + [rib for rib, _, _ in snap_geometry()] + [cyl(x, y, KEEL_BOSS_R, zf + DR.BASE_FLOOR * 0.5, DR.ZKEEL0) for x, y, _, _ in DR.KEEL_SCREWS]
-    cuts = [prism(*W.window(Lg)) for Lg in range(8)] + [pk_cut] \
-        + [cyl(x, y, DR.M2_HEAD_R + F.STEEL.side, zf - 1.0, zf + zh) for x, y, zh, _ in DR.KEEL_SCREWS] \
-        + [cyl(x, y, DR.M2_HOLE_R, zf + zh - 0.5, DR.ZKEEL0 + 1.0) for x, y, zh, _ in DR.KEEL_SCREWS]
+    adds = [rib for rib, _, _ in snap_geometry()] + [cyl(x, y, KEEL_BOSS_R, zf + DR.BASE_FLOOR * 0.5, DR.ZKEEL0) for x, y, _, _ in DR.KEEL_SCREWS]
+    cuts = [prism(*W.window(Lg)) for Lg in range(8)] \
+        + [cyl(x, y, DR.M3_HEAD_R + F.STEEL.side, zf - 1.0, zf + zh) for x, y, zh, _ in DR.KEEL_SCREWS] \
+        + [cyl(x, y, DR.M3_HOLE_R, zf + zh - 0.5, DR.ZKEEL0 + 1.0) for x, y, zh, _ in DR.KEEL_SCREWS]
     b = b0.fuse(*adds); tick(f"fuse {len(adds)}")
     b = b.cut(*cuts); tick(f"cut {len(cuts)}")
     ss = sorted(b.solids(), key=lambda x: -x.volume)
@@ -376,45 +365,6 @@ def base_skin():
     if os.path.exists(p): return import_brep(p)
     sh = to_robot(BA.build(1.0, wall=BASE_WALL / S)); export_brep(sh, p); return sh
 
-# ---- leg x-stop: a post from the body wall that stops the leg sliding off its pin (plan leg-on-pin "-x window": the window is slid
-# LSL along u for assembly, so it does not hold x). Found per right leg (left = mirror) from the leg's own samples.
-XS_RP = 0.4                              # post radius (Ø0.8: two lines)
-XS_EMB = 0.8                             # mm the post goes into the wall
-XS_HIT = 0.9                             # the leg may move this far in its sliding direction before the post stops it (< 1 mm)
-XS_GRID = 0.25
-XS_NCAND, XS_REACH = 1500, 10.0           # candidate free ends tried (nearest the wall first) and the wall reach for the post's other end
-def xstop_post(Lg, near):
-    """(a, b) end points of leg Lg's stop post (Lg 0..3, sliding +x): a free end in the +x shadow of the leg's neutral pose,
-    b inside the wall. The post keeps LEG_PATH (+ its radius) from the leg over the 24 poses and from every other leg, and
-    NEIGHBOUR from the leg at the lift pose KC slid down by LIFTD (the body lifts off over the posts). None if no post fits."""
-    import trimesh
-    P_ = PIV[Lg]; sh = leg(Lg); V, Fc = sh.tessellate(0.1, 0.3); V = np.array([[v.X, v.Y, v.Z] for v in V])
-    T = leg_frame(Lg, 0); m0 = trimesh.Trimesh(V @ T[:3, :3].T + T[:3, 3], np.array(Fc))
-    c24 = cKDTree(np.vstack([leg_points(Lg, k, edge=0.4) for k in range(24)]))
-    q = leg_points(Lg, KC, edge=0.4); lift = cKDTree(np.vstack([q - [0, 0, t] for t in np.arange(0, CL.LIFTD + 0.01, 0.5)]))
-    oth = cKDTree(np.vstack([leg_points(L, k, edge=0.8) for L in range(8) if L != Lg for k in range(0, 24, 2)]))
-    q0 = leg_points(Lg, 0, edge=0.3); rl = F.NEIGHBOUR.side + 0.1; lp = F.LEG_PATH.side
-    g = np.arange(-9, 9.01, XS_GRID); X, Y, Z = np.meshgrid(g, g, g, indexing="ij"); pts = np.c_[X.ravel(), Y.ravel(), Z.ravel()] + P_
-    d24 = c24.query(pts)[0]; pts = pts[d24 >= lp + XS_RP + 0.02]
-    sh_ = np.zeros(len(pts), bool)
-    for t in (0.6, 0.8, 1.0, 1.2): sh_ |= m0.contains(pts - [t, 0, 0])
-    R = pts[sh_]; R = R[(lift.query(R)[0] >= rl + XS_RP) & (oth.query(R)[0] >= lp + XS_RP)]
-    kn = cKDTree(near); dw = kn.query(R)[0]; order = np.argsort(dw)
-    for i in order[:XS_NCAND]:
-        a = R[i]
-        for j in kn.query_ball_point(a, XS_REACH)[::7][:60]:
-            w = near[j]; dr = (w - a) / np.linalg.norm(w - a); b = w + XS_EMB * dr; path = a + np.linspace(0, 1, 16)[:, None] * (b - a)
-            if (c24.query(path)[0] < lp + XS_RP).any() or (lift.query(path)[0] < rl + XS_RP).any() or (oth.query(path)[0] < lp + XS_RP).any(): continue
-            ab = b - a; hit = None
-            for t in np.arange(0, 3.01, 0.05):
-                pp = q0 + [t, 0, 0]; u_ = np.clip(((pp - a) @ ab) / (ab @ ab), 0, 1)
-                if np.linalg.norm(pp - (a + u_[:, None] * ab), axis=1).min() < XS_RP: hit = t; break
-            if hit is not None and hit <= XS_HIT: return a, b, hit
-    return None
-def post_solid(a, b, r=XS_RP):
-    a, b = np.asarray(a, float), np.asarray(b, float); L = np.linalg.norm(b - a)
-    return one(_along(Cylinder(r, L, align=(Align.CENTER, Align.CENTER, Align.MIN)), a, (b - a) / L).fuse(Pos(*a) * Sphere(r)).clean())
-
 # ---- body
 EYES = [(BO.CX - BO.EYE_DX, -50.0, BO.EYE_Z, "eye"), (BO.CX + BO.EYE_DX, -50.0, BO.EYE_Z, "eye"),     # x, back y, z
         (BO.CX - BO.SEYE_DX, -44.0, BO.SEYE_Z, "small-eye"), (BO.CX + BO.SEYE_DX, -44.0, BO.SEYE_Z, "small-eye")]
@@ -431,18 +381,14 @@ def eye_cups():
     return cups
 LED_R = 2.5                                  # 5 mm LED (datasheet: Ø5 body, flange Ø5.8 x 1): the bore is LED_R + TURN a side, the floor's back face stops the flange
 SW_THROW = 1.5                               # SS12D00 lever travel between positions: 1.5 mm (the usual SS12D00 pitch; hardware.md gives no figure)
-SW_SLOT_Y = 12.0                             # lever slot length along y (through the back wall)
+SW_SLOT_Y = 12.0 * FE.K                             # lever slot length along y (through the back wall)
 SW_KEEP_REACH = 0.0                          # keeper ribs/top bar reach this far behind the switch's back face (the switch sits embedded in the wall: they end on that face, inside the skin)
-W_KEEP = 1.2                                 # keeper wall (loaded, rules 3.2)
+W_KEEP = F.WALL_MIN                                 # keeper wall (loaded, rules 3.2)
 def led_pos(sx):
     """LED sx (+-1) axis point on the big eye's bore floor, robot frame (check.py: ex, ey, ez)."""
     return sx * BO.EYE_DX * S, (BO.EYE_BORE_BACK - ORIGIN[1]) * S, (BO.EYE_Z - ORIGIN[2]) * S
-LEDB0, LEDB1 = 0.3, 1.3  # LED through-bore: from 0.3 behind the bore floor to 1.3 past it (cavity face is 0.7 past, ray scan of body.stl)
-LEDF = 0.7                                   # the bore floor's back (cavity) face, behind led_pos's y (ray scan of body.stl): the LED's flange stops on it
-XS_POSTS = {0: ((34.288, -22.683, 19.65), (29.073, -15.758, 26.0)),    # leg x-stop posts (free end a, end in the wall b), found
-            3: ((27.013, 18.242, 16.65), (24.305, 8.136, 17.04))}     # once by xstop_post (60-100 s a leg, 2026-11-23: the leg moves
-                                                                       # 0.70 / 0.75 before its post stops it; none fits legs 1 and 2).
-                                                                       # Re-run xstop_post by hand only if the legs or the body wall move.
+LEDB0, LEDB1 = 0.3 * FE.K, 1.3 * FE.K  # LED through-bore: from 0.3 behind the bore floor to 1.3 past it (cavity face is 0.7 past, ray scan of body.stl)
+LEDF = 0.7 * FE.K                                   # the bore floor's back (cavity) face, behind led_pos's y (ray scan of body.stl): the LED's flange stops on it
 def body_skin():
     """cad/body's shell in the robot frame (17-20 s), kept as a BREP keyed by cad/body/build.py's text."""
     key = (hashlib.sha1(open(os.path.join(ROOT, "cad", "body", "build.py"), "rb").read()).hexdigest()[:12], S, srch(to_robot))
@@ -457,7 +403,7 @@ def body_static():
     cells and switch (their bounding boxes + LOCATOR) and the strip under the holder (one cut)."""
     import power as PW
     key = (_file_key("cad/body/build.py", "cad/eyes/build.py", "cad/robot/power.py"), S, srch(body_static, body_skin, eye_cups, snap_geometry, finger_root, front_panel, led_pos, to_robot),
-           PKT, SNX, SNW, SNT, SNZ, RIBD, SNG, PANEL_T, PANEL_XW, PANEL_M, PANEL_RAY, PANEL_BASE_TOP, PANEL_GAP, LEDB0, LEDB1, LED_R, SW_THROW, SW_SLOT_Y, SW_KEEP_REACH, W_KEEP, STRIP_X, STRIP_X2, STRIP_Y0, STRIP_Y1, STRIP_Z0, STRIP_Z1, STRIP_Z2)
+           SNX, SNW, SNT, SNZ, RIBD, SNG, PANEL_T, PANEL_XW, PANEL_M, PANEL_RAY, PANEL_BASE_TOP, PANEL_GAP, LEDB0, LEDB1, LED_R, SW_THROW, SW_SLOT_Y, SW_KEEP_REACH, W_KEEP, STRIP_X, STRIP_X2, STRIP_Y0, STRIP_Y1, STRIP_Z0, STRIP_Z1, STRIP_Z2)
     p = os.path.join(CACHE, f"body_static_{khash(key)}.brep")
     if os.path.exists(p) and os.path.exists(p + ".npz"):
         import trimesh
@@ -473,8 +419,7 @@ def body_static():
     keeper += [Pos(sx * (xk + W_KEEP / 2) - W_KEEP / 2, yk - W_KEEP, zb) * Box(W_KEEP, yr - yk + W_KEEP, zt - zb, align=MIN) for sx in (-1, 1)]
     adds = cups + [finger_root(f) for _, f, _ in snap_geometry()] + keeper + [front_panel(b0)]
     b = b0.fuse(*adds)
-    tw, ty0, ty1, tz = BO.TAB; ty = (ty0 - ORIGIN[1]) * S; dp, hx, z0, z1 = PKT
-    cuts = [Pos(0, ty - 1.0, z0 - 0.5) * Box(2 * hx + 1.0, dp + 1.0, z1 - z0 + 1.0, align=(Align.CENTER, Align.MIN, Align.MIN))]
+    cuts = []
     for sx in (-1, 1):
         x, y, z = led_pos(sx); cuts.append(cylA((x, y - LEDB0, z), LED_R + F.TURN.side, LEDB1 + LEDB0))
         cuts.append(cylA(((BO.CX + sx * BO.SEYE_DX - ORIGIN[0]) * S, (BO.SEYE_BACK - ORIGIN[1]) * S - LEDB0, (BO.SEYE_Z - ORIGIN[2]) * S), BO.SEYE_BORE * S, LEDB1 + LEDB0))
@@ -489,28 +434,16 @@ def body_static():
     import cutters as CU
     m = CU.mesh_of(b, 0.05, 0.3); np.savez(p + ".npz", v=m.vertices, f=m.faces); return b, m
 def body():
-    """the body: its fixed features (body_static, cached), the legs' designed notches and pockets (cutters.body_cutters:
-    one cut) and the frozen x-stop posts (one fuse). Then every leg is checked against it at its 24 poses and while the
+    """the body: its fixed features (body_static, cached). Then every leg is checked against it at its 24 poses and while the
     body is put on (cutters.body_gaps)."""
     import cutters as CU
     _T0[0] = time.time()
     b, bm = body_static(); tick("skin + fixed features")
     legs = {Lg: leg_mesh(Lg) for Lg in range(8)}
-    lc = CU.body_cutters(bm, {Lg: leg_mesh(Lg, samples=True) for Lg in range(8)}, leg_frame, PIV,
-                         BRELD, F.NEIGHBOUR.side + 0.1, KC, CL.LIFTD, RIMR); tick(f"{len(lc)} leg cutters")
-    from build123d import Plane, Polygon as BPoly, extrude
-    def prism(poly, fr, dr):
-        t, z, n = fr; pl = Plane(origin=tuple(n * dr[0]), x_dir=tuple(t), z_dir=tuple(n))
-        return extrude(pl * BPoly(*[tuple(p) for p in CU.ccw(poly)], align=None), dr[1] - dr[0])
-    for poly, fr, dr, what in lc: print(f"    [body] {what}: {len(poly.exterior.coords) - 1} sides, {dr[1] - dr[0]:.1f} deep", flush=True)
-    cuts = [prism(*x[:3]) for x in lc]
-    b = b.cut(*cuts); tick(f"cut {len(cuts)}")
     ss = sorted(b.solids(), key=lambda x: -x.volume)
     for x in ss[1:]:
         q = x.bounding_box(); print(f"    [body] dropped a loose piece of {x.volume:.2f} mm3 at {np.round([q.min.X, q.min.Y, q.min.Z], 1).tolist()}..{np.round([q.max.X, q.max.Y, q.max.Z], 1).tolist()}", flush=True)
     b = ss[0]
-    posts = [post_solid(*XS_POSTS[i]) for i in sorted(XS_POSTS)]; posts += [mirror_x(p) for p in posts]
-    if posts: b = b.fuse(*posts); tick(f"fuse {len(posts)} stop posts")
     b = one(unify(b, faces_only=True)); tick("unify")
     assert b.is_valid and len(b.solids()) == 1, f"body: valid {b.is_valid}, {len(b.solids())} solids"
     for Lg, what, g, at in CU.body_gaps(CU.mesh_of(b, 0.05, 0.3), legs, leg_frame, KC, CL.LIFTD):

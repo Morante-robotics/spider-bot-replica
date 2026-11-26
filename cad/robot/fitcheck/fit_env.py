@@ -18,20 +18,15 @@ BO, BA = design("body"), design("base")
 S = float(json.load(open(os.path.join(HERE, "..", "spec.json")))["dims"]["S_start"]["value"])   # Morante 2026-11-21: «Prueba 0.70»
 _LEN = ("r", "XC", "H", "DY", "knee_r", "knee_z", "foot_r", "foot_z", "up_arch", "blade_top", "blade_bow",
         "r_upper", "r_root", "r_blade", "r_inner")
+K = S / 0.70    # printed layout numbers (check.py LAYOUT, drive, power, shells) were set at S 0.70: they grow with S
 P = dict(motion.P0, S=S, **{k: motion.P0[k] * S / motion.P0["S"] for k in _LEN})   # every P0 length x S/0.60
-BASE_WALL_R = BA.WALL * S    # robot mm: 0.84 everywhere. No 1.2 pads round the leg windows any more (2026-11-23): the windows are
+BASE_WALL_R = max(F.WALL_MIN, BA.WALL * S)    # robot mm: fits.WALL_MIN. No 1.2 pads round the leg windows any more (2026-11-23): the windows are
                              # open-top LEG_OPEN, the leg is held by its pin, so they carry no load; 1.2 everywhere put the wall
                              # 0.14 from the front arms (decision 2: smooth front, 0.40 at 0.84)
 BODY_WALL_J = BO.WALL   # spec body_wall 1.6 robot mm (Morante 2026-11-21)
 def j2r(q): return motion.to_frame(q, P)
 def r2j(q): return np.asarray(q, float) / S + motion.ORIGIN
 # --- inner surface point clouds (jenscolt frame), then to robot frame
-# back-sheet pocket (spec back_sheet_pocket, Morante 2026-11-21): the sheet 1.6 robot mm outward at |x| <= 11, z 7..17
-PKT = tuple(float(v) for v in os.environ.get("PKT", "1.6,11,7,17").split(","))
-def pocket_dr(J):
-    """radial shrink (jenscolt mm) of the back sheet's circle at jenscolt points J: PKT depth inside the window, else 0."""
-    J = np.atleast_2d(J); xr = (J[:, 0] - motion.ORIGIN[0]) * S; zr = (J[:, 2] - motion.ORIGIN[2]) * S
-    return np.where((np.abs(xr) <= PKT[1]) & (zr >= PKT[2]) & (zr <= PKT[3]), PKT[0] / S, 0.0)
 SCOOP_J = 0.0                 # Morante 2026-11-21: back scoop 1.2 robot mm further back
 BACK_Y_J = BA.BACK_Y + SCOOP_J
 A_L = BA.meridian(BA.X_W, BA.X_ZE, BA.X_H, BA.X_P, BA.Z_LEDGE); B_L = BA.meridian(BA.Y_W, BA.Y_ZE, BA.Y_H, BA.Y_P, BA.Z_LEDGE)
@@ -79,20 +74,10 @@ def base_inner_pts(nt=180):
     t2 = np.linspace(np.pi / 2 - 0.6, np.pi / 2 + 0.6, 300)          # back sheet (inner face of the scoop's wall)
     Rb = BA.BACK_R + d
     for z in zs:
-        q = np.c_[BA.CX + Rb * np.cos(t2), BACK_Y_J - Rb * np.sin(t2), np.full(len(t2), z)]; dr = pocket_dr(q)
-        out.append(np.c_[BA.CX + (Rb - dr) * np.cos(t2), BACK_Y_J - (Rb - dr) * np.sin(t2), q[:, 2]])
-    # pocket step faces: sides at |x| = PKT[1], top and bottom at z PKT[2], PKT[3] (robot)
-    pj = PKT[0] / S; xb = [motion.ORIGIN[0] + sx * PKT[1] / S for sx in (-1, 1)]; zb_ = [motion.ORIGIN[2] + PKT[k] / S for k in (2, 3)]
-    for r_ in np.linspace(Rb - pj, Rb, 6):
-        for x_ in xb:
-            t_ = np.arccos((x_ - BA.CX) / r_); zz_ = np.arange(zb_[0], zb_[1], 0.3)
-            out.append(np.c_[np.full(len(zz_), x_), BACK_Y_J - r_ * np.sin(t_) + 0 * zz_, zz_])
-        for z_ in zb_:
-            tt = t2[np.abs(BA.CX + r_ * np.cos(t2) - motion.ORIGIN[0]) * S <= PKT[1]]
-            out.append(np.c_[BA.CX + r_ * np.cos(tt), BACK_Y_J - r_ * np.sin(tt), np.full(len(tt), z_)])
+        out.append(np.c_[BA.CX + Rb * np.cos(t2), BACK_Y_J - Rb * np.sin(t2), np.full(len(t2), z)])
     out.append(band_pts(d))
     return np.vstack(out)
-_CK = os.path.join(CACHE, f"env_{stamp('cad/body/build.py', 'cad/base/build.py', 'cad/motion.py', 'cad/fits.py', 'cad/robot/fitcheck/fit_env.py')}_{S}_{BASE_WALL_R}_{BODY_WALL_J}_{SCOOP_J:.4f}_pk{"_".join(f"{v:g}" for v in PKT)}.npz")
+_CK = os.path.join(CACHE, f"env_{stamp('cad/body/build.py', 'cad/base/build.py', 'cad/motion.py', 'cad/fits.py', 'cad/robot/fitcheck/fit_env.py')}_{S}_{BASE_WALL_R}_{BODY_WALL_J}_{SCOOP_J:.4f}.npz")
 if os.path.exists(_CK):
     _z = np.load(_CK); BODY_PTS, BODY_ROWS, BASE_PTS = _z["b"], (_z["zs"], _z["R"]), _z["a"]
 else:
@@ -100,18 +85,6 @@ else:
     _ob = body_inner_pts(w=0.3)[0]; BASE_PTS = np.vstack([BASE_PTS, _ob[_ob[:, 2] < EAR[:, 1].max() + 0.5]])  # body skirt outside
     np.savez(_CK, b=BODY_PTS, zs=BODY_ROWS[0], R=BODY_ROWS[1], a=BASE_PTS)
 WALL_PTS = np.vstack([j2r(BODY_PTS), j2r(BASE_PTS)])
-# front leg window relief (spec must_have): a local through-notch, a sphere of radius R at the arm's closest pass, mirrored in x
-REL = [float(v) for v in os.environ.get("REL", "0,0,0,0").split(",")]
-RELC = [np.array([sx * REL[0], REL[1], REL[2]]) for sx in (1, -1)] if REL[3] > 0 else []
-def in_rel(q):
-    q = np.atleast_2d(q); m = np.zeros(len(q), bool)
-    for c in RELC: m |= np.linalg.norm(q - c, axis=1) < REL[3]
-    return m
-if RELC:
-    _w0 = cKDTree(WALL_PTS); WALL_PTS = WALL_PTS[~in_rel(WALL_PTS)]
-    for c in RELC:                                  # the notch's own faces: the sphere where it lies in the wall
-        u = np.random.default_rng(0).normal(size=(6000, 3)); u /= np.linalg.norm(u, axis=1)[:, None]; sp = c + REL[3] * u
-        dd = _w0.query(sp)[0]; WALL_PTS = np.vstack([WALL_PTS, sp[dd < BASE_WALL_R]])
 WALL_T = cKDTree(WALL_PTS)
 _OR = np.array(BO.inner_rows(0.3))
 def in_body_outer(J):
@@ -127,7 +100,7 @@ def inside(q):
     ok = (z >= zs[0]) & (z <= zs[-1]) & ((np.abs(x - BO.CX) / a) ** e + (np.abs(y) / b) ** e < 1)
     global _ZG
     if _ZG is None: _zg = np.linspace(BA.Z_FOOT + d, BA.Z_LEDGE, 400); _ZG = (_zg, np.array([base_hw(zz, d) for zz in _zg]))
-    zg, HW = _ZG; Rb = BA.BACK_R + d - pocket_dr(J)
+    zg, HW = _ZG; Rb = BA.BACK_R + d
     zc = np.clip(z, BA.Z_FOOT + d, BA.Z_LEDGE); A, B, N = [np.interp(zc, zg, HW[:, k]) for k in range(3)]; A = np.maximum(A, 1e-6); B = np.maximum(B, 1e-6)
     okb = (z >= BA.Z_FOOT + d) & (z <= BA.Z_LEDGE) & ((np.abs(x - BA.CX) / A) ** N + (np.abs(y - BA.CY) / B) ** N < 1)
     okb &= np.hypot(x - BA.CX, y - BACK_Y_J) > Rb
@@ -137,7 +110,7 @@ def inside(q):
         (np.abs(x - BA.CX) / (A_L - 0.5 * d)) ** n + (np.abs(y - BA.CY) / (B_L - 0.5 * d)) ** n < 1)
     okc &= np.hypot(x - BA.CX, y - BACK_Y_J) > Rb
     okc &= ~in_body_outer(J)
-    return ok | okb | okc | (in_rel(q) if RELC else False)
+    return ok | okb | okc
 def wall_gap(q):
     """least gap of surface samples q to the cavity wall (negative = outside)."""
     d, _ = WALL_T.query(q); ins = inside(q); g = np.where(ins, d, -d); k = int(np.argmin(g)); return g[k], q[k]
@@ -166,16 +139,6 @@ def capsule(a, b, r, h=0.5):
 def gap_pts(q1, q2):
     return cKDTree(q1).query(q2)[0].min()
 # --- legs: inner arms over 24 poses (motion.legs), the crank pins A and pivots
-# pivot patch (spec must_have, Morante 2026-11-21): cranks 2 and 3 D23 further apart along Y than the uniform DY,
-# split about their midpoint shifted by D23C; motion.py untouched (patched here only)
-D23 = float(os.environ.get("D23", 2.6)); D23C = float(os.environ.get("D23C", 1.8))
-_piv0 = motion.pivot
-def _pivot(i, p=motion.P0):
-    P_, O = _piv0(i, p); O = O.copy()
-    if i == 1: O[1] += -D23 / 2 + D23C
-    if i == 2: O[1] += D23 / 2 + D23C
-    return P_, O
-motion.pivot = _pivot
 LEG_PTS, LEG_RAD, LEG_NI, PIV, A_ALL = motion.legs(P)
 BAND_OUT = j2r(band_pts(None))
 def arm_centres(k_leg, pose, end_r):

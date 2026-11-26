@@ -63,17 +63,18 @@ def iface():
                 BLOCK2=((-wx1, y2 - CL.DBH, zb2), (wx1, y2 + CL.DBH, CL.DZT)), DZT=CL.DZT)
 
 D = iface()
-W = CL.W                                              # wall 1.2 (loaded, rules 3.2)
+K = SH.FE.K                                           # printed sizes set at S 0.70 grow with S
+W = CL.W                                              # wall fits.WALL_MIN (loaded, rules 3.2)
 # ---------------------------------------------------------------- cells, contacts (datasheets) and holder box (probe)
 CELL_D, CELL_H = 11.6, 5.4                            # AG13 / LR44: Ø11.6 x 5.4 (IEC LR44 datasheet)
 CY, CZ = CL.PY, CL.PZ                                 # cells' centre (probe LAYOUT PY 14.4, PZ 31)
 PD = CELL_D + 2 * F.STEEL.side                        # cradle Ø: cell + STEEL a side (bought part in printed seat)
-PITCH = PD + 0.8                                      # 3 stacks side by side, 0.8 rib (two lines) between cradles
+PITCH = PD + 0.8 * K                                      # 3 stacks side by side, 0.8 rib (two lines) between cradles
 SPR = CL.SPR                                          # conical spring compressed length 2.0
 SPR_R0, SPR_R1 = 3.5, 2.0                             # conical spring Ø7 base on the wall -> Ø4 on the cell (to buy)
 STRIP_T = 0.3                                         # nickel strip 0.3 thick (to buy, probe)
 L_IN = 2 * CELL_H + SPR + STRIP_T + 2 * F.STEEL.side  # inner length along y
-HX = 1.5 * PITCH - 0.4 + W; HY = L_IN / 2 + W         # outer half sizes (probe hx, hy)
+HX = 1.5 * PITCH - 0.4 * K + W; HY = L_IN / 2 + W         # outer half sizes (probe hx, hy)
 Z0 = CZ - PD / 2 - W                                  # floor underside
 ZT = CZ + PD / 2                                      # wall top = lid underside (cells' top + STEEL)
 YF, YB = CY - HY, CY + HY                             # front / back outer faces
@@ -93,26 +94,26 @@ PY1 = max(CY + 3, OY4 + SLW + W)                      # post cap's back end, ove
 HSYY = 0.5 * (E2y0 + E2y1)                            # holder M2 at ear 2's centre
 TABHW = CL.TABHW                                      # tab half-width 2.6 (5.2 wide)
 ZTB = E2z1; TABZ1 = ZTB + W                           # tab rests on ear 2's top (lowered, EARH2 1.0), 1.2 thick
-M2_D, M2_HEAD_D, M2_HEAD_H = 2.0, 3.8, 2.0            # ISO 4762 M2: head Ø3.8 x 2.0
-M2_L = 6.0                                            # M2 x 6 (was x 8): 0.4 tab + 5.6 into ear 2 / block 2, tip 0.5 above the block's floor
-HOLE_R = M2_D / 2 + F.STEEL.side                      # tab hole: shank + STEEL
-CB_R, CB_D = M2_HEAD_D / 2 + F.STEEL.side, 0.8        # head counterbored 0.8 into the tab: the N10's underside (z 29.79) clears the head
+M3_D, M3_HEAD_D, M3_HEAD_H = 3.0, 5.5, 3.0            # ISO 4762 M3: head Ø5.5 x 3.0
+M3_L = 8.0                                            # M2 x 6 (was x 8): 0.4 tab + 5.6 into ear 2 / block 2, tip 0.5 above the block's floor
+HOLE_R = M3_D / 2 + F.STEEL.side                      # tab hole: shank + STEEL
+CB_R, CB_D = M3_HEAD_D / 2 + F.STEEL.side, 0.8 * K        # head counterbored 0.8 into the tab: the N10's underside (z 29.79) clears the head
 BZ = TABZ1 - CB_D                                     # head bearing face (tab left 0.4 under it)
 NOTCH = F.WINDOW.side                                 # front-bottom notch round block 2 / ear 2 (fixed printed part passed by)
-SEAT_W, SEAT_H = 0.8, 0.8                             # spring seat ring: 0.8 wall (two lines), 0.8 high
+SEAT_W, SEAT_H = 0.8 * K, 0.8 * K                             # spring seat ring: 0.8 wall (two lines), 0.8 high
 WIRE_W, WIRE_D = 2.0, 1.5                             # wire slots in the wall tops (spring bus front, strip back), m3
 # ---------------------------------------------------------------- lid: plate, 2 front snap lips inside, 2 back lips outside
 LIDT = CL.LIDT                                        # 1.2
 JZ = ZT + LIDT + 11.5 / 2                             # JST pair stands on the lid (probe CL.JZ 43.5 put it 0.4 into the lid)
-LIP_T, LIP_L, LIP_W = 0.8, 3.5, 4.0                   # snap lip: 0.8 thick (two lines), 3.5 long, 4 wide
+LIP_T, LIP_L, LIP_W = 0.8 * K, 3.5 * K, 4.0 * K                   # snap lip: 0.8 thick (two lines), 3.5 long, 4 wide
 LIP_X = PITCH / 2                                     # between the springs / cell columns
 BUMP = 0.2 + F.LOCATOR.side                           # bump proud of the lip: 0.2 engagement past the LOCATOR gap
-BUMP_H = 0.8                                          # bump height (45 deg both faces: snaps on, pulls off)
+BUMP_H = 0.8 * K                                          # bump height (45 deg both faces: snaps on, pulls off)
 EPS_SNAP = 1.5 * LIP_T * (BUMP - F.LOCATOR.side) / LIP_L ** 2   # y = eps L^2 / (1.5 t): 1.96 % (<= 2 %, rules 3.2)
 GROOVE = BUMP                                         # groove depth: the bump reaches 0.2 past the face, + LOCATOR 0.2
-PLUS, PLUS_T, PLUS_D = 3.0, 0.8, 0.4                  # '+' engraved on the back wall's outer face (wall left 0.8)
-KEY_END = 0.6                                         # back wall left outside the key notch (a pocket, not through): the key's +y stop
-KEY_X, KEY_W, KEY_H = 10.0, 3.0, 1.0                  # x-locating key in a notch on the back wall top (LOCATOR a side)
+PLUS, PLUS_T, PLUS_D = 3.0 * K, 0.8 * K, 0.4 * K                  # '+' engraved on the back wall's outer face (wall left 0.8)
+KEY_END = 0.6 * K                                         # back wall left outside the key notch (a pocket, not through): the key's +y stop
+KEY_X, KEY_W, KEY_H = 10.0 * K, 3.0 * K, 1.0 * K                  # x-locating key in a notch on the back wall top (LOCATOR a side)
 
 def lip_bump(y_face, sgn, x0, x1, zc):
     """45 deg ridge on a lip face at y_face, pointing sgn (+1 / -1 in y), x0..x1, centred at zc: BUMP proud."""
@@ -189,8 +190,8 @@ def strip():
     return Pos(-NSX, YBI - F.STEEL.side - STRIP_T, CZ + 0.2) * Box(2 * NSX, STRIP_T, ZT - 0.25 - CZ - 0.2, align=MIN)   # above the cradle ribs (z >= CZ), under the lid
 
 def holder_screw():
-    return Compound([Pos(0, HSYY, BZ - M2_L) * Cylinder(M2_D / 2, M2_L, align=(Align.CENTER, Align.CENTER, Align.MIN)),
-                     Pos(0, HSYY, BZ) * Cylinder(M2_HEAD_D / 2, M2_HEAD_H, align=(Align.CENTER, Align.CENTER, Align.MIN))])
+    return Compound([Pos(0, HSYY, BZ - M3_L) * Cylinder(M3_D / 2, M3_L, align=(Align.CENTER, Align.CENTER, Align.MIN)),
+                     Pos(0, HSYY, BZ) * Cylinder(M3_HEAD_D / 2, M3_HEAD_H, align=(Align.CENTER, Align.CENTER, Align.MIN))])
 
 # SS12D00G3 slide switch (datasheet): body 8.6 x 3.6 x 3.5, lever 1.5 x 1.5 x 3.0 proud; pins bendable (no volume)
 SW_BODY, SW_LEVER = (8.6, 3.5, 3.6), (1.5, 3.0, 1.5)  # (x, y, z): y along the lever, out through the body's back wall

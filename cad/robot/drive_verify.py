@@ -18,7 +18,7 @@ PRINTED = ["spine"] + CRANKS + IDLERS + SLEEVES + ["transfer", "transfer-sleeve"
 def m2(length, p_head, axis):
     """M2 socket cap (ISO 4762): head Ø3.8 x 2 at p_head (its bearing face), shank along axis."""
     a = np.asarray(axis, float); p = np.asarray(p_head, float)
-    return trimesh.util.concatenate([rod(2 * D.IPR, length, p, a), rod(2 * D.M2_HEAD_R, D.M2_HEAD_H, p - a * D.M2_HEAD_H, a)])
+    return trimesh.util.concatenate([rod(2 * D.IPR, length, p, a), rod(2 * D.M3_HEAD_R, D.M3_HEAD_H, p - a * D.M3_HEAD_H, a)])
 
 
 def motor():
@@ -103,9 +103,9 @@ _A = [
     _st(12, (("n10-motor", "pinion"), [[38.0, 0, 0]], {"note": "after the cell holder: slid in along +x, pinion in the plates' grooves, meshes"})),
 ]
 ASSEMBLY = _A
-ACCESS = [*[{"at": n, "tool": tool("hex-key", np.asarray(SCREWS[n][1]) - [D.M2_HEAD_H, 0, 0], [-1, 0, 0]), "why": "1.5 mm hex key from -x"}
+ACCESS = [*[{"at": n, "tool": tool("hex-key", np.asarray(SCREWS[n][1]) - [D.M3_HEAD_H, 0, 0], [-1, 0, 0]), "why": "1.5 mm hex key from -x"}
             for n in ("axle-1", "axle-2", "axle-3", "axle-t")],
-          *[{"at": f"keel-{k+1}", "tool": tool("hex-key", [0, y, zh - D.M2_HEAD_H], [0, 0, -1]), "why": "1.5 mm hex key from below, base on its flank"}
+          *[{"at": f"keel-{k+1}", "tool": tool("hex-key", [0, y, zh - D.M3_HEAD_H], [0, 0, -1]), "why": "1.5 mm hex key from below, base on its flank"}
             for k, (_x, y, zh, _L) in enumerate(D.KEEL_SCREWS)],
           {"at": ("drive-unit", "transfer", "transfer-sleeve", "axle-t"), "tool": tool("finger", [0, D.HOLDER_SCREW["y"], D.HOLDER_SCREW["ear_top_z"]], [0, 0, 1], d=10.0),
            "why": "set down by hand on ear 2: tongues into slots 1-3"},

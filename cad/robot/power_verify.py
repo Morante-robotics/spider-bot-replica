@@ -58,7 +58,7 @@ ASSEMBLY = [("cell-holder", HOLDER_PATH, {"step": 10, "note": "lowered behind th
             ("jst-xh", UP, {"step": 15}),
             ("leds", [[0, 0, 10.0], [0, -12.0, 0]], {"step": 16, "bench": ["body"], "note": "bench: into the body's eye bores from inside, before the body goes on"}),
             ("ss12d00-switch", [0, -1, 0], {"step": 17, "bench": ["body"], "note": "bench: lever out the back, in from the front against the keeper, a drop of glue (Morante 2026-11-23), before the body goes on"})]
-ACCESS = [{"at": "holder-screw", "tool": tool("hex-key", [0, PW.HSYY, PW.BZ + PW.M2_HEAD_H], UP), "why": "1.5 mm hex key from above, clamp empty"},
+ACCESS = [{"at": "holder-screw", "tool": tool("hex-key", [0, PW.HSYY, PW.BZ + PW.M3_HEAD_H], UP), "why": "1.5 mm hex key from above, clamp empty"},
           {"at": "nickel-strip", "tool": tool("finger", [0, PW.YBI - fits.STEEL.side - PW.STRIP_T / 2, PW.ZT - 0.25], UP, d=1.0, reach=30.0), "why": "tweezers tip (Ø1) on the strip's top edge, down into its slot"},
           {"at": "cell-springs", "tool": tool("finger", [0, PW.YFI + fits.STEEL.side + 3.0, PW.CZ + PW.SPR_R0], UP, d=3.0, reach=30.0), "why": "fingertip (Ø3) on the middle spring, pressed against the front wall"},
           {"at": "leds", "tool": tool("finger", [PW.led_axis(1)[0], PW.led_axis(1)[1] + PW.LED_H, PW.led_axis(1)[2]], [0, 1, 0], d=5.0, reach=30.0), "why": "fingertip on the LED's back, pushed forward into its bore"},

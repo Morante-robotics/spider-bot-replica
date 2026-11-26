@@ -21,15 +21,16 @@ FE, CL, P, A_ALL = SH.FE, SH.CL, SH.P, SH.A_ALL
 OUT = SH.OUT
 
 # ---------------- gear train (check.py: m 0.6 from the scale; teeth)
-M = 0.6; ZT, ZP, ZB, ZS = 12, 16, 20, 15            # crank gear, pinion, transfer big, transfer small
-W, GW = CL.W, CL.GW                                 # wall 1.2, gear width 3.0
+M = F.MODULE_MIN; ZT, ZP, ZB, ZS = 10, 14, 17, 13   # crank gear, pinion, transfer big, transfer small: the S 0.70 pitch
+                                                    # diameters x K at module 1.0, fewer teeth (datasheet «Phase 1 result»)
+W, GW = CL.W, CL.GW                                 # wall fits.WALL_MIN, gear width 3.0 x K
 rp = lambda z: M * z / 2
 rt = lambda z: M * z / 2 + M
 cc = lambda za, zb: rp(za) + rp(zb) + F.GEAR_BACKLASH / 2          # centre distance with backlash (check.py)
-O = [FE.motion.pivot(i, P)[1] for i in range(4)]    # crank centres (cranks 2/3 D23 patch in fit_env)
+O = [FE.motion.pivot(i, P)[1] for i in range(4)]    # crank centres (motion.py)
 Oy = [float(o[1]) for o in O]; Oz = float(O[0][2])
-def _zfor(gap):                                     # smallest idler (>= 12 T) bridging two crank gears, h >= 2
-    for z in range(12, 40):
+def _zfor(gap):                                     # smallest idler (>= ZT) bridging two crank gears, h >= 2
+    for z in range(ZT, 60):
         c = cc(ZT, z)
         if c * c - (gap / 2) ** 2 >= 4.0: return z
 ZI = [_zfor(Oy[i + 1] - Oy[i]) for i in range(3)]
@@ -39,33 +40,31 @@ I = [_idler(Oy[i], Oy[i + 1], cc(ZT, ZI[i])) for i in range(3)]
 IDL_T = 0.2                                         # idlers GW - 0.4 wide (each face GEAR_THRUST_IDLER to its wall)
 TH = F.GEAR_THRUST_CRANK.side; GX = GW / 2
 WX0, WX1 = GX + TH, GX + TH + W                     # spine walls at |x| WX0..WX1
-JR = 1.5                                            # crank journal Ø3 (check.py JR)
+JR = 1.5 * FE.K                                     # crank journal Ø3 x K (Ø4.3, TURN)
 PINR = CL.PINR                                      # crank pin Ø3 (legs' bore TURN over it)
-WEB_TRIM = 0.1                                      # webs printed this much thinner than the fit check's WEB_T: leg-3/7's tube starts at x 4.54 (crank-4 gap 0.14 < 0.2)
-WEB_T = CL.WEB_T - WEB_TRIM; WB0 = WX1 + TH; WB1 = WB0 + WEB_T  # webs just outside the walls (THRUST)
+WEB_T = CL.WEB_T; WB0 = WX1 + TH; WB1 = WB0 + WEB_T  # webs just outside the walls (THRUST)
 WEBR = PINR + CL.WEBW                               # web stadium half-width (check.py WEBR)
 PIN_X1 = P["XC"] + CL.PINX                          # pin tip (|x|)
-PIN_TIP_TRIM = 0.5                                  # printed pin ends this much short of PIN_X1: the leg's arm sits on the pin axis just past the tip (2026-11-23: 0.25 left crank-4 x leg-3 at 0.06 at pose 21 in --quick); the snap bead, not the tip, holds the leg
 # pin collar (leg-on-pin "+x crank web"): the leg's end tube starts at XC - TAIL; the collar stops it TURN short, less
 # the tube face's tilt at the collar radius (the leg swings FLARE_DEG on its pin, shells.py), so the leg is held in x
 COLLAR = False                                      # tried 2026-11-23: STL split into bodies, legs 3/4 overlap it at pose 0
 COLLAR_R = PINR + F.TURN.side + 0.35
 COLLAR_X1 = P["XC"] - CL.TAIL - F.TURN.side - COLLAR_R * math.sin(math.radians(max(SH.FLARE_DEG)))
-IPR = 1.0                                           # M2 shank radius (idler and transfer axles, keel, holder)
-M2_HEAD_R, M2_HEAD_H = 1.9, 2.0                     # ISO 4762 M2 head Ø3.8 x 2 (hardware.md socket cap)
-M2_PILOT_R = 0.8                                    # self-tapping pilot Ø1.6 (plan m2-screws, assumed, coupon c2)
-M2_HOLE_R = IPR + F.STEEL.side                      # clearance hole (STEEL)
+IPR = 1.5                                           # M3 shank radius (idler and transfer axles, keel, holder)
+M3_HEAD_R, M3_HEAD_H = 2.75, 3.0                    # ISO 4762 M3 head Ø5.5 x 3 (hardware.md socket cap)
+M3_PILOT_R = 1.25                                   # self-tapping pilot Ø2.5 (plan m2-screws, assumed, coupon c2)
+M3_HOLE_R = IPR + F.STEEL.side                      # clearance hole (STEEL)
 YTOP = max(c[1] + IPR + F.STEEL.side + W for c in I)          # wall top over the idler axles
-ZSP0 = Oz - JR - F.TURN.side - W - 0.3                         # wall bottom
+ZSP0 = Oz - JR - F.TURN.side - W - 0.3 * FE.K                         # wall bottom
 SPF, SPB, KY = CL.SPF, CL.SPB, CL.KY
 ZK1 = min(ZSP0, Oz - rt(ZT) - F.GEAR_TIP.side - F.TURN.side)   # keel top under the gear tips (KEELFIX)
-KEEL_SCREW_Y = (-KY + 1.8, KY - 1.8)                # 2 M2 from below (check.py keel-screw)
+KEEL_SCREW_Y = (-KY + 1.8 * FE.K, KY - 1.8 * FE.K)                # 2 M2 from below (check.py keel-screw)
 # keel M2 from below: each head sits in a counterbore of a boss on the base floor (shells.py), flush with the base foot
 # (z 0), bearing on the boss material above it, KEEL_BOSS_T thick; the spine's keel stands on the two boss tops.
 BASE_FLOOR = FE.BASE_WALL_R                         # bowl floor 0.84 thick (base WALL x S; base.stl ray at the keel)
-KEEL_BOSS_T = 1.5                                   # boss material over the head (bearing slab)
-KEEL_HEAD_Z = 2.0                                   # head bearing face: head Ø3.8 x 2 flush with the foot (0 .. 2)
-KEEL_LEN = 4.0                                      # M2 x 4: 1.5 boss + 2.5 into the keel pilot (was M2 x 6 from z 0)
+KEEL_BOSS_T = F.WALL_MIN                                   # boss material over the head (bearing slab)
+KEEL_HEAD_Z = M3_HEAD_H                                   # head bearing face: head Ø3.8 x 2 flush with the foot (0 .. 2)
+KEEL_LEN = 6.0                                      # M2 x 4: 1.5 boss + 2.5 into the keel pilot (was M2 x 6 from z 0)
 KEEL_SCREWS = [(0.0, y, KEEL_HEAD_Z, KEEL_LEN) for y in KEEL_SCREW_Y]    # (x, y, z of the head's bearing face, length), shank up
 ZKEEL0 = KEEL_HEAD_Z + KEEL_BOSS_T                  # keel foot on the boss tops (3.5); boss rises from the floor top to here
 # transfer compound over idler TI, pinion on the N10 (check.py)
@@ -86,16 +85,16 @@ CLX1 = min(MX1, CL.CLX1, -(CL.TABHW + F.NEIGHBOUR.side)); CTX0 = max(MX0 + 3, CL
                                                     # that it slides in under it (plan: the holder goes in before the motor): the plate ended at -2.1, 0.5 over the tab
 LUGR = IPR + F.STEEL.side + W
 def _top_below(y):                                  # highest gear tip under y (between the walls)
-    t = [c[1] + rt(ZI[i]) for i, c in enumerate(I) if abs(c[0] - y) < rt(ZI[i]) + 2.6] + \
+    t = [c[1] + rt(ZI[i]) for i, c in enumerate(I) if abs(c[0] - y) < rt(ZI[i]) + 2.6 * FE.K] + \
         [Oz + rt(ZT) for o in Oy if abs(o - y) < rt(ZT) + 2.6]
     return max(t + [YTOP])
 BLOCK_Y = (T[0] - CL.DSY1, T[0] + CL.DSY2)
 ZBLK = [_top_below(y) + F.GEAR_TIP.side for y in BLOCK_Y]
-EAR_H = (2.4, CL.EARH2)                             # ear 2 lowered to 1.0 (plan drive-unit)
-EAR_HW = 2.6
+EAR_H = (2.4 * FE.K, CL.EARH2)                             # ear 2 lowered to 1.0 (plan drive-unit)
+EAR_HW = 2.6 * FE.K
 DU_W = 2.0                                          # drive unit plates 2.0 (5 nozzle lines; print 2026-11-24: the 1.2 plates broke at support removal), grown away from the fit faces
-CB_DEPTH = 0.4                                      # idler axles 1, 2: M2 head sunk this deep into the -x lug (lug W 1.2 keeps 0.8): head clears the legs' end tubes
-CB_R = M2_HEAD_R + F.STEEL.side
+CB_DEPTH = 0.4 * FE.K                                      # idler axles 1, 2: M2 head sunk this deep into the -x lug (lug W 1.2 keeps 0.8): head clears the legs' end tubes
+CB_R = M3_HEAD_R + F.STEEL.side
 SLW = JR + F.TURN.side                              # journal slot half-width
 TG = SLW - F.TURN.side                              # cap tongue half-width
 ZTG = Oz + JR + F.TURN.side                         # tongue foot over the journal
@@ -116,7 +115,7 @@ SPRISE = max(0.0, ZHP - YTOP)                       # walls raised under the pos
 SPINE_SEAT = {"x": POST_X, "y": POST_Y, "z": ZHP}   # cell holder's post rests here, on both wall tops
 SLOT4 = {"y": Oy[3], "half_width": SLW, "tongue_half_width": TG, "tongue_foot_z": ZTG, "wall_x": (WX0, WX1)}
 HOLDER_SCREW = {"x": 0.0, "y": 0.5 * (BLOCK_Y[1] - DBH + BLOCK_Y[1] + DBH), "ear_top_z": DZT + EAR_H[1],
-                "pilot_r": M2_PILOT_R, "pilot_bottom_z": None}       # M2 down through the holder tab into ear 2 / block 2
+                "pilot_r": M3_PILOT_R, "pilot_bottom_z": None}       # M2 down through the holder tab into ear 2 / block 2
 YB_END = BLOCK_Y[1] + DBH
 POWER_IFACE = dict(Oy=Oy, Oz=Oz, wx0=WX0, wx1=WX1, ytop=YTOP, tip_over=_tip_over, JR=JR,
                    EAR2=((-EAR_HW, BLOCK_Y[1] - DBH, DZT), (EAR_HW, BLOCK_Y[1] + DBH, DZT + EAR_H[1])),
@@ -206,9 +205,9 @@ def spine():
     for o in Oy:                                                            # open-top U slots (TURN)
         sp = sp - cylx(o, Oz, SLW, -WX1 - 1, WX1 + 1) - box((-WX1 - 1, o - SLW, Oz), (WX1 + 1, o + SLW, ZHP + 1))
     for c in I:                                                             # idler axles: -x STEEL, +x pilot
-        sp = sp - cylx(c[0], c[1], M2_HOLE_R, -WX1 - 1, -WX0 + 0.01) - cylx(c[0], c[1], M2_PILOT_R, WX0 - 0.01, WX1 + 1)
+        sp = sp - cylx(c[0], c[1], M3_HOLE_R, -WX1 - 1, -WX0 + 0.01) - cylx(c[0], c[1], M3_PILOT_R, WX0 - 0.01, WX1 + 1)
     for y in KEEL_SCREW_Y:                                                  # keel pilots from below
-        sp = sp - cylz(0, y, M2_PILOT_R, ZKEEL0 - 1, KEEL_HEAD_Z + KEEL_LEN + 0.5)   # M2x4 from the boss, 0.5 past its tip
+        sp = sp - cylz(0, y, M3_PILOT_R, ZKEEL0 - 1, KEEL_HEAD_Z + KEEL_LEN + 0.5)   # M2x4 from the boss, 0.5 past its tip
     return sp
 
 
@@ -221,7 +220,7 @@ def crank(i):
         d = math.hypot(A[1] - o[0], A[2] - o[1]); ang = math.degrees(math.atan2(A[2] - o[1], A[1] - o[0]))
         parts.append(cylx(o[0], o[1], WEBR, x0, x1)); parts.append(cylx(A[1], A[2], WEBR, x0, x1))
         parts.append(Pos((x0 + x1) / 2, (o[0] + A[1]) / 2, (o[1] + A[2]) / 2) * Rot(ang, 0, 0) * Box(x1 - x0, d, 2 * WEBR))
-        pa, pb = (WB1 - 0.01, PIN_X1 - PIN_TIP_TRIM) if sx > 0 else (-PIN_X1 + PIN_TIP_TRIM, -WB1 + 0.01)
+        pa, pb = (WB1 - 0.01, PIN_X1) if sx > 0 else (-PIN_X1, -WB1 + 0.01)
         pin = cylx(A[1], A[2], PINR, pa, pb)
         gx0, gx1 = SH.snap_groove(i)                                                          # snap groove: the bead's travel over the 24 poses
         gx0, gx1 = (gx0, gx1) if sx > 0 else (-gx1, -gx0)
@@ -231,12 +230,12 @@ def crank(i):
         if COLLAR: parts.append(cylx(A[1], A[2], COLLAR_R, ca, cb))          # collar: the leg's inner stop along x (off: see report)
     c = fuse(parts)
     for u, v in common.dice(i + 1, 1.0):                                    # i+1 dots on the +x web hub: which crank, which end
-        c = c - Pos(WB1, o[0] + u, o[1] + v) * Sphere(0.35)
+        c = c - Pos(WB1, o[0] + u, o[1] + v) * Sphere(0.35 * FE.K)
     return c
 
 
-IDLER_BORE = 3.2 / 2 + F.TURN.side                  # idler turns on its sleeve (TURN)
-SLEEVE_R = 3.2 / 2                                  # printed sleeve Ø3.2 (plan idlers), M2 tapped bore Ø1.6
+IDLER_BORE = 3.2 * FE.K / 2 + F.TURN.side                  # idler turns on its sleeve (TURN)
+SLEEVE_R = 3.2 * FE.K / 2                                  # printed sleeve Ø3.2 (plan idlers), M2 tapped bore Ø1.6
 
 
 def idler(i):
@@ -245,7 +244,7 @@ def idler(i):
 
 
 def sleeve(i):
-    c = I[i]; return cylx(c[0], c[1], SLEEVE_R, -WX0, WX0) - cylx(c[0], c[1], M2_PILOT_R, -WX0 - 1, WX0 + 1)
+    c = I[i]; return cylx(c[0], c[1], SLEEVE_R, -WX0, WX0) - cylx(c[0], c[1], M3_PILOT_R, -WX0 - 1, WX0 + 1)
 
 
 HUB_R = IDLER_BORE + W                              # transfer hub over the wall band
@@ -257,7 +256,7 @@ def transfer():
 
 TS_X0, TS_X1 = -WX1, XO                              # transfer sleeve between the drive unit's cheeks
 def transfer_sleeve():
-    return cylx(T[0], T[1], SLEEVE_R, TS_X0, TS_X1) - cylx(T[0], T[1], M2_PILOT_R, TS_X0 - 1, TS_X1 + 1)
+    return cylx(T[0], T[1], SLEEVE_R, TS_X0, TS_X1) - cylx(T[0], T[1], M3_PILOT_R, TS_X0 - 1, TS_X1 + 1)
 
 
 def pinion():
@@ -300,14 +299,14 @@ def drive_unit():
         z0, z1 = sorted((mz + sz * (N10_H / 2 + F.MOTOR_SEAT.side - 0.01), mz + sz * pr))
         du = du - box((MX0, my - gw, z0), (MX1 + 0.5, my + gw, z1))
     for k in (0, 1):                                                         # lug holes (STEEL) + head counterbore
-        c = I[k]; du = du - cylx(c[0], c[1], M2_HOLE_R, -WX1 - W - 1, -WX1 + 0.01) - cylx(c[0], c[1], CB_R, -WX1 - W - 1, -WX1 - W + CB_DEPTH)
-    du = du - cylx(ty, tz, M2_HOLE_R, -WX1 - Wd - 1, -WX1 + 0.01) - cylx(ty, tz, CB_R, -WX1 - Wd - 1, -WX1 - W) - cylx(ty, tz, M2_PILOT_R, XO - 0.01, XO + Wd + 1)   # transfer axle
+        c = I[k]; du = du - cylx(c[0], c[1], M3_HOLE_R, -WX1 - W - 1, -WX1 + 0.01) - cylx(c[0], c[1], CB_R, -WX1 - W - 1, -WX1 - W + CB_DEPTH)
+    du = du - cylx(ty, tz, M3_HOLE_R, -WX1 - Wd - 1, -WX1 + 0.01) - cylx(ty, tz, CB_R, -WX1 - Wd - 1, -WX1 - W) - cylx(ty, tz, M3_PILOT_R, XO - 0.01, XO + Wd + 1)   # transfer axle
     du = du - cylx(ty, tz, rt(ZS) + F.GEAR_TIP.side, -GX, GX) - cylx(ty, tz, HUB_R + F.TURN.side, GX - IDL_T, XB0) \
             - cylx(ty, tz, rt(ZB) + F.GEAR_TIP.side, XB0 - F.GEAR_AXIAL.side + 0.01, XO - 0.01) \
             - cylx(my, mz, rt(ZP) + F.GEAR_TIP.side, MX1 + 0.01, XO - 0.01)                   # the transfer's and pinion's sweeps
     HOLDER_SCREW["pilot_bottom_z"] = max(ZBLK[1] + 0.8, HOLDER_SCREW["ear_top_z"] - 7.0)
-    du = du - cylz(0, HOLDER_SCREW["y"], M2_PILOT_R, HOLDER_SCREW["pilot_bottom_z"], HOLDER_SCREW["ear_top_z"] + 1)
-    KEY_R = 2.0 + F.STEEL.side                                               # 1.5 mm hex key access (cad_verify's hex-key tool is a Ø4 rod): hole in the upper clamp plate over the holder M2
+    du = du - cylz(0, HOLDER_SCREW["y"], M3_PILOT_R, HOLDER_SCREW["pilot_bottom_z"], HOLDER_SCREW["ear_top_z"] + 1)
+    KEY_R = 2.0 * FE.K + F.STEEL.side                                               # 1.5 mm hex key access (cad_verify's hex-key tool is a Ø4 rod): hole in the upper clamp plate over the holder M2
     du = du - cylz(0, HOLDER_SCREW["y"], KEY_R, mz + N10_H / 2 + F.MOTOR_SEAT.side - 1, mz + N10_H / 2 + gd + 1)
     return du
 
