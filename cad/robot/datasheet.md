@@ -63,6 +63,11 @@ throw 3.3 mm, so lifting the whole weight needs ≈ 0.09 kg·cm: the motor bough
 torque never measured; seller's datasheet before buying). Body build 41–47 s cold (over 40 s). Count for phase 3: 27
 printed parts, 14 hardware entries, 37 assembly steps. Sections: `cad/robot/images/phase2/` (not committed).
 
+**Next session (Morante opens it): phase 3, step 1**, by the coordinator with no agent: a count sheet (printed parts,
+screws, assembly steps, supported parts, from `verify.py` PARTS/ASSEMBLY) and the candidate simplifications, each with
+its gain (A and B already approved, plus what the count shows). Morante picks; then the local work (the ≤ 0.4 mm
+overlaps, leg↔shell gaps, front-window relief, marks, spine spot), N2 `cad_verify`, coupons, print.
+
 **Phase 3, simplify: what can go, and how?**
 1. Count parts, screws, assembly steps, supported parts.
 2. Proposals with their gain, e.g. fewer gears, merged parts, and the two already approved (2026-11-26):
