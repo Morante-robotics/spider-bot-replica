@@ -51,6 +51,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); pointer-events: auto; cursor: pointer; padding: 0 }
 .pin.tol { background: var(--tol) }
 .pin.sel { outline: 3px solid var(--fg); outline-offset: 1px }
+.labels.off .pin:not(.sel) { display: none }
 .posebar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap }
 .posebar input { flex: 1; min-width: 140px; accent-color: var(--accent) }
 .posebar output { font: 500 13px var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); min-width: 9ch }
@@ -109,6 +110,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
         <div class="tools">
           <button id="shells" aria-pressed="true">See inside: shells off</button>
           <button id="xray" aria-pressed="false">See-through shells</button>
+          <button id="pins" aria-pressed="true" title="Show or hide the numbered warning markers (a picked warning keeps its own)">Warning markers</button>
           <button id="spin" aria-pressed="false">Spin</button>
           <button id="reset">Reset view</button>
         </div>
@@ -302,6 +304,9 @@ function applyVis() {
 function setShellsOut(on) { if (on) groupOff.add("carcasas"); else groupOff.delete("carcasas"); applyVis(); }
 document.getElementById("shells").onclick = () => setShellsOut(!groupOff.has("carcasas"));
 document.getElementById("xray").onclick = (e) => { xray = !xray; e.currentTarget.setAttribute("aria-pressed", String(xray)); applyVis(); };
+document.getElementById("pins").onclick = (e) => {
+  const on = document.getElementById("labels").classList.toggle("off"); e.currentTarget.setAttribute("aria-pressed", String(!on));
+};
 document.getElementById("spin").onclick = (e) => { controls.autoRotate = !controls.autoRotate; e.currentTarget.setAttribute("aria-pressed", String(controls.autoRotate)); };
 document.getElementById("reset").onclick = () => { select(null); goHome(); };
 
