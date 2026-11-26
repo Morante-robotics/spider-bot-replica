@@ -30,8 +30,20 @@ before the one above is validated, and no local fix is worked before phase 3.
 4. Morante: the robot at 0.70, 1.0 and 1.17 next to jenscolt, with the motor, the cells and one smallest part of each
    type at true size. He picks the target S (± 0.05). It does not yet promise a fit: phase 2 checks that.
 
+**Phase 1 result (closed 2026-11-26): S = 1.0.** Measured (ray thickness, every printed STL at 0.70): legs and body
+are near the minimum already (legs p10 ≈ 2.0, thin only at spots); the mechanism (gears, cranks, idlers, spine,
+sleeves, median ≈ 1.0, module 0.6) and the base bowl (0.7 everywhere) are what is thin. The crank spacing is set by the
+legs, so the gear train's size follows the robot's S. Pure scaling reaches every minimum only at S 1.17–1.2 (271 mm
+across the legs, weight ×5, motor torque ×8.6 vs 0.70). Morante, verbatim: «S 1.0 máximo». At S 1.0 (×1.43 from 0.70)
+the minimum is reached without moving the gears: **same pitch diameters, fewer teeth at module 1.0** (crank and idlers
+12 → 10 T, pinion 16 → 14, transfer 20/15 → 17/13; crank:motor ratio 1.07, or 0.99 with a 13 T pinion); walls scale to
+1.71 and need **+0.3 mm in place** to reach 2.0; journals Ø4.3 and M3 holes pass by scaling. Below 1.0 the crank gear
+falls to 9 T and the walls need ≥ 0.45 mm more, so 1.0 is also the floor. Costs vs 0.70: 225 mm across the legs
+(jenscolt's own size), weight ×2.9, crank torque ×4.2: the motor (N10 not bought, torque never measured) and cells are
+sized in phase 2. Figure: session scratchpad `p1/escala.png`, script `p1/fig.py`; wall table `p1/walls.py`.
+
 **Phase 2, motion: where does everything go so the whole mechanism turns?**
-1. Scale the whole robot to the chosen S and apply the minimums; every fit tweak made at 0.70 is deleted (D23/D23C,
+1. Scale the whole robot to S 1.0 and apply the minimums; every fit tweak made at 0.70 is deleted (D23/D23C,
    arm pockets, reliefs, x-stop posts, spacings).
 2. Spatial reasoning before modelling: side and top sections with the swept volume of each moving part over a turn
    (legs, cranks, gears) and where the motor and cells go.
