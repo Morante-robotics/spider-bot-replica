@@ -51,6 +51,18 @@ sized in phase 2. Figure: session scratchpad `p1/escala.png`, script `p1/fig.py`
 4. Done when the whole mechanism runs the 24 poses with no collision, every part counted, at N1 (1 mm).
 5. Morante: animation and sections. Agent: `cad-designer` · opus for the layout PLAN (≈ 200k), one N1 check.
 
+**Phase 2 result (closed 2026-11-26, branch `phase2-s1`: `808cf15`, `51a83ce`, `dbee8af`).** The robot builds at S 1.0
+with the minimums (all 10 gears module 1.0 by check 13). Whole-robot N1 check `cad/robot/fitcheck/n1.py` (41 parts,
+24 poses, 18 s): no shell↔leg or leg↔leg overlap; every remaining overlap ≤ 0.40 mm (legs 3/7 vs crank-4, legs vs
+crank-1/2 webs and M3 axle heads), all phase 3. No large layout move was needed. Re-derived at 1.0 (concepts Morante
+approved at 0.70): crank 2/3 spread 4.3 + shift 2.8 (legs 1↔2, 5↔6 0.55; legs 0↔1, 4↔5 0.37), body leg cutters
+(BRELD 0.65, 12 cutters), back-sheet cup [3.0, |x| 17.2, z 10.0–23.7] with the body tab keep-out. Leg↔shell gaps
+0.01–0.32 (no overlap) and the base front-window relief (not restored) are phase 3. Room: the motor has 22 mm free
+along −x and 17 mm above (an N20 fits without moving anything). Mass ≈ 225 g printed, ≈ 255 g with hardware; crank
+throw 3.3 mm, so lifting the whole weight needs ≈ 0.09 kg·cm: the motor bought must give ≥ ≈ 0.3 kg·cm at 3 V (N10's
+torque never measured; seller's datasheet before buying). Body build 41–47 s cold (over 40 s). Count for phase 3: 27
+printed parts, 14 hardware entries, 37 assembly steps. Sections: `cad/robot/images/phase2/` (not committed).
+
 **Phase 3, simplify: what can go, and how?**
 1. Count parts, screws, assembly steps, supported parts.
 2. Proposals with their gain, e.g. fewer gears, merged parts, and the two already approved (2026-11-26):
