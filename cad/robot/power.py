@@ -138,7 +138,11 @@ def holder():
     b -= Pos(0, HSYY, BZ) * Cylinder(CB_R, CB_D + 1, align=(Align.CENTER, Align.CENTER, Align.MIN))
     # front-bottom notch round drive block 2 / ear 2 (WINDOW), open to the underside: lifts off +z
     nx = max(E2x1, B2x1) + NOTCH
-    b -= Pos(-nx, YF - 1, Z0 - 1) * Box(2 * nx, max(E2y1, B2y1) + NOTCH - (YF - 1), ZTB - (Z0 - 1), align=MIN)
+    ny, nz = max(E2y1, B2y1) + NOTCH - (YF - 1), ZTB - (Z0 - 1)
+    if min(nx, ny, nz) > 0:                       # at S 1.0 the block may not reach the holder: no notch
+        b -= Pos(-nx, YF - 1, Z0 - 1) * Box(2 * nx, ny, nz, align=MIN)
+    else:
+        print(f"    holder: block-2 notch not cut (nx {nx:.2f}, ny {ny:.2f}, nz {nz:.2f})")
     # spring seats: a ring on the front wall's inner face holds each spring's Ø7 base (STEEL a side, 0.8 high)
     for x in XS:
         b += Pos(x, YFI - 0.01, CZ) * Rot(-90, 0, 0) * (Cylinder(SPR_R0 + F.STEEL.side + SEAT_W, SEAT_H + 0.01, align=(Align.CENTER, Align.CENTER, Align.MIN))
