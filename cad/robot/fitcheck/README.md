@@ -22,6 +22,7 @@ not in git.
 | `fit_env.py` | The robot's scale (from `../spec.json`), motion parameters, and the inner surfaces of the body and base in the robot frame |
 | `fit_legs.py`, `fit_legmesh.py` | The real `cad/legs` arm and blade, bent onto `cad/motion.py`'s neutral leg at S and carried per pose |
 | `fit_samplers.py` | Samplers: cylinders along any axis, swept discs |
+| `n1.py` | Whole-robot overlap check on the built coarse STLs (`out/*.stl`): every part pair at the 24 crank poses, worst overlap thickness (2 V / A) and gaps under 1 mm; ≈ 18 s, `../../.venv/bin/python n1.py` |
 
 ## Which clearance a pair needs
 

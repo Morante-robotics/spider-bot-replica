@@ -139,6 +139,19 @@ def capsule(a, b, r, h=0.5):
 def gap_pts(q1, q2):
     return cKDTree(q1).query(q2)[0].min()
 # --- legs: inner arms over 24 poses (motion.legs), the crank pins A and pivots
+# crank 2/3 spread (spec dims crank_2_3_extra_dy / crank_2_3_shift, re-derived at S 1.0): cranks 2 and 3 D23 further apart along Y
+# than the uniform DY, split about their midpoint shifted by D23C; motion.py untouched (patched here only)
+_sd = json.load(open(os.path.join(HERE, "..", "spec.json")))["dims"]
+D23 = float(os.environ.get("D23", _sd["crank_2_3_extra_dy"]["value"])); D23C = float(os.environ.get("D23C", _sd["crank_2_3_shift"]["value"]))
+# back-sheet pocket (spec dims back_sheet_pocket, re-derived at S 1.0): (depth, |x| <=, z0, z1) robot mm
+PKT = tuple(float(v) for v in _sd["back_sheet_pocket"]["value"])
+_piv0 = motion.pivot
+def _pivot(i, p=motion.P0):
+    P_, O = _piv0(i, p); O = O.copy()
+    if i == 1: O[1] += -D23 / 2 + D23C
+    if i == 2: O[1] += D23 / 2 + D23C
+    return P_, O
+motion.pivot = _pivot
 LEG_PTS, LEG_RAD, LEG_NI, PIV, A_ALL = motion.legs(P)
 BAND_OUT = j2r(band_pts(None))
 def arm_centres(k_leg, pose, end_r):

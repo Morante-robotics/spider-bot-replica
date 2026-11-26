@@ -33,6 +33,21 @@
    "unit": "scale vs jenscolt",
    "source": "Morante 2026-11-26: «S 1.0 máximo»; motion.py lengths × S/0.60, printed layout numbers set at 0.70 × S/0.70, fits never scaled"
   },
+  "crank_2_3_extra_dy": {
+   "value": 4.3,
+   "unit": "mm extra Y spacing, cranks 2-3 only",
+   "source": "S 1.0 n1 (cad/robot/fitcheck/n1.py): legs 1-2 and 5-6 overlap 0.93 mm; concept approved at 0.70 (Morante, 2026-11-21: «Ok»)"
+  },
+  "back_sheet_pocket": {
+   "value": [3.0, 17.2, 10.0, 23.7],
+   "unit": "mm outward (radial), |x| <=, z0, z1 (robot mm), cup with fits.WALL_MIN walls",
+   "source": "S 1.0 n1: legs 3/7 overlap the base's back sheet 0.62 mm over 24 poses; the leg sweep (coarse STL, 24 poses) comes within LEG_PATH of the sheet's inner face by at most 2.95 mm at |x| 7.0-16.7, z 10.5-23.2 (crank 4: 0.85); depth 2.95 rounded up to 3.0, extents + LEG_PATH; pocket concept approved at 0.70 (Morante, 2026-11-21: «Tu recomendación»)"
+  },
+  "crank_2_3_shift": {
+   "value": 2.8,
+   "unit": "mm, both cranks 2-3 moved along Y",
+   "source": "same"
+  },
   "motor_n10": {
    "value": [
     12.0,

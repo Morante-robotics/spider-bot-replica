@@ -59,6 +59,8 @@ BASE_WALL = FE.BASE_WALL_R              # mm robot: the base wall (BA.WALL x S, 
 RN, WR = CL.RN, CL.WR                   # window: neck within RN of the pivot, dilated WR (LEG_PATH + sampling)
 STRIP_X, STRIP_X2, STRIP_Y0, STRIP_Y1, STRIP_Z0, STRIP_Z1, STRIP_Z2 = (FE.K * v for v in (20.05, 19.25, 6.4, 12.8, 19.0, 23.65, 23.9))   # body strip under the cell holder, cut away
 def wr_of(Lg): return WR
+BRELD = F.LEG_PATH.side + 0.15   # body rim notch / eye-block pocket: the body inner face is pushed back to this from the legs' 24-pose sweep: LEG_PATH + 0.15 for the sample spacing and the coarse mesh (0.6 left 0.00-0.06 at legs 0/4; 0.75 and 0.85 gave an empty cutter outline)
+PKT = FE.PKT                            # back-sheet pocket (depth, |x|, z0, z1): spec back_sheet_pocket, derived from the legs' sweep at S 1.0
 SNX, SNW, SNT, SNZ, RIBD, SNG = CL.SNX, CL.SNW, CL.SNT, CL.SNZ, CL.RIBD, CL.SNG
 PINR = CL.PINR                          # printed crank pin r (Ø3)
 END_R = PINR + F.TURN.side + CL.W       # leg end tube: bore TURN over the pin, wall W 1.2
@@ -207,7 +209,7 @@ def _along(sh, p0, u):
     return Pos(*p0) * sh
 def leg(Lg):
     i = Lg % 4
-    key = ("leg9", i, SNAP_END, SNAP_WALL, SNAP_NECK_R, SNAP_BW, SNAP_SLIT, FLARE_DEG[i], BORE_DRIFT[i], CL.PINX, S, HUBCUT, TAIL, END_R, PB, JOINT_R, JOINT_BLEND_DR, JOINT_BLEND_L, stamp("cad/legs/build.py", "cad/motion.py"),
+    key = ("leg9", i, SNAP_END, SNAP_WALL, SNAP_NECK_R, SNAP_BW, SNAP_SLIT, FLARE_DEG[i], BORE_DRIFT[i], CL.PINX, S, HUBCUT, TAIL, END_R, PB, JOINT_R, JOINT_BLEND_DR, JOINT_BLEND_L, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C,
            srch(_leg_right, _along))
     sh = cached(f"leg{i}", key, lambda: _leg_right(i))
     return sh if Lg < 4 else mirror_x(sh)
@@ -266,6 +268,26 @@ def one(sh):
     ss = sh.solids(); return max(ss, key=lambda s: s.volume) if len(ss) > 1 else (ss[0] if ss else sh)
 
 # ---- base
+def back_pocket(inner=None):
+    """back sheet PKT[0] outward in |x| <= PKT[1], z PKT[2..3], as a cup: the sheet moved out by the depth, with side,
+    top and bottom walls of the wall's own thickness joining it to the bowl (moved out by more than the wall is thick,
+    a bare sheet came loose: 265 mm3 dropped, 2026-11-23). Returns (cut on the cavity side, cup added on the scoop side)."""
+    d = BASE_WALL / S; w = BASE_WALL; cx, cy = (BA.CX - ORIGIN[0]) * S, (BA.BACK_Y - ORIGIN[1]) * S
+    rb_in, rb_out = (BA.BACK_R + d) * S, BA.BACK_R * S; dp, hx, z0, z1 = PKT
+    clip = lambda m: Pos(0, cy - rb_in - 1.0, z0 - m) * Box(2 * (hx + m), 10.0, z1 - z0 + 2 * m, align=(Align.CENTER, Align.MIN, Align.MIN))
+    ring = lambda r0, r1, m: (Pos(cx, cy, z0 - m) * (Cylinder(r1, z1 - z0 + 2 * m, align=(Align.CENTER, Align.CENTER, Align.MIN))
+                                                     - Cylinder(r0, z1 - z0 + 2 * m, align=(Align.CENTER, Align.CENTER, Align.MIN))))
+    cut = ring(rb_in - dp, rb_in, 0.0) & clip(0.0)
+    add = ring(rb_out - dp, rb_in - 0.05, w) & clip(w)
+    return cut, add
+def pocket_keepout():
+    """the cup's volume grown by NEIGHBOUR: cut from the body so that its rear tab stays that far from the cup."""
+    g = F.NEIGHBOUR.side; d = BASE_WALL / S; w = BASE_WALL; cx, cy = (BA.CX - ORIGIN[0]) * S, (BA.BACK_Y - ORIGIN[1]) * S
+    rb_in, rb_out = (BA.BACK_R + d) * S, BA.BACK_R * S; dp, hx, z0, z1 = PKT; m = w + g
+    clip = Pos(0, cy - rb_in - 1.0, z0 - m) * Box(2 * (hx + m), 10.0, z1 - z0 + 2 * m, align=(Align.CENTER, Align.MIN, Align.MIN))
+    ring = (Pos(cx, cy, z0 - m) * (Cylinder(rb_in - 0.05, z1 - z0 + 2 * m, align=(Align.CENTER, Align.CENTER, Align.MIN))
+                                   - Cylinder(rb_out - dp - g, z1 - z0 + 2 * m, align=(Align.CENTER, Align.CENTER, Align.MIN))))
+    return ring & clip
 def snap_geometry():
     """front snap rib (base) and finger + hook (body) at x +-SNX, as check.py (innermost wall face yw from inside())."""
     out = []
@@ -340,9 +362,10 @@ def base():
     def prism(poly, fr, dr):
         t, z, n = fr; pl = Plane(origin=tuple(n * dr[0]), x_dir=tuple(t), z_dir=tuple(n))
         return extrude(pl * BPoly(*[tuple(p) for p in CU.ccw(poly)], align=None), dr[1] - dr[0])
+    pk_cut, pk_add = back_pocket()
     zf = b0.bounding_box().min.Z; cyl = lambda x, y, r, z0, z1: Pos(x, y, z0) * Cylinder(r, z1 - z0, align=(Align.CENTER, Align.CENTER, Align.MIN))
-    adds = [rib for rib, _, _ in snap_geometry()] + [cyl(x, y, KEEL_BOSS_R, zf + DR.BASE_FLOOR * 0.5, DR.ZKEEL0) for x, y, _, _ in DR.KEEL_SCREWS]
-    cuts = [prism(*W.window(Lg)) for Lg in range(8)] \
+    adds = [pk_add] + [rib for rib, _, _ in snap_geometry()] + [cyl(x, y, KEEL_BOSS_R, zf + DR.BASE_FLOOR * 0.5, DR.ZKEEL0) for x, y, _, _ in DR.KEEL_SCREWS]
+    cuts = [prism(*W.window(Lg)) for Lg in range(8)] + [pk_cut] \
         + [cyl(x, y, DR.M3_HEAD_R + F.STEEL.side, zf - 1.0, zf + zh) for x, y, zh, _ in DR.KEEL_SCREWS] \
         + [cyl(x, y, DR.M3_HOLE_R, zf + zh - 0.5, DR.ZKEEL0 + 1.0) for x, y, zh, _ in DR.KEEL_SCREWS]
     b = b0.fuse(*adds); tick(f"fuse {len(adds)}")
@@ -402,8 +425,8 @@ def body_static():
     over the back pocket, the LED bores, the small eyes' vents, the lever slot, box pockets round the cell holder, lid,
     cells and switch (their bounding boxes + LOCATOR) and the strip under the holder (one cut)."""
     import power as PW
-    key = (_file_key("cad/body/build.py", "cad/eyes/build.py", "cad/robot/power.py"), S, srch(body_static, body_skin, eye_cups, snap_geometry, finger_root, front_panel, led_pos, to_robot),
-           SNX, SNW, SNT, SNZ, RIBD, SNG, PANEL_T, PANEL_XW, PANEL_M, PANEL_RAY, PANEL_BASE_TOP, PANEL_GAP, LEDB0, LEDB1, LED_R, SW_THROW, SW_SLOT_Y, SW_KEEP_REACH, W_KEEP, STRIP_X, STRIP_X2, STRIP_Y0, STRIP_Y1, STRIP_Z0, STRIP_Z1, STRIP_Z2)
+    key = (_file_key("cad/body/build.py", "cad/eyes/build.py", "cad/robot/power.py"), S, srch(body_static, pocket_keepout, body_skin, eye_cups, snap_geometry, finger_root, front_panel, led_pos, to_robot),
+           PKT, SNX, SNW, SNT, SNZ, RIBD, SNG, PANEL_T, PANEL_XW, PANEL_M, PANEL_RAY, PANEL_BASE_TOP, PANEL_GAP, LEDB0, LEDB1, LED_R, SW_THROW, SW_SLOT_Y, SW_KEEP_REACH, W_KEEP, STRIP_X, STRIP_X2, STRIP_Y0, STRIP_Y1, STRIP_Z0, STRIP_Z1, STRIP_Z2)
     p = os.path.join(CACHE, f"body_static_{khash(key)}.brep")
     if os.path.exists(p) and os.path.exists(p + ".npz"):
         import trimesh
@@ -419,7 +442,8 @@ def body_static():
     keeper += [Pos(sx * (xk + W_KEEP / 2) - W_KEEP / 2, yk - W_KEEP, zb) * Box(W_KEEP, yr - yk + W_KEEP, zt - zb, align=MIN) for sx in (-1, 1)]
     adds = cups + [finger_root(f) for _, f, _ in snap_geometry()] + keeper + [front_panel(b0)]
     b = b0.fuse(*adds)
-    cuts = []
+    tw, ty0, ty1, tz = BO.TAB; ty = (ty0 - ORIGIN[1]) * S; dp, hx, z0, z1 = PKT
+    cuts = [Pos(0, ty - 1.0, z0 - 0.5) * Box(2 * hx + 1.0, dp + 1.0, z1 - z0 + 1.0, align=(Align.CENTER, Align.MIN, Align.MIN)), pocket_keepout()]
     for sx in (-1, 1):
         x, y, z = led_pos(sx); cuts.append(cylA((x, y - LEDB0, z), LED_R + F.TURN.side, LEDB1 + LEDB0))
         cuts.append(cylA(((BO.CX + sx * BO.SEYE_DX - ORIGIN[0]) * S, (BO.SEYE_BACK - ORIGIN[1]) * S - LEDB0, (BO.SEYE_Z - ORIGIN[2]) * S), BO.SEYE_BORE * S, LEDB1 + LEDB0))
@@ -434,12 +458,22 @@ def body_static():
     import cutters as CU
     m = CU.mesh_of(b, 0.05, 0.3); np.savez(p + ".npz", v=m.vertices, f=m.faces); return b, m
 def body():
-    """the body: its fixed features (body_static, cached). Then every leg is checked against it at its 24 poses and while the
+    """the body: its fixed features (body_static, cached) and the legs' designed notches and pockets (cutters.body_cutters:
+    one cut). Then every leg is checked against it at its 24 poses and while the
     body is put on (cutters.body_gaps)."""
     import cutters as CU
     _T0[0] = time.time()
     b, bm = body_static(); tick("skin + fixed features")
     legs = {Lg: leg_mesh(Lg) for Lg in range(8)}
+    lc = CU.body_cutters(bm, {Lg: leg_mesh(Lg, samples=True) for Lg in range(8)}, leg_frame, PIV,
+                         BRELD, F.NEIGHBOUR.side + 0.1, KC, CL.LIFTD, RIMR, reach=30.0); tick(f"{len(lc)} leg cutters")
+    from build123d import Plane, Polygon as BPoly, extrude
+    def prism(poly, fr, dr):
+        t, z, n = fr; pl = Plane(origin=tuple(n * dr[0]), x_dir=tuple(t), z_dir=tuple(n))
+        return extrude(pl * BPoly(*[tuple(p) for p in CU.ccw(poly)], align=None), dr[1] - dr[0])
+    for poly, fr, dr, what in lc: print(f"    [body] {what}: {len(poly.exterior.coords) - 1} sides, {dr[1] - dr[0]:.1f} deep", flush=True)
+    cuts = [prism(*x[:3]) for x in lc]
+    b = b.cut(*cuts); tick(f"cut {len(cuts)}")
     ss = sorted(b.solids(), key=lambda x: -x.volume)
     for x in ss[1:]:
         q = x.bounding_box(); print(f"    [body] dropped a loose piece of {x.volume:.2f} mm3 at {np.round([q.min.X, q.min.Y, q.min.Z], 1).tolist()}..{np.round([q.max.X, q.max.Y, q.max.Z], 1).tolist()}", flush=True)
