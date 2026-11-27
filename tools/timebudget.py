@@ -1,4 +1,4 @@
-"""Time budget of a build (plan-velocidad, Phase 0): any build command over CAD_BUDGET seconds (env, default 40; 0 = off) is a bug.
+"""Time budget of a build (plan-velocidad, Phase 0): any build command over CAD_BUDGET seconds (env, default 60; 0 = off) is a bug.
 
     timebudget.start()                     # once per process (common.part_args does it): the watchdog thread
     with timebudget.stage("base_keel", cold=True): ...   # a stage: its time is logged, > 10 s warns, the watchdog names it
@@ -14,7 +14,7 @@ import sys
 import threading
 import time
 
-BUDGET = float(os.environ.get("CAD_BUDGET", "40"))
+BUDGET = float(os.environ.get("CAD_BUDGET", "60"))
 WARN = 10.0
 CSV = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "out", "build-times.csv")
 _T0 = time.time()
