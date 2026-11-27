@@ -63,32 +63,34 @@ throw 3.3 mm, so lifting the whole weight needs ≈ 0.09 kg·cm: the motor bough
 torque never measured; seller's datasheet before buying). Body build 41–47 s cold (over 40 s). Count for phase 3: 27
 printed parts, 14 hardware entries, 37 assembly steps. Sections: `cad/robot/images/phase2/` (not committed).
 
-**Next session (Morante opens it, 2026-11-27): question the leg ↔ crank joint first.** Branch `phase3-s1`
-(work in progress, committed so the tree survives). Morante wants to question the last fixer's leg change before
-anything else; nothing below is approved yet.
+**Next session (Morante opens it): the other phase 3 items; the leg ↔ crank joint is parked.** Branch `phase3-s1`.
+Morante, 2026-11-27: «Deje este tema para resolverlo más adelante y vamos a seguir abordando otras cosas que haya
+pendiente». Do not reopen the joint unless he does.
 
-*What the leg fixer did (shells.py, drive.py):* `TAIL_CUT` 1.5 (tube face XC − 0.5, was XC − 2.0) and `PIN_TRIM`
-0.5 (pin tip 13.79): the leg now holds its pin over **4.29 mm instead of 6.29** (Ø4.3 pin, ≈ 100 mm leg arm);
-`FACE_CHAMFER` 0.6 on the tube mouth; `END_REL_*` recess 0.5 deep on the lowest 1.5 mm of the tube end (base gap at
-crank pose 18); `BORE_DRIFT_MARGIN` 0.01 → 0.05. Result: no crank × leg or axle-head × leg overlap (closest 0.20 and
-0.40), base × legs 0/3/4/7 0.50–0.60 (LEG_OPEN 0.40 met), `--quick` 39 → 20 FAIL (34 s).
-*The objection (coordinator, measured):* the tube wall is `END_R` − bore = **1.72–1.86** on all four legs (never got
-phase 1's +0.3 in place) and **1.22–1.36** at the recess: below the 2.0 minimum, on the joint that carries the leg.
-Check 13 did not flag either: a gap in the check (its per-part surface share lets a small thin zone pass), to fix.
-*Options put to Morante:* (1, recommended) move each leg 1.5–2 mm outward along a longer pin (XC and PINX + 1.5–2,
-TAIL back to W): grip back to ≈ 6.3, room to thicken the tube to 2.0 with no recess; ≈ 229 mm across (was 225), the
-cutters re-derive the base/body windows; a layout change, everything re-checked; `cad-fixer` ≈ 100k. (2) accept
-4.3 mm grip and 1.2–1.9 walls and let the print test it.
+*Parked: leg ↔ crank joint.* The one real problem is the leg's end tube: walls 1.7–1.9 (< 2.0) and, after the first
+fixer, a 4.3 mm grip on its pin. Measured on the fine meshes (cad-designer, 2026-11-27): pure ×1.43 scaling would have
+given ×1.43 more gap everywhere (Morante's point); it was spent on the 2.0 walls, the 6.3 mm grip, the bore drift
+added outside and the M3 heads. The only real contact left is the closed tube ends of legs 0↔1 and 4↔5 (overlap 0.06):
+the leg leans 12.5–17.9° on its pin, so the tube flares and its closed end is the widest part. Base, cranks and
+transfer meet their fits; several checks ask more than the fit (pin in bore and mouth ↔ web at 0.2 instead of the
+TURN contact; leg pairs at 0.2 instead of LEG_PATH 0.5; check 13's per-part share let the 1.7 walls pass). The
+N1 check's sub-0.2 mm numbers are noise at its 1 mm level. Options seen: (A) as now, snap that broke; (B, designer's
+pick) tube centred on the pin point (end radius −0.9, ≈ 1.5 to the next leg) + Ø2×8 steel cross pin in a groove of the
+printed pin (groove neck Ø2.9: coupon risk); (C) steel Ø3 pin, slimmer tube, but no retention without opening the
+tube end. *Two fixers' attempts, committed on branch `phase3-leg-joint-wip` (4320b72), not on phase3-s1* (cutters.py, drive.py, fit_env.py, shells.py): legs out
+XC_OUT 1.5, H_UP 0, full pin (PIN_TRIM 0, PIN_CH 0.6), TAIL = W, recess deleted, `leg_end_r` with BORE_DRIFT, base
+window over the tube end (`Windows(tube, wt)`, MINW = WALL_MIN), elliptic neck JOINT_DH, SNAP_END_X 0.4, TB_CH 1.0,
+BRELD +0.25; `--quick` 27 FAIL with it (20 before), legs 0/5 retention and leg-0 path worse. Kept or dropped when the
+joint is reopened.
 
-*Still open after the leg decision (most numbers move with it):* body × leg-4 0.01, leg-1 0.13, leg-0 0.17 (need
-0.2); leg-1 × transfer 0.13 (bigger `FACE_CHAMFER` ≈ 0.9–1.0); leg-0 assembly «blocked on move 2 at 1.36 mm»;
-retention legs 0/7 (> 1.65) and 5 (> 1.25); crank marks not cut (engraved numbers ≈ 3 mm, the new mark type); spine
-0.86 at the keel; transfer-cheek sliver 0.12 at the strap tip (y −0.2, z 54.7); cell-holder × nickel-strip 6.6 mm³;
-cell-lid and nickel-strip retention; switch path 0.25 and its tool; the body roof tool hits the pinion; body build
-42 s. Then the full `cad_verify`, coupons (c5: transfer centre distance through 3 screwed parts), plates, kit.
-*Done in this session (2026-11-26/27), on the branch:* plan.json rewritten for S 1.0 (A + B + F, validate PASS, 24
-steps); drive unit split into journal-cap 2.7 g, motor-u 3.4 g, transfer-cheek 1.3 g, flat, no support; sleeves
-gone; idlers and transfer on M3 shanks; **ISO 7380 M3 button heads** on axles 1–3 and the transfer axle M3×16
+*Still open, not about the joint:* crank marks not cut (engraved numbers ≈ 3 mm, the new mark type); spine 0.86 at
+the keel; transfer-cheek sliver 0.12 at the strap tip (y −0.2, z 54.7); cell-holder × nickel-strip 6.6 mm³; cell-lid
+and nickel-strip retention; switch path 0.25 and its tool; the body roof tool hits the pinion; body build 42 s (over
+40 s); base drops two loose 15.4 mm³ pieces at the front rim; checks that ask more than their fit (above). Then the
+full `cad_verify`, coupons (c5: transfer centre distance through 3 screwed parts), plates, kit.
+*Done in phase 3 so far (2026-11-26/27), committed on the branch:* plan.json rewritten for S 1.0 (A + B + F, validate
+PASS, 24 steps); drive unit split into journal-cap 2.7 g, motor-u 3.4 g, transfer-cheek 1.3 g, flat, no support;
+sleeves gone; idlers and transfer on M3 shanks; **ISO 7380 M3 button heads** on axles 1–3 and the transfer axle M3×16
 (Morante: no thin rims, buy them); 1 strap screw; screws 2 × M3×6, 5 × M3×10, 1 × M3×16; transfer before motor-u;
 spine set lowered 1 mm forward then slid back (crank-4 vs the base's rear lip). hardware.md still lists M2: the
 documenter updates it with the button heads at the step's close.
