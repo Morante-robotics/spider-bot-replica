@@ -9,7 +9,7 @@ toy: the specification is now the toy and jenscolt's model, and the mechanism is
 went through a mock-up in simple shapes (N0), the real parts as light meshes (N1), and a first print-detail attempt
 that did not fit at 65 % (N2 rev 5). Meshes then proved a dead end, so every part was rebuilt as parameters and only
 those measure. Round r00 of N2 designed the inside (drive and power); the shells then took an hour to build, so their
-leg clearances were redesigned as simple shapes and every build and check came under 40 s, with 0 failures. Then the unused front sensor was removed and the mouth closed with a front panel, and the robot was split into one print plate per colour for a first test batch. That batch failed as a robot: the parts print, but the mechanism is too fine for the printer at this size. Older
+leg clearances were redesigned as simple shapes and every build and check came under 40 s, with 0 failures. Then the unused front sensor was removed and the mouth closed with a front panel, and the robot was split into one print plate per colour for a first test batch. That batch failed as a robot: the parts print, but the mechanism is too fine for the printer at this size. Morante then asked for a top-down redesign in three phases: the size (S 1.0, set by the smallest features the printer made well), whether the whole mechanism turns at that size (it does, with no large layout move), and what to simplify (a 3-part flat drive unit, M3 screws only, engraved marks, and a new leg ↔ crank joint). The design now passes the full check; nothing has been printed at S 1.0 yet. Older
 entries are shortened to their summary; the full text is in git (links).
 
 ### Redesign: looks first
@@ -377,7 +377,7 @@ and the spine (30 %).
 
 ### Batch 1 result: the mechanism is not printable at this size
 
-**Phase 5 · Final build · 2026-11-24** · Status: ❌ batch 1 failed as a robot; how to fix it is open
+**Phase 5 · Final build · 2026-11-24** · Status: ❌ batch 1 failed as a robot; answered by the [top-down redesign](#top-down-redesign-phase-1-size-s-10)
 
 > **In short.** Morante printed batch 1 (the blue base, the yellow inner plate and leg 3) at scale 0.70 and tried to
 > assemble it. Two parts broke while he removed the support, and after two fixes the assembly still failed on five
@@ -461,9 +461,213 @@ result does not say which of them would have worked alone.
 
 #### Next
 
-Open decision, Morante's: how to make the mechanism printable. The options on the table are calibration coupons
-first (gear tooth, marks, M2 holes and pilots, wall and plate minimums), then a larger scale, or the same scale
-with printable minimums, or a 0.2 mm nozzle, or a simpler mechanism. The open item says coupons first, so that the
-choice can rest on printed numbers.
+Morante chose how to make it printable: a top-down redesign in three phases, starting with [phase 1](#top-down-redesign-phase-1-size-s-10).
+
+[↑ Contents](../build-log.md#contents)
+
+### Top-down redesign, phase 1: size S 1.0
+
+**Phase 5 · Final build · 2026-11-26** · Status: ✅ target scale S 1.0 chosen
+
+> **In short.** After batch 1 failed, two attempts to thicken the mechanism in place and to bisect a scale part by part
+> gave no number. Morante stopped them and asked for a top-down approach in three phases: first how big the robot
+> must be, then where everything goes, then what can be simplified. Phase 1 measured the smallest feature the printer
+> made well, per type, and scaled the robot to reach them: pure scaling needs S 1.17, and Morante capped it at **S 1.0**
+> (225 mm across the legs, jenscolt's own size). At 1.0 the gears keep their pitch diameters with fewer teeth at module
+> 1.0, and the walls need only +0.3 mm in place.
+
+Morante's reason for stopping the probes: «falta razonamiento espacial y te centras en solucionar problemas pequeños
+antes de saber qué tenemos que hacer. Yo quiero una aproximación Top-down» (spatial reasoning is missing and the work
+sits on small problems before knowing what has to be done; he wants a top-down approach). Scale S is the fraction of
+jenscolt's size; the batch 1 robot was S 0.70. No phase starts before the one above is validated.
+
+#### Steps
+
+1. List the smallest printed feature of each type, only from what was printed and measured (archive tag
+   `pre-redesign-2026-11-17`).
+2. Measure the ray thickness of every printed STL at 0.70 to see which parts are thin.
+3. Compare three scales (0.70, 1.0, 1.17) with the bought parts (motor, cells) and one smallest part of each type
+   at true size; Morante picks the target.
+
+#### Result
+
+| Feature | At S 0.70 | Measured minimum | Factor | Source |
+|---|---|---|---|---|
+| gear module | 0.6 | 1.0 | ×1.67 | gear train v2 turned at module 1 (2026-11-12) |
+| wall / plate | 1.2 (spine 0.56, drive unit 0.29, idler rims 0.98) | 2.0 | ×1.67 | fork side wall, test leg v2 (`measurements.csv`, 2026-11-11) |
+| crank journal | Ø3 | Ø4 (`TURN` 0.25) | ×1.33 | crankshaft journal 4.0 printed 3.9–4.0 |
+| screw | M2 (Ø2.3 holes, never measured) | M3, `STEEL` on Ø3.3 | ×1.5 | clearance test, M3 column (2026-11-11) |
+| mark | dots Ø0.7 × 0.35 | engraved numbers ≈ 3 mm | new type | not measured: the one assumption |
+
+- Legs and body are near the minimum already (legs p10 ≈ 2.0 mm, thin only at spots). What is thin is the mechanism
+  (gears, cranks, idlers, spine, sleeves: median ≈ 1.0, module 0.6) and the base bowl (0.7 everywhere).
+- The crank spacing is set by the legs, so the gear train's size follows the robot's S. Pure scaling reaches every
+  minimum only at S 1.17–1.2: 271 mm across the legs, weight ×5, motor torque ×8.6 against 0.70.
+- Morante, verbatim: «S 1.0 máximo». At S 1.0 (×1.43 from 0.70) the gears keep their pitch diameters with fewer
+  teeth at module 1.0: crank and idlers 12 → 10 T, pinion 16 → 14, transfer 20/15 → 17/13 (crank:motor ratio 1.07, or
+  0.99 with a 13 T pinion). Walls scale to 1.71 and need +0.3 mm in place to reach 2.0; journals Ø4.3 and M3 holes
+  pass by scaling.
+- Below 1.0 the crank gear falls to 9 T and the walls need ≥ 0.45 mm more, so 1.0 is also the floor.
+- Cost against 0.70: 225 mm across the legs, weight ×2.9, crank torque ×4.2. The motor (not bought, torque never
+  measured) and the cells are sized in phase 2.
+
+#### Decisions
+
+- **Target S 1.0** (Morante's cap). It does not promise a fit: phase 2 checks that.
+- **Printable minimums become a gate:** `cad_verify` check 13 (module, walls, marks read from the meshes; spec
+  `MINIMUMS`, `GEAR_GEOM`, `MARK_GEOM`). The 0.70 design fails it 28 times. A deliberately thin feature is declared
+  as an `except` box with its reason.
+
+[↑ Contents](../build-log.md#contents)
+
+### Top-down redesign, phase 2: the whole mechanism turns at S 1.0
+
+**Phase 5 · Final build · 2026-11-26** · Status: ✅ the mechanism turns, no layout move needed; overlaps left are phase 3's
+
+> **In short.** The whole robot was rebuilt at S 1.0 with the minimums, deleting every fit tweak made at 0.70, and
+> checked over the 24 crank poses at 1 mm resolution. No leg overlaps a shell or another leg, and every remaining
+> overlap is at most 0.40 mm. No large layout move was needed: the motor even has 22 mm free along −x. The remaining
+> small overlaps and gaps are phase 3's.
+
+#### Steps
+
+1. Scale the robot to S 1.0, apply the minimums and delete the fit tweaks made at 0.70 (D23/D23C, arm pockets,
+   reliefs, x-stop posts, spacings).
+2. Re-derive the approved concepts at 1.0 (below).
+3. Run the whole-robot N1 check, `cad/robot/fitcheck/n1.py`: 41 parts, 24 poses, 18 s.
+
+<img src="../cad/robot/images/phase2/top.png" alt="Top view of the robot with the swept volume of legs, cranks and gears over 24 poses">
+
+*Fig. 1 · From above, cut at the motor axis. Light blue: where the legs go over a whole turn; the black outline is
+the base and body. Notice that the motor (green), the cells and holder (purple) and the gears (orange) sit inside the
+shells, clear of the leg sweep.*
+
+<img src="../cad/robot/images/phase2/side.png" alt="Side view of the same sweep, with the motor above the gear train">
+
+*Fig. 2 · The same from the side, cut at x = 0. The motor (green) is the top gear's neighbour; the cranks and gears
+turn in the lower half, the cells and the switch toward the front (+y).*
+
+#### Result
+
+| Check | Result |
+|---|---|
+| Whole mechanism, 24 poses | no shell ↔ leg or leg ↔ leg overlap |
+| Remaining overlaps | all ≤ 0.40 mm: legs 3/7 against crank 4, legs against the crank 1/2 webs and the M3 axle heads |
+| All 10 gears | module 1.0 (check 13) |
+| Mass | ≈ 225 g printed, ≈ 255 g with hardware |
+| Crank throw | 3.3 mm: lifting the whole weight needs ≈ 0.09 kg·cm |
+| Body build | 41–47 s cold (over the 40 s rule) |
+| Count going into phase 3 | 27 printed parts, 14 hardware entries, 37 assembly steps |
+
+- Re-derived at 1.0 (concepts Morante approved at 0.70): crank 2/3 spread 4.3 + shift 2.8 (legs 1↔2 and 5↔6 0.55;
+  legs 0↔1 and 4↔5 0.37), body leg cutters (BRELD 0.65, 12 cutters), back-sheet cup [3.0, |x| 17.2, z 10.0–23.7] with
+  the body tab keep-out.
+- Leg ↔ shell gaps 0.01–0.32 (no overlap) and the base's front-window relief (not restored) go to phase 3.
+- Room: the motor has 22 mm free along −x and 17 mm above, so an N20 would fit without moving anything.
+- The motor bought must give ≥ ≈ 0.3 kg·cm at 3 V (the N10's torque has never been measured): the seller's datasheet
+  comes before buying.
+
+#### Decisions
+
+- **No large layout move.** The approach worked as intended: the size decision made the room; no sub-millimetre
+  relief was needed to get a turning mechanism.
+- The N1 check's sub-0.2 mm numbers are noise at its 1 mm resolution and are not acted on.
+
+Branch `phase2-s1` (`808cf15`, `51a83ce`, `dbee8af`). The figures are projections of the exported STLs.
+
+[↑ Contents](../build-log.md#contents)
+
+### Top-down redesign, phase 3: simplify, and the leg joint
+
+**Phase 5 · Final build · 2026-11-28** · Status: 🔄 design done and checked (full `cad_verify` PASS, 0 FAIL); coupons, plates and the hardware order next
+
+> **In short.** Phase 3 cut the mechanism down to what a 0.4 mm nozzle prints well: the drive unit is three flat parts
+> with no support, the printed sleeves are gone, all screws are M3, and the crank marks are engraved numbers 1–4.
+> The leg ↔ crank joint was the one real problem left: Morante parked it, reopened it, and picked option D, where
+> the leg's end tube follows the pin's real swing cone. The robot now passes the full check (0 FAIL, 91 WARN). Nothing
+> has been printed at S 1.0: the 3 mm numbers and the M3 pilots in PLA are still assumptions, so coupons come before
+> the plates.
+
+Phase 3 is the simplification phase: count parts, screws, assembly steps and supported parts, propose what can go,
+Morante picks, and only then the local work (fits, retention, marks, the check, coupons).
+
+#### Steps
+
+1. **Count at S 1.0:** 27 printed parts (10 gears in 9), 14 hardware entries, 37 assembly entries (17 plan steps, 11
+   on the bench); 18 of 27 parts need support.
+2. **Proposals, Morante picks A + B + F.** **A**: the drive unit as 3 flat parts screwed with M3 (motor U closed by a
+   strap on the same part as the transfer axle; one flat journal cap; the transfer cheek). **B**: idlers and transfer
+   on M3 shanks, no printed sleeves. **F**: A's journal cap also caps crank 4, so the cell holder loses its tongue
+   over journal 4 and the holder comes out without freeing crank 4. Declined: C (one-way keys) and D (motor held by
+   the base: pinion centre distance on two parts). Also applied: M2 labels → M3, at most two screw lengths.
+3. **Direct drive (no transfer) was scanned** (pinion 10–30 T on any idler or crank, every 5°, 24 poses): the best,
+   «Direct 1», has the pinion on idler 1 and clears the body by 0.47 mm, but only if the gearbox face holds the
+   motor. Morante: «Lanza con la variante directa incluida»; the plan compared both, and A + B + F with the transfer
+   is the design that stays.
+4. **Hardware:** ISO 7380 M3 button heads on axles 1–3 and the transfer axle (M3 × 16), because there is no room for
+   thin printed rims (Morante: buy them). Motor: N10 07 type, 100:1.
+5. **Marks:** engraved numbers 1–4 on the +x web hub of each crank, 3 mm high and 0.5 mm deep.
+6. **Smaller fixes** (committed on the branch): spine keel pilots stop at z 8.2 and the keel screws go from M3×6 to
+   M3×5; nickel strip inside the holder's walls; lid lips 3.06 wide between the spring seats; switch pocket opened
+   2.5 mm forward; `BODY_TOP` 80.5; transfer-cheek strap ends squared (`STRAP_TIP_W` 2.4, was a 50° wedge with wall 0).
+7. **The checks ask their pair's fit:** leg ↔ own crank at `fits.TURN`, leg ↔ every other part at `LEG_PATH` 0.5,
+   legs in `MINIMUMS` at `WALL_MIN` (only the end tube asked). That check run gave 30 FAIL, all on the legs.
+
+#### The leg ↔ crank joint
+
+The leg's end tube had walls of 1.7–1.9 mm (< 2.0) and, after a first fix, a 4.3 mm grip on its pin. Pure ×1.43
+scaling would have given ×1.43 more gap everywhere (Morante's point); the gain went to the 2.0 walls, a 6.3 mm grip,
+the bore drift added outside and the M3 heads. The one real contact left was the closed tube ends of legs 0↔1 and
+4↔5 (overlap 0.06), because the leg leans 12.5–17.9° on its pin and the tube flares.
+
+- Options seen: (A) as it was, the snap that broke; (B) a tube centred on the pin point plus a Ø2 × 8 steel cross pin
+  in a groove of the printed pin (groove neck Ø2.9: coupon risk); (C) a steel Ø3 pin, slimmer tube, but no retention
+  without opening the tube end. Two earlier attempts at fixing A (branch `phase3-leg-joint-wip`) made it worse
+  (27 FAIL against 20).
+- Morante, 2026-11-27: «Deje este tema para resolverlo más adelante y vamos a seguir abordando otras cosas que haya
+  pendiente». It was parked, then reopened by him, who **picked option D**: the leg rides with its pin point on the
+  crank pin (foot moves ≤ 1.43 mm along the leg, ≤ 0.23 high), the bore follows the tilted pin's ellipse, and the neck
+  tab was removed. That gave 17 FAIL (30 before).
+- Then the tube was fitted **about the pin's real swing cone** (Morante's pick): measured over the 24 poses, the pin
+  tilts only towards +y, so the old symmetric 13.9° double cone made the end up to 1.1 mm fatter. Cone tilt
+  6.44/5.49/5.52/7.96° for leg classes 0/4, 1/5, 2/6, 3/7; outer wall = bore + `WALL_MIN`/cos; rounded end revolved
+  about the tilted axis; slit edges chamfered 0.5 × 45°; groove margin `TURN` + 0.05; body notch grown 0.35.
+- Option A′ (a rigid carry with 2.0 walls) failed at the 1 mm check (tube ↔ tube −0.04, base −0.15 to −0.23) and was
+  dropped.
+
+#### Result
+
+Full `cad_verify` on branch `phase3-s1`: **PASS, 0 FAIL, 91 WARN** (`cad/robot/verify-result.txt`).
+
+| Gap or check | Value |
+|---|---|
+| base ↔ legs | ≥ 0.49 (legs 3/7); legs 0/4 0.26 → 1.3 |
+| legs ↔ transfer, body | ≥ 0.60 |
+| leg ↔ crank (`TURN`) | 0.25–0.26 |
+| retention | 36 held |
+| tube wall across slit chamfers | ≥ 2.0 |
+
+- Lessons from this phase: `verify.py` imported a second, unscaled `cad.motion`, so its boxes for legs 1, 2, 5, 6 sat
+  off the tube (leg 2 by 5 mm) and it now uses the shells' own module; stale STLs in `out/` gave false wall FAILs, so
+  rebuild everything (`build.py`) after switching branches; deleting a recess that a comment explained brought back
+  the base FAIL it was made for.
+- Interior WARNs located and read as noise: spine (keel pilot chord), cranks (engraving floor), journal cap (sloped
+  face); the motor-u has a 1.24 mm floor under a blind hole (0.2 %), not identified.
+- Not done: printed mass in grams (the check prints volumes only); the full check takes ≈ 95 s (over 60).
+- The whole-robot viewer is at S 1.0 but still shows the legs from before option D; it is regenerated at the step's
+  close.
+
+#### Decisions
+
+- **A + B + F, M3 only, ISO 7380 button heads** where there is no room for a thin printed rim.
+- **Option D with the pin's swing cone** for the leg ↔ crank joint.
+- **Motor: N10 07 type 100:1**, hardware counts in [`hardware.md`](../hardware.md).
+
+#### Next
+
+Nothing has been printed at S 1.0 yet, and two sizes are assumptions: the 3 mm engraved numbers and the M3
+self-tapping pilots (Ø2.5) in PLA. The order is: (1) coupons for those two (`measurements.csv`, then `cad/fits.py` by
+the designer); (2) print plates and the pre-print review; (3) the workshop kit; (4) one hardware order, after checking
+that the seller's datasheet gives ≥ ≈ 0.3 kg·cm at 3 V. The items are rows in Open items.
 
 [↑ Contents](../build-log.md#contents)

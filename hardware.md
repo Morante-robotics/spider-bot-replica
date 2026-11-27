@@ -1,6 +1,6 @@
 # Spider-Bot · Hardware
 
-The one shopping list for the N2 robot (`cad/robot`, round r00, scale 0.70), counted from the code on 2026-11-23:
+The one shopping list for the robot (`cad/robot`, scale S 1.0, phase 3 design), counted from the code on 2026-11-28:
 everything that is not printed. Designs only use hardware listed here (a new item is added here first, as «To
 buy»), and the workshop kit compares its parts list with the **Have** column. At the end of the build this
 becomes the bill of materials.
@@ -17,13 +17,13 @@ What to order: the count the robot uses and the count to order (screws +50 %, ce
 | Nickel strip, 0.3 mm thick (one 37 × 5.5 mm piece) | 1 piece | a strip of about 10 cm |
 | JST-XH 3-pin connector, male and female pair with leads | 1 pair | 2 pairs |
 | SS12D00 slide switch (SPDT, panel) | 1 | 2 |
-| M2 socket head screw (ISO 4762), 4 mm | 2 | 3 |
-| M2 socket head screw, 5 mm | 1 | 2 |
-| M2 socket head screw, 6 mm | 3 | 5 |
-| M2 socket head screw, 12 mm | 1 | 2 |
+| M3 socket head screw (ISO 4762), 5 mm | 2 | 3 |
+| M3 socket head screw, 10 mm | 2 | 3 |
+| M3 button head screw (ISO 7380), 10 mm | 3 | 5 |
+| M3 button head screw (ISO 7380), 16 mm | 1 | 2 |
 
 From the Arduino kit, not ordered: 2 red or yellow 5 mm LEDs, their 2 resistors of 100–220 Ω and the hook-up wire
-(spec m16 and m17). The robot uses no M3 screws, nuts or steel pins.
+(spec m16 and m17). The robot uses no nuts or steel pins: every screw is M3 and self-tapping into a printed pilot.
 
 ## Table
 
@@ -41,13 +41,15 @@ already in the kit. **Where used**: the file that holds the count.
 | LED | 5 mm (Ø5, flange Ø5.8), red or yellow (spec m16) | 2 (the big eyes) | `power.py` (`leds`) | ? | Arduino kit |
 | Resistor | 100–220 Ω, ¼ W, Ø2.3 × 6.5 | 2 (one per LED) | `power.py` (`leds`, `RES_*`) | ? | Arduino kit |
 | Hook-up wire | thin, a few short leads (switch, LEDs, JST) | not counted (wires take no volume, spec m3) | spec m17 | ? | Arduino kit |
-| Socket head screw | M2 × 4 | 2 (keel, from below) | `drive.py` (`KEEL_LEN`, `KEEL_SCREWS`) | ? | To buy |
-| Socket head screw | M2 × 5 | 1 (idler axle 3) | `drive_verify.py` (`SCREWS["axle-3"]`) | ? | To buy |
-| Socket head screw | M2 × 6 | 3 (idler axles 1 and 2; cell holder to the drive unit) | `drive_verify.py` (`axle-1`, `axle-2`); `power.py` (`M2_L`) | ? | To buy |
-| Socket head screw | M2 × 12 | 1 (transfer axle) | `drive_verify.py` (`SCREWS["axle-t"]`) | ? | To buy |
+| Socket head screw | M3 × 5 | 2 (keel, from below) | `drive.py` (`KEEL_LEN`, `KEEL_SCREWS`) | ? | To buy |
+| Socket head screw | M3 × 10 | 2 (strap of the transfer cheek; cell holder to the drive unit) | `drive_verify.py` (`SCREWS["strap-screw"]`); `power.py` (`M3_L`) | ? | To buy |
+| Button head screw | M3 × 10, ISO 7380 | 3 (idler axles 1, 2 and 3) | `drive_verify.py` (`SCREWS["axle-1"]` to `axle-3`, `BUTTON`) | ? | To buy |
+| Button head screw | M3 × 16, ISO 7380 | 1 (transfer axle) | `drive_verify.py` (`SCREWS["transfer-pin"]`, `BUTTON`) | ? | To buy |
 
-All M2 screws are ISO 4762 (head Ø3.8 × 2.0, 1.5 mm hex key), self-tapping into PLA pilots of Ø1.6 (assumed; proven
-on the coupon c2, which Morante skipped: the first plate tests it). The robot has no M3 screws, nuts or steel pins.
+Socket head screws are ISO 4762 (head Ø5.5 × 3.0, 2.5 mm hex key); button heads are ISO 7380 (head Ø5.7 × 1.65, 2 mm hex
+key), used where there is no room for a printed rim. All are self-tapping into PLA pilots of Ø2.5 (assumed; the coupon c2,
+which Morante skipped, is replaced by the S 1.0 coupons in [Open items](build-log.md#open-items)). The robot has no nuts or
+steel pins.
 
 Rows of the old chassis designs (M3 screws and nuts, Ø3 steel pins, 2-pin JST, perfboard, printed battery
 compartment, the test frame, gear train test and base v1 hardware) were removed: r00 does not use them. The archive

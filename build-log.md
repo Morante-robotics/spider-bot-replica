@@ -65,6 +65,9 @@ The robot's story in four parts, then what is left to do and a glossary.
    - [Front sensor removed, mouth closed](build-log/4-looks-first.md#front-sensor-removed-mouth-closed) · 2026-11-24 · ✅ done
    - [Print plates by colour](build-log/4-looks-first.md#print-plates-by-colour) · 2026-11-24 · ✅ plates made
    - [Batch 1 result: the mechanism is not printable at this size](build-log/4-looks-first.md#batch-1-result-the-mechanism-is-not-printable-at-this-size) · 2026-11-24 · ❌ failed as a robot
+   - [Top-down redesign, phase 1: size S 1.0](build-log/4-looks-first.md#top-down-redesign-phase-1-size-s-10) · 2026-11-26 · ✅ S 1.0 chosen
+   - [Top-down redesign, phase 2: the whole mechanism turns at S 1.0](build-log/4-looks-first.md#top-down-redesign-phase-2-the-whole-mechanism-turns-at-s-10) · 2026-11-26 · ✅ turns, no layout move
+   - [Top-down redesign, phase 3: simplify, and the leg joint](build-log/4-looks-first.md#top-down-redesign-phase-3-simplify-and-the-leg-joint) · 2026-11-28 · 🔄 design passes, coupons next
 5. **[Open items](#open-items)**: everything still to do.
 6. **[Glossary](#glossary)**: the terms used in the entries.
 
@@ -82,11 +85,12 @@ archived in [Legs and drive](build-log/3-legs-and-drive.md).
 | Pending | Came up in | Phase |
 |---|---|---|
 | Speed, optional: the body skin (cad/body, 17–20 s) and the body's fixed stage (cold 40 s) are cached; make them faster if they get used often (`viewer/src/export.py` is down to 5 s) | [Fast shells](build-log/4-looks-first.md#fast-shells-clearances-designed-not-computed) | 3 |
-| Coupon for the leg snap: skipped by Morante; the leg snap is tested on the first plate (base + one leg) before the other 7 legs ([state](cad/robot/datasheet.md#state-2026-11-23)) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
-| Make the mechanism printable, top-down (Morante 2026-11-26): (1) size from the printable minimums: done, **S 1.0** (fewer teeth at module 1.0, walls +0.3 in place); (2) the whole mechanism turns with no collision at that scale; (3) simplify: done (A + B + F, 25 parts, 24 steps); local fits in progress, the leg ↔ crank joint to decide first ([state](cad/robot/datasheet.md#state-2026-11-26-top-down-plan-start-here)) | [Batch 1 result](build-log/4-looks-first.md#batch-1-result-the-mechanism-is-not-printable-at-this-size) | 5 |
-| Cold leg build over 40 s under load (`CAD_BUDGET`) | [Batch 1 result](build-log/4-looks-first.md#batch-1-result-the-mechanism-is-not-printable-at-this-size) | 3 |
+| Coupon for the leg snap: skipped by Morante; the leg joint (option D, groove and bead) is tested on the first plate (base + one leg) before the other 7 legs ([state](cad/robot/datasheet.md#3-leg--crank-joint-option-d-as-built)) | [N2 round r00](build-log/4-looks-first.md#n2-round-r00-the-inside-and-the-leg-hold) | 3 |
+| Coupons for the two unmeasured fits at S 1.0: engraved numbers 3 mm × 0.5 deep and M3 self-tapping pilots Ø2.5 in PLA; the measured values go to `measurements.csv`, `cad/fits.py` follows | [Phase 3](build-log/4-looks-first.md#top-down-redesign-phase-3-simplify-and-the-leg-joint) | 5 |
+| Print plates for S 1.0 (the design passes the full check: 0 FAIL), pre-print review, then the workshop kit | [Phase 3](build-log/4-looks-first.md#top-down-redesign-phase-3-simplify-and-the-leg-joint) | 5 |
+| One hardware order: N10 07 type 100:1 motor (the seller's datasheet must give ≥ ≈ 0.3 kg·cm at 3 V), AG13 cells, M3 screws (ISO 7380 button heads and socket heads); measure the motor on arrival (body, shaft, mounting), see [`hardware.md`](hardware.md) | [Phase 2](build-log/4-looks-first.md#top-down-redesign-phase-2-the-whole-mechanism-turns-at-s-10) | 5 |
+| Cold leg build over 40 s under load (`CAD_BUDGET`); at S 1.0 the body build takes 41–47 s and the full `cad_verify` ≈ 95 s | [Batch 1 result](build-log/4-looks-first.md#batch-1-result-the-mechanism-is-not-printable-at-this-size) | 3 |
 | Body: the curved top panels and the chin grille, if Morante wants them later (a build takes 60–80 s) | [Meshes become parameters](build-log/4-looks-first.md#meshes-become-parameters) | 3 |
-| Buy the N10 motor (3 V, ≈ 100–150 rpm) and 6 × AG13 cells and measure the motor (body, shaft, mounting); sizing: [`sizing.py`](https://github.com/Morante-robotics/spider-bot-replica/blob/n2-on-meshes-2026-11-20/cad/mockup/sizing.py) | [Redesign: looks first](build-log/4-looks-first.md#redesign-looks-first) | 3 |
 | Import the parts into Onshape as STEP and assemble them with mates | [Onshape assembly](build-log/3-legs-and-drive.md#onshape-assembly) | 3 |
 | Count the hardware in the workshop (the **Have** column) | [Hardware](hardware.md) | 3 |
 | Calibrate X-Y hole and contour compensation and save the standard settings as a Bambu Studio preset | [Standard settings](print/README.md#standard-settings) | 2 |
