@@ -1545,7 +1545,14 @@ def check_minimums(spec, meshes, rep, only=None):
         if not len(tk):
             rep.warn(f"{n}: every wall sample is excepted: no wall minimum checked")
             continue
-        thin = tk < w_min - 0.05
+        # The meshes checked are the coarse STLs (cad/common.STL_TOL: chord deviation 0.05; the fine ones 0.02): a round wall of exactly w_min
+        # reads up to that much thinner from its facets. Samples thinner than w_min by no more than the deviation are a coarse WARN, not counted in wall_frac.
+        dev = min(0.05, float(getattr(spec, "CHORD_DEV", 0.05)))
+        thin = tk < w_min - dev
+        soft = (tk < w_min) & ~thin
+        if soft.any():
+            rep.warn(f"{n}: {soft.mean():.1%} of its surface reads {w_min - tk[soft].min():.2f} mm or less under {w_min:.1f} mm "
+                     f"(within the mesh's chord deviation {dev:.2f}: coarse, not counted)")
         where = pts[keep][thin]
         msg = (f"{n}: {thin.mean():.1%} of its surface (outside teeth and marks) thinner than {w_min:.1f} mm, thinnest "
                f"{tk.min():.2f}" + (f", e.g. at {where[np.argmin(tk[thin])].round(1).tolist()}" if thin.any() else ""))

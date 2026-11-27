@@ -45,8 +45,7 @@ PINR = CL.PINR                                      # crank pin Ø3 (legs' bore 
 WEB_T = CL.WEB_T; WB0 = WX1 + TH; WB1 = WB0 + WEB_T  # webs just outside the walls (THRUST)
 WEBR = PINR + CL.WEBW                               # web stadium half-width (check.py WEBR)
 WEB_SWEEP = [math.hypot(A_ALL[i + 4, 0][1] - Oy[i], A_ALL[i + 4, 0][2] - Oz) + WEBR for i in range(4)]   # -x webs' reach round each crank centre
-PIN_TRIM = 0.5                                      # pin tip short of the leg's bore floor by this more (the inward-drifted leg's floor met the tip: crank 4 x legs 3/7, phase 3)
-PIN_X1 = P["XC"] + CL.PINX - PIN_TRIM                 # pin tip (|x|)
+PIN_TRIM, PIN_X1 = SH.PIN_TRIM, SH.PIN_X1             # pin tip (|x|), set in shells.py (the legs' bore floor is cut from it)
 # pin collar (leg-on-pin "+x crank web"): the leg's end tube starts at XC - TAIL; the collar stops it TURN short, less
 # the tube face's tilt at the collar radius (the leg swings FLARE_DEG on its pin, shells.py), so the leg is held in x
 COLLAR = False                                      # tried 2026-11-23: STL split into bodies, legs 3/4 overlap it at pose 0
