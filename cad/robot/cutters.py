@@ -209,7 +209,10 @@ def body_cutters(body, samples, frames, piv, r_pose, r_lift, kc, liftd, rimr, re
                 n = body.face_normals[fi].mean(0); fr = frame_of(n); t, z, n = fr
                 near_leg = np.vstack([P[np.isfinite(cKDTree(R).query(P, distance_upper_bound=r + SLACK)[0])] for P, r in ((pose, r_pose), (lift, r_lift))])
                 d0 = (near_leg @ n).min() - r_pose - SLACK; d1 = (R @ n).max() + 0.5
-                out.append((_hull_outline(R, fr), fr, (d0, d1), f"pocket leg {Lg}"))
+                ol = _hull_outline(R, fr)
+                if ol.is_empty or not np.isfinite([d0, d1]).all():            # a one-sample patch at the threshold: its outline simplifies away (new sweep, phase 3); body_gaps still checks it
+                    print(f"    [body] pocket leg {Lg}: a {len(R)}-sample patch at {np.round(R.mean(0), 1).tolist()} has no outline, skipped", flush=True); continue
+                out.append((ol, fr, (d0, d1), f"pocket leg {Lg}"))
     return out
 
 

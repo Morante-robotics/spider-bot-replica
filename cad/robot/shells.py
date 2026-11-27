@@ -64,22 +64,28 @@ BRELD = F.LEG_PATH.side + 0.15   # body rim notch / eye-block pocket: the body i
 PKT = FE.PKT                            # back-sheet pocket (depth, |x|, z0, z1): spec back_sheet_pocket, derived from the legs' sweep at S 1.0
 SNX, SNW, SNT, SNZ, RIBD, SNG = CL.SNX, CL.SNW, CL.SNT, CL.SNZ, CL.RIBD, CL.SNG
 PINR = CL.PINR                          # printed crank pin r (Ø3)
-END_R = PINR + F.TURN.side + CL.W       # leg end tube: bore TURN over the pin, wall W 1.2
+PIN_TRIM = 0.5                          # pin tip short of the legs' nominal bore floor by this (drive.py reads it: PIN_X1)
+PIN_X1 = P["XC"] + CL.PINX - PIN_TRIM   # pin tip (|x|)
+# leg end tube (option D): the bore is the tilted pin's ellipse, PINR / cos(tilt) + TURN; the wall is fits.WALL_MIN; per leg, set below
+# (BORE_R, END_RS, TUBE_X1 after pin_swing); END_R is the largest, the envelope the checks box
 # leg snap on the crank pin (option A, build-log N2 r00): a groove on the pin, a ring bead in the end tube's bore, an axial slit
 # in the tube so it opens over the pin tip. The snap fit is fits.PRESS (assumed): coupon list, not printed now.
 SNAP_NECK_R = 1.0 * FE.K                       # pin neck r in the groove (Ø2.0, brief: neck Ø >= 2.0)
 SNAP_BW = 0.5 * FE.K                           # bead width (axial)
-SNAP_END = 1.0 * FE.K                          # bore floor past XC+PINX: the old open mouth, kept (the pin tip is 0.5 inside it; the leg slides up to 1.5 towards its crank: a floor at TURN 0.25 overlapped crank x leg 0.22 mm3)
 SNAP_WALL = F.WALL_MIN                         # solid end wall closing the tube beyond the bore floor: the neck rod runs into it (print 2026-11-24: the rod only butted the open rim, leg 3 snapped)
 SNAP_SLIT = 0.6 * FE.K                         # slit width (tangential)
-def snap_bead_r(i): return SNAP_NECK_R + F.TURN.side + BORE_DRIFT[i]       # bead inner r: turns on the neck (TURN), bore axis drift as the bore
+def snap_bead_r(i):
+    """bead inner r: the ring (circle of radius r, width SNAP_BW, plane normal to the tube's axis) sits tilted by the pin's swing on the
+    neck: its edge corner is at distance r cos(tilt) - SNAP_BW / 2 sin(tilt) from the pin axis, which must be neck + TURN."""
+    t = math.radians(PIN_TILT[i])
+    return (SNAP_NECK_R + F.TURN.side + SNAP_BW / 2 * math.sin(t)) / math.cos(t)
 SNAP_MARGIN = F.TURN.side             # axial room each side of the bead's travel (TURN; 0.10 left crank x leg 0.06-0.09 over the poses; slide stays within RETAIN 1.25)
 def snap_groove(i):
     """(x0, x1) of the pin groove (robot |x|, right side): the axial span the bead's inner edge sweeps where it is within the pin's
     shoulder radius (PINR), over the 24 poses (tilt of the tube on the pin and the leg's axial drift), plus SNAP_MARGIN a side."""
     P_, A0 = motion.neutral_leg(i, P, n=13)[:2]; A0 = np.asarray(A0, float); rb = snap_bead_r(i); lo = 1e9; hi = -1e9
     th = np.linspace(0, 2 * np.pi, 181)
-    ring = np.array([[A0[0], A0[1] + r * np.cos(t), A0[2] + r * np.sin(t), 1.0] for r in (rb, (rb + PINR) / 2) for t in th])
+    ring = np.array([[A0[0], A0[1] + r * np.cos(t), A0[2] + r * np.sin(t), 1.0] for r in np.linspace(rb, PINR + 0.5, 6) for t in th])     # the bead's face out to the shoulder radius: its tilted plane reaches furthest along x there
     for k in range(24):
         Q = (leg_frame(i, k) @ ring.T).T[:, :3]
         rho = np.hypot(Q[:, 1] - A_ALL[i, k][1], Q[:, 2] - A_ALL[i, k][2]); m = rho < PINR
@@ -142,6 +148,9 @@ def _leg_frame(Lg, k):
     A = A_ALL[Lg, k] * ([1, 1, 1] if right else [-1, 1, 1])
     u = (P_ - A) / np.linalg.norm(P_ - A); M = R0.T @ motion.frame(u[None])[0]
     T = np.eye(4); T[:3, :3] = M.T; T[:3, 3] = P_ - M.T @ P_
+    # option D (phase 3 leg joint): the leg rides with its pin point on the crank pin, not with its pivot P fixed: translate by A_k - T A0
+    # (<= 1.45 mm along the leg, foot height <= 0.3), so the bore axis stays on the pin and BORE_DRIFT is 0 (right-leg frame, then mirrored)
+    T[:3, 3] += A - (T[:3, :3] @ np.asarray(A0, float) + T[:3, 3])
     if not right:
         Mx = np.diag([-1.0, 1, 1, 1]); T = Mx @ T @ Mx
     return T
@@ -162,7 +171,8 @@ def _leg_right(i):
     hs = _along(hs, A0 + HUBCUT * u, u)
     arm = arm - hs
     th = math.radians(FLARE_DEG[i])                  # bore and tube flare: the pin's swing in the leg frame + 1 deg
-    x0, xm, x1 = A0[0] - TAIL, A0[0], P["XC"] + CL.PINX + SNAP_END   # tail .. pin point .. bore floor past the pin tip
+    END_R = END_RS[i]; BR = BORE_R[i]
+    x0, xm, x1 = A0[0] - TAIL, A0[0], TUBE_X1[i]   # tail .. pin point .. bore floor (the tilted pin tip's corner + TURN)
     xe = x1 + SNAP_WALL                                              # the tube's closed end
     def dcone(r, xend=None):
         from build123d import Cone
@@ -187,14 +197,14 @@ def _leg_right(i):
                                                     - Cone(r0, r0 - END_REL_SLOPE * hr, hr, align=(Align.CENTER, Align.CENTER, Align.MIN)))
     below = Pos(xr + hr / 2, A0[1], A0[2] - 3.0 - 10.0) * Box(hr + 2.0, 40.0, 20.0)         # z < axis - 3: the lowest bit of the tube, clear of the arm rod (its underside is at axis - 2.4 there)
     tube = tube - wedge - (rel & below)
-    bore = Pos(-0.01, 0, 0) * dcone(PINR + F.TURN.side + BORE_DRIFT[i], x1)
-    bore = bore + Pos(0.02, 0, 0) * dcone(PINR + F.TURN.side + BORE_DRIFT[i], x1)
+    bore = Pos(-0.01, 0, 0) * dcone(BR, x1)
+    bore = bore + Pos(0.02, 0, 0) * dcone(BR, x1)
     from build123d import Cone
     joint = _along(Cylinder(JOINT_R, HUBCUT - 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN)), A0 + 1.5 * u, u)
     joint = joint + _along(Cone(JOINT_R + JOINT_BLEND_DR, JOINT_R, JOINT_BLEND_L, align=(Align.CENTER, Align.CENTER, Align.MIN)), A0 + 1.5 * u, u)   # blends into the tube wall
     ball = Pos(*P_) * Sphere(PB)
     rb = snap_bead_r(i)
-    ring = Pos(xm - SNAP_BW / 2, A0[1], A0[2]) * Rot(0, 90, 0) * (Cylinder(PINR + F.TURN.side + BORE_DRIFT[i] + 0.4, SNAP_BW, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    ring = Pos(xm - SNAP_BW / 2, A0[1], A0[2]) * Rot(0, 90, 0) * (Cylinder(BR + 0.4, SNAP_BW, align=(Align.CENTER, Align.CENTER, Align.MIN))
                                                                   - Cylinder(rb, SNAP_BW, align=(Align.CENTER, Align.CENTER, Align.MIN)))
     leg = fuse_all([blade, arm, tube, joint, ball]) - bore
     uh = u - np.dot(u, [1.0, 0, 0]) * np.array([1.0, 0, 0]); uh = uh / np.linalg.norm(uh)             # the arm's side of the tube
@@ -222,7 +232,7 @@ def _along(sh, p0, u):
     return Pos(*p0) * sh
 def leg(Lg):
     i = Lg % 4
-    key = ("leg9", i, SNAP_END, SNAP_WALL, SNAP_NECK_R, SNAP_BW, SNAP_SLIT, FLARE_DEG[i], BORE_DRIFT[i], CL.PINX, S, HUBCUT, TAIL, END_R, PB, JOINT_R, JOINT_BLEND_DR, JOINT_BLEND_L, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C,
+    key = ("leg11", i, snap_bead_r(i), TUBE_X1[i], BORE_R[i], END_RS[i], SNAP_WALL, SNAP_NECK_R, SNAP_BW, SNAP_SLIT, FLARE_DEG[i], CL.PINX, S, HUBCUT, TAIL, PB, JOINT_R, JOINT_BLEND_DR, JOINT_BLEND_L, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C,
            FACE_CHAMFER, END_REL_X, END_REL_DR, END_REL_SLOPE, srch(_leg_right, _along))
     sh = cached(f"leg{i}", key, lambda: _leg_right(i))
     return sh if Lg < 4 else mirror_x(sh)
@@ -248,16 +258,16 @@ FACE_CHAMFER = 0.6       # tube mouth outer edge 45 deg chamfer
 END_REL_X = 1.5          # the recess starts this far before the bore floor ...
 END_REL_DR = 0.5         # ... this deep ...
 END_REL_SLOPE = 1.0      # ... and grows by this per mm towards the closed end
-BORE_DRIFT_MARGIN = 0.05   # was 0.01: the pin's tilt left crank 3 x legs 2/6 at 0.19 < 0.2 (phase 3)
-def bore_drift(i):
-    """worst offset (mm, across the pin axis x) between the pin centre A_k and the bore axis the rigid leg carries over the 24
-    poses: leg_frame keeps the pivot P fixed while |P - A| changes by SL, so the neutral A0 lands off the pin (smoke 2026-11-23:
-    gaps 0.08 / 0.14 / 0.19 against TURN 0.25). The bore is widened by it: a loose leg on its pin is fine in this toy."""
-    P_, A0 = motion.neutral_leg(i, P, n=13)[:2]; A0 = np.asarray(A0, float); w = 0.0
-    for k in range(24):
-        d = (leg_frame(i, k) @ np.r_[A0, 1.0])[:3] - A_ALL[i, k]; w = max(w, float(np.hypot(d[1], d[2])))
-    return round(w + BORE_DRIFT_MARGIN, 2)
-BORE_DRIFT = [bore_drift(i) for i in range(4)]
+BORE_DRIFT = [0.0] * 4          # the leg rides on its pin (leg_frame): no axis drift to widen the bore by
+PIN_TILT = [pin_swing(i) for i in range(4)]          # deg, the pin's largest tilt to the leg's x over the 24 poses
+BORE_R = [PINR / math.cos(math.radians(t)) + F.TURN.side for t in PIN_TILT]     # the tilted pin cuts the bore's plane as an ellipse (semi-major PINR / cos)
+END_RS = [b + F.WALL_MIN for b in BORE_R]
+END_R = max(END_RS)
+def _tube_x1(i):
+    """bore floor (robot |x|): the pin tip's far corner, tilted by the pin's swing, plus TURN."""
+    A0 = np.asarray(motion.neutral_leg(i, P, n=13)[1], float); th = math.radians(PIN_TILT[i]); tip = PIN_X1 - A0[0]
+    return float(A0[0] + tip * math.cos(th) + PINR * math.sin(th) + F.TURN.side)
+TUBE_X1 = [_tube_x1(i) for i in range(4)]
 
 _LV = {}
 def leg_points(Lg, k, edge=0.8):

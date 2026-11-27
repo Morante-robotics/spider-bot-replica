@@ -1,21 +1,21 @@
-cad_verify: FAIL (30 failures, 74 warnings)
+cad_verify: FAIL (17 failures, 70 warnings)
 
 == 1 integrity (printed parts)
-  WARN  base: closed solid, 13925 mm³, 96.6 × 86.3 × 27.0 mm; 2.5% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[-30.6, 34.0, 17.3], [30.1, 35.8, 20.3], [44.2, -16.1, 23.0]])
-  WARN  body: closed solid, 103334 mm³, 95.7 × 111.9 × 67.6 mm; 2.6% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[33.9, 10.1, 69.0], [-5.2, -48.7, 56.3], [-10.0, -55.3, 53.1]])
-  WARN  leg-0: closed solid, 23480 mm³, 73.7 × 65.2 × 100.1 mm; 1.7% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[10.4, -28.5, 17.3], [9.5, -32.9, 19.1], [10.4, -33.0, 18.2]])
-  WARN  leg-1: closed solid, 23553 mm³, 101.5 × 35.1 × 100.1 mm; 2.1% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[9.6, -16.3, 15.5], [72.5, -27.5, 72.1], [15.3, -13.3, 13.4]])
-  WARN  leg-2: closed solid, 23566 mm³, 101.9 × 40.2 × 100.1 mm; 1.5% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[11.1, 7.7, 17.5], [71.9, 13.5, 79.3], [14.1, 4.0, 11.8]])
-  WARN  leg-3: closed solid, 23091 mm³, 74.0 × 67.7 × 100.1 mm; 1.7% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[58.5, 50.6, 64.1], [10.4, 20.6, 18.8], [10.6, 26.3, 15.5]])
-  WARN  leg-4: closed solid, 23480 mm³, 73.7 × 65.2 × 100.1 mm; 1.1% of the surface is thinner than 0.8 mm (thinnest 0.06 mm, e.g. at [[-71.4, -55.8, 49.7], [-69.6, -54.2, 50.8], [-9.6, -29.1, 17.7]])
-  WARN  leg-5: closed solid, 23553 mm³, 101.5 × 35.1 × 100.1 mm; 1.7% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[-25.5, -16.4, 31.2], [-15.3, -14.3, 13.3], [-10.8, -17.6, 13.9]])
-  WARN  leg-6: closed solid, 23566 mm³, 101.9 × 40.2 × 100.1 mm; 1.3% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[-72.1, 13.0, 76.9], [-84.6, 12.3, 58.6], [-83.7, 34.1, 48.5]])
-  WARN  leg-7: closed solid, 23091 mm³, 74.0 × 67.7 × 100.1 mm; 1.4% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[-51.7, 58.0, 51.1], [-55.8, 48.4, 72.3], [-48.1, 57.8, 75.6]])
+  WARN  base: closed solid, 14612 mm³, 97.6 × 86.4 × 31.2 mm; 2.5% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[-46.6, 10.7, 18.1], [21.5, -35.4, 11.0], [41.6, -7.6, 13.8]])
+  WARN  body: closed solid, 103221 mm³, 95.7 × 111.9 × 67.6 mm; 2.2% of the surface is thinner than 0.8 mm (thinnest 0.18 mm, e.g. at [[-17.1, -52.9, 61.2], [27.2, -44.9, 64.8], [-25.7, 35.3, 24.5]])
+  WARN  leg-0: closed solid, 23470 mm³, 73.7 × 65.2 × 100.1 mm; 1.3% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[55.5, -47.7, 79.5], [51.1, -59.1, 56.0], [55.4, -50.9, 40.6]])
+  WARN  leg-1: closed solid, 23537 mm³, 101.5 × 35.1 × 100.1 mm; 1.8% of the surface is thinner than 0.8 mm (thinnest 0.02 mm, e.g. at [[74.5, -16.7, 45.3], [9.6, -12.5, 16.5], [9.6, -15.0, 15.0]])
+  WARN  leg-2: closed solid, 23557 mm³, 101.9 × 39.9 × 100.1 mm; 2.1% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[88.5, 36.1, 37.4], [74.0, 28.9, 68.0], [39.8, 0.5, 20.8]])
+  WARN  leg-3: closed solid, 23089 mm³, 74.0 × 67.4 × 100.1 mm; 1.5% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[33.5, 25.3, 17.3], [57.0, 47.9, 75.9], [14.0, 23.6, 13.9]])
+  WARN  leg-4: closed solid, 23470 mm³, 73.7 × 65.2 × 100.1 mm; 1.2% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[-56.4, -52.4, 45.7], [-9.6, -29.5, 15.8], [-76.4, -59.4, 36.9]])
+  WARN  leg-5: closed solid, 23537 mm³, 101.5 × 35.1 × 100.1 mm; 1.8% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[-71.5, -13.9, 73.4], [-10.4, -11.7, 16.9], [-24.6, -13.3, 31.7]])
+  WARN  leg-6: closed solid, 23557 mm³, 101.9 × 39.9 × 100.1 mm; 1.7% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[-94.1, 37.1, 35.2], [-73.5, 14.3, 69.7], [-72.1, 27.8, 70.3]])
+  WARN  leg-7: closed solid, 23089 mm³, 74.0 × 67.4 × 100.1 mm; 1.4% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[-55.6, 48.4, 72.8], [-9.8, 25.3, 19.7], [-9.7, 19.5, 15.4]])
   ok    spine: closed solid, 3274 mm³, 8.8 × 61.9 × 21.1 mm; walls ≥ 0.8 mm
-  ok    crank-1: closed solid, 718 mm³, 11.5 × 12.5 × 27.6 mm; walls ≥ 0.8 mm
-  ok    crank-2: closed solid, 723 mm³, 12.0 × 12.5 × 27.6 mm; walls ≥ 0.8 mm
-  ok    crank-3: closed solid, 725 mm³, 11.8 × 12.5 × 27.6 mm; walls ≥ 0.8 mm
-  ok    crank-4: closed solid, 710 mm³, 11.9 × 12.5 × 27.6 mm; walls ≥ 0.8 mm
+  ok    crank-1: closed solid, 735 mm³, 11.5 × 12.5 × 27.6 mm; walls ≥ 0.8 mm
+  ok    crank-2: closed solid, 737 mm³, 12.0 × 12.5 × 27.6 mm; walls ≥ 0.8 mm
+  ok    crank-3: closed solid, 737 mm³, 11.8 × 12.5 × 27.6 mm; walls ≥ 0.8 mm
+  ok    crank-4: closed solid, 731 mm³, 11.9 × 12.5 × 27.6 mm; walls ≥ 0.8 mm
   ok    idler-1: closed solid, 246 mm³, 12.0 × 11.8 × 3.9 mm; walls ≥ 0.8 mm
   ok    idler-2: closed solid, 246 mm³, 11.7 × 12.0 × 3.9 mm; walls ≥ 0.8 mm
   ok    idler-3: closed solid, 246 mm³, 11.7 × 12.0 × 3.9 mm; walls ≥ 0.8 mm
@@ -29,11 +29,8 @@ cad_verify: FAIL (30 failures, 74 warnings)
 
 == 2 motion: overlaps and gaps at every step   3 gears: backlash
   ok    no undeclared overlaps over 24 steps
-        1945 pair positions computed, 3509 repeats reused
-        swept envelopes (still part × moving part): 69 pairs clear at every step in one query each, 1 closer (gaps step by step, no overlap); scanned step by step: 0 overlapping or touching, 46 close last time, 0 close at their first step; 274 never near, 1 declared contacts skipped; 66 envelope results from the cache
-  FAIL  body × leg-4: gap 0.04 mm < 0.5 (at 15)
-  FAIL  leg-1 × transfer: gap 0.13 mm < 0.5 (at 19)
-  FAIL  body × leg-1: gap 0.13 mm < 0.5 (at 21)
+        1971 pair positions computed, 3673 repeats reused
+        swept envelopes (still part × moving part): 68 pairs clear at every step in one query each, 0 closer (gaps step by step, no overlap); scanned step by step: 0 overlapping or touching, 47 close last time, 0 close at their first step; 275 never near, 1 declared contacts skipped; 68 envelope results from the cache
         axle-3 × idler-3: gap 0.15 mm (closest at 21)
         transfer × transfer-pin: gap 0.15 mm (closest at 13)
         axle-1 × idler-1: gap 0.15 mm (closest at 23)
@@ -43,7 +40,6 @@ cad_verify: FAIL (30 failures, 74 warnings)
         holder-screw × journal-cap: gap 0.15 mm (closest at 0)
         cell-holder × nickel-strip: gap 0.15 mm (closest at 0)
         cell-lid × nickel-strip: gap 0.15 mm (closest at 0)
-  FAIL  body × leg-0: gap 0.17 mm < 0.5 (at 10)
         ag13-cells × cell-lid: gap 0.17 mm (closest at 0)
   WARN  body × ss12d00-switch: gap 0.20 mm < 0.2 (at 0): coarse, fixed parts with no fit, within 0.4
         body × leds: gap 0.20 mm (closest at 0)
@@ -51,6 +47,8 @@ cad_verify: FAIL (30 failures, 74 warnings)
         crank-3 × motor-u: gap 0.20 mm (closest at 14)
         crank-2 × motor-u: gap 0.20 mm (closest at 10)
         crank-1 × motor-u: gap 0.20 mm (closest at 22)
+  FAIL  body × leg-0: gap 0.22 mm < 0.5 (at 9)
+  FAIL  body × leg-4: gap 0.23 mm < 0.5 (at 14)
         crank-1 × spine: gap 0.24 mm (closest at 0)
         crank-4 × spine: gap 0.24 mm (closest at 0)
         crank-2 × spine: gap 0.24 mm (closest at 0)
@@ -59,12 +57,8 @@ cad_verify: FAIL (30 failures, 74 warnings)
         crank-4 × journal-cap: gap 0.25 mm (closest at 16)
         crank-2 × journal-cap: gap 0.25 mm (closest at 12)
         crank-3 × journal-cap: gap 0.25 mm (closest at 12)
-  FAIL  body × leg-7: gap 0.34 mm < 0.5 (at 7)
-  FAIL  leg-0 × leg-1: gap 0.36 mm < 0.5 (at 12)
-  FAIL  leg-4 × leg-5: gap 0.36 mm < 0.5 (at 0)
-  FAIL  body × leg-6: gap 0.39 mm < 0.5 (at 14)
+  FAIL  body × leg-7: gap 0.29 mm < 0.5 (at 9)
         idler-1 × journal-cap: gap 0.40 mm (closest at 15)
-  FAIL  body × leg-2: gap 0.41 mm < 0.5 (at 2)
         idler-1 × spine: gap 0.45 mm (closest at 0)
         idler-2 × spine: gap 0.45 mm (closest at 0)
         idler-3 × spine: gap 0.45 mm (closest at 0)
@@ -74,23 +68,29 @@ cad_verify: FAIL (30 failures, 74 warnings)
         journal-cap × transfer: gap 0.45 mm (closest at 0)
         motor-u × transfer: gap 0.45 mm (closest at 0)
         pinion × transfer-cheek: gap 0.45 mm (closest at 8)
-  FAIL  body × leg-3: gap 0.46 mm < 0.5 (at 4)
-        base × leg-4: gap 0.50 mm (closest at 7)
-        body × leg-5: gap 0.50 mm (closest at 10)
-        base × leg-0: gap 0.51 mm (closest at 19)
-        leg-1 × leg-2: gap 0.55 mm (closest at 0)
-        leg-5 × leg-6: gap 0.55 mm (closest at 12)
+        body × leg-6: gap 0.54 mm (closest at 15)
+        leg-1 × transfer: gap 0.59 mm (closest at 19)
+        leg-0 × leg-1: gap 0.60 mm (closest at 12)
+        leg-4 × leg-5: gap 0.60 mm (closest at 0)
         base × leg-3: gap 0.60 mm (closest at 0)
         base × leg-7: gap 0.60 mm (closest at 12)
         leds × transfer-cheek: gap 0.61 mm (closest at 0)
+        body × leg-2: gap 0.62 mm (closest at 7)
+        body × leg-1: gap 0.63 mm (closest at 20)
+        body × leg-3: gap 0.64 mm (closest at 7)
+        body × leg-5: gap 0.65 mm (closest at 20)
         transfer-cheek × transfer-pin: gap 0.67 mm (closest at 0)
-        axle-3 × leg-7: gap 0.77 mm (closest at 3)
+        base × leg-2: gap 0.75 mm (closest at 18)
         transfer × transfer-cheek: gap 0.80 mm (closest at 0)
         motor-u × pinion: gap 0.80 mm (closest at 0)
-        base × leg-2: gap 0.83 mm (closest at 19)
-        base × leg-1: gap 0.86 mm (closest at 6)
-        axle-1 × leg-5: gap 0.96 mm (closest at 4)
+        leg-1 × leg-2: gap 0.80 mm (closest at 0)
+        leg-5 × leg-6: gap 0.80 mm (closest at 12)
+        base × leg-1: gap 0.82 mm (closest at 7)
+        base × leg-5: gap 0.84 mm (closest at 20)
+        base × leg-6: gap 0.85 mm (closest at 5)
         journal-cap × transfer-pin: gap 0.98 mm (closest at 0)
+        base × leg-0: gap 0.98 mm (closest at 16)
+        base × leg-4: gap 0.99 mm (closest at 8)
         axle-1 × crank-1: gap 0.99 mm (closest at 22)
         axle-1 × crank-2: gap 0.99 mm (closest at 2)
         axle-2 × crank-2: gap 1.00 mm (closest at 10)
@@ -143,14 +143,14 @@ cad_verify: FAIL (30 failures, 74 warnings)
 
 == 4 retention: can a part fall, lift or tip out?
   ok    body: held within 0.6 mm / 5.0° (free: )
-  FAIL  leg-0 is not held: moves 1.65+ mm towards -X (at 0)
-  FAIL  leg-1 is not held: moves 1.25+ mm towards -X (at 8)
-  ok    leg-2: held within 1.25 mm / 5.0° (free: )
-  ok    leg-3: held within 1.65 mm / 5.0° (free: )
-  ok    leg-4: held within 1.65 mm / 5.0° (free: )
-  FAIL  leg-5 is not held: moves 1.25+ mm towards +X (at 0)
-  FAIL  leg-6 is not held: moves 1.25+ mm towards -X (at 16)
-  FAIL  leg-7 is not held: moves 1.65+ mm towards +X (at 0)
+  ok    leg-0: held within 1.0 mm / 5.0° (free: )
+  ok    leg-1: held within 1.0 mm / 5.0° (free: )
+  ok    leg-2: held within 1.0 mm / 5.0° (free: )
+  ok    leg-3: held within 1.0 mm / 5.0° (free: )
+  ok    leg-4: held within 1.0 mm / 5.0° (free: )
+  ok    leg-5: held within 1.0 mm / 5.0° (free: )
+  ok    leg-6: held within 1.0 mm / 5.0° (free: )
+  ok    leg-7: held within 1.0 mm / 5.0° (free: )
   ok    spine: held within 0.3 mm / 5.0° (free: )
   ok    crank-1: held within 0.6 mm / 5.0° (free: spin)
   ok    crank-2: held within 0.6 mm / 5.0° (free: spin)
@@ -215,7 +215,7 @@ cad_verify: FAIL (30 failures, 74 warnings)
         leg-6: not checked against crank-3 (the snap bead flexes over the pin tip (slit, fits.PRESS, coupon c1))
   ok    leg-7 goes in: down 30 mm, then +X-Y-Z 6.6 mm (machine at step 0)
         leg-7: not checked against crank-4 (the snap bead flexes over the pin tip (slit, fits.PRESS, coupon c1))
-  FAIL  leg-0 cannot go in: down 30 mm, then -X-Y-Z 6.6 mm (machine at step 12): blocked on move 2 at 1.36 mm
+  ok    leg-0 goes in: down 30 mm, then -X-Y-Z 6.6 mm (machine at step 12)
         leg-0: not checked against crank-1 (the snap bead flexes over the pin tip (slit, fits.PRESS, coupon c1))
   ok    leg-3 goes in: down 30 mm, then -X-Y-Z 6.6 mm (machine at step 12)
         leg-3: not checked against crank-4 (the snap bead flexes over the pin tip (slit, fits.PRESS, coupon c1))
@@ -238,41 +238,37 @@ cad_verify: FAIL (30 failures, 74 warnings)
   ok    body + ss12d00-switch + leds (as one body) goes in from +Z (machine at step 12)
 
 == 6 print (overhangs over 45°, in print orientation)
-  WARN  base: upright feature thinner than Ø4 (0.6 mm² section) from z 17.6 to 23.2 at [45.1, -16.8] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  base: upright feature thinner than Ø4 (0.6 mm² section) from z 17.2 to 22.8 at [-45.1, -16.6] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  base: upright feature thinner than Ø4 (0.7 mm² section) from z 14.4 to 17.2 at [-46.4, -0.6] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  base: 6573 mm² of overhang needing support, 103 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-12.1, 32.6, 23.7] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  body: upright feature thinner than Ø4 (0.0 mm² section) from z -28.5 to -25.3 at [-25.0, 17.8] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  body: upright feature thinner than Ø4 (0.0 mm² section) from z -28.1 to -25.3 at [25.0, 17.8] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  base: upright feature thinner than Ø4 (0.1 mm² section) from z 15.2 to 19.6 at [48.2, -1.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  base: upright feature thinner than Ø4 (0.1 mm² section) from z 17.2 to 23.6 at [45.1, -16.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  base: upright feature thinner than Ø4 (0.1 mm² section) from z 24.0 to 26.4 at [30.3, 35.3] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  base: 6615 mm² of overhang needing support, 103 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-12.1, 32.6, 23.7] in print orientation): open it, split the part, or give the reason in the design review
   WARN  body: upright feature thinner than Ø4 (0.0 mm² section) from z -23.3 to -20.5 at [-12.2, 45.0] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  body: 9338 mm² of overhang needing support, 2339 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [0.3, 22.8, -67.0] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  leg-0: 406 mm² of overhang needing support, 78 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [58.3, -58.1, 68.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  body: upright feature thinner than Ø4 (0.0 mm² section) from z -23.3 to -20.5 at [12.2, 45.0] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  body: upright feature thinner than Ø4 (0.2 mm² section) from z -28.9 to -25.3 at [25.1, 18.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  body: 9326 mm² of overhang needing support, 2339 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [0.3, 22.8, -67.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-0: 395 mm² of overhang needing support, 76 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [58.3, -58.1, 68.0] in print orientation): open it, split the part, or give the reason in the design review
   WARN  leg-1: upright feature thinner than Ø4 (1.4 mm² section) from z 22.8 to 31.6 at [24.7, -12.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  leg-1: 410 mm² of overhang needing support, 74 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [80.0, -20.6, 68.1] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-1: 396 mm² of overhang needing support, 69 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [80.0, -20.6, 68.1] in print orientation): open it, split the part, or give the reason in the design review
   WARN  leg-2: upright feature thinner than Ø4 (0.1 mm² section) from z 22.8 to 32.4 at [24.4, 4.6] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  leg-2: 377 mm² of overhang needing support, 69 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [79.3, 20.5, 67.6] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  leg-3: 370 mm² of overhang needing support, 74 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [57.2, 59.8, 68.5] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  leg-4: 406 mm² of overhang needing support, 78 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-58.3, -58.1, 68.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-2: 364 mm² of overhang needing support, 60 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [79.3, 20.5, 67.6] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-3: 358 mm² of overhang needing support, 68 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [57.2, 59.8, 68.5] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-4: 395 mm² of overhang needing support, 76 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-58.3, -58.1, 68.0] in print orientation): open it, split the part, or give the reason in the design review
   WARN  leg-5: upright feature thinner than Ø4 (1.4 mm² section) from z 22.8 to 31.6 at [-24.7, -12.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  leg-5: 410 mm² of overhang needing support, 74 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-80.0, -20.6, 68.1] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-5: 396 mm² of overhang needing support, 69 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-80.0, -20.6, 68.1] in print orientation): open it, split the part, or give the reason in the design review
   WARN  leg-6: upright feature thinner than Ø4 (0.1 mm² section) from z 22.8 to 32.4 at [-24.4, 4.6] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  leg-6: 377 mm² of overhang needing support, 69 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-79.3, 20.5, 67.6] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  leg-7: 370 mm² of overhang needing support, 74 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-57.2, 59.8, 68.5] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-6: 364 mm² of overhang needing support, 60 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-79.3, 20.5, 67.6] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-7: 358 mm² of overhang needing support, 68 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-57.2, 59.8, 68.5] in print orientation): open it, split the part, or give the reason in the design review
   WARN  spine: upright feature thinner than Ø4 (4.4 mm² section) from z 15.0 to 25.8 at [-3.4, 28.4] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
   WARN  spine: upright feature thinner than Ø4 (4.4 mm² section) from z 15.0 to 25.8 at [3.4, 28.4] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
   WARN  spine: upright feature thinner than Ø4 (4.4 mm² section) from z 15.0 to 25.8 at [-3.4, -31.3] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
   WARN  spine: 226 mm² of overhang needing support, 26 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [3.1, -18.3, 23.8] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  crank-1: upright feature thinner than Ø4 (6.4 mm² section) from z -11.0 to -8.2 at [-17.0, -24.5] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  crank-1: upright feature thinner than Ø4 (6.4 mm² section) from z 8.2 to 11.0 at [-17.0, -31.2] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crank-1: upright feature thinner than Ø4 (6.4 mm² section) from z -11.0 to -9.0 at [-17.0, -24.5] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crank-1: upright feature thinner than Ø4 (6.4 mm² section) from z 9.0 to 11.0 at [-17.0, -31.2] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
   WARN  crank-1: 137 mm² of overhang needing support, 63 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-19.6, -29.3, 4.6] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  crank-2: upright feature thinner than Ø4 (6.4 mm² section) from z 8.2 to 11.0 at [-17.0, -7.5] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  crank-2: upright feature thinner than Ø4 (6.4 mm² section) from z -11.0 to -8.2 at [-17.0, -14.2] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
   WARN  crank-2: 137 mm² of overhang needing support, 64 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-19.6, -9.4, 4.6] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  crank-3: upright feature thinner than Ø4 (6.4 mm² section) from z 9.0 to 11.4 at [-17.0, 3.0] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  crank-3: upright feature thinner than Ø4 (6.4 mm² section) from z -11.4 to -9.0 at [-17.0, 9.7] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
   WARN  crank-3: 137 mm² of overhang needing support, 65 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-19.6, 4.9, 4.6] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  crank-4: upright feature thinner than Ø4 (6.4 mm² section) from z 7.8 to 11.0 at [-17.0, 28.2] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  crank-4: upright feature thinner than Ø4 (6.4 mm² section) from z -11.0 to -7.8 at [-17.0, 21.6] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crank-4: upright feature thinner than Ø4 (6.4 mm² section) from z 9.0 to 11.0 at [-17.0, 28.2] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crank-4: upright feature thinner than Ø4 (6.4 mm² section) from z -11.0 to -9.0 at [-17.0, 21.6] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
   WARN  crank-4: 137 mm² of overhang needing support, 64 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-19.6, 26.3, 4.6] in print orientation): open it, split the part, or give the reason in the design review
         idler-1: no overhangs
         idler-2: no overhangs
@@ -316,19 +312,19 @@ cad_verify: FAIL (30 failures, 74 warnings)
 == 9 joints: every fit at least its measured clearance, at every step
   ok    body × base (front snap fingers under the ribs and rear tab (plan body-front-snaps, body-rear-tab)): ≥ 0.00 mm a side (fit 0.00, assumed)
   WARN  body × base: fit not measured yet (never printed: prove on a coupon): prove it on a coupon first
-  ok    leg-0 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.51 mm a side (fit 0.40, assumed)
+  ok    leg-0 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.98 mm a side (fit 0.40, assumed)
   WARN  leg-0 × base: fit not measured yet (Morante, 2026-11-23: «Se laxo con tolerancias muy pequeñas en sitios no críticos»; leg-3 cleared the base's neck window by 0.41 a side against LEG_PATH 0.5. Coupon in the robot's batch): prove it on a coupon first
-  ok    leg-1 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.86 mm a side (fit 0.40, assumed)
+  ok    leg-1 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.82 mm a side (fit 0.40, assumed)
   WARN  leg-1 × base: fit not measured yet (Morante, 2026-11-23: «Se laxo con tolerancias muy pequeñas en sitios no críticos»; leg-3 cleared the base's neck window by 0.41 a side against LEG_PATH 0.5. Coupon in the robot's batch): prove it on a coupon first
-  ok    leg-2 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.83 mm a side (fit 0.40, assumed)
+  ok    leg-2 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.75 mm a side (fit 0.40, assumed)
   WARN  leg-2 × base: fit not measured yet (Morante, 2026-11-23: «Se laxo con tolerancias muy pequeñas en sitios no críticos»; leg-3 cleared the base's neck window by 0.41 a side against LEG_PATH 0.5. Coupon in the robot's batch): prove it on a coupon first
   ok    leg-3 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.60 mm a side (fit 0.40, assumed)
   WARN  leg-3 × base: fit not measured yet (Morante, 2026-11-23: «Se laxo con tolerancias muy pequeñas en sitios no críticos»; leg-3 cleared the base's neck window by 0.41 a side against LEG_PATH 0.5. Coupon in the robot's batch): prove it on a coupon first
-  ok    leg-4 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.50 mm a side (fit 0.40, assumed)
+  ok    leg-4 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.99 mm a side (fit 0.40, assumed)
   WARN  leg-4 × base: fit not measured yet (Morante, 2026-11-23: «Se laxo con tolerancias muy pequeñas en sitios no críticos»; leg-3 cleared the base's neck window by 0.41 a side against LEG_PATH 0.5. Coupon in the robot's batch): prove it on a coupon first
-  ok    leg-5 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 1.12 mm a side (fit 0.40, assumed)
+  ok    leg-5 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.84 mm a side (fit 0.40, assumed)
   WARN  leg-5 × base: fit not measured yet (Morante, 2026-11-23: «Se laxo con tolerancias muy pequeñas en sitios no críticos»; leg-3 cleared the base's neck window by 0.41 a side against LEG_PATH 0.5. Coupon in the robot's batch): prove it on a coupon first
-  ok    leg-6 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 1.17 mm a side (fit 0.40, assumed)
+  ok    leg-6 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.85 mm a side (fit 0.40, assumed)
   WARN  leg-6 × base: fit not measured yet (Morante, 2026-11-23: «Se laxo con tolerancias muy pequeñas en sitios no críticos»; leg-3 cleared the base's neck window by 0.41 a side against LEG_PATH 0.5. Coupon in the robot's batch): prove it on a coupon first
   ok    leg-7 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.60 mm a side (fit 0.40, assumed)
   WARN  leg-7 × base: fit not measured yet (Morante, 2026-11-23: «Se laxo con tolerancias muy pequeñas en sitios no críticos»; leg-3 cleared the base's neck window by 0.41 a side against LEG_PATH 0.5. Coupon in the robot's batch): prove it on a coupon first
@@ -357,32 +353,32 @@ cad_verify: FAIL (30 failures, 74 warnings)
   WARN  cell-lid × cell-holder: fit not measured yet (never printed: prove on a coupon): prove it on a coupon first
   ok    ag13-cells × cell-holder (cells in their cradles (bought part in a printed seat)): ≥ 0.15 mm a side (fit 0.15, measured)
   ok    holder-screw × journal-cap (M3 tip through the cap's hole): ≥ 0.15 mm a side (fit 0.15, measured)
-  FAIL  leg-0 × crank-1 (leg pin in its bore and mouth on the web: a turning joint (fits.TURN)): 0.22 mm a side at 9, measured fit needs 0.25
-  FAIL  leg-1 × crank-2 (leg pin in its bore and mouth on the web: a turning joint (fits.TURN)): 0.22 mm a side at 21, measured fit needs 0.25
-  FAIL  leg-2 × crank-3 (leg pin in its bore and mouth on the web: a turning joint (fits.TURN)): 0.20 mm a side at 16, measured fit needs 0.25
-  ok    leg-3 × crank-4 (leg pin in its bore and mouth on the web: a turning joint (fits.TURN)): ≥ 0.20 mm a side (fit 0.18)
-  FAIL  leg-4 × crank-1 (leg pin in its bore and mouth on the web: a turning joint (fits.TURN)): 0.22 mm a side at 21, measured fit needs 0.25
-  FAIL  leg-5 × crank-2 (leg pin in its bore and mouth on the web: a turning joint (fits.TURN)): 0.22 mm a side at 9, measured fit needs 0.25
-  FAIL  leg-6 × crank-3 (leg pin in its bore and mouth on the web: a turning joint (fits.TURN)): 0.20 mm a side at 4, measured fit needs 0.25
-  ok    leg-7 × crank-4 (leg pin in its bore and mouth on the web: a turning joint (fits.TURN)): ≥ 0.20 mm a side (fit 0.18)
+  FAIL  leg-0 × crank-1 (leg pin in its bore and mouth on the web: a turning joint (fits.TURN)): 0.22 mm a side at 12, measured fit needs 0.25
+  FAIL  leg-1 × crank-2 (leg pin in its bore and mouth on the web: a turning joint (fits.TURN)): 0.23 mm a side at 0, measured fit needs 0.25
+  FAIL  leg-2 × crank-3 (leg pin in its bore and mouth on the web: a turning joint (fits.TURN)): 0.23 mm a side at 12, measured fit needs 0.25
+  ok    leg-3 × crank-4 (leg pin in its bore and mouth on the web: a turning joint (fits.TURN)): ≥ 0.21 mm a side (fit 0.18)
+  FAIL  leg-4 × crank-1 (leg pin in its bore and mouth on the web: a turning joint (fits.TURN)): 0.22 mm a side at 0, measured fit needs 0.25
+  FAIL  leg-5 × crank-2 (leg pin in its bore and mouth on the web: a turning joint (fits.TURN)): 0.23 mm a side at 12, measured fit needs 0.25
+  FAIL  leg-6 × crank-3 (leg pin in its bore and mouth on the web: a turning joint (fits.TURN)): 0.23 mm a side at 0, measured fit needs 0.25
+  ok    leg-7 × crank-4 (leg pin in its bore and mouth on the web: a turning joint (fits.TURN)): ≥ 0.21 mm a side (fit 0.18)
 
 == 9b junction sections: no thin plane through a neck
   ok    leg-0: thinnest plane 35.3 mm2 at s 15.98 (>= 15.0; s 4.48..16.18): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
-  ok    leg-0: thinnest plane 56.9 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
+  ok    leg-0: thinnest plane 51.4 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
   ok    leg-1: thinnest plane 35.3 mm2 at s 16.18 (>= 15.0; s 4.43..16.18): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
-  ok    leg-1: thinnest plane 51.2 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
+  ok    leg-1: thinnest plane 46.6 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
   ok    leg-2: thinnest plane 35.6 mm2 at s 16.18 (>= 15.0; s 4.43..16.18): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
-  ok    leg-2: thinnest plane 46.8 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
+  ok    leg-2: thinnest plane 42.9 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
   ok    leg-3: thinnest plane 35.3 mm2 at s 16.09 (>= 15.0; s 4.59..16.18): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
-  ok    leg-3: thinnest plane 64.9 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
+  ok    leg-3: thinnest plane 58.3 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
   ok    leg-4: thinnest plane 35.3 mm2 at s 15.98 (>= 15.0; s 4.48..16.18): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
-  ok    leg-4: thinnest plane 56.9 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
+  ok    leg-4: thinnest plane 51.4 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
   ok    leg-5: thinnest plane 35.3 mm2 at s 16.18 (>= 15.0; s 4.43..16.18): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
-  ok    leg-5: thinnest plane 51.2 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
+  ok    leg-5: thinnest plane 46.6 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
   ok    leg-6: thinnest plane 35.6 mm2 at s 16.18 (>= 15.0; s 4.43..16.18): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
-  ok    leg-6: thinnest plane 46.8 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
+  ok    leg-6: thinnest plane 42.9 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
   ok    leg-7: thinnest plane 35.3 mm2 at s 16.09 (>= 15.0; s 4.59..16.18): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
-  ok    leg-7: thinnest plane 64.9 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
+  ok    leg-7: thinnest plane 58.3 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
 
 == 10 marks: can each part that must be lined up be lined up?
   ok    crank-1: number 1 engraved (≈ 3 mm high, 0.5 deep) on the +x web hub (which crank, which end right); its gear is printed at its phase: set at crank pose 0
@@ -421,72 +417,72 @@ cad_verify: FAIL (30 failures, 74 warnings)
   ok    idler-3: no mark feature (any tooth: the cranks' phases are printed in their gears, the idler meshes as it drops in at pose 0)
   ok    transfer: no mark feature (any tooth (meshes idler 2 and the pinion as it goes in))
   ok    pinion: no mark feature (any tooth)
-  WARN  spine: 0.6% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.32, e.g. at [-0.0, 5.8, 5.3] (≤ 1%: edges or a few samples; look at it)
-  WARN  crank-1: 0.2% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.33, e.g. at [6.4, -27.0, 19.8] (≤ 1%: edges or a few samples; look at it)
-  WARN  crank-2: 0.7% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.34, e.g. at [6.2, -12.5, 14.6] (≤ 1%: edges or a few samples; look at it)
-  WARN  crank-3: 0.8% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.40, e.g. at [6.2, 6.7, 14.1] (≤ 1%: edges or a few samples; look at it)
-  WARN  crank-4: 0.5% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.42, e.g. at [6.2, 25.2, 14.1] (≤ 1%: edges or a few samples; look at it)
+  WARN  spine: 0.6% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.32, e.g. at [0.0, 7.1, 6.0] (≤ 1%: edges or a few samples; look at it)
+  WARN  crank-1: 0.4% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.36, e.g. at [6.4, -26.7, 19.7] (≤ 1%: edges or a few samples; look at it)
+  WARN  crank-2: 0.7% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.21, e.g. at [6.5, -12.3, 14.4] (≤ 1%: edges or a few samples; look at it)
+  WARN  crank-3: 0.9% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.39, e.g. at [6.2, 6.6, 19.9] (≤ 1%: edges or a few samples; look at it)
+  WARN  crank-4: 0.2% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.42, e.g. at [6.2, 25.2, 14.1] (≤ 1%: edges or a few samples; look at it)
   ok    idler-1: walls ≥ 2.0 mm outside teeth and marks (thinnest 2.06)
   ok    idler-2: walls ≥ 2.0 mm outside teeth and marks (thinnest 2.06)
   ok    idler-3: walls ≥ 2.0 mm outside teeth and marks (thinnest 2.06)
   ok    transfer: walls ≥ 2.0 mm outside teeth and marks (thinnest 1.99)
-  WARN  journal-cap: 0.8% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.08, e.g. at [-4.4, 15.7, 17.4] (≤ 1%: edges or a few samples; look at it)
-  WARN  motor-u: 0.3% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.26, e.g. at [-3.7, -6.0, 30.9] (≤ 1%: edges or a few samples; look at it)
-  WARN  transfer-cheek: 0.5% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.60, e.g. at [-1.0, -15.2, 55.5] (≤ 1%: edges or a few samples; look at it)
+  WARN  journal-cap: 0.7% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.31, e.g. at [-6.0, 16.0, 17.4] (≤ 1%: edges or a few samples; look at it)
+  WARN  motor-u: 0.4% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.23, e.g. at [-3.7, -5.8, 30.9] (≤ 1%: edges or a few samples; look at it)
+  WARN  transfer-cheek: 0.4% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.61, e.g. at [-1.2, -15.2, 54.9] (≤ 1%: edges or a few samples; look at it)
   ok    pinion: walls ≥ 2.0 mm outside teeth and marks (thinnest 4.22)
         leg-0: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-0: 94.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+        leg-0: 95.1% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-0: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-0: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-0: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-0: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-  FAIL  leg-0: 64.1% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.01, e.g. at [15.5, -34.8, 14.0]: it snaps when handled
+  FAIL  leg-0: 43.4% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.03, e.g. at [13.9, -35.9, 14.3]: it snaps when handled
         leg-1: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-1: 94.7% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-1: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-1: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+        leg-1: 95.6% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-1: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-1: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-  FAIL  leg-1: 62.2% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.07, e.g. at [10.6, -9.2, 17.3]: it snaps when handled
+        leg-1: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+        leg-1: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+  FAIL  leg-1: 35.0% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.06, e.g. at [9.6, -15.7, 15.9]: it snaps when handled
         leg-2: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-2: 94.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+        leg-2: 95.2% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-2: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-2: 1.6% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+        leg-2: 1.5% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-2: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-2: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-  FAIL  leg-2: 64.7% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.03, e.g. at [10.8, 2.6, 21.9]: it snaps when handled
+  FAIL  leg-2: 32.7% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.11, e.g. at [9.6, 4.6, 16.2]: it snaps when handled
         leg-3: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-3: 93.7% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-3: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-3: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+        leg-3: 94.5% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-3: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-3: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-  FAIL  leg-3: 64.0% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.09, e.g. at [15.1, 21.1, 12.8]: it snaps when handled
-        leg-4: 93.9% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+        leg-3: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+        leg-3: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+  FAIL  leg-3: 50.8% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.17, e.g. at [12.9, 22.9, 11.8]: it snaps when handled
+        leg-4: 94.9% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-4: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-4: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-4: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-4: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-4: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-  FAIL  leg-4: 62.1% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.02, e.g. at [-11.0, -32.2, 21.8]: it snaps when handled
-        leg-5: 94.5% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+  FAIL  leg-4: 45.9% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.03, e.g. at [-10.7, -31.1, 21.9]: it snaps when handled
+        leg-5: 95.2% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-5: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-5: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-5: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-5: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-5: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-  FAIL  leg-5: 63.1% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.06, e.g. at [-15.3, -17.4, 14.0]: it snaps when handled
-        leg-6: 94.6% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+  FAIL  leg-5: 31.7% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.06, e.g. at [-9.6, -16.2, 16.0]: it snaps when handled
+        leg-6: 95.7% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-6: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-6: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-6: 1.5% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+        leg-6: 1.3% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-6: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-6: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-  FAIL  leg-6: 63.0% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.01, e.g. at [-11.0, 1.1, 21.5]: it snaps when handled
-        leg-7: 93.3% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+  FAIL  leg-6: 32.8% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.14, e.g. at [-14.0, 3.0, 13.7]: it snaps when handled
+        leg-7: 94.5% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-7: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-7: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-7: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-7: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-7: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-  FAIL  leg-7: 64.3% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.03, e.g. at [-12.1, 17.7, 13.8]: it snaps when handled
+  FAIL  leg-7: 49.4% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.02, e.g. at [-14.2, 23.9, 14.0]: it snaps when handled

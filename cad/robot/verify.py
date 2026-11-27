@@ -29,15 +29,11 @@ def poses(t):
     return out
 
 UP = [0, 0, 1]
+PLAY = 1.0
 RETAIN = {"body": {"spin": None, "slide": None, "play": 0.6},          # two front snap hooks under the ribs + rear tab
-          **{n: {"spin": None, "slide": None, "play": 1.25} for n in LEGS}}  # snap bead in the pin's groove + window + body rim
-# the corner legs 0, 3 and their mirrors 4, 7 slide up to 1.40 / 1.50 mm towards their crank (0 and 7 at pose 0-7,
-# 4 at pose 10, 3 at pose 12; measured at all 24 poses 2026-11-23: only the groove stops them since the base front is
-# smooth): accepted by Morante 2026-11-23 («Aceptar 1,6 mm hacia dentro»); outward every leg stays <= 1.15 mm
-for _n in ("leg-0", "leg-3", "leg-4", "leg-7"):
-    RETAIN[_n]["play"] = 1.65
-# legs' play 1.25, not 1.0 (Morante, 2026-11-23): the groove lets the bead travel 1.4-1.7 mm over the 24 poses (tube
-# tilt + axial drift), so a leg rides up to 1.0 mm along its pin; inward it cannot come off, outward it stays <= 0.75
+          **{n: {"spin": None, "slide": None, "play": PLAY} for n in LEGS}}  # snap bead in the pin's groove + window + body rim
+# option D (the leg rides with its pin point on the crank pin, groove = the bead's sweep + 2 x TURN): the legs' play is what retention measures,
+# PLAY mm along the pin (was 1.25, 1.65 on the corner legs 0, 3, 4, 7 while the leg slid 1.4-1.7 mm along it)
 ALLOWED_CONTACT = {("body", "base"): "body rim seated on the base ledge; snap hooks under the front ribs (fits.PRESS, coupon c1)"}
 JOINTS = {("body", "base"): {"fit": fits.PRESS, "why": "front snap fingers under the ribs and rear tab (plan body-front-snaps, body-rear-tab)"},
           **{(n, "base"): {"fit": fits.LEG_OPEN, "why": "leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)"} for n in LEGS}}
@@ -73,7 +69,7 @@ def _junction_sections():
         sa = (tip - A0[0]) / u[0]
         out.append({"part": n, "origin": [float(v) for v in A0m], "axis": [float(v) for v in um], "s0": float(sa), "s1": float(SH.HUBCUT - 0.25),
                     "min": 15.0, "why": "tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)"})
-        out.append({"part": n, "origin": [float(sx * (SH.P["XC"] + SH.CL.PINX + SH.SNAP_END + 0.1)), float(A0[1]), float(A0[2])], "axis": [sx, 0.0, 0.0],
+        out.append({"part": n, "origin": [float(sx * (SH.TUBE_X1[k % 4] + 0.1)), float(A0[1]), float(A0[2])], "axis": [sx, 0.0, 0.0],
                     "s0": 0.0, "s1": float(SH.SNAP_WALL - 0.2), "min": 15.0, "why": "the tube's closed end wall and the rod running into it"})
     return out
 SECTION_MIN = _junction_sections()
@@ -126,8 +122,8 @@ def _leg_except():
     for k, n in enumerate(LEGS):
         P_, A0, *_ = motion.neutral_leg(k % 4, SH.P, n=13)
         sx = 1.0 if k < 4 else -1.0
-        x0 = A0[0] - SH.CL.TAIL; xe = SH.P["XC"] + SH.CL.PINX + SH.SNAP_END + SH.SNAP_WALL
-        r = SH.END_R + (xe - A0[0]) * math.tan(math.radians(SH.FLARE_DEG[k % 4])) + max(SH.BORE_DRIFT) + 1.0
+        x0 = A0[0] - SH.CL.TAIL; xe = SH.TUBE_X1[k % 4] + SH.SNAP_WALL
+        r = SH.END_RS[k % 4] + (xe - A0[0]) * math.tan(math.radians(SH.FLARE_DEG[k % 4])) + 1.0
         xa, xb = sorted((sx * (x0 - 1.0), sx * (xe + 1.0)))
         ya, yb, za, zb = float(A0[1] - r), float(A0[1] + r), float(A0[2] - r), float(A0[2] + r)
         why = "leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked"
