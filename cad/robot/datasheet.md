@@ -63,7 +63,7 @@ throw 3.3 mm, so lifting the whole weight needs ≈ 0.09 kg·cm: the motor bough
 torque never measured; seller's datasheet before buying). Body build 41–47 s cold (over 40 s). Count for phase 3: 27
 printed parts, 14 hardware entries, 37 assembly steps. Sections: `cad/robot/images/phase2/` (not committed).
 
-**Next session (Morante opens it): the other phase 3 items; the leg ↔ crank joint is parked.** Branch `phase3-s1`.
+**Leg ↔ crank joint reopened by Morante (2026-11-27, second session): measure only, see «Next» below.** Branch `phase3-s1`.
 Morante, 2026-11-27: «Deje este tema para resolverlo más adelante y vamos a seguir abordando otras cosas que haya
 pendiente». Do not reopen the joint unless he does.
 
@@ -90,10 +90,8 @@ spine keel pilots stop at z 8.2 (2.16 mm left), keel screws M3×6 → **M3×5**;
 clean rebuild: **10 FAIL, all on the legs** (body/transfer gaps 0.04–0.17 < 0.2, legs 0, 1, 5, 6, 7 not held, leg-0
 path), i.e. the parked joint. Before this, `out/` mixed the joint branch's legs and base with this branch's parts:
 rebuild everything (`build.py`) after switching branches.
-*Still open, not about the joint:* transfer-cheek sliver at the strap tip (now a WARN); body cold build 45 s and the
-full check 59 s (over 40 s); base loose pieces at the front rim (the clean build gives 1 solid: recheck); checks that
-ask more than their fit (above). Then the
-full `cad_verify`, coupons (c5: transfer centre distance through 3 screwed parts), plates, kit.
+*Done 2026-11-27 (second session), not the joint:* checks ask their pair's fit (`verify.py` end block): leg ↔ own crank a JOINTS row at fits.TURN (crank-4 / legs 3, 7 keep the accepted 0.18); leg ↔ every other part LEG_PATH 0.5 (base stays LEG_OPEN); legs in MINIMUMS at WALL_MIN, only the end tube asked (except boxes = the complement of a tube box; the rest is jenscolt's looks). `wall_frac` stays 0.01 (0 failed every edge and tip). Transfer-cheek strap ends square, `STRAP_TIP_W` 2.4 (was a 50° wedge, wall 0.00). Base: one solid. Motor picked: N10 07 type 100:1 (`hardware.md`). **Full check: 30 FAIL, all the legs** — (i) leg ↔ crank TURN 0.20–0.22 on legs 0, 1, 2, 4, 5, 6; (ii) LEG_PATH 0.5: body ↔ legs 0.04–0.46 (legs 0, 1, 2, 3, 4, 6, 7), leg-1 ↔ transfer 0.13, legs 0↔1 and 4↔5 0.36; (iii) tube walls 1.65–1.82, slit / bead edges near 0 (8 legs); (iv) legs 0, 1, 5, 6, 7 not held, leg-0 cannot go in. Interior WARNs located: spine (keel pilot chord), cranks (engraving floor), journal cap (sloped face): noise; motor-u 1.24 floor under a blind hole, 0.2 %, not identified. Full check now 95 s (over 60).
+*Next: the joint, measure only* (two fixes failed): one probe maps every neighbour of each leg's tube over 24 poses and ranks options (A, B, C, new) that clear all 30 at once; Morante picks, then one fixer.
 *Done in phase 3 so far (2026-11-26/27), committed on the branch:* plan.json rewritten for S 1.0 (A + B + F, validate
 PASS, 24 steps); drive unit split into journal-cap 2.7 g, motor-u 3.4 g, transfer-cheek 1.3 g, flat, no support;
 sleeves gone; idlers and transfer on M3 shanks; **ISO 7380 M3 button heads** on axles 1–3 and the transfer axle M3×16

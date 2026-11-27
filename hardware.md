@@ -11,7 +11,7 @@ What to order: the count the robot uses and the count to order (screws +50 %, ce
 
 | Item | Uses | Order |
 |---|---|---|
-| N10 gear motor, 3 V, metal gearbox, Ø3 D-shaft (output ≈ 100–150 rpm at 3 V) | 1 | 2 |
+| N10 gear motor, 3 V, **07 type, 100:1** (low-current core), metal gearbox, Ø3 shaft | 1 | 2 |
 | AG13 / LR44 alkaline cells, Ø11.6 × 5.4 | 6 | 12 |
 | Conical springs, Ø7 at the base and Ø4 at the tip, 2.0 mm compressed | 3 | 6 |
 | Nickel strip, 0.3 mm thick (one 37 × 5.5 mm piece) | 1 piece | a strip of about 10 cm |
@@ -32,7 +32,7 @@ already in the kit. **Where used**: the file that holds the count.
 
 | Item | Size | Count | Where used | Have | Source |
 |---|---|---|---|---|---|
-| Gear motor | N10, 3 V, metal gearbox, Ø3 D-shaft, 12 × 10 × 21 mm; output ≈ 100–150 rpm (the crank turns 1:1 with the shaft: 12/15 × 20/16 teeth) | 1 | `drive.py` (`N10_W/H/L`, `RATIO`), `drive_verify.py` (`n10-motor`) | ? | To buy |
+| Gear motor | N10, 3 V, **07 type, 100:1** (Morante, 2026-11-27), metal gearbox, Ø3 × 10 shaft (D-cut and body size to measure on arrival; modelled 12 × 10 × 21 mm). Seller's datasheet at 3 V: no load 95 rpm ≤ 0.05 A, rated 63 rpm 0.2 kg·cm ≤ 0.11 A, stall ≥ 0.4 kg·cm ≤ 0.25 A. Picked over the 92 type (0.42 A rated) because the AG13 cells are rated for mA-level drain (VARTA V13GA: 130 mAh at 6.8 kΩ): at the robot's ≈ 0.09 kg·cm it draws ≈ 0.1 A (≈ 33 mA a cell) at ≈ 70 rpm, estimated, not measured. The crank turns ≈ 1:1 with the shaft | 1 | `drive.py` (`N10_W/H/L`, `RATIO`), `drive_verify.py` (`n10-motor`) | ? | To buy |
 | Button cells | AG13 / LR44 alkaline, Ø11.6 × 5.4 mm | 6 (3 stacks of 2) | `power.py` (`cells`, `XS`) | ? | To buy |
 | Conical spring | Ø7 → Ø4, 2.0 mm compressed | 3 | `power.py` (`springs`, `SPR_R0`, `SPR_R1`) | ? | To buy |
 | Nickel strip | 0.3 thick, 37 wide, 5.5 long (cut piece) | 1 | `power.py` (`strip`, `STRIP_T`, `NSX`) | ? | To buy |

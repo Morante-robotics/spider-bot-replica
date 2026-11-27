@@ -100,3 +100,40 @@ if IV is not None:
 # Gap Morante accepted under 0.2 (2026-11-23): the snap bead against its groove's neck on crank 4 (0.19 at poses 19/7,
 # a turning part). The body's hairlines to the fixed parts inside are the coarse class now (cad_verify COARSE).
 PAIR_GAP = {**globals().get("PAIR_GAP", {}), ("crank-4", "leg-3"): 0.18, ("crank-4", "leg-7"): 0.18}
+
+
+# --- checks ask exactly their pair's fit (2026-11-27; datasheet «Parked: leg <-> crank joint») ---
+# (a) leg k turns on crank k%4+1: pin in its bore and the mouth against the web are a turning joint (fits.TURN): contact
+# is the joint, not MIN_GAP. Morante's accepted 0.18 on crank-4 / leg-3, 7 (above) stays the asked gap for those two.
+_ACCEPTED = {("crank-4", "leg-3"): 0.18, ("crank-4", "leg-7"): 0.18}
+for _k, _n in enumerate(LEGS):
+    _c = f"crank-{_k % 4 + 1}"
+    JOINTS[(_n, _c)] = {"fit": _ACCEPTED.get((_c, _n), fits.TURN), "why": "leg pin in its bore and mouth on the web: a turning joint (fits.TURN)"}
+    ALLOWED_CONTACT[(_n, _c)] = "turning joint: the JOINTS row asks its fit (fits.TURN), not MIN_GAP"
+# (b) a leg to every part it sweeps past (other legs, body, the interior; its own crank is the joint above, the base the
+# LEG_OPEN window in JOINTS): fits.LEG_PATH, not MIN_GAP
+for _n in LEGS:
+    for _m in PARTS:
+        if _m != _n and _m != "base" and not (_m.startswith("crank-") and (_n, _m) in JOINTS) and not PARTS[_m].get("hardware"):
+            PAIR_GAP.setdefault((_n, _m), fits.LEG_PATH.side)
+# (c) check 13 reads the legs' joint region only: the end tube and its closed end (bore, snap groove/bead, slit), boxed from
+# shells.py (x: tail .. closed end, radius END_R + flare, + 1 mm); the arms, claws and foot tips are the looks' shape (printed at 0.70).
+# Everything else of the leg is an except box (the complement of the tube box, in the leg's STL frame). The wall is fits.WALL_MIN.
+def _leg_except():
+    from cad import motion
+    import math
+    out, B = [], 300.0
+    for k, n in enumerate(LEGS):
+        P_, A0, *_ = motion.neutral_leg(k % 4, SH.P, n=13)
+        sx = 1.0 if k < 4 else -1.0
+        x0 = A0[0] - SH.CL.TAIL; xe = SH.P["XC"] + SH.CL.PINX + SH.SNAP_END + SH.SNAP_WALL
+        r = SH.END_R + (xe - A0[0]) * math.tan(math.radians(SH.FLARE_DEG[k % 4])) + max(SH.BORE_DRIFT) + 1.0
+        xa, xb = sorted((sx * (x0 - 1.0), sx * (xe + 1.0)))
+        ya, yb, za, zb = float(A0[1] - r), float(A0[1] + r), float(A0[2] - r), float(A0[2] + r)
+        why = "leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked"
+        for lo, hi in (([-B, -B, -B], [xa, B, B]), ([xb, -B, -B], [B, B, B]), ([xa, -B, -B], [xb, ya, B]),
+                       ([xa, yb, -B], [xb, B, B]), ([xa, ya, -B], [xb, yb, za]), ([xa, ya, zb], [xb, yb, B])):
+            out.append({"part": n, "box": [lo, hi], "why": why})
+    return out
+MINIMUMS = dict(MINIMUMS or {"module": 1.0, "mark": 3.0}, parts=list((MINIMUMS or {}).get("parts", [])) + LEGS, wall=fits.WALL_MIN,
+                **{"except": list((MINIMUMS or {}).get("except", [])) + _leg_except()})

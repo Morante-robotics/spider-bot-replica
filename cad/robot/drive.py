@@ -129,6 +129,7 @@ CH_Z0 = T[1] - IDLER_BORE - W - 1.0
 PIN_R_CUT = rt(ZP) + F.GEAR_TIP.side + MESH_TOL     # pinion's room under the strap
 STRAP_CUT_Y = MC[0] - math.sqrt(PIN_R_CUT ** 2 - (UZ1 - MC[1]) ** 2)   # strap's +y edge beside the pinion (square cut, no wedge)
 SLOPE = 1.2                                         # self-supporting growth: 1 mm sideways per 1.2 mm of height (40 deg)
+STRAP_TIP_W = F.WALL_MIN + 0.4                   # strap's square end is this wide where the 40 deg edge meets it
 STRAP_LIP_Y = MC[0] - N10_W / 2 + W                 # strap's +y edge at the U's end: 2 mm over the motor's -y top edge
 
 
@@ -359,7 +360,8 @@ def transfer_cheek():
     q = [box((x0, EARM_Y0, CH_Z0), (x1, CH_Y1, ZS1))]
     sp = Plane(origin=(0, 0, UZ1), x_dir=(1, 0, 0), z_dir=(0, 0, 1))
     y_end = min(UY1 - DU_W, STRAP_CUT_Y + (UX1 - LUG_X0) / SLOPE); xe = UX1 - (y_end - STRAP_CUT_Y) * SLOPE
-    poly = [(x0 + 0.01, EARM_Y0), (x0 + 0.01, STRAP_CUT_Y), (UX1, STRAP_CUT_Y), (xe, y_end)] + ([(LUG_X0, y_end)] if xe > LUG_X0 + 0.5 else []) + [(LUG_X0, EARM_Y0)]
+    y_sq = y_end - STRAP_TIP_W / SLOPE; xq = UX1 - (y_sq - STRAP_CUT_Y) * SLOPE      # square the tip: no wedge thinner than STRAP_TIP_W (was a 50 deg point)
+    poly = [(x0 + 0.01, EARM_Y0), (x0 + 0.01, STRAP_CUT_Y), (UX1, STRAP_CUT_Y), (xq, y_sq), (LUG_X0, y_sq), (LUG_X0, EARM_Y0)]
     q.append(extrude(sp * Polygon(*poly, align=None), amount=DU_W))
     ch = fuse(q)                                                                 # beside the pinion the strap stops at STRAP_CUT_Y; over the U its +y edge grows at 40 deg
     ch = ch - tear_hole("z", (STRAP_X, STRAP_Y), M3_HOLE_R, UZ1 - 1, ZS1 + 1, (-1, 0))
