@@ -45,8 +45,7 @@ class _Layout:
             if k in self.FIXED: continue
             setattr(self, k, max(F.WALL_MIN, getattr(self, k)) if k in self.WALLS else getattr(self, k) * FE.K)
         for k in self.DELETED: delattr(self, k)
-        self.TAIL_CUT = 1.5                # phase 3: the tube's mouth stops this much short of a wall's tail (tilt + axial drift put its rim 0.0-0.75 into the crank webs, n1 2026-11-27)
-        self.TAIL = self.W - self.TAIL_CUT  # tube face XC - TAIL (was XC - W)
+        self.TAIL = self.W                 # tube face XC - TAIL (the legs sit FE.XC_OUT further out instead of a cut mouth)
         TH = F.GEAR_THRUST_CRANK.side; wb1 = self.GW / 2 + TH + self.W + TH + self.WEB_T
         self.LSL = (P["XC"] + self.PINX) - wb1 + 1.0
 CL = None
@@ -60,16 +59,16 @@ BASE_WALL = FE.BASE_WALL_R              # mm robot: the base wall (BA.WALL x S, 
 RN, WR = CL.RN, CL.WR                   # window: neck within RN of the pivot, dilated WR (LEG_PATH + sampling)
 STRIP_X, STRIP_X2, STRIP_Y0, STRIP_Y1, STRIP_Z0, STRIP_Z1, STRIP_Z2 = (FE.K * v for v in (20.05, 19.25, 6.4, 12.8, 19.0, 23.65, 23.9))   # body strip under the cell holder, cut away
 def wr_of(Lg): return WR
-BRELD = F.LEG_PATH.side + 0.15   # body rim notch / eye-block pocket: the body inner face is pushed back to this from the legs' 24-pose sweep: LEG_PATH + 0.15 for the sample spacing and the coarse mesh (0.6 left 0.00-0.06 at legs 0/4; 0.75 and 0.85 gave an empty cutter outline)
+BRELD = F.LEG_PATH.side + 0.25   # body rim notch / eye-block pocket: the body inner face is pushed back to this from the legs' 24-pose sweep: LEG_PATH + 0.15 for the sample spacing and the coarse mesh (0.6 left 0.00-0.06 at legs 0/4; 0.75 and 0.85 gave an empty cutter outline)
 PKT = FE.PKT                            # back-sheet pocket (depth, |x|, z0, z1): spec back_sheet_pocket, derived from the legs' sweep at S 1.0
 SNX, SNW, SNT, SNZ, RIBD, SNG = CL.SNX, CL.SNW, CL.SNT, CL.SNZ, CL.RIBD, CL.SNG
 PINR = CL.PINR                          # printed crank pin r (Ø3)
-END_R = PINR + F.TURN.side + CL.W       # leg end tube: bore TURN over the pin, wall W 1.2
 # leg snap on the crank pin (option A, build-log N2 r00): a groove on the pin, a ring bead in the end tube's bore, an axial slit
 # in the tube so it opens over the pin tip. The snap fit is fits.PRESS (assumed): coupon list, not printed now.
 SNAP_NECK_R = 1.0 * FE.K                       # pin neck r in the groove (Ø2.0, brief: neck Ø >= 2.0)
 SNAP_BW = 0.5 * FE.K                           # bead width (axial)
-SNAP_END = 1.0 * FE.K                          # bore floor past XC+PINX: the old open mouth, kept (the pin tip is 0.5 inside it; the leg slides up to 1.5 towards its crank: a floor at TURN 0.25 overlapped crank x leg 0.22 mm3)
+SNAP_END_X = 0.4                               # phase 3: the pin tip met the bore floor (crank 4 x legs 3/7: 0.12 overlap, leg 0/4 x crank 1: 0.01): floor +0.4 = TURN 0.25 of clearance at the worst pose
+SNAP_END = 1.0 * FE.K + SNAP_END_X                          # bore floor past XC+PINX: the old open mouth, kept (the pin tip is 0.5 inside it; the leg slides up to 1.5 towards its crank: a floor at TURN 0.25 overlapped crank x leg 0.22 mm3)
 SNAP_WALL = F.WALL_MIN                         # solid end wall closing the tube beyond the bore floor: the neck rod runs into it (print 2026-11-24: the rod only butted the open rim, leg 3 snapped)
 SNAP_SLIT = 0.6 * FE.K                         # slit width (tangential)
 def snap_bead_r(i): return SNAP_NECK_R + F.TURN.side + BORE_DRIFT[i]       # bead inner r: turns on the neck (TURN), bore axis drift as the bore
@@ -146,6 +145,8 @@ def _leg_frame(Lg, k):
         Mx = np.diag([-1.0, 1, 1, 1]); T = Mx @ T @ Mx
     return T
 JOINT_R = 2.35 * FE.K            # mm, the neck between the end tube and the arm (was P["r_inner"] 1.8: leg-3 broke there, print 2026-11-24)
+JOINT_ARM_H = 10.0               # mm, the real arm's section height (legs 1-3: 6 wide x 10 tall; leg 0's arm is smaller)
+JOINT_DH = [0.7, JOINT_ARM_H / 2 - JOINT_R, JOINT_ARM_H / 2 - JOINT_R, 0.8]   # mm, per leg: the neck is taller than wide, half-height JOINT_R + DH (joint map 2026-11-27, gap - need above the neck: legs 0/4 0.72 to the body, legs 3/7 0.8 to the base, legs 1/2/5/6 >= 2.1: up to the arm's 10)
 JOINT_BLEND_DR, JOINT_BLEND_L = 1.0 * FE.K, 2.0 * FE.K     # mm, cone at the tube end of the neck: r +1 tapering over 2 mm
 def _leg_right(i):
     from build123d import Cone
@@ -172,25 +173,22 @@ def _leg_right(i):
         c1 = Pos(x0, A0[1], A0[2]) * Rot(0, 90, 0) * Cone(r + (xm - x0) * math.tan(th), r, xm - x0, align=(Align.CENTER, Align.CENTER, Align.MIN))
         c2 = Pos(xm, A0[1], A0[2]) * Rot(0, 90, 0) * Cone(r, r + (x1 - xm) * math.tan(th), x1 - xm, align=(Align.CENTER, Align.CENTER, Align.MIN))
         return c1 + c2
+    END_R = leg_end_r(i)
     tube = dcone(END_R, x1)                          # the flared tube up to the bore floor, then the end wall as a cylinder of the radius there (a longer cone grew into the next leg's tube: leg-1 x leg-2 gap 0.00)
     r1 = END_R + (x1 - xm) * math.tan(th)            # the end wall is a 45 deg chamfer from r1 down by SNAP_WALL: its rim stays off the base's wall at crank pose 19 (leg 0/4 gap 0.21 with a straight rim, 0.4 needed)
     tube = tube + Pos(x1, A0[1], A0[2]) * Rot(0, 90, 0) * Cone(r1, r1 - SNAP_WALL, SNAP_WALL, align=(Align.CENTER, Align.CENTER, Align.MIN))
     # phase 3 reliefs on the tube (n1 / leg_gaps 2026-11-27): the mouth's outer edge is chamfered (leg 1 x transfer touched it) and the
-    # lower half of the tube's outer cone is recessed from END_REL_X (the lowest point of the end met the base's bowl at crank pose 18,
-    # legs 0/4/3/7: gap 0.00-0.15, LEG_OPEN needs 0.40). Both only remove material on the side away from the arm / outside the tube.
+    # (the base gap comes from the mechanism's height, H_UP, not a recess).
     rf = END_R + (xm - x0) * math.tan(th)
     wedge = Pos(x0, A0[1], A0[2]) * Rot(0, 90, 0) * (Cylinder(rf + 1.5, FACE_CHAMFER + 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
                                                       - Cone(rf - FACE_CHAMFER, rf + 1.0, FACE_CHAMFER + 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN)))
-    xr = x1 - END_REL_X; hr = xe - xr
-    r0 = END_R + (xr - xm) * math.tan(th) - END_REL_DR
-    rel = Pos(xr, A0[1], A0[2]) * Rot(0, 90, 0) * (Cylinder(r0 + 1.5, hr, align=(Align.CENTER, Align.CENTER, Align.MIN))
-                                                    - Cone(r0, r0 - END_REL_SLOPE * hr, hr, align=(Align.CENTER, Align.CENTER, Align.MIN)))
-    below = Pos(xr + hr / 2, A0[1], A0[2] - 3.0 - 10.0) * Box(hr + 2.0, 40.0, 20.0)         # z < axis - 3: the lowest bit of the tube, clear of the arm rod (its underside is at axis - 2.4 there)
-    tube = tube - wedge - (rel & below)
+    tube = tube - wedge
     bore = Pos(-0.01, 0, 0) * dcone(PINR + F.TURN.side + BORE_DRIFT[i], x1)
     bore = bore + Pos(0.02, 0, 0) * dcone(PINR + F.TURN.side + BORE_DRIFT[i], x1)
     from build123d import Cone
-    joint = _along(Cylinder(JOINT_R, HUBCUT - 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN)), A0 + 1.5 * u, u)
+    from build123d import Ellipse
+    vh = np.cross(u, across); vh /= np.linalg.norm(vh)                                                       # the neck's tall axis, normal to the arm's width (across)
+    joint = extrude(Plane(origin=tuple(A0 + 1.5 * u), x_dir=tuple(across), z_dir=tuple(u)) * Ellipse(JOINT_R, JOINT_R + JOINT_DH[i]), amount=HUBCUT - 1.0)
     joint = joint + _along(Cone(JOINT_R + JOINT_BLEND_DR, JOINT_R, JOINT_BLEND_L, align=(Align.CENTER, Align.CENTER, Align.MIN)), A0 + 1.5 * u, u)   # blends into the tube wall
     ball = Pos(*P_) * Sphere(PB)
     rb = snap_bead_r(i)
@@ -222,8 +220,8 @@ def _along(sh, p0, u):
     return Pos(*p0) * sh
 def leg(Lg):
     i = Lg % 4
-    key = ("leg9", i, SNAP_END, SNAP_WALL, SNAP_NECK_R, SNAP_BW, SNAP_SLIT, FLARE_DEG[i], BORE_DRIFT[i], CL.PINX, S, HUBCUT, TAIL, END_R, PB, JOINT_R, JOINT_BLEND_DR, JOINT_BLEND_L, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C,
-           FACE_CHAMFER, END_REL_X, END_REL_DR, END_REL_SLOPE, srch(_leg_right, _along))
+    key = ("leg9", i, SNAP_END, SNAP_WALL, SNAP_NECK_R, SNAP_BW, SNAP_SLIT, FLARE_DEG[i], BORE_DRIFT[i], CL.PINX, S, HUBCUT, TAIL, leg_end_r(i), PB, JOINT_R, JOINT_DH[i], JOINT_BLEND_DR, JOINT_BLEND_L, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C,
+           FACE_CHAMFER, srch(_leg_right, _along))
     sh = cached(f"leg{i}", key, lambda: _leg_right(i))
     return sh if Lg < 4 else mirror_x(sh)
 
@@ -245,9 +243,6 @@ def leg_mesh(Lg, samples=False):
     return trimesh.Trimesh(d["v"] * mx, d["f"][:, ::-1] if Lg >= 4 else d["f"], process=False)
 FLARE_DEG = [round(pin_swing(i) + 1.0, 1) for i in range(4)]
 FACE_CHAMFER = 0.6       # tube mouth outer edge 45 deg chamfer
-END_REL_X = 1.5          # the recess starts this far before the bore floor ...
-END_REL_DR = 0.5         # ... this deep ...
-END_REL_SLOPE = 1.0      # ... and grows by this per mm towards the closed end
 BORE_DRIFT_MARGIN = 0.05   # was 0.01: the pin's tilt left crank 3 x legs 2/6 at 0.19 < 0.2 (phase 3)
 def bore_drift(i):
     """worst offset (mm, across the pin axis x) between the pin centre A_k and the bore axis the rigid leg carries over the 24
@@ -258,6 +253,16 @@ def bore_drift(i):
         d = (leg_frame(i, k) @ np.r_[A0, 1.0])[:3] - A_ALL[i, k]; w = max(w, float(np.hypot(d[1], d[2])))
     return round(w + BORE_DRIFT_MARGIN, 2)
 BORE_DRIFT = [bore_drift(i) for i in range(4)]
+def tube_sphere():
+    """{Lg: (centre, radius)} sphere round each leg's closed end tube in the neutral pose (robot frame): the base windows clear it by LEG_OPEN."""
+    out = {}
+    for Lg in range(8):
+        i = Lg % 4; sg = 1.0 if Lg < 4 else -1.0; A0 = np.asarray(motion.neutral_leg(i, P, n=13)[1], float) * [sg, 1, 1]
+        x1 = CL.PINX + SNAP_END + SNAP_WALL; xc = (x1 - TAIL) / 2
+        out[Lg] = (A0 + [sg * xc, 0, 0], math.hypot((x1 + TAIL) / 2, leg_end_r(i) + 1.0))
+    return out
+def leg_end_r(i): return PINR + F.TURN.side + BORE_DRIFT[i] + CL.W      # tube outer r: measured from the widened bore, wall W (2.0) on every leg
+END_R = [leg_end_r(i) for i in range(4)]
 
 _LV = {}
 def leg_points(Lg, k, edge=0.8):
@@ -376,7 +381,7 @@ def base():
     b0 = base_skin(); tick("skin")
     legs = {Lg: leg_mesh(Lg) for Lg in range(8)}
     W = CU.Windows(CU.mesh_of(b0, 0.02, 0.2), legs, leg_frame, PIV, A_ALL, wr_of, RN, b0.bounding_box().max.Z + 3.0,
-                   samples={Lg: leg_mesh(Lg, samples=True) for Lg in range(8)}); tick("window outlines")
+                   samples={Lg: leg_mesh(Lg, samples=True) for Lg in range(8)}, tube=tube_sphere(), wt=F.LEG_OPEN.side + 0.2); tick("window outlines")
     def prism(poly, fr, dr):
         t, z, n = fr; pl = Plane(origin=tuple(n * dr[0]), x_dir=tuple(t), z_dir=tuple(n))
         return extrude(pl * BPoly(*[tuple(p) for p in CU.ccw(poly)], align=None), dr[1] - dr[0])

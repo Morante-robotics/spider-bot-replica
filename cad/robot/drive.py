@@ -14,7 +14,7 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 for p in (ROOT, ROOT + "/cad", HERE, HERE + "/fitcheck"):
     if p not in sys.path: sys.path.insert(0, p)
-from build123d import Box, Cylinder, Pos, Rot, Plane, Polygon, extrude, Align, Compound, Sphere
+from build123d import Box, Cylinder, Cone, Pos, Rot, Plane, Polygon, extrude, Align, Compound, Sphere
 from cad import common, fits as F
 import shells as SH                        # CL (check.py layout), FE (S, P, patched pivots, A_ALL)
 FE, CL, P, A_ALL = SH.FE, SH.CL, SH.P, SH.A_ALL
@@ -45,7 +45,9 @@ PINR = CL.PINR                                      # crank pin Ø3 (legs' bore 
 WEB_T = CL.WEB_T; WB0 = WX1 + TH; WB1 = WB0 + WEB_T  # webs just outside the walls (THRUST)
 WEBR = PINR + CL.WEBW                               # web stadium half-width (check.py WEBR)
 WEB_SWEEP = [math.hypot(A_ALL[i + 4, 0][1] - Oy[i], A_ALL[i + 4, 0][2] - Oz) + WEBR for i in range(4)]   # -x webs' reach round each crank centre
-PIN_TRIM = 0.5                                      # pin tip short of the leg's bore floor by this more (the inward-drifted leg's floor met the tip: crank 4 x legs 3/7, phase 3)
+PIN_TRIM = 0.0                                      # pin tip short of the leg's bore floor by this more (the inward-drifted leg's floor met the tip: crank 4 x legs 3/7, phase 3)
+TB_CH = 1.0                                         # transfer big gear: +x face tooth-tip chamfer (45 deg): leg 1's tube mouth met the tips at crank pose 19-20 (0.12 overlap, 0.2 needed); tips only, no wall
+PIN_CH = 0.6                                        # pin tip 45 deg chamfer: the tilted bore's cone met the tip's sharp rim (crank 4 x legs 3/7) now that the pin keeps its full length
 PIN_X1 = P["XC"] + CL.PINX - PIN_TRIM                 # pin tip (|x|)
 # pin collar (leg-on-pin "+x crank web"): the leg's end tube starts at XC - TAIL; the collar stops it TURN short, less
 # the tube face's tilt at the collar radius (the leg swings FLARE_DEG on its pin, shells.py), so the leg is held in x
@@ -246,6 +248,8 @@ def crank(i):
         gx0, gx1 = SH.snap_groove(i)                                                          # snap groove: the bead's travel over the 24 poses
         gx0, gx1 = (gx0, gx1) if sx > 0 else (-gx1, -gx0)
         pin = pin - (cylx(A[1], A[2], PINR + 0.5, gx0, gx1) - cylx(A[1], A[2], SH.SNAP_NECK_R, gx0 - 0.01, gx1 + 0.01))
+        tip = Pos(PIN_X1 if sx > 0 else -PIN_X1, A[1], A[2]) * Rot(0, 90 if sx > 0 else -90, 0)      # local +z along the pin's tip, outward
+        pin = pin - tip * Pos(0, 0, -PIN_CH) * (Cylinder(PINR + 1, PIN_CH + 1, align=(Align.CENTER, Align.CENTER, Align.MIN)) - Cone(PINR - PIN_CH, PINR + 0.01, PIN_CH, align=(Align.CENTER, Align.CENTER, Align.MIN)))
         parts.append(pin)
         ca, cb = (WB1 - 0.01, COLLAR_X1) if sx > 0 else (-COLLAR_X1, -WB1 + 0.01)
         if COLLAR: parts.append(cylx(A[1], A[2], COLLAR_R, ca, cb))          # collar: the leg's inner stop along x (off: see report)
@@ -281,7 +285,9 @@ def idler(i):
 def transfer():
     g = gear(ZS, -GX + IDL_T, GX - IDL_T, T[0], T[1], PH["transfer-small"]) + cylx(T[0], T[1], HUB_R, GX - IDL_T - 0.01, XB0 + 0.01) \
         + gear(ZB, XB0, XB0 + GW, T[0], T[1], PH["transfer-big"])
-    return g - cylx(T[0], T[1], IDLER_BORE, -10, 12)
+    xf = XB0 + GW
+    ch = cylx(T[0], T[1], rt(ZB) + 1.0, xf - TB_CH - 1.0, xf + 1.0) - (Pos(xf - TB_CH - 1.0, T[0], T[1]) * Rot(0, 90, 0) * Cone(rt(ZB) + 1.0, rt(ZB) - TB_CH, TB_CH + 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN)))
+    return g - ch - cylx(T[0], T[1], IDLER_BORE, -10, 12)
 
 
 def pinion():

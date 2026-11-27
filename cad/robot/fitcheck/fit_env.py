@@ -20,6 +20,9 @@ _LEN = ("r", "XC", "H", "DY", "knee_r", "knee_z", "foot_r", "foot_z", "up_arch",
         "r_upper", "r_root", "r_blade", "r_inner")
 K = S / 0.70    # printed layout numbers (check.py LAYOUT, drive, power, shells) were set at S 0.70: they grow with S
 P = dict(motion.P0, S=S, **{k: motion.P0[k] * S / motion.P0["S"] for k in _LEN})   # every P0 length x S/0.60
+XC_OUT = 1.5    # phase 3: all 8 legs' crank pins (and the legs on them) this much further out along x: the leg holds its pin the full 6.3 mm again, tube face clear of the crank webs
+H_UP = 0.0      # phase 3: tried 0.5 and 1.0: the base touches the tube end from the side, not below; raising only the crank end also tilted the approved motion. Kept 0.
+P["XC"] += XC_OUT; P["H"] += H_UP
 BASE_WALL_R = max(F.WALL_MIN, BA.WALL * S)    # robot mm: fits.WALL_MIN. No 1.2 pads round the leg windows any more (2026-11-23): the windows are
                              # open-top LEG_OPEN, the leg is held by its pin, so they carry no load; 1.2 everywhere put the wall
                              # 0.14 from the front arms (decision 2: smooth front, 0.40 at 0.84)

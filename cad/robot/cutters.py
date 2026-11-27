@@ -20,12 +20,13 @@ import trimesh
 from scipy.spatial import cKDTree
 from shapely.geometry import Polygon
 from trimesh.remesh import subdivide_to_size
+from cad import fits as F
 
 SLACK = 0.05        # mm on top of WR when picking wall samples near the sweep (with SMOOTH: gaps 0.94-1.16 for WR 0.9)
 SLACK2 = 0.12       # outline buffer for the 0.4 mm wall sampling
 SMOOTH = 0.25       # outline grown and simplified by this: 11-13 sides per window
 COL = 0.25          # floor columns along the wall
-MINW = 1.6          # wall between two windows narrower than this is cut (4 lines of a 0.4 nozzle)
+MINW = F.WALL_MIN   # wall between two windows narrower than this is cut (was 1.6: the notch's wall keeps the 2.0 minimum, Morante 2026-11-27)
 LEG_STEP = 0.8      # leg surface samples at most this far apart
 WALL_STEP = 0.4     # wall surface samples
 SLIDE_N = 8         # samples along the assembly slide
@@ -61,7 +62,8 @@ def frame_of(n):
 class Windows:
     """leg windows of a base: base0 (trimesh, the base before windows), legs {Lg: trimesh in the neutral pose}, frames(Lg, k) -> 4x4, piv (8, 3), crank pins A (8, 24, 3), wr(Lg), rn, ztop."""
 
-    def __init__(self, base0, legs, frames, piv, A, wr, rn, ztop, samples=None):
+    def __init__(self, base0, legs, frames, piv, A, wr, rn, ztop, samples=None, tube=None, wt=0.5):
+        self.tube, self.wt = tube or {}, wt     # tube {Lg: (centre, radius)}: the leg's closed end tube, swept at the 24 poses, cleared by wt (LEG_OPEN + sampling)
         self.base0, self.legs, self.frames, self.piv, self.A, self.wr, self.rn, self.ztop = base0, legs, frames, piv, A, wr, rn, ztop
         self.samples = samples or {}
         self.wall = self._near(base0)
@@ -72,6 +74,7 @@ class Windows:
         """surface samples WALL_STEP apart of the faces of m within rn + 6 of a pivot (the rest of the bowl is never cut)."""
         c = m.triangles_center; keep = np.zeros(len(c), bool)
         for p in self.piv: keep |= np.linalg.norm(c - p, axis=1) <= self.rn + 6
+        for C, rt in self.tube.values(): keep |= np.linalg.norm(c - C, axis=1) <= rt + 8
         return subdivide_to_size(m.vertices, m.faces[keep], max_edge=WALL_STEP)[0]
 
     def u(self, Lg, k):
@@ -87,10 +90,22 @@ class Windows:
         k0 = ASM_POSE[Lg]; q0 = at(k0); u = self.u(Lg, k0)
         return np.vstack([at(k) for k in range(24)] + [q0 + s * u for s in np.linspace(0, LEG_SLIDE[Lg], SLIDE_N)])
 
+    def _tube_cloud(self, Lg):
+        """the leg's closed end tube (samples within the sphere self.tube[Lg]) at the 24 poses."""
+        if Lg not in self.tube: return None
+        V = self.samples.get(Lg)
+        if V is None: m = self.legs[Lg]; V = subdivide_to_size(m.vertices, m.faces, max_edge=LEG_STEP)[0]
+        C, rt = self.tube[Lg]; V = V[np.linalg.norm(V - C, axis=1) <= rt]
+        return np.vstack([V @ self.frames(Lg, k)[:3, :3].T + self.frames(Lg, k)[:3, 3] for k in range(24)])
+
     def _hits(self, Lg):
         """wall samples within wr + SLACK of the leg's sweep, and the mean outward normal of the wall there."""
         C = cKDTree(self._cloud(Lg)); w = self.wall[np.linalg.norm(self.wall - self.piv[Lg], axis=1) <= self.rn + 4]
         R = w[np.isfinite(C.query(w, distance_upper_bound=self.wr(Lg) + SLACK)[0])]
+        T = self._tube_cloud(Lg)
+        if T is not None:                                                    # + the wall the closed end tube comes within wt of
+            CT = cKDTree(T); wt = self.wall[np.isfinite(CT.query(self.wall, distance_upper_bound=self.wt + SLACK)[0])]
+            R = np.vstack([R, wt]) if len(R) else wt
         _, _, fi = trimesh.proximity.closest_point(self.base0, R[::max(1, len(R) // 300)])
         nn = self.base0.face_normals[fi]; c = self.base0.triangles_center[fi]
         nn = nn * np.sign((nn[:, :2] * c[:, :2]).sum(1))[:, None]                  # outward (the bowl is round the z axis)
