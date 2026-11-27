@@ -1,162 +1,156 @@
-cad_verify: PASS (0 failures, 83 warnings)
+cad_verify: FAIL (10 failures, 74 warnings)
 
 == 1 integrity (printed parts)
-  WARN  base: closed solid, 3032 mm³, 67.6 × 60.5 × 21.7 mm; 70.2% of the surface is thinner than 0.8 mm (thinnest 0.04 mm, e.g. at [[25.1, 13.8, 10.0], [2.5, -24.0, 4.6], [-11.1, 18.0, 4.5]])
-  WARN  body: closed solid, 35408 mm³, 69.4 × 78.3 × 47.3 mm; 8.6% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[25.3, 8.8, 36.5], [-15.0, 3.2, 53.6], [-11.1, -38.0, 35.4]])
-  WARN  leg-0: closed solid, 8054 mm³, 51.9 × 45.6 × 70.0 mm; 1.8% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[11.4, -24.7, 9.9], [8.2, -24.7, 10.4], [33.4, -38.5, 52.4]])
-  WARN  leg-1: closed solid, 8078 mm³, 71.4 × 24.6 × 70.1 mm; 2.6% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[8.0, -9.4, 15.2], [6.3, -11.6, 9.5], [64.2, -8.9, 30.0]])
-  WARN  leg-2: closed solid, 8086 mm³, 71.6 × 28.4 × 70.0 mm; 2.4% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[56.3, 8.7, 46.0], [6.3, -1.1, 12.9], [17.1, 5.3, 20.6]])
-  WARN  leg-3: closed solid, 7919 mm³, 52.2 × 47.3 × 70.0 mm; 2.0% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[39.5, 34.5, 52.7], [17.1, 18.7, 17.3], [34.3, 42.6, 49.3]])
-  WARN  leg-4: closed solid, 8054 mm³, 51.9 × 45.6 × 70.0 mm; 1.7% of the surface is thinner than 0.8 mm (thinnest 0.02 mm, e.g. at [[-42.4, -37.9, 53.7], [-6.3, -18.7, 11.9], [-45.4, -36.0, 44.6]])
-  WARN  leg-5: closed solid, 8078 mm³, 71.4 × 24.6 × 70.1 mm; 2.5% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[-6.3, -12.9, 11.9], [-18.2, -11.3, 18.0], [-48.7, -17.7, 53.4]])
-  WARN  leg-6: closed solid, 8086 mm³, 71.6 × 28.4 × 70.0 mm; 2.5% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[-66.0, 26.0, 24.5], [-50.1, 15.5, 28.9], [-50.6, 16.1, 30.9]])
-  WARN  leg-7: closed solid, 7918 mm³, 52.2 × 47.3 × 70.0 mm; 1.8% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[-43.4, 54.8, 25.1], [-37.6, 48.6, 37.3], [-40.2, 35.0, 46.8]])
-  ok    spine: closed solid, 990 mm³, 5.9 × 43.3 × 15.9 mm; walls ≥ 0.8 mm
-  WARN  crank-1: closed solid, 240 mm³, 8.4 × 8.8 × 19.0 mm; 7.3% of the surface is thinner than 0.8 mm (thinnest 0.48 mm, e.g. at [[0.5, -23.5, 11.7], [-0.8, -16.8, 10.8], [0.3, -19.7, 16.0]])
-  WARN  crank-2: closed solid, 241 mm³, 8.3 × 8.8 × 19.0 mm; 7.1% of the surface is thinner than 0.8 mm (thinnest 0.35 mm, e.g. at [[-0.3, -8.4, 14.7], [-0.6, -11.4, 13.1], [-0.9, -10.9, 9.4]])
-  WARN  crank-3: closed solid, 242 mm³, 8.3 × 8.8 × 19.0 mm; 7.8% of the surface is thinner than 0.8 mm (thinnest 0.39 mm, e.g. at [[1.1, 2.6, 8.1], [-0.8, 0.2, 10.9], [-0.9, 1.9, 13.9]])
-  WARN  crank-4: closed solid, 237 mm³, 8.4 × 8.8 × 19.0 mm; 7.0% of the surface is thinner than 0.8 mm (thinnest 0.30 mm, e.g. at [[1.3, 14.6, 11.2], [0.8, 20.0, 8.7], [0.9, 20.6, 14.4]])
-  WARN  idler-1: closed solid, 69 mm³, 8.4 × 8.4 × 2.6 mm; 13.5% of the surface is thinner than 0.8 mm (thinnest 0.48 mm, e.g. at [[0.5, -16.3, 16.7], [-0.4, -11.1, 17.7], [-0.2, -12.0, 12.4]])
-  WARN  idler-2: closed solid, 69 mm³, 8.3 × 8.3 × 2.6 mm; 13.1% of the surface is thinner than 0.8 mm (thinnest 0.48 mm, e.g. at [[0.3, 0.9, 17.7], [0.2, -2.6, 12.3], [-0.8, -5.7, 15.0]])
-  WARN  idler-3: closed solid, 69 mm³, 8.3 × 8.3 × 2.6 mm; 14.1% of the surface is thinner than 0.8 mm (thinnest 0.48 mm, e.g. at [[-0.3, 6.8, 15.2], [-0.8, 14.3, 16.6], [0.3, 13.6, 14.8]])
-  WARN  sleeve-1: closed solid, 21 mm³, 3.2 × 3.2 × 3.5 mm; 64.5% of the surface is thinner than 0.8 mm (thinnest 0.80 mm, e.g. at [[-0.9, -12.7, 16.2], [-0.2, -14.3, 16.3], [1.2, -13.4, 17.7]])
-  WARN  sleeve-2: closed solid, 21 mm³, 3.2 × 3.2 × 3.5 mm; 64.7% of the surface is thinner than 0.8 mm (thinnest 0.80 mm, e.g. at [[0.9, -1.8, 17.1], [-0.3, -1.1, 15.8], [0.6, -2.3, 17.8]])
-  WARN  sleeve-3: closed solid, 21 mm³, 3.2 × 3.2 × 3.5 mm; 65.4% of the surface is thinner than 0.8 mm (thinnest 0.80 mm, e.g. at [[-0.1, 12.1, 15.8], [-1.3, 12.3, 15.1], [1.1, 10.8, 14.1]])
-  WARN  transfer: closed solid, 461 mm³, 13.2 × 13.2 × 8.0 mm; 8.7% of the surface is thinner than 0.8 mm (thinnest 0.48 mm, e.g. at [[-1.0, -9.1, 24.6], [0.5, -9.1, 24.1], [5.1, 2.0, 26.3]])
-  WARN  transfer-sleeve: closed solid, 63 mm³, 3.2 × 3.2 × 10.5 mm; 73.3% of the surface is thinner than 0.8 mm (thinnest 0.80 mm, e.g. at [[0.6, -3.4, 22.7], [2.5, -3.4, 24.1], [4.2, -4.6, 25.7]])
-  WARN  drive-unit: closed solid, 1963 mm³, 24.6 × 28.9 × 28.8 mm; 1.8% of the surface is thinner than 0.8 mm (thinnest 0.25 mm, e.g. at [[-3.0, -2.3, 14.7], [-3.8, -0.9, 15.3], [-3.8, -3.5, 17.3]])
-  WARN  pinion: closed solid, 184 mm³, 10.8 × 10.8 × 3.0 mm; 9.3% of the surface is thinner than 0.8 mm (thinnest 0.48 mm, e.g. at [[6.3, -7.2, 34.0], [6.4, 3.3, 33.5], [6.4, 3.4, 35.3]])
-  WARN  cell-holder: closed solid, 3334 mm³, 39.7 × 23.3 × 21.0 mm; 3.4% of the surface is thinner than 0.8 mm (thinnest 0.40 mm, e.g. at [[-2.4, 8.3, 33.7], [-15.0, 8.4, 27.2], [-1.2, 4.0, 27.4]])
-  WARN  cell-lid: closed solid, 811 mm³, 39.7 × 16.8 × 4.7 mm; 5.8% of the surface is thinner than 0.8 mm (thinnest 0.40 mm, e.g. at [[10.0, 21.5, 36.6], [5.8, 7.9, 35.8], [-7.5, 8.7, 35.5]])
+  WARN  base: closed solid, 13925 mm³, 96.6 × 86.3 × 27.0 mm; 2.2% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[-17.2, 32.7, 21.0], [-28.7, 36.4, 19.5], [1.4, 7.1, 0.3]])
+  WARN  body: closed solid, 103334 mm³, 95.7 × 111.9 × 67.6 mm; 2.7% of the surface is thinner than 0.8 mm (thinnest 0.03 mm, e.g. at [[15.4, -50.8, 62.3], [-28.4, 8.1, 31.7], [19.5, -49.2, 48.6]])
+  WARN  leg-0: closed solid, 23480 mm³, 73.7 × 65.2 × 100.1 mm; 1.6% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[49.4, -60.7, 70.9], [47.8, -57.3, 75.3], [10.2, -26.3, 18.1]])
+  WARN  leg-1: closed solid, 23553 mm³, 101.5 × 35.1 × 100.1 mm; 2.3% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[15.3, -15.0, 13.4], [39.4, -4.4, 16.5], [26.0, -14.4, 23.3]])
+  WARN  leg-2: closed solid, 23566 mm³, 101.9 × 40.2 × 100.1 mm; 1.8% of the surface is thinner than 0.8 mm (thinnest 0.05 mm, e.g. at [[77.0, 25.5, 77.0], [25.2, 10.8, 27.7], [9.6, 1.8, 15.4]])
+  WARN  leg-3: closed solid, 23091 mm³, 74.0 × 67.7 × 100.1 mm; 1.8% of the surface is thinner than 0.8 mm (thinnest 0.02 mm, e.g. at [[42.9, 34.6, 22.6], [57.9, 74.2, 41.7], [51.8, 58.3, 56.1]])
+  WARN  leg-4: closed solid, 23480 mm³, 73.7 × 65.2 × 100.1 mm; 1.4% of the surface is thinner than 0.8 mm (thinnest 0.04 mm, e.g. at [[-55.4, -48.6, 71.0], [-14.2, -29.9, 11.7], [-56.7, -50.2, 66.7]])
+  WARN  leg-5: closed solid, 23553 mm³, 101.5 × 35.1 × 100.1 mm; 1.6% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[-15.3, -12.7, 13.6], [-69.7, -25.4, 76.0], [-14.2, -16.9, 12.6]])
+  WARN  leg-6: closed solid, 23566 mm³, 101.9 × 40.2 × 100.1 mm; 1.7% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[-74.0, 29.1, 67.9], [-25.6, 7.3, 22.4], [-74.8, 14.6, 66.5]])
+  WARN  leg-7: closed solid, 23091 mm³, 74.0 × 67.7 × 100.1 mm; 1.7% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[-15.7, 21.9, 13.6], [-48.0, 54.8, 73.0], [-57.2, 47.8, 75.4]])
+  ok    spine: closed solid, 3274 mm³, 8.8 × 61.9 × 21.1 mm; walls ≥ 0.8 mm
+  ok    crank-1: closed solid, 718 mm³, 11.5 × 12.5 × 27.6 mm; walls ≥ 0.8 mm
+  ok    crank-2: closed solid, 723 mm³, 12.0 × 12.5 × 27.6 mm; walls ≥ 0.8 mm
+  ok    crank-3: closed solid, 725 mm³, 11.8 × 12.5 × 27.6 mm; walls ≥ 0.8 mm
+  ok    crank-4: closed solid, 710 mm³, 11.9 × 12.5 × 27.6 mm; walls ≥ 0.8 mm
+  ok    idler-1: closed solid, 246 mm³, 12.0 × 11.8 × 3.9 mm; walls ≥ 0.8 mm
+  ok    idler-2: closed solid, 246 mm³, 11.7 × 12.0 × 3.9 mm; walls ≥ 0.8 mm
+  ok    idler-3: closed solid, 246 mm³, 11.7 × 12.0 × 3.9 mm; walls ≥ 0.8 mm
+  ok    transfer: closed solid, 1445 mm³, 19.0 × 18.9 × 11.4 mm; walls ≥ 0.8 mm
+  ok    journal-cap: closed solid, 2146 mm³, 10.8 × 61.5 × 13.5 mm; walls ≥ 0.8 mm
+  ok    motor-u: closed solid, 2738 mm³, 35.2 × 32.3 × 10.8 mm; walls ≥ 0.8 mm
+  ok    transfer-cheek: closed solid, 990 mm³, 27.1 × 15.0 × 18.7 mm; walls ≥ 0.8 mm
+  ok    pinion: closed solid, 593 mm³, 15.9 × 16.0 × 4.3 mm; walls ≥ 0.8 mm
+  ok    cell-holder: closed solid, 5642 mm³, 42.0 × 19.4 × 27.2 mm; walls ≥ 0.8 mm
+  ok    cell-lid: closed solid, 1556 mm³, 42.0 × 18.7 × 7.0 mm; walls ≥ 0.8 mm
 
 == 2 motion: overlaps and gaps at every step   3 gears: backlash
   ok    no undeclared overlaps over 24 steps
-        1941 pair positions computed, 3689 repeats reused
-        swept envelopes (still part × moving part): 85 pairs clear at every step in one query each, 0 closer (gaps step by step, no overlap); scanned step by step: 0 overlapping or touching, 47 close last time, 0 close at their first step; 275 never near, 1 declared contacts skipped; 85 envelope results from the cache
+        1945 pair positions computed, 3555 repeats reused
+        swept envelopes (still part × moving part): 69 pairs clear at every step in one query each, 1 closer (gaps step by step, no overlap); scanned step by step: 0 overlapping or touching, 46 close last time, 0 close at their first step; 274 never near, 1 declared contacts skipped; 70 envelope results from the cache
+  FAIL  body × leg-4: gap 0.04 mm < 0.2 (at 15)
+  FAIL  leg-1 × transfer: gap 0.13 mm < 0.2 (at 19)
+  FAIL  body × leg-1: gap 0.13 mm < 0.2 (at 21)
+        axle-3 × idler-3: gap 0.15 mm (closest at 21)
+        transfer × transfer-pin: gap 0.15 mm (closest at 13)
+        axle-1 × idler-1: gap 0.15 mm (closest at 23)
+        axle-2 × idler-2: gap 0.15 mm (closest at 13)
         cell-holder × cell-springs: gap 0.15 mm (closest at 0)
         ag13-cells × cell-holder: gap 0.15 mm (closest at 0)
+        holder-screw × journal-cap: gap 0.15 mm (closest at 0)
         cell-holder × nickel-strip: gap 0.15 mm (closest at 0)
         cell-lid × nickel-strip: gap 0.15 mm (closest at 0)
+  FAIL  body × leg-0: gap 0.17 mm < 0.2 (at 10)
         ag13-cells × cell-lid: gap 0.17 mm (closest at 0)
-        crank-4 × leg-3: gap 0.19 mm (closest at 19)
-        crank-4 × leg-7: gap 0.19 mm (closest at 7)
-  WARN  body × cell-lid: gap 0.20 mm < 0.2 (at 0): coarse, fixed parts with no fit, within 0.4
   WARN  body × ss12d00-switch: gap 0.20 mm < 0.2 (at 0): coarse, fixed parts with no fit, within 0.4
-  WARN  body × cell-holder: gap 0.20 mm < 0.2 (at 0): coarse, fixed parts with no fit, within 0.4
-  WARN  body × leds: gap 0.20 mm < 0.2 (at 0): coarse, fixed parts with no fit, within 0.4
-        drive-unit × leds: gap 0.21 mm (closest at 0)
-        crank-1 × leg-4: gap 0.21 mm (closest at 19)
-        crank-1 × leg-0: gap 0.21 mm (closest at 7)
-        crank-3 × leg-6: gap 0.21 mm (closest at 5)
-        crank-3 × leg-2: gap 0.21 mm (closest at 17)
-        crank-2 × leg-5: gap 0.21 mm (closest at 7)
-        crank-2 × leg-1: gap 0.21 mm (closest at 19)
-        leg-1 × leg-2: gap 0.23 mm (closest at 0)
-        leg-5 × leg-6: gap 0.23 mm (closest at 12)
-        cell-lid × drive-unit: gap 0.23 mm (closest at 0)
-        idler-1 × sleeve-1: gap 0.24 mm (closest at 22)
-        idler-2 × sleeve-2: gap 0.24 mm (closest at 18)
-        idler-3 × sleeve-3: gap 0.24 mm (closest at 10)
-        transfer × transfer-sleeve: gap 0.25 mm (closest at 14)
-        crank-4 × spine: gap 0.25 mm (closest at 8)
-        crank-1 × spine: gap 0.25 mm (closest at 0)
-        crank-3 × spine: gap 0.25 mm (closest at 8)
-        crank-2 × spine: gap 0.25 mm (closest at 20)
-        cell-holder × crank-4: gap 0.25 mm (closest at 8)
-        crank-1 × drive-unit: gap 0.25 mm (closest at 12)
-        crank-2 × drive-unit: gap 0.25 mm (closest at 12)
-        crank-3 × drive-unit: gap 0.25 mm (closest at 12)
-        axle-1 × leg-5: gap 0.26 mm (closest at 3)
-        cell-holder × leg-2: gap 0.31 mm (closest at 7)
-        cell-holder × leg-6: gap 0.31 mm (closest at 19)
-        axle-2 × leg-6: gap 0.34 mm (closest at 15)
-        axle-1 × leg-4: gap 0.34 mm (closest at 22)
-        holder-screw × n10-motor: gap 0.39 mm (closest at 0)
-        drive-unit × pinion: gap 0.40 mm (closest at 4)
-        base × leg-4: gap 0.40 mm (closest at 7)
-        drive-unit × idler-1: gap 0.41 mm (closest at 10)
-        base × leg-3: gap 0.41 mm (closest at 0)
-        base × leg-7: gap 0.41 mm (closest at 12)
-        base × leg-0: gap 0.42 mm (closest at 19)
-        cell-holder × idler-3: gap 0.43 mm (closest at 2)
-        axle-2 × leg-5: gap 0.45 mm (closest at 10)
+        body × leds: gap 0.20 mm (closest at 0)
+        n10-motor × transfer-cheek: gap 0.20 mm (closest at 0)
+        crank-4 × leg-3: gap 0.20 mm (closest at 21)
+        crank-4 × leg-7: gap 0.20 mm (closest at 9)
+        crank-3 × leg-6: gap 0.20 mm (closest at 4)
+        crank-3 × leg-2: gap 0.20 mm (closest at 16)
+        crank-3 × motor-u: gap 0.20 mm (closest at 14)
+        crank-2 × motor-u: gap 0.20 mm (closest at 10)
+        crank-1 × motor-u: gap 0.20 mm (closest at 22)
+        crank-2 × leg-5: gap 0.22 mm (closest at 9)
+        crank-2 × leg-1: gap 0.22 mm (closest at 21)
+        crank-1 × leg-4: gap 0.22 mm (closest at 21)
+        crank-1 × leg-0: gap 0.22 mm (closest at 9)
+        crank-1 × spine: gap 0.24 mm (closest at 0)
+        crank-4 × spine: gap 0.24 mm (closest at 0)
+        crank-2 × spine: gap 0.24 mm (closest at 0)
+        crank-3 × spine: gap 0.24 mm (closest at 16)
+        crank-1 × journal-cap: gap 0.25 mm (closest at 16)
+        crank-4 × journal-cap: gap 0.25 mm (closest at 16)
+        crank-2 × journal-cap: gap 0.25 mm (closest at 12)
+        crank-3 × journal-cap: gap 0.25 mm (closest at 12)
+        body × leg-7: gap 0.34 mm (closest at 7)
+        leg-0 × leg-1: gap 0.36 mm (closest at 12)
+        leg-4 × leg-5: gap 0.36 mm (closest at 0)
+        body × leg-6: gap 0.39 mm (closest at 14)
+        idler-1 × journal-cap: gap 0.40 mm (closest at 15)
+        body × leg-2: gap 0.41 mm (closest at 2)
         idler-1 × spine: gap 0.45 mm (closest at 0)
         idler-2 × spine: gap 0.45 mm (closest at 0)
         idler-3 × spine: gap 0.45 mm (closest at 0)
-        drive-unit × idler-2: gap 0.45 mm (closest at 0)
-        drive-unit × transfer: gap 0.45 mm (closest at 0)
-        body × leg-0: gap 0.50 mm (closest at 10)
-        body × leg-4: gap 0.53 mm (closest at 13)
-        body × leg-3: gap 0.53 mm (closest at 16)
-        body × leg-7: gap 0.53 mm (closest at 4)
-        leg-0 × leg-1: gap 0.55 mm (closest at 12)
-        leg-4 × leg-5: gap 0.55 mm (closest at 0)
-        n10-motor × transfer: gap 0.56 mm (closest at 15)
-        body × leg-1: gap 0.58 mm (closest at 22)
-        spine × transfer: gap 0.58 mm (closest at 0)
-        leg-1 × transfer: gap 0.64 mm (closest at 19)
-        axle-3 × leg-7: gap 0.75 mm (closest at 4)
-        axle-1 × idler-1: gap 0.84 mm (closest at 19)
-        axle-3 × idler-3: gap 0.84 mm (closest at 22)
-        axle-t × transfer: gap 0.84 mm (closest at 0)
-        axle-2 × idler-2: gap 0.84 mm (closest at 4)
-        body × leg-6: gap 0.87 mm (closest at 20)
-        body × leg-2: gap 0.89 mm (closest at 16)
-        drive-unit × sleeve-2: gap 0.90 mm (closest at 0)
-        body × leg-5: gap 0.94 mm (closest at 19)
-        drive-unit × sleeve-1: gap 0.95 mm (closest at 0)
-        base × leg-2: gap 0.96 mm (closest at 16)
-        base × leg-1: gap 0.99 mm (closest at 4)
+        spine × transfer: gap 0.45 mm (closest at 0)
+        idler-2 × journal-cap: gap 0.45 mm (closest at 0)
+        idler-3 × journal-cap: gap 0.45 mm (closest at 0)
+        journal-cap × transfer: gap 0.45 mm (closest at 0)
+        motor-u × transfer: gap 0.45 mm (closest at 0)
+        pinion × transfer-cheek: gap 0.45 mm (closest at 8)
+        body × leg-3: gap 0.46 mm (closest at 4)
+        base × leg-4: gap 0.50 mm (closest at 7)
+        body × leg-5: gap 0.50 mm (closest at 10)
+        base × leg-0: gap 0.51 mm (closest at 19)
+        leg-1 × leg-2: gap 0.55 mm (closest at 0)
+        leg-5 × leg-6: gap 0.55 mm (closest at 12)
+        base × leg-3: gap 0.60 mm (closest at 0)
+        base × leg-7: gap 0.60 mm (closest at 12)
+        leds × transfer-cheek: gap 0.61 mm (closest at 0)
+        transfer-cheek × transfer-pin: gap 0.67 mm (closest at 0)
+        axle-3 × leg-7: gap 0.77 mm (closest at 3)
+        transfer × transfer-cheek: gap 0.80 mm (closest at 0)
+        motor-u × pinion: gap 0.80 mm (closest at 0)
+        base × leg-2: gap 0.83 mm (closest at 19)
+        base × leg-1: gap 0.86 mm (closest at 6)
+        axle-1 × leg-5: gap 0.96 mm (closest at 4)
+        journal-cap × transfer-pin: gap 0.98 mm (closest at 0)
+        axle-1 × crank-1: gap 0.99 mm (closest at 22)
+        axle-1 × crank-2: gap 0.99 mm (closest at 2)
+        axle-2 × crank-2: gap 1.00 mm (closest at 10)
+        axle-2 × crank-3: gap 1.00 mm (closest at 14)
         base × body: contact allowed (body rim seated on the base ledge; snap hooks under the front ribs (fits.PRESS, coupon c1))
-        sleeve-1 × spine: contact allowed (sleeve clamped wall to wall by its M2 axle (plan idlers))
-        sleeve-2 × spine: contact allowed (sleeve clamped wall to wall by its M2 axle (plan idlers))
-        sleeve-3 × spine: contact allowed (sleeve clamped wall to wall by its M2 axle (plan idlers))
-        drive-unit × transfer-sleeve: contact allowed (sleeve clamped cheek to cheek by the transfer M2)
-        drive-unit × spine: contact allowed (cheeks on the wall tops, lugs on the -x wall (plan drive-on-spine))
-        drive-unit × n10-motor: contact allowed (in its clamp at MOTOR_SEAT 0.2 (the JOINTS row checks the fit; MIN_GAP 0.2 sits on it))
+        journal-cap × spine: contact allowed (rails on the wall tops (plan cap-on-spine))
+        motor-u × spine: contact allowed (web and lugs 1, 2 on the -x wall's outer face (plan motor-u-on-spine))
+        journal-cap × motor-u: contact allowed (ledge, boss and ear 2 on the cap top; web on the cap rail's -x face (plan motor-u-on-spine))
+        motor-u × transfer-cheek: contact allowed (strap on the U wall tops and the -y ear (plan cheek-on-u))
+        motor-u × n10-motor: contact allowed (in its U at MOTOR_SEAT 0.2 (the JOINTS row checks the fit))
         n10-motor × pinion: contact allowed (pressed on the D-shaft (fits.DSHAFT 0, assumed: coupon of 3 bores with the motor))
         base × spine: contact allowed (keel foot on the bowl floor (plan spine-on-keel))
-        axle-1 × sleeve-1: contact allowed (self-tapping M2 in its pilot Ø1.6 (plan m2-screws, assumed, coupon c2))
-        axle-2 × sleeve-2: contact allowed (self-tapping M2 in its pilot Ø1.6 (plan m2-screws, assumed, coupon c2))
-        axle-3 × sleeve-3: contact allowed (self-tapping M2 in its pilot Ø1.6 (plan m2-screws, assumed, coupon c2))
-        axle-1 × spine: contact allowed (M2 through the -x wall (STEEL), tip in the +x wall pilot)
-        axle-2 × spine: contact allowed (M2 through the -x wall (STEEL), tip in the +x wall pilot)
-        axle-3 × spine: contact allowed (head on the -x wall, self-tapping M2 in its pilot Ø1.6 (plan m2-screws, assumed, coupon c2))
-        axle-1 × drive-unit: contact allowed (head on the drive unit's lug (plan drive-on-spine))
-        axle-2 × drive-unit: contact allowed (head on the drive unit's lug (plan drive-on-spine))
-        axle-t × transfer-sleeve: contact allowed (self-tapping M2 in its pilot Ø1.6 (plan m2-screws, assumed, coupon c2))
-        axle-t × drive-unit: contact allowed (head on the inner cheek, tip in the +x cheek pilot)
-        keel-1 × spine: contact allowed (keel M2 from below, self-tapping M2 in its pilot Ø1.6 (plan m2-screws, assumed, coupon c2))
-        keel-2 × spine: contact allowed (keel M2 from below, self-tapping M2 in its pilot Ø1.6 (plan m2-screws, assumed, coupon c2))
-        base × keel-1: contact allowed (head in its counterbored boss on the bowl floor (needs its STEEL hole in the base: shells.py))
-        base × keel-2: contact allowed (head in its counterbored boss on the bowl floor (needs its STEEL hole in the base: shells.py))
+        axle-1 × spine: contact allowed (M3 thread in the -x wall's pilot Ø2.5, tip in the +x wall's STEEL hole (plan B))
+        axle-2 × spine: contact allowed (M3 thread in the -x wall's pilot Ø2.5, tip in the +x wall's STEEL hole (plan B))
+        axle-3 × spine: contact allowed (M3 thread in the -x wall's pilot Ø2.5, tip in the +x wall's STEEL hole (plan B))
+        axle-1 × motor-u: contact allowed (head on the motor-u lug (plan motor-u-on-spine))
+        axle-2 × motor-u: contact allowed (head on the motor-u lug (plan motor-u-on-spine))
+        axle-3 × journal-cap: contact allowed (head on the cap's lug 3 (plan cap-on-spine))
+        motor-u × transfer-pin: contact allowed (head on the web's -x face, self-tapping M3 in its pilot Ø2.5 (plan m3-screws, assumed, coupon c2) (web + boss, 4 mm))
+        strap-screw × transfer-cheek: contact allowed (head on the strap)
+        motor-u × strap-screw: contact allowed (self-tapping M3 in its pilot Ø2.5 (plan m3-screws, assumed, coupon c2) (the -y ear))
+        keel-1 × spine: contact allowed (keel M3 from below, self-tapping M3 in its pilot Ø2.5 (plan m3-screws, assumed, coupon c2))
+        keel-2 × spine: contact allowed (keel M3 from below, self-tapping M3 in its pilot Ø2.5 (plan m3-screws, assumed, coupon c2))
+        base × keel-1: contact allowed (head in its counterbored boss on the bowl floor)
+        base × keel-2: contact allowed (head in its counterbored boss on the bowl floor)
         cell-holder × cell-lid: contact allowed (lid plate rests on the wall tops; lips snap in the grooves (PRESS, coupon))
         ag13-cells × cell-springs: contact allowed (spring pressed on the front cell (the contact))
         ag13-cells × nickel-strip: contact allowed (strip on the back cells' + faces (the contact))
-        cell-holder × holder-screw: contact allowed (M2 head clamps the tab)
+        cell-holder × holder-screw: contact allowed (M3 head clamps the tab)
         cell-lid × jst-xh: contact allowed (the JST pair stands on the lid, glued (drop of glue))
-        cell-holder × drive-unit: contact allowed (tab rests on drive ear 2 (plan holder-on-drive-block))
-        cell-holder × spine: contact allowed (post on the raised wall tops, tongues in slot 4 (plan))
-        drive-unit × holder-screw: contact allowed (M2 self-tapping into drive block 2 / ear 2 (pilot 1.6, coupon c2))
-  ok    gears crank-1 × idler-1: gap 0.13–0.13 mm over the motion
-  ok    gears crank-2 × idler-1: gap 0.13–0.13 mm over the motion
-  ok    gears crank-2 × idler-2: gap 0.13–0.13 mm over the motion
-  ok    gears crank-3 × idler-2: gap 0.13–0.13 mm over the motion
-  ok    gears crank-3 × idler-3: gap 0.13–0.13 mm over the motion
-  ok    gears crank-4 × idler-3: gap 0.13–0.13 mm over the motion
-  ok    gears idler-2 × transfer: gap 0.13–0.13 mm over the motion
+        cell-holder × motor-u: contact allowed (tab rests on the motor-u's ear 2 (plan holder-on-cap))
+        cell-holder × journal-cap: contact allowed (post on the cap top (plan holder-on-cap, F))
+        holder-screw × motor-u: contact allowed (M3 self-tapping into ear 2 (pilot 2.5, coupon c2))
+  ok    gears crank-1 × idler-1: gap 0.13–0.14 mm over the motion
+  ok    gears crank-2 × idler-1: gap 0.13–0.14 mm over the motion
+  ok    gears crank-2 × idler-2: gap 0.13–0.14 mm over the motion
+  ok    gears crank-3 × idler-2: gap 0.13–0.14 mm over the motion
+  ok    gears crank-3 × idler-3: gap 0.13–0.14 mm over the motion
+  ok    gears crank-4 × idler-3: gap 0.13–0.14 mm over the motion
+  ok    gears idler-2 × transfer: gap 0.13–0.14 mm over the motion
   ok    gears pinion × transfer: gap 0.13–0.13 mm over the motion
 
 == 4 retention: can a part fall, lift or tip out?
   ok    body: held within 0.6 mm / 5.0° (free: )
-  ok    leg-0: held within 1.65 mm / 5.0° (free: )
-  ok    leg-1: held within 1.25 mm / 5.0° (free: )
+  FAIL  leg-0 is not held: moves 1.65+ mm towards -X (at 0)
+  FAIL  leg-1 is not held: moves 1.25+ mm towards -X (at 8)
   ok    leg-2: held within 1.25 mm / 5.0° (free: )
   ok    leg-3: held within 1.65 mm / 5.0° (free: )
   ok    leg-4: held within 1.65 mm / 5.0° (free: )
-  ok    leg-5: held within 1.25 mm / 5.0° (free: )
-  ok    leg-6: held within 1.25 mm / 5.0° (free: )
-  ok    leg-7: held within 1.65 mm / 5.0° (free: )
+  FAIL  leg-5 is not held: moves 1.25+ mm towards +X (at 0)
+  FAIL  leg-6 is not held: moves 1.25+ mm towards -X (at 16)
+  FAIL  leg-7 is not held: moves 1.65+ mm towards +X (at 0)
   ok    spine: held within 0.3 mm / 5.0° (free: )
   ok    crank-1: held within 0.6 mm / 5.0° (free: spin)
   ok    crank-2: held within 0.6 mm / 5.0° (free: spin)
@@ -165,18 +159,17 @@ cad_verify: PASS (0 failures, 83 warnings)
   ok    idler-1: held within 0.6 mm / 8.0° (free: spin)
   ok    idler-2: held within 0.6 mm / 8.0° (free: spin)
   ok    idler-3: held within 0.6 mm / 8.0° (free: spin)
-  ok    sleeve-1: held within 0.3 mm / 5.0° (free: spin)
-  ok    sleeve-2: held within 0.3 mm / 5.0° (free: spin)
-  ok    sleeve-3: held within 0.3 mm / 5.0° (free: spin)
   ok    transfer: held within 0.6 mm / 8.0° (free: spin)
-  ok    transfer-sleeve: held within 0.3 mm / 5.0° (free: spin)
-  ok    drive-unit: held within 0.3 mm / 5.0° (free: )
+  ok    journal-cap: held within 0.3 mm / 5.0° (free: )
+  ok    motor-u: held within 0.3 mm / 5.0° (free: )
+  ok    transfer-cheek: held within 0.3 mm / 5.0° (free: )
   ok    pinion: held within 0.3 mm / 5.0° (free: spin slide)
   ok    n10-motor: held within 0.3 mm / 5.0° (free:  slide)
   ok    axle-1: held within 0.3 mm / 5.0° (free: spin slide)
   ok    axle-2: held within 0.3 mm / 5.0° (free: spin slide)
   ok    axle-3: held within 0.3 mm / 5.0° (free: spin slide)
-  ok    axle-t: held within 0.3 mm / 5.0° (free: spin slide)
+  ok    transfer-pin: held within 0.3 mm / 5.0° (free: spin slide)
+  ok    strap-screw: held within 0.3 mm / 5.0° (free: spin slide)
   ok    keel-1: held within 0.3 mm / 5.0° (free: spin slide)
   ok    keel-2: held within 0.3 mm / 5.0° (free: spin slide)
   ok    cell-holder: held within 0.6 mm / 5.0° (free: )
@@ -184,36 +177,33 @@ cad_verify: PASS (0 failures, 83 warnings)
   ok    ag13-cells: held within 0.6 mm / 5.0° (free: spin)
   ok    cell-springs: held within 0.6 mm / 5.0° (free: spin)
   ok    nickel-strip: held within 0.6 mm / 5.0° (free: )
-  ok    holder-screw: held within 0.6 mm / 5.0° (free: spin)
+  ok    holder-screw: held within 0.6 mm / 5.0° (free: spin slide)
 
 == 5 assembly order
   ok    crank-1 goes in from +Z on the bench
   ok    crank-2 goes in from +Z on the bench
   ok    crank-3 goes in from +Z on the bench
   ok    crank-4 goes in from +Z on the bench
-  ok    idler-1 + sleeve-1 (as one body) goes in from +Z on the bench
-  ok    idler-2 + sleeve-2 (as one body) goes in from +Z on the bench
-  ok    idler-3 + sleeve-3 (as one body) goes in from +Z on the bench
-  ok    transfer + transfer-sleeve (as one body) goes in from -Z on the bench
-  ok    axle-t goes in from -X on the bench
-        axle-t: not checked against transfer-sleeve (self-tapping M2 in its pilot Ø1.6 (plan m2-screws, assumed, coupon c2))
-        axle-t: not checked against drive-unit (self-tapping M2 in its pilot Ø1.6 (plan m2-screws, assumed, coupon c2))
-  ok    drive-unit + transfer + transfer-sleeve + axle-t (as one body) goes in from +Z on the bench
-  ok    axle-1 goes in from -X on the bench
-        axle-1: not checked against sleeve-1 (self-tapping M2 in its pilot Ø1.6 (plan m2-screws, assumed, coupon c2))
-        axle-1: not checked against spine (tip into the +x wall pilot)
-  ok    axle-2 goes in from -X on the bench
-        axle-2: not checked against sleeve-2 (self-tapping M2 in its pilot Ø1.6 (plan m2-screws, assumed, coupon c2))
-        axle-2: not checked against spine (tip into the +x wall pilot)
+  ok    idler-1 goes in from +Z on the bench
+  ok    idler-2 goes in from +Z on the bench
+  ok    idler-3 goes in from +Z on the bench
+  ok    journal-cap goes in from +Z on the bench
   ok    axle-3 goes in from -X on the bench
-        axle-3: not checked against sleeve-3 (self-tapping M2 in its pilot Ø1.6 (plan m2-screws, assumed, coupon c2))
-        axle-3: not checked against spine (tip into the +x wall pilot)
-  ok    spine + crank-1 + crank-2 + crank-3 + crank-4 + idler-1 + idler-2 + idler-3 + sleeve-1 + sleeve-2 + sleeve-3 + drive-unit + transfer + transfer-sleeve + axle-t + axle-1 + axle-2 + axle-3 (as one body) goes in from +Z
+        axle-3: not checked against spine (self-tapping M3 in its pilot Ø2.5 (plan m3-screws, assumed, coupon c2) (-x wall))
+  ok    transfer goes in from +Z on the bench
+  ok    motor-u goes in from +Z on the bench
+  ok    axle-1 goes in from -X on the bench
+        axle-1: not checked against spine (self-tapping M3 in its pilot Ø2.5 (plan m3-screws, assumed, coupon c2) (-x wall))
+  ok    axle-2 goes in from -X on the bench
+        axle-2: not checked against spine (self-tapping M3 in its pilot Ø2.5 (plan m3-screws, assumed, coupon c2) (-x wall))
+  ok    transfer-pin goes in from -X on the bench
+        transfer-pin: not checked against motor-u (self-tapping M3 in its pilot Ø2.5 (plan m3-screws, assumed, coupon c2) (boss))
+  ok    spine + crank-1 + crank-2 + crank-3 + crank-4 + idler-1 + idler-2 + idler-3 + journal-cap + axle-3 + transfer + motor-u + axle-1 + axle-2 + transfer-pin (as one body) goes in: -Y-Z 30.0167 mm, then +Y 1 mm
   ok    keel-1 goes in from -Z
-        keel-1: not checked against spine (self-tapping M2 in its pilot Ø1.6 (plan m2-screws, assumed, coupon c2))
+        keel-1: not checked against spine (self-tapping M3 in its pilot Ø2.5 (plan m3-screws, assumed, coupon c2))
   ok    keel-2 goes in from -Z
-        keel-2: not checked against spine (self-tapping M2 in its pilot Ø1.6 (plan m2-screws, assumed, coupon c2))
-  ok    leg-1 goes in: down 30 mm, then -X+Y-Z 6.6 mm (machine at step 0)
+        keel-2: not checked against spine (self-tapping M3 in its pilot Ø2.5 (plan m3-screws, assumed, coupon c2))
+  ok    leg-1 goes in: down 30 mm, then -X-Y-Z 6.6 mm (machine at step 0)
         leg-1: not checked against crank-2 (the snap bead flexes over the pin tip (slit, fits.PRESS, coupon c1))
   ok    leg-2 goes in: down 30 mm, then -X-Y-Z 6.6 mm (machine at step 0)
         leg-2: not checked against crank-3 (the snap bead flexes over the pin tip (slit, fits.PRESS, coupon c1))
@@ -225,15 +215,18 @@ cad_verify: PASS (0 failures, 83 warnings)
         leg-6: not checked against crank-3 (the snap bead flexes over the pin tip (slit, fits.PRESS, coupon c1))
   ok    leg-7 goes in: down 30 mm, then +X-Y-Z 6.6 mm (machine at step 0)
         leg-7: not checked against crank-4 (the snap bead flexes over the pin tip (slit, fits.PRESS, coupon c1))
-  ok    leg-0 goes in: down 30 mm, then -X-Y-Z 6.6 mm (machine at step 12)
+  FAIL  leg-0 cannot go in: down 30 mm, then -X-Y-Z 6.6 mm (machine at step 12): blocked on move 2 at 1.36 mm
         leg-0: not checked against crank-1 (the snap bead flexes over the pin tip (slit, fits.PRESS, coupon c1))
   ok    leg-3 goes in: down 30 mm, then -X-Y-Z 6.6 mm (machine at step 12)
         leg-3: not checked against crank-4 (the snap bead flexes over the pin tip (slit, fits.PRESS, coupon c1))
-  ok    cell-holder goes in: down 34 mm, then -Y 5 mm, then down 6 mm
+  ok    cell-holder goes in: down 30 mm, then -Y 4.02199 mm, then down 0.3 mm
   ok    holder-screw goes in from +Z
-        holder-screw: not checked against drive-unit (self-tapping M2 in its pilot Ø1.6 (plan m2-screws, assumed, coupon c2))
+        holder-screw: not checked against motor-u (self-tapping M3 in its pilot Ø2.5 (plan m3-screws, assumed, coupon c2))
   ok    pinion goes in from +X on the bench
-  ok    n10-motor + pinion (as one body) goes in: +X 38 mm
+  ok    n10-motor + pinion (as one body) goes in from +Z
+  ok    transfer-cheek goes in from +Z
+  ok    strap-screw goes in from +Z
+        strap-screw: not checked against motor-u (self-tapping M3 in its pilot Ø2.5 (plan m3-screws, assumed, coupon c2) (-y ear))
   ok    nickel-strip goes in from +Z
   ok    cell-springs goes in: down 30 mm, then -Y 2 mm
   ok    ag13-cells goes in from +Z
@@ -245,70 +238,73 @@ cad_verify: PASS (0 failures, 83 warnings)
   ok    body + ss12d00-switch + leds (as one body) goes in from +Z (machine at step 12)
 
 == 6 print (overhangs over 45°, in print orientation)
-  WARN  base: upright feature thinner than Ø4 (0.2 mm² section) from z 9.2 to 13.2 at [-32.1, -10.2] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  base: upright feature thinner than Ø4 (0.5 mm² section) from z 9.2 to 14.0 at [32.2, -10.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  base: upright feature thinner than Ø4 (1.4 mm² section) from z 9.2 to 11.2 at [31.6, -0.5] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  base: 3127 mm² of overhang needing support, 49 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-9.2, 23.9, 17.0] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  body: upright feature thinner than Ø4 (0.0 mm² section) from z -19.1 to -17.1 at [28.2, 0.7] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  body: upright feature thinner than Ø4 (0.0 mm² section) from z -19.5 to -17.1 at [-28.3, 0.8] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  body: upright feature thinner than Ø4 (0.5 mm² section) from z -24.7 to -19.5 at [-34.3, 22.6] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  body: 4655 mm² of overhang needing support, 1235 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [0.2, 16.0, -46.9] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  leg-0: 202 mm² of overhang needing support, 40 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [40.8, -40.7, 47.6] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  leg-1: upright feature thinner than Ø4 (0.9 mm² section) from z 16.1 to 22.1 at [17.3, -9.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  leg-1: 198 mm² of overhang needing support, 38 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [56.0, -14.4, 47.7] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  leg-2: upright feature thinner than Ø4 (0.2 mm² section) from z 16.1 to 22.5 at [17.1, 3.3] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  leg-2: 185 mm² of overhang needing support, 34 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [55.5, 14.3, 47.3] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  leg-3: 185 mm² of overhang needing support, 38 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [40.0, 41.8, 48.0] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  leg-4: 202 mm² of overhang needing support, 40 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-40.8, -40.7, 47.6] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  leg-5: upright feature thinner than Ø4 (0.9 mm² section) from z 16.1 to 22.1 at [-17.3, -9.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  leg-5: 198 mm² of overhang needing support, 38 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-56.0, -14.4, 47.7] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  leg-6: upright feature thinner than Ø4 (0.2 mm² section) from z 16.1 to 22.5 at [-17.1, 3.3] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  leg-6: 185 mm² of overhang needing support, 34 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-55.5, 14.3, 47.3] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  leg-7: 185 mm² of overhang needing support, 38 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-40.0, 41.8, 48.0] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  spine: upright feature thinner than Ø4 (1.7 mm² section) from z 10.3 to 18.3 at [2.4, 19.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  spine: upright feature thinner than Ø4 (1.7 mm² section) from z 10.3 to 18.3 at [-2.4, 19.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  spine: upright feature thinner than Ø4 (1.7 mm² section) from z 10.3 to 18.3 at [-2.4, -22.0] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  spine: 94 mm² of overhang needing support, 10 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-2.6, -1.0, 17.2] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  crank-1: upright feature thinner than Ø4 (3.1 mm² section) from z 4.5 to 8.9 at [-11.9, -21.8] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  crank-1: upright feature thinner than Ø4 (3.1 mm² section) from z -9.1 to -4.7 at [-11.9, -17.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  crank-1: 69 mm² of overhang needing support, 33 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-13.7, -20.5, 3.2] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  crank-2: upright feature thinner than Ø4 (3.1 mm² section) from z 4.5 to 8.9 at [-11.9, -5.2] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  crank-2: upright feature thinner than Ø4 (3.1 mm² section) from z -9.1 to -4.7 at [-11.9, -9.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  crank-2: 69 mm² of overhang needing support, 33 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-13.7, -6.6, 3.2] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  crank-3: upright feature thinner than Ø4 (3.1 mm² section) from z 4.5 to 8.9 at [-11.9, 1.8] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  crank-3: upright feature thinner than Ø4 (3.1 mm² section) from z -9.1 to -4.7 at [-11.9, 6.4] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  crank-3: 69 mm² of overhang needing support, 33 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-13.7, 3.1, 3.2] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  crank-4: upright feature thinner than Ø4 (3.1 mm² section) from z -9.1 to -4.7 at [-11.9, 15.1] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  crank-4: upright feature thinner than Ø4 (3.1 mm² section) from z 4.5 to 8.9 at [-11.9, 19.8] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  crank-4: 69 mm² of overhang needing support, 33 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-13.7, 18.4, 3.2] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  base: upright feature thinner than Ø4 (0.6 mm² section) from z 17.6 to 23.2 at [45.1, -16.8] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  base: upright feature thinner than Ø4 (0.6 mm² section) from z 17.2 to 22.8 at [-45.1, -16.6] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  base: upright feature thinner than Ø4 (0.7 mm² section) from z 14.4 to 17.2 at [-46.4, -0.6] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  base: 6573 mm² of overhang needing support, 103 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-12.1, 32.6, 23.7] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  body: upright feature thinner than Ø4 (0.0 mm² section) from z -28.5 to -25.3 at [-25.0, 17.8] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  body: upright feature thinner than Ø4 (0.0 mm² section) from z -28.1 to -25.3 at [25.0, 17.8] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  body: upright feature thinner than Ø4 (0.0 mm² section) from z -23.3 to -20.5 at [-12.2, 45.0] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  body: 9338 mm² of overhang needing support, 2339 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [0.3, 22.8, -67.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-0: 406 mm² of overhang needing support, 78 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [58.3, -58.1, 68.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-1: upright feature thinner than Ø4 (1.4 mm² section) from z 22.8 to 31.6 at [24.7, -12.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  leg-1: 410 mm² of overhang needing support, 74 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [80.0, -20.6, 68.1] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-2: upright feature thinner than Ø4 (0.1 mm² section) from z 22.8 to 32.4 at [24.4, 4.6] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  leg-2: 377 mm² of overhang needing support, 69 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [79.3, 20.5, 67.6] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-3: 370 mm² of overhang needing support, 74 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [57.2, 59.8, 68.5] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-4: 406 mm² of overhang needing support, 78 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-58.3, -58.1, 68.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-5: upright feature thinner than Ø4 (1.4 mm² section) from z 22.8 to 31.6 at [-24.7, -12.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  leg-5: 410 mm² of overhang needing support, 74 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-80.0, -20.6, 68.1] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-6: upright feature thinner than Ø4 (0.1 mm² section) from z 22.8 to 32.4 at [-24.4, 4.6] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  leg-6: 377 mm² of overhang needing support, 69 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-79.3, 20.5, 67.6] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  leg-7: 370 mm² of overhang needing support, 74 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-57.2, 59.8, 68.5] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  spine: upright feature thinner than Ø4 (4.4 mm² section) from z 15.0 to 25.8 at [-3.4, 28.4] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  spine: upright feature thinner than Ø4 (4.4 mm² section) from z 15.0 to 25.8 at [3.4, 28.4] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  spine: upright feature thinner than Ø4 (4.4 mm² section) from z 15.0 to 25.8 at [-3.4, -31.3] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  spine: 226 mm² of overhang needing support, 26 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [3.1, -18.3, 23.8] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  crank-1: upright feature thinner than Ø4 (6.4 mm² section) from z -11.0 to -8.2 at [-17.0, -24.5] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crank-1: upright feature thinner than Ø4 (6.4 mm² section) from z 8.2 to 11.0 at [-17.0, -31.2] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crank-1: 137 mm² of overhang needing support, 63 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-19.6, -29.3, 4.6] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  crank-2: upright feature thinner than Ø4 (6.4 mm² section) from z 8.2 to 11.0 at [-17.0, -7.5] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crank-2: upright feature thinner than Ø4 (6.4 mm² section) from z -11.0 to -8.2 at [-17.0, -14.2] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crank-2: 137 mm² of overhang needing support, 64 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-19.6, -9.4, 4.6] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  crank-3: upright feature thinner than Ø4 (6.4 mm² section) from z 9.0 to 11.4 at [-17.0, 3.0] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crank-3: upright feature thinner than Ø4 (6.4 mm² section) from z -11.4 to -9.0 at [-17.0, 9.7] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crank-3: 137 mm² of overhang needing support, 65 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-19.6, 4.9, 4.6] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  crank-4: upright feature thinner than Ø4 (6.4 mm² section) from z 7.8 to 11.0 at [-17.0, 28.2] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crank-4: upright feature thinner than Ø4 (6.4 mm² section) from z -11.0 to -7.8 at [-17.0, 21.6] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  crank-4: 137 mm² of overhang needing support, 64 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-19.6, 26.3, 4.6] in print orientation): open it, split the part, or give the reason in the design review
         idler-1: no overhangs
         idler-2: no overhangs
         idler-3: no overhangs
-        sleeve-1: no overhangs
-        sleeve-2: no overhangs
-        sleeve-3: no overhangs
-  WARN  transfer: 78 mm² of overhang needing support, 26 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-24.2, -8.7, 3.8] in print orientation): open it, split the part, or give the reason in the design review
-        transfer-sleeve: no overhangs
-  WARN  drive-unit: upright feature thinner than Ø4 (1.1 mm² section) from z 0.9 to 2.9 at [-3.4, 15.2] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  drive-unit: upright feature thinner than Ø4 (1.1 mm² section) from z 12.5 to 14.5 at [-3.4, 14.7] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  drive-unit: upright feature thinner than Ø4 (1.6 mm² section) from z -5.9 to -1.9 at [1.9, 41.0] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  drive-unit: 256 mm² of overhang needing support, 146 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-5.0, 33.1, 8.1] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  transfer: 174 mm² of overhang needing support, 85 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-33.3, 0.3, 5.2] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  journal-cap: upright feature thinner than Ø4 (3.9 mm² section) from z -22.5 to -18.5 at [-5.4, -16.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  journal-cap: upright feature thinner than Ø4 (4.0 mm² section) from z -22.5 to -18.5 at [-5.4, -14.3] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  journal-cap: upright feature thinner than Ø4 (8.5 mm² section) from z -26.1 to -19.7 at [-3.4, -6.4] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+        journal-cap: 2 mm² of overhang needing support, all of it over the bed
+        motor-u: no overhangs
+        transfer-cheek: no overhangs
         pinion: no overhangs
-  WARN  cell-holder: 443 mm² of overhang needing support, 389 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-10.7, 36.4, -7.7] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  cell-holder: upright feature thinner than Ø4 (2.7 mm² section) from z -7.3 to -4.5 at [-2.6, 39.4] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  cell-holder: upright feature thinner than Ø4 (2.7 mm² section) from z -7.3 to -4.5 at [2.6, 39.4] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  cell-holder: 417 mm² of overhang needing support, 398 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [10.9, 49.8, -13.9] in print orientation): open it, split the part, or give the reason in the design review
         cell-lid: no overhangs
 
 == 8 access: can a finger or tool reach each fastener when it goes in?
   ok    body: reachable (pressed down by hand on the roof: two front clicks)
-  ok    axle-1: reachable (1.5 mm hex key from -x)
-  ok    axle-2: reachable (1.5 mm hex key from -x)
-  ok    axle-3: reachable (1.5 mm hex key from -x)
-  ok    axle-t: reachable (1.5 mm hex key from -x)
-  ok    keel-1: reachable (1.5 mm hex key from below, base on its flank)
-  ok    keel-2: reachable (1.5 mm hex key from below, base on its flank)
-  ok    drive-unit + transfer + transfer-sleeve + axle-t: reachable (set down by hand on ear 2: tongues into slots 1-3)
-  ok    spine + crank-1 + crank-2 + crank-3 + crank-4 + idler-1 + idler-2 + idler-3 + sleeve-1 + sleeve-2 + sleeve-3 + drive-unit + transfer + transfer-sleeve + axle-t + axle-1 + axle-2 + axle-3: reachable (set onto the keel seat by hand, pressed on ear 2)
-  ok    n10-motor + pinion: reachable (pushed in along +x by hand)
-  ok    holder-screw: reachable (1.5 mm hex key from above, clamp empty)
+  ok    axle-1: reachable (2 mm hex key from -x (ISO 7380 button head))
+  ok    axle-2: reachable (2 mm hex key from -x (ISO 7380 button head))
+  ok    axle-3: reachable (2 mm hex key from -x (ISO 7380 button head))
+  ok    transfer-pin: reachable (2 mm hex key from -x (ISO 7380 button head))
+  ok    strap-screw: reachable (2.5 mm hex key from above)
+  ok    keel-1: reachable (2.5 mm hex key from below, base on its flank)
+  ok    keel-2: reachable (2.5 mm hex key from below, base on its flank)
+  ok    journal-cap: reachable (pressed down by hand on the plate)
+  ok    motor-u: reachable (pressed down by hand on the U's -x end)
+  ok    transfer-cheek: reachable (pressed down by hand on the strap)
+  ok    spine + crank-1 + crank-2 + crank-3 + crank-4 + idler-1 + idler-2 + idler-3 + journal-cap + axle-3 + transfer + motor-u + axle-1 + axle-2 + transfer-pin: reachable (set onto the keel seat by hand, pressed on the cap)
+  ok    n10-motor + pinion: reachable (pressed down into the U by hand)
+  ok    holder-screw: reachable (2.5 mm hex key from above, through the U's key hole (motor not in yet))
   ok    nickel-strip: reachable (tweezers tip (Ø1) on the strip's top edge, down into its slot)
   ok    cell-springs: reachable (fingertip (Ø3) on the middle spring, pressed against the front wall)
   ok    leds: reachable (fingertip on the LED's back, pushed forward into its bore)
@@ -320,66 +316,71 @@ cad_verify: PASS (0 failures, 83 warnings)
 == 9 joints: every fit at least its measured clearance, at every step
   ok    body × base (front snap fingers under the ribs and rear tab (plan body-front-snaps, body-rear-tab)): ≥ 0.00 mm a side (fit 0.00, assumed)
   WARN  body × base: fit not measured yet (never printed: prove on a coupon): prove it on a coupon first
-  ok    leg-0 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.42 mm a side (fit 0.40, assumed)
+  ok    leg-0 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.51 mm a side (fit 0.40, assumed)
   WARN  leg-0 × base: fit not measured yet (Morante, 2026-11-23: «Se laxo con tolerancias muy pequeñas en sitios no críticos»; leg-3 cleared the base's neck window by 0.41 a side against LEG_PATH 0.5. Coupon in the robot's batch): prove it on a coupon first
-  ok    leg-1 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.99 mm a side (fit 0.40, assumed)
+  ok    leg-1 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.86 mm a side (fit 0.40, assumed)
   WARN  leg-1 × base: fit not measured yet (Morante, 2026-11-23: «Se laxo con tolerancias muy pequeñas en sitios no críticos»; leg-3 cleared the base's neck window by 0.41 a side against LEG_PATH 0.5. Coupon in the robot's batch): prove it on a coupon first
-  ok    leg-2 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.96 mm a side (fit 0.40, assumed)
+  ok    leg-2 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.83 mm a side (fit 0.40, assumed)
   WARN  leg-2 × base: fit not measured yet (Morante, 2026-11-23: «Se laxo con tolerancias muy pequeñas en sitios no críticos»; leg-3 cleared the base's neck window by 0.41 a side against LEG_PATH 0.5. Coupon in the robot's batch): prove it on a coupon first
-  ok    leg-3 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.41 mm a side (fit 0.40, assumed)
+  ok    leg-3 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.60 mm a side (fit 0.40, assumed)
   WARN  leg-3 × base: fit not measured yet (Morante, 2026-11-23: «Se laxo con tolerancias muy pequeñas en sitios no críticos»; leg-3 cleared the base's neck window by 0.41 a side against LEG_PATH 0.5. Coupon in the robot's batch): prove it on a coupon first
-  ok    leg-4 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.40 mm a side (fit 0.40, assumed)
+  ok    leg-4 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.50 mm a side (fit 0.40, assumed)
   WARN  leg-4 × base: fit not measured yet (Morante, 2026-11-23: «Se laxo con tolerancias muy pequeñas en sitios no críticos»; leg-3 cleared the base's neck window by 0.41 a side against LEG_PATH 0.5. Coupon in the robot's batch): prove it on a coupon first
-  ok    leg-5 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 1.03 mm a side (fit 0.40, assumed)
+  ok    leg-5 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 1.12 mm a side (fit 0.40, assumed)
   WARN  leg-5 × base: fit not measured yet (Morante, 2026-11-23: «Se laxo con tolerancias muy pequeñas en sitios no críticos»; leg-3 cleared the base's neck window by 0.41 a side against LEG_PATH 0.5. Coupon in the robot's batch): prove it on a coupon first
-  ok    leg-6 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 1.05 mm a side (fit 0.40, assumed)
+  ok    leg-6 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 1.17 mm a side (fit 0.40, assumed)
   WARN  leg-6 × base: fit not measured yet (Morante, 2026-11-23: «Se laxo con tolerancias muy pequeñas en sitios no críticos»; leg-3 cleared the base's neck window by 0.41 a side against LEG_PATH 0.5. Coupon in the robot's batch): prove it on a coupon first
-  ok    leg-7 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.41 mm a side (fit 0.40, assumed)
+  ok    leg-7 × base (leg neck in its open-top window (plan leg-path; LEG_OPEN, 2026-11-23)): ≥ 0.60 mm a side (fit 0.40, assumed)
   WARN  leg-7 × base: fit not measured yet (Morante, 2026-11-23: «Se laxo con tolerancias muy pequeñas en sitios no críticos»; leg-3 cleared the base's neck window by 0.41 a side against LEG_PATH 0.5. Coupon in the robot's batch): prove it on a coupon first
-  ok    crank-1 × spine (journal in its open-top slot (plan crank-in-spine)): ≥ 0.25 mm a side (fit 0.25, measured)
-  ok    crank-2 × spine (journal in its open-top slot (plan crank-in-spine)): ≥ 0.25 mm a side (fit 0.25, measured)
-  ok    crank-3 × spine (journal in its open-top slot (plan crank-in-spine)): ≥ 0.25 mm a side (fit 0.25, measured)
-  ok    crank-4 × spine (journal in its open-top slot (plan crank-in-spine)): ≥ 0.25 mm a side (fit 0.25, measured)
-  ok    crank-1 × drive-unit (cap tongue over the journal (plan crank-in-spine)): ≥ 0.25 mm a side (fit 0.25, measured)
-  ok    crank-2 × drive-unit (cap tongue over the journal (plan crank-in-spine)): ≥ 0.25 mm a side (fit 0.25, measured)
-  ok    crank-3 × drive-unit (cap tongue over the journal (plan crank-in-spine)): ≥ 0.25 mm a side (fit 0.25, measured)
-  ok    idler-1 × sleeve-1 (idler on its sleeve (plan idlers)): ≥ 0.24 mm a side (fit 0.25, measured)
-  ok    idler-2 × sleeve-2 (idler on its sleeve (plan idlers)): ≥ 0.24 mm a side (fit 0.25, measured)
-  ok    idler-3 × sleeve-3 (idler on its sleeve (plan idlers)): ≥ 0.24 mm a side (fit 0.25, measured)
+  ok    crank-1 × spine (journal in its open-top slot (plan crank-in-spine)): ≥ 0.24 mm a side (fit 0.25, measured)
+  ok    crank-2 × spine (journal in its open-top slot (plan crank-in-spine)): ≥ 0.24 mm a side (fit 0.25, measured)
+  ok    crank-3 × spine (journal in its open-top slot (plan crank-in-spine)): ≥ 0.24 mm a side (fit 0.25, measured)
+  ok    crank-4 × spine (journal in its open-top slot (plan crank-in-spine)): ≥ 0.24 mm a side (fit 0.25, measured)
+  ok    crank-1 × journal-cap (cap tongue over the journal, 1-4 (plan crank-in-spine, F)): ≥ 0.25 mm a side (fit 0.25, measured)
+  ok    crank-2 × journal-cap (cap tongue over the journal, 1-4 (plan crank-in-spine, F)): ≥ 0.25 mm a side (fit 0.25, measured)
+  ok    crank-3 × journal-cap (cap tongue over the journal, 1-4 (plan crank-in-spine, F)): ≥ 0.25 mm a side (fit 0.25, measured)
+  ok    crank-4 × journal-cap (cap tongue over the journal, 1-4 (plan crank-in-spine, F)): ≥ 0.25 mm a side (fit 0.25, measured)
+  ok    idler-1 × axle-1 (idler on its M3 shank (plan idler-on-shank)): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    idler-2 × axle-2 (idler on its M3 shank (plan idler-on-shank)): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    idler-3 × axle-3 (idler on its M3 shank (plan idler-on-shank)): ≥ 0.15 mm a side (fit 0.15, measured)
   ok    idler-1 × spine (idler faces to the walls): ≥ 0.45 mm a side (fit 0.45, measured)
   ok    idler-2 × spine (idler faces to the walls): ≥ 0.45 mm a side (fit 0.45, measured)
   ok    idler-3 × spine (idler faces to the walls): ≥ 0.45 mm a side (fit 0.45, measured)
-  ok    transfer × transfer-sleeve (transfer on its sleeve): ≥ 0.25 mm a side (fit 0.25, measured)
-  ok    n10-motor × drive-unit (N10 in its clamp (plan motor-in-clamp)): ≥ 0.20 mm a side (fit 0.20, assumed)
-  WARN  n10-motor × drive-unit: fit not measured yet (as LOCATOR for a short printed part, not printed against a metal body yet. A coupon waits for the motor): prove it on a coupon first
+  ok    transfer × transfer-pin (transfer on its M3 x 16 (plan transfer-on-pin)): ≥ 0.15 mm a side (fit 0.15, measured)
+  ok    transfer × journal-cap (notch and hub cut round the tips (GEAR_TIP); small gear 0.45 off the rails (THRUST_IDLER)): ≥ 0.45 mm a side (fit 0.40, assumed)
+  WARN  transfer × journal-cap: fit not measured yet (a gear on a steel pin (STEEL 0.15) plus a wider printed wall (0.1) needs 0.25; was 0.5 (chassis rev 4), lowered with Morante, 2026-11-21. Proven by the drive coupon turning by hand): prove it on a coupon first
+  ok    transfer × motor-u (small gear's -x face to the pin boss): ≥ 0.45 mm a side (fit 0.45, measured)
+  ok    transfer × transfer-cheek (big gear's +x face to the cheek (plan transfer-on-pin)): ≥ 0.80 mm a side (fit 0.80, measured)
+  ok    n10-motor × motor-u (N10 in its U (plan motor-in-u)): ≥ 0.20 mm a side (fit 0.20, assumed)
+  WARN  n10-motor × motor-u: fit not measured yet (as LOCATOR for a short printed part, not printed against a metal body yet. A coupon waits for the motor): prove it on a coupon first
   ok    cell-lid × cell-holder (lid-on-holder: snap lips, LOCATOR 0.2 lips / 0.2 key (plan)): ≥ 0.00 mm a side (fit 0.00, assumed)
   WARN  cell-lid × cell-holder: fit not measured yet (never printed: prove on a coupon): prove it on a coupon first
   ok    ag13-cells × cell-holder (cells in their cradles (bought part in a printed seat)): ≥ 0.15 mm a side (fit 0.15, measured)
-  ok    cell-holder × crank-4 (crank-in-spine: post-cap tongue over journal 4 (TURN)): ≥ 0.25 mm a side (fit 0.25, measured)
+  ok    holder-screw × journal-cap (M3 tip through the cap's hole): ≥ 0.15 mm a side (fit 0.15, measured)
 
 == 9b junction sections: no thin plane through a neck
-  ok    leg-0: thinnest plane 17.3 mm2 at s 11.14 (>= 15.0; s 3.14..11.25): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
-  ok    leg-0: thinnest plane 33.0 mm2 at s 0.75 (>= 15.0; s 0.00..0.80): the tube's closed end wall and the rod running into it
-  ok    leg-1: thinnest plane 17.3 mm2 at s 11.10 (>= 15.0; s 3.10..11.25): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
-  ok    leg-1: thinnest plane 29.5 mm2 at s 0.75 (>= 15.0; s 0.00..0.80): the tube's closed end wall and the rod running into it
-  ok    leg-2: thinnest plane 17.4 mm2 at s 11.10 (>= 15.0; s 3.10..11.25): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
-  ok    leg-2: thinnest plane 27.9 mm2 at s 0.75 (>= 15.0; s 0.00..0.80): the tube's closed end wall and the rod running into it
-  ok    leg-3: thinnest plane 17.3 mm2 at s 11.21 (>= 15.0; s 3.21..11.25): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
-  ok    leg-3: thinnest plane 38.2 mm2 at s 0.75 (>= 15.0; s 0.00..0.80): the tube's closed end wall and the rod running into it
-  ok    leg-4: thinnest plane 17.3 mm2 at s 11.14 (>= 15.0; s 3.14..11.25): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
-  ok    leg-4: thinnest plane 33.0 mm2 at s 0.75 (>= 15.0; s 0.00..0.80): the tube's closed end wall and the rod running into it
-  ok    leg-5: thinnest plane 17.3 mm2 at s 11.10 (>= 15.0; s 3.10..11.25): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
-  ok    leg-5: thinnest plane 29.5 mm2 at s 0.75 (>= 15.0; s 0.00..0.80): the tube's closed end wall and the rod running into it
-  ok    leg-6: thinnest plane 17.4 mm2 at s 11.10 (>= 15.0; s 3.10..11.25): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
-  ok    leg-6: thinnest plane 27.9 mm2 at s 0.75 (>= 15.0; s 0.00..0.80): the tube's closed end wall and the rod running into it
-  ok    leg-7: thinnest plane 17.3 mm2 at s 11.21 (>= 15.0; s 3.21..11.25): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
-  ok    leg-7: thinnest plane 38.2 mm2 at s 0.75 (>= 15.0; s 0.00..0.80): the tube's closed end wall and the rod running into it
+  ok    leg-0: thinnest plane 35.3 mm2 at s 15.98 (>= 15.0; s 4.48..16.18): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
+  ok    leg-0: thinnest plane 56.9 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
+  ok    leg-1: thinnest plane 35.3 mm2 at s 16.18 (>= 15.0; s 4.43..16.18): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
+  ok    leg-1: thinnest plane 51.2 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
+  ok    leg-2: thinnest plane 35.6 mm2 at s 16.18 (>= 15.0; s 4.43..16.18): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
+  ok    leg-2: thinnest plane 46.8 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
+  ok    leg-3: thinnest plane 35.3 mm2 at s 16.09 (>= 15.0; s 4.59..16.18): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
+  ok    leg-3: thinnest plane 64.9 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
+  ok    leg-4: thinnest plane 35.3 mm2 at s 15.98 (>= 15.0; s 4.48..16.18): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
+  ok    leg-4: thinnest plane 56.9 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
+  ok    leg-5: thinnest plane 35.3 mm2 at s 16.18 (>= 15.0; s 4.43..16.18): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
+  ok    leg-5: thinnest plane 51.2 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
+  ok    leg-6: thinnest plane 35.6 mm2 at s 16.18 (>= 15.0; s 4.43..16.18): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
+  ok    leg-6: thinnest plane 46.8 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
+  ok    leg-7: thinnest plane 35.3 mm2 at s 16.09 (>= 15.0; s 4.59..16.18): tube -> neck rod -> arm, planes normal to the rod (rod alone 17.3)
+  ok    leg-7: thinnest plane 64.9 mm2 at s 1.75 (>= 15.0; s 0.00..1.80): the tube's closed end wall and the rod running into it
 
 == 10 marks: can each part that must be lined up be lined up?
-  ok    crank-1: 1 dots on the +x web hub (which crank, which end right); its gear is printed at its phase: set at crank pose 0
-  ok    crank-2: 2 dots on the +x web hub (which crank, which end right); its gear is printed at its phase: set at crank pose 0
-  ok    crank-3: 3 dots on the +x web hub (which crank, which end right); its gear is printed at its phase: set at crank pose 0
-  ok    crank-4: 4 dots on the +x web hub (which crank, which end right); its gear is printed at its phase: set at crank pose 0
+  ok    crank-1: number 1 engraved (≈ 3 mm high, 0.5 deep) on the +x web hub (which crank, which end right); its gear is printed at its phase: set at crank pose 0
+  ok    crank-2: number 2 engraved (≈ 3 mm high, 0.5 deep) on the +x web hub (which crank, which end right); its gear is printed at its phase: set at crank pose 0
+  ok    crank-3: number 3 engraved (≈ 3 mm high, 0.5 deep) on the +x web hub (which crank, which end right); its gear is printed at its phase: set at crank pose 0
+  ok    crank-4: number 4 engraved (≈ 3 mm high, 0.5 deep) on the +x web hub (which crank, which end right); its gear is printed at its phase: set at crank pose 0
   ok    idler-1: any tooth: the cranks' phases are printed in their gears, the idler meshes as it drops in at pose 0
   ok    idler-2: any tooth: the cranks' phases are printed in their gears, the idler meshes as it drops in at pose 0
   ok    idler-3: any tooth: the cranks' phases are printed in their gears, the idler meshes as it drops in at pose 0
@@ -388,3 +389,40 @@ cad_verify: PASS (0 failures, 83 warnings)
         ag13-cells: + face toward the nickel strip (back); '+' engraved on the holder's back wall
         body: body-on mark: crank pose 12 (plan step 17)
         cell-lid: keyed: back lips over the back wall, key in the back notch (goes on one way)
+        journal-cap: one way: lug 3 on the -x side over idler hole 3, 8 tongues in the 4 slots
+        motor-u: one way: lugs over idler holes 1, 2 on the -x wall, U over the cap
+        transfer-cheek: one way: cheek on the +x side of the big gear, strap over the U
+
+== 13 minimums: printable features (gear module, walls, marks)
+  ok    crank-1 gear at [0.0, -27.8, 17.0]: module 1.00 (10 T, tip Ø12.0) ≥ 1.0
+  ok    crank-2 gear at [0.0, -10.8, 17.0]: module 1.00 (10 T, tip Ø12.0) ≥ 1.0
+  ok    crank-3 gear at [0.0, 6.4, 17.0]: module 1.00 (10 T, tip Ø12.0) ≥ 1.0
+  ok    crank-4 gear at [0.0, 24.9, 17.0]: module 1.00 (10 T, tip Ø12.0) ≥ 1.0
+  ok    idler-1 gear at [0.0, -19.3, 22.5]: module 1.00 (10 T, tip Ø12.0) ≥ 1.0
+  ok    idler-2 gear at [0.0, -2.2, 22.3]: module 1.00 (10 T, tip Ø12.0) ≥ 1.0
+  ok    idler-3 gear at [0.0, 15.6, 21.0]: module 1.00 (10 T, tip Ø12.0) ≥ 1.0
+  ok    transfer gear at [0.0, -5.7, 33.3]: module 1.00 (13 T, tip Ø15.0) ≥ 1.0
+  ok    transfer gear at [7.3, -5.7, 33.3]: module 1.00 (17 T, tip Ø19.0) ≥ 1.0
+  ok    pinion gear at [7.3, -2.5, 48.6]: module 1.00 (14 T, tip Ø16.0) ≥ 1.0
+  ok    crank-1: mark cut, 1 bodies, each ≥ 3.0 mm (≥ 3.0)
+  ok    crank-2: mark cut, 1 bodies, each ≥ 3.0 mm (≥ 3.0)
+  ok    crank-3: mark cut, 1 bodies, each ≥ 3.1 mm (≥ 3.0)
+  ok    crank-4: mark cut, 1 bodies, each ≥ 3.7 mm (≥ 3.0)
+  ok    idler-1: no mark feature (any tooth: the cranks' phases are printed in their gears, the idler meshes as it drops in at pose 0)
+  ok    idler-2: no mark feature (any tooth: the cranks' phases are printed in their gears, the idler meshes as it drops in at pose 0)
+  ok    idler-3: no mark feature (any tooth: the cranks' phases are printed in their gears, the idler meshes as it drops in at pose 0)
+  ok    transfer: no mark feature (any tooth (meshes idler 2 and the pinion as it goes in))
+  ok    pinion: no mark feature (any tooth)
+  WARN  spine: 0.8% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.32, e.g. at [0.0, 7.1, 7.6] (≤ 1%: edges or a few samples; look at it)
+  WARN  crank-1: 0.5% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.30, e.g. at [6.3, -26.6, 14.4] (≤ 1%: edges or a few samples; look at it)
+  WARN  crank-2: 0.7% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.41, e.g. at [6.2, -11.0, 14.1] (≤ 1%: edges or a few samples; look at it)
+  WARN  crank-3: 0.7% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.39, e.g. at [6.2, 6.6, 19.9] (≤ 1%: edges or a few samples; look at it)
+  WARN  crank-4: 0.3% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.42, e.g. at [6.4, 25.4, 14.1] (≤ 1%: edges or a few samples; look at it)
+  ok    idler-1: walls ≥ 2.0 mm outside teeth and marks (thinnest 2.06)
+  ok    idler-2: walls ≥ 2.0 mm outside teeth and marks (thinnest 2.06)
+  ok    idler-3: walls ≥ 2.0 mm outside teeth and marks (thinnest 2.06)
+  ok    transfer: walls ≥ 2.0 mm outside teeth and marks (thinnest 1.99)
+  WARN  journal-cap: 0.7% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.47, e.g. at [-5.4, 15.0, 17.4] (≤ 1%: edges or a few samples; look at it)
+  WARN  motor-u: 0.3% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.24, e.g. at [-3.2, -5.9, 30.9] (≤ 1%: edges or a few samples; look at it)
+  WARN  transfer-cheek: 0.9% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.08, e.g. at [-6.4, -0.2, 55.1] (≤ 1%: edges or a few samples; look at it)
+  ok    pinion: walls ≥ 2.0 mm outside teeth and marks (thinnest 4.22)

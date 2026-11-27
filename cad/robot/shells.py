@@ -467,6 +467,9 @@ def body_static():
         cuts.append(cylA(((BO.CX + sx * BO.SEYE_DX - ORIGIN[0]) * S, (BO.SEYE_BACK - ORIGIN[1]) * S - LEDB0, (BO.SEYE_Z - ORIGIN[2]) * S), BO.SEYE_BORE * S, LEDB1 + LEDB0))
     cuts.append(Pos(-(lx / 2 + SW_THROW / 2 + st), y1 - 0.5, zs - lz / 2 - st) * Box(lx + SW_THROW + 2 * st, SW_SLOT_Y, lz + 2 * st, align=MIN))
     r = F.LOCATOR.side
+    # switch pocket opened 2.5 forward into the cavity: the leaning back wall left a wedge in front of it (z 29.6-31.2)
+    # that blocked the switch 0.25 out and met the fingertip (verify 2026-11-27)
+    cuts.append(Pos(-(bx / 2 + r), y1 - by - r - 2.5, zs - bz / 2 - r) * Box(bx + 2 * r, 2.5, bz + 2 * r, align=MIN))
     for part in (PW.holder(), PW.lid(), PW.cells(), PW.switch()):
         for so in part.solids():
             q = so.bounding_box(); cuts.append(Pos(q.min.X - r, q.min.Y - r, q.min.Z - r) * Box(q.size.X + 2 * r, q.size.Y + 2 * r, q.size.Z + 2 * r, align=MIN))

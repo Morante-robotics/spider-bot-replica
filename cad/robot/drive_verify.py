@@ -130,7 +130,7 @@ PRINT_ORIENT = {"spine": np.eye(4), **{n: _X2Z for n in CRANKS + IDLERS + ["tran
                 "journal-cap": np.diag([1.0, -1.0, -1.0, 1.0]),               # top face on the bed (180 deg about x): rails, tongues, lug 3 rise
                 "motor-u": _X2Z,                                              # -x face on the bed, the U rises along +x
                 "transfer-cheek": _MX2Z}                                      # +x face on the bed, the strap rises along -x
-MARKS = {**{c: f"{i+1} dots on the +x web hub (which crank, which end right); its gear is printed at its phase: set at crank pose 0" for i, c in enumerate(CRANKS)},
+MARKS = {**{c: f"number {i+1} engraved (≈ 3 mm high, 0.5 deep) on the +x web hub (which crank, which end right); its gear is printed at its phase: set at crank pose 0" for i, c in enumerate(CRANKS)},
          **{n: "any tooth: the cranks' phases are printed in their gears, the idler meshes as it drops in at pose 0" for n in IDLERS},
          "transfer": "any tooth (meshes idler 2 and the pinion as it goes in)", "pinion": "any tooth",
          "journal-cap": "one way: lug 3 on the -x side over idler hole 3, 8 tongues in the 4 slots",
@@ -141,12 +141,16 @@ _GX = lambda n, x, c, z: {"part": n, "origin": [x, *c], "axis": [1, 0, 0], "widt
 _I2 = (D.I[1][0] + 0.02, D.I[1][1])               # idler 2: the reader's polar bin at -y holds no edge of its root arc from the exact centre; 0.02 off it reads 10 teeth
 GEAR_GEOM = [*[_GX(c, 0.0, D.CENTRE[c], D.ZT) for c in CRANKS], *[_GX(n, 0.0, _I2 if i == 1 else D.I[i], D.ZI[i]) for i, n in enumerate(IDLERS)],
              _GX("transfer", 0.0, D.T, D.ZS), _GX("transfer", D.XB0 + D.GW / 2, D.T, D.ZB), _GX("pinion", D.XB0 + D.GW / 2, D.MC, D.ZP)]
-def _dots(i):                                       # crank i's dice dots as built (drive.crank: Sphere(0.35) on the +x web face)
-    o = D.CENTRE[CRANKS[i]]; out = []
-    for u, v in D.common.dice(i + 1, 1.0):
-        s = trimesh.creation.icosphere(subdivisions=2, radius=0.35); s.apply_translation([D.WB1, o[0] + u, o[1] + v]); out.append(s)
-    return trimesh.util.concatenate(out)
-MARK_GEOM = {**{c: _dots(i) for i, c in enumerate(CRANKS)}, **{n: None for n in IDLERS + ["transfer", "pinion"]}}
+def _mark(i):                                       # crank i's engraved number as built (drive.mark_cutter), as a mesh in the part's frame
+    import tempfile, os
+    from build123d import export_stl
+    o = D.CENTRE[CRANKS[i]]; cut = D.mark_cutter(i)
+    hub = D.cylx(o[0], o[1], D.WEBR, D.WB0, D.WB1)          # the web hub before the engraving: the cutter must remove material from it
+    assert (hub & cut).volume > 0.5, f"{CRANKS[i]}: the number's cutter removes no material from the +x web hub"
+    with tempfile.TemporaryDirectory() as d:
+        p = os.path.join(d, "mark.stl"); export_stl(cut, p, tolerance=0.01, angular_tolerance=0.2)
+        return trimesh.load(p, force="mesh")
+MARK_GEOM = {**{c: _mark(i) for i, c in enumerate(CRANKS)}, **{n: None for n in IDLERS + ["transfer", "pinion"]}}
 LABELS = {"es": {"spine": "espina", **{c: f"cigüeñal {i+1}" for i, c in enumerate(CRANKS)},
                  **{n: f"engranaje loco {i+1}" for i, n in enumerate(IDLERS)}, "transfer": "engranaje doble", "journal-cap": "tapa de los ejes", "motor-u": "soporte U del motor",
                  "transfer-cheek": "mejilla y brida del motor",

@@ -81,7 +81,7 @@ YF, YB = CY - HY, CY + HY                             # front / back outer faces
 YFI, YBI = YF + W, YB - W                             # inner faces
 XS = (-PITCH, 0.0, PITCH)
 CYC = YBI - F.STEEL.side - STRIP_T - CELL_H           # cells' stack centre: pushed by the spring against the strip
-NSX = CL.NSX                                          # strip half-width 18.5 (probe)
+NSX = HX - W - F.STEEL.side                           # strip half-width: inside the holder's side walls, STEEL a side (the probe's CL.NSX 18.5 x 1.43 overran the walls)
 # ---------------------------------------------------------------- post, post cap, tab (probe, re-plan 2026-11-22)
 OY4 = D["Oy"][3]
 SLW = D["JR"] + F.TURN.side                           # slot 4 half-width (journal + TURN)
@@ -105,7 +105,8 @@ WIRE_W, WIRE_D = 2.0, 1.5                             # wire slots in the wall t
 # ---------------------------------------------------------------- lid: plate, 2 front snap lips inside, 2 back lips outside
 LIDT = CL.LIDT                                        # 1.2
 JZ = ZT + LIDT + 11.5 / 2                             # JST pair stands on the lid (probe CL.JZ 43.5 put it 0.4 into the lid)
-LIP_T, LIP_L, LIP_W = 0.8 * K, 3.5 * K, 4.0 * K                   # snap lip: 0.8 thick (two lines), 3.5 long, 4 wide
+LIP_T, LIP_L = 0.8 * K, 3.5 * K                       # snap lip: 0.8 thick (two lines), 3.5 long
+LIP_W = PITCH - 2 * (SPR_R0 + F.STEEL.side + SEAT_W) - 2 * F.LOCATOR.side   # 4 wide at most: between the spring seat rings (LOCATOR a side)
 LIP_X = PITCH / 2                                     # between the springs / cell columns
 BUMP = 0.2 + F.LOCATOR.side                           # bump proud of the lip: 0.2 engagement past the LOCATOR gap
 BUMP_H = 0.8 * K                                          # bump height (45 deg both faces: snaps on, pulls off)

@@ -14,7 +14,7 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 for p in (ROOT, ROOT + "/cad", HERE, HERE + "/fitcheck"):
     if p not in sys.path: sys.path.insert(0, p)
-from build123d import Box, Cylinder, Pos, Rot, Plane, Polygon, extrude, Align, Compound, Sphere
+from build123d import Box, Cylinder, Pos, Rot, Plane, Polygon, extrude, Align, Compound, Sphere, Axis
 from cad import common, fits as F
 import shells as SH                        # CL (check.py layout), FE (S, P, patched pivots, A_ALL)
 FE, CL, P, A_ALL = SH.FE, SH.CL, SH.P, SH.A_ALL
@@ -66,7 +66,8 @@ KEEL_SCREW_Y = (-KY + 1.8 * FE.K, KY - 1.8 * FE.K)                # 2 M2 from be
 BASE_FLOOR = FE.BASE_WALL_R                         # bowl floor 0.84 thick (base WALL x S; base.stl ray at the keel)
 KEEL_BOSS_T = F.WALL_MIN                                   # boss material over the head (bearing slab)
 KEEL_HEAD_Z = M3_HEAD_H                                   # head bearing face: head Ø3.8 x 2 flush with the foot (0 .. 2)
-KEEL_LEN = 6.0                                      # M2 x 4: 1.5 boss + 2.5 into the keel pilot (was M2 x 6 from z 0)
+KEEL_LEN = 5.0                                      # M3 x 5 from the bearing face: 2 boss + 3 into the keel pilot (was 6: left 0.85 over the pilot, < WALL_MIN)
+KEEL_PILOT_OVER = 0.2                               # pilot past the screw tip; keel top over it = ZK1 - (3 + 5 + 0.2) >= WALL_MIN
 KEEL_SCREWS = [(0.0, y, KEEL_HEAD_Z, KEEL_LEN) for y in KEEL_SCREW_Y]    # (x, y, z of the head's bearing face, length), shank up
 ZKEEL0 = KEEL_HEAD_Z + KEEL_BOSS_T                  # keel foot on the boss tops (3.5); boss rises from the floor top to here
 # transfer compound over idler TI, pinion on the N10 (check.py)
@@ -228,8 +229,21 @@ def spine():
     for c in I:                                                             # idler axles (plan B): -x wall M3 pilot (the thread), +x wall STEEL
         sp = sp - cylx(c[0], c[1], M3_PILOT_R, -WX1 - 1, -WX0 + 0.01) - cylx(c[0], c[1], M3_HOLE_R, WX0 - 0.01, WX1 + 1)
     for y in KEEL_SCREW_Y:                                                  # keel pilots from below
-        sp = sp - cylz(0, y, M3_PILOT_R, ZKEEL0 - 1, KEEL_HEAD_Z + KEEL_LEN + 0.5)   # M2x4 from the boss, 0.5 past its tip
+        sp = sp - cylz(0, y, M3_PILOT_R, ZKEEL0 - 1, KEEL_HEAD_Z + KEEL_LEN + KEEL_PILOT_OVER)   # M3x5 from the boss, 0.2 past its tip
     return sp
+
+
+MARK_H, MARK_DEPTH = 3.0, 0.5                      # engraved number: ≈ 3 mm high (datasheet Phase 1, mark), 0.5 deep into the hub face
+MARK_FS = 4.2                                       # build123d Text font size whose digits stand 3.07 mm tall (bold)
+
+
+def mark_cutter(i):
+    """Cutter of crank i's number (i+1) on the +x web hub face (x = WB1), read from +x with z up; centred on the hub."""
+    from build123d import Text, FontStyle
+    o = (Oy[i], Oz)
+    t = Text(str(i + 1), MARK_FS, font_style=FontStyle.BOLD, align=(Align.CENTER, Align.CENTER))
+    t = extrude(t.faces().sort_by(Axis.Z)[0], MARK_DEPTH + 0.5)               # z 0..depth+0.5 (the part past the face is air)
+    return Pos(WB1 - MARK_DEPTH, o[0], o[1]) * Rot(0, 90, 0) * Rot(0, 0, 90) * t
 
 
 def crank(i):
@@ -250,8 +264,7 @@ def crank(i):
         ca, cb = (WB1 - 0.01, COLLAR_X1) if sx > 0 else (-COLLAR_X1, -WB1 + 0.01)
         if COLLAR: parts.append(cylx(A[1], A[2], COLLAR_R, ca, cb))          # collar: the leg's inner stop along x (off: see report)
     c = fuse(parts)
-    for u, v in common.dice(i + 1, 1.0):                                    # i+1 dots on the +x web hub: which crank, which end
-        c = c - Pos(WB1, o[0] + u, o[1] + v) * Sphere(0.35 * FE.K)
+    c = c - mark_cutter(i)                                                  # engraved number i+1 on the +x web hub: which crank, which end
     return c
 
 

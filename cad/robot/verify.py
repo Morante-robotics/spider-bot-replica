@@ -53,7 +53,7 @@ _LEG_ASM = [(n, [[0, 0, -LEG_DROP], [float(x) for x in -_leg_u(k) * LEG_SLIDE[k]
               "note": "lowered beside the pin, then slid inward along the pin's axis: the bead clicks into the groove"})
             for k, n in sorted(enumerate(LEGS), key=lambda kn: (ASM_POSE[kn[0]], kn[0]))]
 ASSEMBLY = [("base", None)] + _LEG_ASM + [("body", [0, 0, 1], {"at": SH.KC})]
-BODY_TOP = 56.3                                   # body roof's top (z, body.stl bbox): the finger presses on the outside, not from inside the shell
+BODY_TOP = 80.5                                  # body roof's top (z, body.stl bbox): the finger presses on the outside, not from inside the shell
 ACCESS = [{"at": "body", "tool": tool("finger", [0, 0, BODY_TOP], [0, 0, 1]), "why": "pressed down by hand on the roof: two front clicks"}]
 PRINT_ORIENT = {"base": np.eye(4),                                # foot down
                 "body": np.diag([1.0, -1.0, -1.0, 1.0])}           # rim up (roof on the bed): 180 deg about x

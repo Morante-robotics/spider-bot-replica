@@ -83,10 +83,16 @@ window over the tube end (`Windows(tube, wt)`, MINW = WALL_MIN), elliptic neck J
 BRELD +0.25; `--quick` 27 FAIL with it (20 before), legs 0/5 retention and leg-0 path worse. Kept or dropped when the
 joint is reopened.
 
-*Still open, not about the joint:* crank marks not cut (engraved numbers ≈ 3 mm, the new mark type); spine 0.86 at
-the keel; transfer-cheek sliver 0.12 at the strap tip (y −0.2, z 54.7); cell-holder × nickel-strip 6.6 mm³; cell-lid
-and nickel-strip retention; switch path 0.25 and its tool; the body roof tool hits the pinion; body build 42 s (over
-40 s); base drops two loose 15.4 mm³ pieces at the front rim; checks that ask more than their fit (above). Then the
+*Done 2026-11-27, not about the joint:* crank marks = engraved numbers 1–4, 3 mm × 0.5 deep on the +x web hub;
+spine keel pilots stop at z 8.2 (2.16 mm left), keel screws M3×6 → **M3×5**; nickel strip inside the holder's walls
+(NSX 18.84); lid lips 3.06 wide, between the spring seats (the lid is held); switch pocket opened 2.5 mm forward
+(the leaning back wall's wedge); `BODY_TOP` 80.5 (the roof tool started inside the shell). Full `cad_verify` on a
+clean rebuild: **10 FAIL, all on the legs** (body/transfer gaps 0.04–0.17 < 0.2, legs 0, 1, 5, 6, 7 not held, leg-0
+path), i.e. the parked joint. Before this, `out/` mixed the joint branch's legs and base with this branch's parts:
+rebuild everything (`build.py`) after switching branches.
+*Still open, not about the joint:* transfer-cheek sliver at the strap tip (now a WARN); body cold build 45 s and the
+full check 59 s (over 40 s); base loose pieces at the front rim (the clean build gives 1 solid: recheck); checks that
+ask more than their fit (above). Then the
 full `cad_verify`, coupons (c5: transfer centre distance through 3 screwed parts), plates, kit.
 *Done in phase 3 so far (2026-11-26/27), committed on the branch:* plan.json rewritten for S 1.0 (A + B + F, validate
 PASS, 24 steps); drive unit split into journal-cap 2.7 g, motor-u 3.4 g, transfer-cheek 1.3 g, flat, no support;
