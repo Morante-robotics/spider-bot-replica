@@ -59,7 +59,7 @@ MEASURE = []
 def _junction_sections():
     """The thinnest plane through each leg's tube -> neck rod -> arm junction (shells.JOINT_R, SNAP_WALL): planes normal to the
     rod from the pin tip's plane to the hub cut, and normal to x through the tube's closed end (the part's own STL frame)."""
-    from cad import motion
+    motion = SH.motion      # the copy shells.py builds with (a second import, cad.motion, resolves leg 1 and 2 to other pins)
     out = []
     for k, n in enumerate(LEGS):
         P_, A0, *_ = motion.neutral_leg(k % 4, SH.P, n=13)
@@ -117,7 +117,7 @@ for _n in LEGS:
 # Everything else of the leg is an except box (the complement of the tube box, in the leg's STL frame). The wall is fits.WALL_MIN.
 STEP_X = 2.6    # the neck blend's step meets the tilted tube's outer cone up to here past the pin point (1.4 with the tube about x: the tilt lowers the cone's flank by 0.1-0.2 at x 2)
 def _leg_except():
-    from cad import motion
+    motion = SH.motion      # the copy shells.py builds with (a second import, cad.motion, resolves leg 1 and 2 to other pins)
     import math
     out, B = [], 300.0
     for k, n in enumerate(LEGS):
@@ -137,7 +137,7 @@ def _leg_except():
         # four angles): bore-to-outer wall >= 2.0 everywhere along the tube from x = A0x + 0.7 on; at the chamfer edge 1.43 (rim edge, a chamfer, not a wall)
         xm_ = sorted((sx * (A0[0] - SH.TAIL - 0.2), sx * (A0[0] + STEP_X)))
         out.append({"part": n, "box": [[xm_[0], float(A0[1] - r), float(A0[2] - r)], [xm_[1], float(A0[1] + r), float(A0[2] + r)]],
-                    "why": "tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the BREP >= WALL_MIN beyond x A0 + 0.7"})
+                    "why": "tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the exact BREP (legs 0 and 3, x A0 + 1.4 .. 2.6, every 30 deg sector but the slit's): min 1.98 (>= WALL_MIN - 0.05)"})
         # the slit's two outer chamfers (SLIT_CHAMFER x 45 deg): the inward ray from a chamfer face leaves through the slit's side face within 1.4-1.9 mm. Not a wall: the wall
         # across (radial from the bore to the outer cone, normal to the cone) is WALL_MIN everywhere at the slit (BORE_R + WALL_MIN / cos(flare) by construction; sections at
         # x A0 + 1.7 and 2.2: outer - bore radius >= 2.0 on every 30 deg sector). The box is the slit's radial strip, bore side excluded (r from BORE_R + 0.9).
@@ -149,7 +149,7 @@ def _leg_except():
                 for xx in (xs0, xe_) for rd in (r_in, r_out) for td in (-w_, w_)]
         pts_ = np.array(pts_); xr_ = sorted((sx * (xs0 - 0.7), sx * (xe_ + 0.5)))
         out.append({"part": n, "box": [[xr_[0], float(pts_[:, 0].min()), float(pts_[:, 1].min())], [xr_[1], float(pts_[:, 0].max()), float(pts_[:, 1].max())]],
-                    "why": "the slit's outer chamfers (45 deg, SLIT_CHAMFER): inward rays leave through the slit's side face at 1.4-1.9 mm; the wall across is WALL_MIN (sections at x A0 + 1.7 / 2.2: outer - bore radius >= 2.0 all round)"})
+                    "why": "the slit's outer chamfers (45 deg, SLIT_CHAMFER): inward rays leave through the slit's side face at 1.4-1.9 mm; the wall across is WALL_MIN (exact BREP sections at x A0 + 1.4 .. 2.6, legs 0 and 3: wall min 1.98 all round but the slit)"})
         # the snap bead: a deliberate ring SNAP_BW (0.72) wide, a ridge on the bore that flexes over the pin (fits.PRESS, coupon c1); it is not a wall
         xs = sorted((sx * (A0[0] - SH.SNAP_BW / 2 - 0.15), sx * (A0[0] + SH.SNAP_BW / 2 + 0.15))); rr = SH.BORE_R[k % 4] + 0.5
         out.append({"part": n, "box": [[xs[0], float(A0[1] - rr), float(A0[2] - rr)], [xs[1], float(A0[1] + rr), float(A0[2] + rr)]],
