@@ -115,6 +115,7 @@ for _n in LEGS:
 # (c) check 13 reads the legs' joint region only: the end tube and its closed end (bore, snap groove/bead, slit), boxed from
 # shells.py (x: tail .. closed end, radius END_R + flare, + 1 mm); the arms, claws and foot tips are the looks' shape (printed at 0.70).
 # Everything else of the leg is an except box (the complement of the tube box, in the leg's STL frame). The wall is fits.WALL_MIN.
+STEP_X = 2.6    # the neck blend's step meets the tilted tube's outer cone up to here past the pin point (1.4 with the tube about x: the tilt lowers the cone's flank by 0.1-0.2 at x 2)
 def _leg_except():
     from cad import motion
     import math
@@ -123,9 +124,10 @@ def _leg_except():
         P_, A0, *_ = motion.neutral_leg(k % 4, SH.P, n=13)
         sx = 1.0 if k < 4 else -1.0
         x0 = A0[0] - SH.CL.TAIL; xe = SH.TUBE_X1[k % 4] + SH.SNAP_WALL
-        r = SH.END_RS[k % 4] + (xe - A0[0]) * math.tan(math.radians(SH.FLARE_DEG[k % 4])) + 1.0
+        r = SH.END_RS[k % 4] + (xe - A0[0]) * math.tan(math.radians(SH.CONE_FLARE[k % 4])) + 1.0
+        cy = float((xe - A0[0]) * SH.CONE_AXIS[k % 4][1] / SH.CONE_AXIS[k % 4][0]); cz = float((xe - A0[0]) * SH.CONE_AXIS[k % 4][2] / SH.CONE_AXIS[k % 4][0])     # the tilted axis at the closed end
         xa, xb = sorted((sx * (x0 - 1.0), sx * (xe + 1.0)))
-        ya, yb, za, zb = float(A0[1] - r), float(A0[1] + r), float(A0[2] - r), float(A0[2] + r)
+        ya, yb, za, zb = float(A0[1] - r + min(0, cy)), float(A0[1] + r + max(0, cy)), float(A0[2] - r + min(0, cz)), float(A0[2] + r + max(0, cz))
         why = "leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked"
         for lo, hi in (([-B, -B, -B], [xa, B, B]), ([xb, -B, -B], [B, B, B]), ([xa, -B, -B], [xb, ya, B]),
                        ([xa, yb, -B], [xb, B, B]), ([xa, ya, -B], [xb, yb, za]), ([xa, ya, zb], [xb, yb, B])):
@@ -133,9 +135,21 @@ def _leg_except():
         # the mouth: the outer chamfer (FACE_CHAMFER, 45 deg) thins the rim edge to 1.4-1.5 over 0.5 mm, and the neck's blend cone meets the tube in a 0.27 high step
         # at xrel 0.7: sharp edges, where the inward ray meets the neighbouring face within 0.0-0.2. Measured on the exact BREP (0.004 tessellation, section at
         # four angles): bore-to-outer wall >= 2.0 everywhere along the tube from x = A0x + 0.7 on; at the chamfer edge 1.43 (rim edge, a chamfer, not a wall)
-        xm_ = sorted((sx * (A0[0] - SH.TAIL - 0.2), sx * (A0[0] + 1.4)))
+        xm_ = sorted((sx * (A0[0] - SH.TAIL - 0.2), sx * (A0[0] + STEP_X)))
         out.append({"part": n, "box": [[xm_[0], float(A0[1] - r), float(A0[2] - r)], [xm_[1], float(A0[1] + r), float(A0[2] + r)]],
                     "why": "tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the BREP >= WALL_MIN beyond x A0 + 0.7"})
+        # the slit's two outer chamfers (SLIT_CHAMFER x 45 deg): the inward ray from a chamfer face leaves through the slit's side face within 1.4-1.9 mm. Not a wall: the wall
+        # across (radial from the bore to the outer cone, normal to the cone) is WALL_MIN everywhere at the slit (BORE_R + WALL_MIN / cos(flare) by construction; sections at
+        # x A0 + 1.7 and 2.2: outer - bore radius >= 2.0 on every 30 deg sector). The box is the slit's radial strip, bore side excluded (r from BORE_R + 0.9).
+        P_n = np.asarray(P_, float); u_ = P_n - np.asarray(A0, float); u_[0] = 0.0; u_ = -u_ / np.linalg.norm(u_)     # the slit's direction, as shells.py
+        ca_ = SH.CONE_AXIS[k % 4]; xe_ = SH.TUBE_X1[k % 4] + SH.SLIT_END; xs0 = A0[0] - SH.TAIL
+        r_in = SH.BORE_R[k % 4] + 0.9; r_out = SH.END_RS[k % 4] + (xe_ - A0[0]) * math.tan(math.radians(SH.CONE_FLARE[k % 4])) + 0.3
+        w_ = SH.SNAP_SLIT / 2 + SH.SLIT_CHAMFER + 0.2; tg_ = np.array([-u_[2], u_[1]])
+        pts_ = [np.asarray(A0[1:3], float) + (xx - A0[0]) * np.array([ca_[1], ca_[2]]) / ca_[0] + rd * u_[1:3] + td * tg_
+                for xx in (xs0, xe_) for rd in (r_in, r_out) for td in (-w_, w_)]
+        pts_ = np.array(pts_); xr_ = sorted((sx * (xs0 - 0.7), sx * (xe_ + 0.5)))
+        out.append({"part": n, "box": [[xr_[0], float(pts_[:, 0].min()), float(pts_[:, 1].min())], [xr_[1], float(pts_[:, 0].max()), float(pts_[:, 1].max())]],
+                    "why": "the slit's outer chamfers (45 deg, SLIT_CHAMFER): inward rays leave through the slit's side face at 1.4-1.9 mm; the wall across is WALL_MIN (sections at x A0 + 1.7 / 2.2: outer - bore radius >= 2.0 all round)"})
         # the snap bead: a deliberate ring SNAP_BW (0.72) wide, a ridge on the bore that flexes over the pin (fits.PRESS, coupon c1); it is not a wall
         xs = sorted((sx * (A0[0] - SH.SNAP_BW / 2 - 0.15), sx * (A0[0] + SH.SNAP_BW / 2 + 0.15))); rr = SH.BORE_R[k % 4] + 0.5
         out.append({"part": n, "box": [[xs[0], float(A0[1] - rr), float(A0[2] - rr)], [xs[1], float(A0[1] + rr), float(A0[2] + rr)]],
