@@ -24,6 +24,7 @@ from trimesh.remesh import subdivide_to_size
 SLACK = 0.05        # mm on top of WR when picking wall samples near the sweep (with SMOOTH: gaps 0.94-1.16 for WR 0.9)
 SLACK2 = 0.12       # outline buffer for the 0.4 mm wall sampling
 SMOOTH = 0.25       # outline grown and simplified by this: 11-13 sides per window
+NOTCH_GROW = 0.35   # extra outline buffer of a notch: body x leg-0/4/7 came out 0.22-0.29 against LEG_PATH 0.5 (column envelope + simplify)
 COL = 0.25          # floor columns along the wall
 MINW = 1.6          # wall between two windows narrower than this is cut (4 lines of a 0.4 nozzle)
 LEG_STEP = 0.8      # leg surface samples at most this far apart
@@ -203,7 +204,7 @@ def body_cutters(body, samples, frames, piv, r_pose, r_lift, kc, liftd, rimr, re
                 fr = frame_of(nn.mean(0)); t, z, n = fr; cs, zs = envelope(R @ t, R @ z, lower=False)
                 env = [(q * COL, zz) for q, zz in zip(cs, zs)] + [((cs[-1] + 1) * COL, zs[-1])]
                 zb = R[:, 2].min() - 2.0
-                poly = Polygon([(env[0][0], zb)] + env + [(env[-1][0], zb)]).buffer(SLACK2 + SMOOTH, quad_segs=2).simplify(SMOOTH)
+                poly = Polygon([(env[0][0], zb)] + env + [(env[-1][0], zb)]).buffer(SLACK2 + SMOOTH + NOTCH_GROW, quad_segs=2).simplify(SMOOTH)
                 d = R @ n; out.append((poly, fr, (d.min() - 1.0, d.max() + 1.0), f"notch leg {Lg}"))
             else:                                                             # shallow pocket in a face
                 n = body.face_normals[fi].mean(0); fr = frame_of(n); t, z, n = fr

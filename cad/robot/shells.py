@@ -72,8 +72,7 @@ PIN_X1 = P["XC"] + CL.PINX - PIN_TRIM   # pin tip (|x|)
 # in the tube so it opens over the pin tip. The snap fit is fits.PRESS (assumed): coupon list, not printed now.
 SNAP_NECK_R = 1.0 * FE.K                       # pin neck r in the groove (Ø2.0, brief: neck Ø >= 2.0)
 SNAP_BW = 0.5 * FE.K                           # bead width (axial)
-WALL_FACET = 0.06        # the check reads the coarse mesh, whose facets thin a round wall by up to ~0.04: the wall is designed this much over fits.WALL_MIN
-SNAP_WALL = F.WALL_MIN + WALL_FACET / 2                         # solid end wall closing the tube beyond the bore floor: the neck rod runs into it (print 2026-11-24: the rod only butted the open rim, leg 3 snapped)
+SNAP_WALL = F.WALL_MIN                         # solid end wall closing the tube beyond the bore floor: the neck rod runs into it (print 2026-11-24: the rod only butted the open rim, leg 3 snapped)
 END_PAD = 0.0                                  # end wall starts this far past the bore floor (the bore cutter runs 0.02 past it; the wall must stay SNAP_WALL thick)
 SNAP_SLIT = 0.6 * FE.K                         # slit width (tangential)
 def snap_bead_r(i):
@@ -214,7 +213,7 @@ def _leg_right(i):
         leg = fuse_all([leg, strut]) - bore
     leg = fuse_all([leg, ring])
     up_ = u - np.dot(u, [1.0, 0, 0]) * np.array([1.0, 0, 0]); up_ = -up_ / np.linalg.norm(up_)     # slit on the side away from the arm
-    sx0 = x0 + 0.2
+    sx0 = x0 - 0.5                                    # the slit runs out through the mouth (from x0 + 0.2 it left a 0.2 mm membrane across the slit)
     slit = Box(x1 + 0.05 - sx0, SNAP_SLIT, END_R + 1.5 + (xt - xm) * tn, align=(Align.MIN, Align.CENTER, Align.MIN))     # x, tangent, radial
     slit = Pos(sx0, A0[1], A0[2]) * Rot(math.degrees(math.atan2(up_[2], up_[1])) - 90, 0, 0) * slit   # +z of the box -> up_
     leg = leg - (slit & tube)
@@ -229,7 +228,7 @@ def _along(sh, p0, u):
     return Pos(*p0) * sh
 def leg(Lg):
     i = Lg % 4
-    key = ("leg17", i, flare_end(i), WALL_FACET, END_PAD, snap_bead_r(i), TUBE_X1[i], BORE_R[i], END_RS[i], SNAP_WALL, SNAP_NECK_R, SNAP_BW, SNAP_SLIT, FLARE_DEG[i], CL.PINX, S, HUBCUT, TAIL, PB, JOINT_R, JOINT_BLEND_DR, JOINT_BLEND_L, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C,
+    key = ("leg17", i, flare_end(i), END_PAD, snap_bead_r(i), TUBE_X1[i], BORE_R[i], END_RS[i], SNAP_WALL, SNAP_NECK_R, SNAP_BW, SNAP_SLIT, FLARE_DEG[i], CL.PINX, S, HUBCUT, TAIL, PB, JOINT_R, JOINT_BLEND_DR, JOINT_BLEND_L, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C,
            FACE_CHAMFER, HUBFLANGE_L, HUBFLANGE_R, srch(_leg_right, _along))
     sh = cached(f"leg{i}", key, lambda: _leg_right(i))
     return sh if Lg < 4 else mirror_x(sh)
@@ -256,7 +255,7 @@ HUBFLANGE_L, HUBFLANGE_R = 5.0, 6.0     # mm past HUBCUT, mm round the leg axis:
 BORE_DRIFT = [0.0] * 4          # the leg rides on its pin (leg_frame): no axis drift to widen the bore by
 PIN_TILT = [pin_swing(i) for i in range(4)]          # deg, the pin's largest tilt to the leg's x over the 24 poses
 BORE_R = [PINR / math.cos(math.radians(t)) + F.TURN.side for t in PIN_TILT]     # the tilted pin cuts the bore's plane as an ellipse (semi-major PINR / cos)
-END_RS = [BORE_R[i] + (F.WALL_MIN + WALL_FACET) / math.cos(math.radians(FLARE_DEG[i])) for i in range(4)]     # WALL_MIN measured normal to the flared cone
+END_RS = [BORE_R[i] + F.WALL_MIN / math.cos(math.radians(FLARE_DEG[i])) for i in range(4)]     # WALL_MIN measured normal to the flared cone
 END_R = max(END_RS)
 def _tube_x1(i):
     """bore floor (robot |x|): the pin tip's far corner, tilted by the pin's swing, plus TURN."""
