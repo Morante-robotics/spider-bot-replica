@@ -169,7 +169,7 @@ def _leg_right(i):
     # the hub (s < HUBCUT from the pin along u) is replaced by the end tube
     hs = Cylinder(60, HUBCUT + 20, align=(Align.CENTER, Align.CENTER, Align.MAX))
     hs = _along(hs, A0 + HUBCUT * u, u)
-    arm = arm - hs
+    arm = arm - hs - _along(Cylinder(60, HUBFLANGE_L, align=(Align.CENTER, Align.CENTER, Align.MIN)) - Cylinder(HUBFLANGE_R, HUBFLANGE_L, align=(Align.CENTER, Align.CENTER, Align.MIN)), A0 + HUBCUT * u, u)     # and the rim of the hub plate the cut left standing as a thin tab on the neck
     th = math.radians(FLARE_DEG[i])                  # bore and tube flare: the pin's swing in the leg frame + 1 deg
     END_R = END_RS[i]; BR = BORE_R[i]
     x0, xm, x1 = A0[0] - TAIL, A0[0], TUBE_X1[i]   # tail .. pin point .. bore floor (the tilted pin tip's corner + TURN)
@@ -233,7 +233,7 @@ def _along(sh, p0, u):
 def leg(Lg):
     i = Lg % 4
     key = ("leg11", i, snap_bead_r(i), TUBE_X1[i], BORE_R[i], END_RS[i], SNAP_WALL, SNAP_NECK_R, SNAP_BW, SNAP_SLIT, FLARE_DEG[i], CL.PINX, S, HUBCUT, TAIL, PB, JOINT_R, JOINT_BLEND_DR, JOINT_BLEND_L, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C,
-           FACE_CHAMFER, END_REL_X, END_REL_DR, END_REL_SLOPE, srch(_leg_right, _along))
+           FACE_CHAMFER, END_REL_X, END_REL_DR, END_REL_SLOPE, HUBFLANGE_L, HUBFLANGE_R, srch(_leg_right, _along))
     sh = cached(f"leg{i}", key, lambda: _leg_right(i))
     return sh if Lg < 4 else mirror_x(sh)
 
@@ -255,6 +255,7 @@ def leg_mesh(Lg, samples=False):
     return trimesh.Trimesh(d["v"] * mx, d["f"][:, ::-1] if Lg >= 4 else d["f"], process=False)
 FLARE_DEG = [round(pin_swing(i) + 1.0, 1) for i in range(4)]
 FACE_CHAMFER = 0.6       # tube mouth outer edge 45 deg chamfer
+HUBFLANGE_L, HUBFLANGE_R = 5.0, 6.0     # mm past HUBCUT, mm round the leg axis: jenscolt's hub-plate rim beyond HUBCUT is cut away outside this tube (it stood as a thin tab on the neck)
 END_REL_X = 1.5          # the recess starts this far before the bore floor ...
 END_REL_DR = 0.5         # ... this deep ...
 END_REL_SLOPE = 1.0      # ... and grows by this per mm towards the closed end
