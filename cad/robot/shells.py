@@ -15,7 +15,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 for p in (ROOT, ROOT + "/cad", HERE + "/fitcheck", ROOT + "/tools"):
     if p not in sys.path: sys.path.insert(0, p)
-from build123d import (Shape, Box, Cylinder, Sphere, Pos, Rot, Solid, Shell, Face, Wire, Compound, Vector, Align,
+from build123d import (Torus, Shape, Box, Cylinder, Sphere, Pos, Rot, Solid, Shell, Face, Wire, Compound, Vector, Align,
                        export_step, export_stl, import_brep, export_brep, extrude, Plane, Polygon)
 from OCP.BRepBuilderAPI import BRepBuilderAPI_Transform
 from OCP.ShapeUpgrade import ShapeUpgrade_UnifySameDomain
@@ -72,14 +72,16 @@ PIN_X1 = P["XC"] + CL.PINX - PIN_TRIM   # pin tip (|x|)
 # in the tube so it opens over the pin tip. The snap fit is fits.PRESS (assumed): coupon list, not printed now.
 SNAP_NECK_R = 1.0 * FE.K                       # pin neck r in the groove (Ø2.0, brief: neck Ø >= 2.0)
 SNAP_BW = 0.5 * FE.K                           # bead width (axial)
-SNAP_WALL = F.WALL_MIN                         # solid end wall closing the tube beyond the bore floor: the neck rod runs into it (print 2026-11-24: the rod only butted the open rim, leg 3 snapped)
+WALL_FACET = 0.06        # the check reads the coarse mesh, whose facets thin a round wall by up to ~0.04: the wall is designed this much over fits.WALL_MIN
+SNAP_WALL = F.WALL_MIN + WALL_FACET / 2                         # solid end wall closing the tube beyond the bore floor: the neck rod runs into it (print 2026-11-24: the rod only butted the open rim, leg 3 snapped)
+END_PAD = 0.0                                  # end wall starts this far past the bore floor (the bore cutter runs 0.02 past it; the wall must stay SNAP_WALL thick)
 SNAP_SLIT = 0.6 * FE.K                         # slit width (tangential)
 def snap_bead_r(i):
     """bead inner r: the ring (circle of radius r, width SNAP_BW, plane normal to the tube's axis) sits tilted by the pin's swing on the
     neck: its edge corner is at distance r cos(tilt) - SNAP_BW / 2 sin(tilt) from the pin axis, which must be neck + TURN."""
     t = math.radians(PIN_TILT[i])
     return (SNAP_NECK_R + F.TURN.side + SNAP_BW / 2 * math.sin(t)) / math.cos(t)
-SNAP_MARGIN = F.TURN.side             # axial room each side of the bead's travel (TURN; 0.10 left crank x leg 0.06-0.09 over the poses; slide stays within RETAIN 1.25)
+SNAP_MARGIN = F.TURN.side + 0.05             # axial room each side of the bead's travel (TURN; 0.10 left crank x leg 0.06-0.09 over the poses; slide stays within RETAIN 1.25)
 def snap_groove(i):
     """(x0, x1) of the pin groove (robot |x|, right side): the axial span the bead's inner edge sweeps where it is within the pin's
     shoulder radius (PINR), over the 24 poses (tilt of the tube on the pin and the leg's axial drift), plus SNAP_MARGIN a side."""
@@ -173,32 +175,27 @@ def _leg_right(i):
     th = math.radians(FLARE_DEG[i])                  # bore and tube flare: the pin's swing in the leg frame + 1 deg
     END_R = END_RS[i]; BR = BORE_R[i]
     x0, xm, x1 = A0[0] - TAIL, A0[0], TUBE_X1[i]   # tail .. pin point .. bore floor (the tilted pin tip's corner + TURN)
-    xe = x1 + SNAP_WALL                                              # the tube's closed end
-    def dcone(r, xend=None):
+    xe = x1 + END_PAD + SNAP_WALL                                              # the tube's closed end
+    tn = math.tan(th); xt = min(flare_end(i), x1)      # the flare stops where the pin tip's reach does (flare_end); a cylinder beyond it to the bore floor
+    def dcone(r, xend):
         from build123d import Cone
-        x1 = xe if xend is None else xend
-        a = Cylinder(1, 1)
-        from build123d import Cone
-        c1 = Pos(x0, A0[1], A0[2]) * Rot(0, 90, 0) * Cone(r + (xm - x0) * math.tan(th), r, xm - x0, align=(Align.CENTER, Align.CENTER, Align.MIN))
-        c2 = Pos(xm, A0[1], A0[2]) * Rot(0, 90, 0) * Cone(r, r + (x1 - xm) * math.tan(th), x1 - xm, align=(Align.CENTER, Align.CENTER, Align.MIN))
-        return c1 + c2
-    tube = dcone(END_R, x1)                          # the flared tube up to the bore floor, then the end wall as a cylinder of the radius there (a longer cone grew into the next leg's tube: leg-1 x leg-2 gap 0.00)
-    r1 = END_R + (x1 - xm) * math.tan(th)            # the end wall is a 45 deg chamfer from r1 down by SNAP_WALL: its rim stays off the base's wall at crank pose 19 (leg 0/4 gap 0.21 with a straight rim, 0.4 needed)
-    tube = tube + Pos(x1, A0[1], A0[2]) * Rot(0, 90, 0) * Cone(r1, r1 - SNAP_WALL, SNAP_WALL, align=(Align.CENTER, Align.CENTER, Align.MIN))
-    # phase 3 reliefs on the tube (n1 / leg_gaps 2026-11-27): the mouth's outer edge is chamfered (leg 1 x transfer touched it) and the
-    # lower half of the tube's outer cone is recessed from END_REL_X (the lowest point of the end met the base's bowl at crank pose 18,
-    # legs 0/4/3/7: gap 0.00-0.15, LEG_OPEN needs 0.40). Both only remove material on the side away from the arm / outside the tube.
+        c1 = Pos(x0, A0[1], A0[2]) * Rot(0, 90, 0) * Cone(r + (xm - x0) * tn, r, xm - x0, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        c2 = Pos(xm, A0[1], A0[2]) * Rot(0, 90, 0) * Cone(r, r + (xt - xm) * tn, xt - xm, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        c3 = Pos(xt, A0[1], A0[2]) * Rot(0, 90, 0) * Cylinder(r + (xt - xm) * tn, xend - xt, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        return c1 + c2 + c3
+    x1p = x1 + END_PAD                                # the end wall's inner face: the bore runs 0.02 past x1, so the wall is SNAP_WALL thick from here
+    tube = dcone(END_R, x1p)                          # the flared tube up to the bore floor
+    r1 = END_R + (xt - xm) * tn            # outer radius at the floor; the closed end is the bore's offset by SNAP_WALL: a flat end wall and a quarter round of radius SNAP_WALL (no sharp rim under WALL_MIN)
+    cx = Pos(x1p, A0[1], A0[2]) * Rot(0, 90, 0)
+    rnd = (cx * Torus(r1 - SNAP_WALL, SNAP_WALL)) & (Pos(x1p + SNAP_WALL / 2, A0[1], A0[2]) * Box(SNAP_WALL, 4 * r1, 4 * r1))
+    tube = tube + Pos(x1p - 0.5, A0[1], A0[2]) * Rot(0, 90, 0) * Cylinder(r1 - SNAP_WALL, SNAP_WALL + 0.5, align=(Align.CENTER, Align.CENTER, Align.MIN)) + rnd
+    # the mouth's outer edge is chamfered (leg 1 x transfer touched it, n1 2026-11-27)
     rf = END_R + (xm - x0) * math.tan(th)
     wedge = Pos(x0, A0[1], A0[2]) * Rot(0, 90, 0) * (Cylinder(rf + 1.5, FACE_CHAMFER + 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
                                                       - Cone(rf - FACE_CHAMFER, rf + 1.0, FACE_CHAMFER + 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN)))
-    xr = x1 - END_REL_X; hr = xe - xr
-    r0 = END_R + (xr - xm) * math.tan(th) - END_REL_DR
-    rel = Pos(xr, A0[1], A0[2]) * Rot(0, 90, 0) * (Cylinder(r0 + 1.5, hr, align=(Align.CENTER, Align.CENTER, Align.MIN))
-                                                    - Cone(r0, r0 - END_REL_SLOPE * hr, hr, align=(Align.CENTER, Align.CENTER, Align.MIN)))
-    below = Pos(xr + hr / 2, A0[1], A0[2] - 3.0 - 10.0) * Box(hr + 2.0, 40.0, 20.0)         # z < axis - 3: the lowest bit of the tube, clear of the arm rod (its underside is at axis - 2.4 there)
-    tube = tube - wedge - (rel & below)
-    bore = Pos(-0.01, 0, 0) * dcone(BR, x1)
-    bore = bore + Pos(0.02, 0, 0) * dcone(BR, x1)
+    tube = tube - wedge
+    bore = Pos(-0.02, 0, 0) * dcone(BR, x1)
+    bore = bore + dcone(BR, x1)         # the floor stays at x1 (a copy 0.02 past it left the end wall 1.98)
     from build123d import Cone
     joint = _along(Cylinder(JOINT_R, HUBCUT - 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN)), A0 + 1.5 * u, u)
     joint = joint + _along(Cone(JOINT_R + JOINT_BLEND_DR, JOINT_R, JOINT_BLEND_L, align=(Align.CENTER, Align.CENTER, Align.MIN)), A0 + 1.5 * u, u)   # blends into the tube wall
@@ -211,14 +208,14 @@ def _leg_right(i):
     if sorted(x.volume for x in leg.solids())[-2:-1] and sorted(x.volume for x in leg.solids())[-2] > 30:     # a piece bigger than the hub's 12 mm3 sliver
         # the arm leaves the tube's flare cone (leg 2/6: u mostly along x), so the joint never reaches the wall and the tube came off
         # (r00: «leg-2's tube detached»). A strut from the wall at the tube's mouth to the joint axis ties them.
-        xw = xe - 0.3; rw = (rb + END_R) / 2 + (xw - xm) * math.tan(th) + 0.2
+        xw = xe - 0.3; rw = (rb + END_R) / 2 + (min(xw, xt) - xm) * tn + 0.2
         W_ = np.array([xw, A0[1], A0[2]]) + rw * np.array([0, uh[1], uh[2]]) ; J_ = A0 + 6.0 * u
         v_ = J_ - W_; strut = _along(Cylinder(1.0 * FE.K, float(np.linalg.norm(v_)), align=(Align.CENTER, Align.CENTER, Align.MIN)), W_, v_)
         leg = fuse_all([leg, strut]) - bore
     leg = fuse_all([leg, ring])
     up_ = u - np.dot(u, [1.0, 0, 0]) * np.array([1.0, 0, 0]); up_ = -up_ / np.linalg.norm(up_)     # slit on the side away from the arm
     sx0 = x0 + 0.2
-    slit = Box(x1 - sx0, SNAP_SLIT, END_R + 1.5, align=(Align.MIN, Align.CENTER, Align.MIN))     # x, tangent, radial
+    slit = Box(x1 + 0.05 - sx0, SNAP_SLIT, END_R + 1.5 + (xt - xm) * tn, align=(Align.MIN, Align.CENTER, Align.MIN))     # x, tangent, radial
     slit = Pos(sx0, A0[1], A0[2]) * Rot(math.degrees(math.atan2(up_[2], up_[1])) - 90, 0, 0) * slit   # +z of the box -> up_
     leg = leg - (slit & tube)
     return one(leg)          # a 12 mm3 sliver of the cut hub dropped
@@ -232,8 +229,8 @@ def _along(sh, p0, u):
     return Pos(*p0) * sh
 def leg(Lg):
     i = Lg % 4
-    key = ("leg11", i, snap_bead_r(i), TUBE_X1[i], BORE_R[i], END_RS[i], SNAP_WALL, SNAP_NECK_R, SNAP_BW, SNAP_SLIT, FLARE_DEG[i], CL.PINX, S, HUBCUT, TAIL, PB, JOINT_R, JOINT_BLEND_DR, JOINT_BLEND_L, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C,
-           FACE_CHAMFER, END_REL_X, END_REL_DR, END_REL_SLOPE, HUBFLANGE_L, HUBFLANGE_R, srch(_leg_right, _along))
+    key = ("leg17", i, flare_end(i), WALL_FACET, END_PAD, snap_bead_r(i), TUBE_X1[i], BORE_R[i], END_RS[i], SNAP_WALL, SNAP_NECK_R, SNAP_BW, SNAP_SLIT, FLARE_DEG[i], CL.PINX, S, HUBCUT, TAIL, PB, JOINT_R, JOINT_BLEND_DR, JOINT_BLEND_L, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C,
+           FACE_CHAMFER, HUBFLANGE_L, HUBFLANGE_R, srch(_leg_right, _along))
     sh = cached(f"leg{i}", key, lambda: _leg_right(i))
     return sh if Lg < 4 else mirror_x(sh)
 
@@ -256,19 +253,26 @@ def leg_mesh(Lg, samples=False):
 FLARE_DEG = [round(pin_swing(i) + 1.0, 1) for i in range(4)]
 FACE_CHAMFER = 0.6       # tube mouth outer edge 45 deg chamfer
 HUBFLANGE_L, HUBFLANGE_R = 5.0, 6.0     # mm past HUBCUT, mm round the leg axis: jenscolt's hub-plate rim beyond HUBCUT is cut away outside this tube (it stood as a thin tab on the neck)
-END_REL_X = 1.5          # the recess starts this far before the bore floor ...
-END_REL_DR = 0.5         # ... this deep ...
-END_REL_SLOPE = 1.0      # ... and grows by this per mm towards the closed end
 BORE_DRIFT = [0.0] * 4          # the leg rides on its pin (leg_frame): no axis drift to widen the bore by
 PIN_TILT = [pin_swing(i) for i in range(4)]          # deg, the pin's largest tilt to the leg's x over the 24 poses
 BORE_R = [PINR / math.cos(math.radians(t)) + F.TURN.side for t in PIN_TILT]     # the tilted pin cuts the bore's plane as an ellipse (semi-major PINR / cos)
-END_RS = [b + F.WALL_MIN for b in BORE_R]
+END_RS = [BORE_R[i] + (F.WALL_MIN + WALL_FACET) / math.cos(math.radians(FLARE_DEG[i])) for i in range(4)]     # WALL_MIN measured normal to the flared cone
 END_R = max(END_RS)
 def _tube_x1(i):
     """bore floor (robot |x|): the pin tip's far corner, tilted by the pin's swing, plus TURN."""
     A0 = np.asarray(motion.neutral_leg(i, P, n=13)[1], float); th = math.radians(PIN_TILT[i]); tip = PIN_X1 - A0[0]
     return float(A0[0] + tip * math.cos(th) + PINR * math.sin(th) + F.TURN.side)
 TUBE_X1 = [_tube_x1(i) for i in range(4)]
+def flare_end(i):
+    """x (leg frame) up to which the bore flares: the pin tip's farthest reach over the 24 poses (tip circle, leg frame) + TURN; beyond it
+    the tube (to the bore floor) keeps the radius it has there: the floor is the leg's axial play, not the pin's."""
+    P_, A0 = motion.neutral_leg(i, P, n=13)[:2]; A0 = np.asarray(A0, float); xt = 0.0
+    ph = np.linspace(0, 2 * np.pi, 16, endpoint=False)
+    for k in range(24):
+        Ti = np.linalg.inv(leg_frame(i, k)); A = A_ALL[i, k]
+        pts = np.array([[PIN_X1, A[1] + PINR * np.cos(t), A[2] + PINR * np.sin(t), 1.0] for t in ph])
+        xt = max(xt, float((pts @ Ti.T)[:, 0].max()))
+    return round(xt + F.TURN.side, 2)
 
 _LV = {}
 def leg_points(Lg, k, edge=0.8):

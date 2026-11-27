@@ -130,6 +130,10 @@ def _leg_except():
         for lo, hi in (([-B, -B, -B], [xa, B, B]), ([xb, -B, -B], [B, B, B]), ([xa, -B, -B], [xb, ya, B]),
                        ([xa, yb, -B], [xb, B, B]), ([xa, ya, -B], [xb, yb, za]), ([xa, ya, zb], [xb, yb, B])):
             out.append({"part": n, "box": [lo, hi], "why": why})
+        # the snap bead: a deliberate ring SNAP_BW (0.72) wide, a ridge on the bore that flexes over the pin (fits.PRESS, coupon c1); it is not a wall
+        xs = sorted((sx * (A0[0] - SH.SNAP_BW / 2 - 0.15), sx * (A0[0] + SH.SNAP_BW / 2 + 0.15))); rr = SH.BORE_R[k % 4] + 0.5
+        out.append({"part": n, "box": [[xs[0], float(A0[1] - rr), float(A0[2] - rr)], [xs[1], float(A0[1] + rr), float(A0[2] + rr)]],
+                    "why": "the snap bead: a deliberate ring SNAP_BW wide on the bore, flexing over the pin tip (fits.PRESS, coupon c1)"})
     return out
 MINIMUMS = dict(MINIMUMS or {"module": 1.0, "mark": 3.0}, parts=list((MINIMUMS or {}).get("parts", [])) + LEGS, wall=fits.WALL_MIN,
                 **{"except": list((MINIMUMS or {}).get("except", [])) + _leg_except()})
