@@ -1,5 +1,5 @@
-"""Power parts of cad/robot (plan.json): the 2S3P AG13 cell holder (post + post-cap tongues that cap crank 4, front tab
-screwed into drive block 2 / ear 2, front-bottom notch round block 2), its snap lid, and the bought parts as hardware
+"""Power parts of cad/robot (plan.json): the 2S3P AG13 cell holder (post on the journal-cap, plan F: no tongue over crank 4;
+front tab screwed into the motor-u's ear 2), its snap lid, and the bought parts as hardware
 from their datasheets: 6 x AG13, 3 conical springs + nickel strip, SS12D00 switch, two 5 mm LEDs + resistors, JST-XH.
 
     ../../.venv/bin/python power.py [--part cell-holder] [--fine]
@@ -87,7 +87,7 @@ OY4 = D["Oy"][3]
 SLW = D["JR"] + F.TURN.side                           # slot 4 half-width (journal + TURN)
 TG = SLW - F.TURN.side                                # cap tongue half-width in the slot (TURN a side)
 ZTG = D["Oz"] + D["JR"] + F.TURN.side                 # tongue foot: journal top + TURN
-ZHP = D["tip_over"](CY - 3, CY + 3)                   # post foot: over idler 3's tip + GEAR_TIP (spine walls raised to it)
+ZHP = D.get("CAP_TOP", D["tip_over"](CY - 3, CY + 3))  # post foot: on the journal-cap's top (plan F); probe: idler 3's tip + GEAR_TIP
 PY1 = max(CY + 3, OY4 + SLW + W)                      # post cap's back end, over slot 4 + wall
 (E2x0, E2y0, E2z0), (E2x1, E2y1, E2z1) = D["EAR2"]
 (B2x0, B2y0, B2z0), (B2x1, B2y1, B2z1) = D["BLOCK2"]
@@ -95,7 +95,7 @@ HSYY = 0.5 * (E2y0 + E2y1)                            # holder M2 at ear 2's cen
 TABHW = CL.TABHW                                      # tab half-width 2.6 (5.2 wide)
 ZTB = E2z1; TABZ1 = ZTB + W                           # tab rests on ear 2's top (lowered, EARH2 1.0), 1.2 thick
 M3_D, M3_HEAD_D, M3_HEAD_H = 3.0, 5.5, 3.0            # ISO 4762 M3: head Ø5.5 x 3.0
-M3_L = 8.0                                            # M2 x 6 (was x 8): 0.4 tab + 5.6 into ear 2 / block 2, tip 0.5 above the block's floor
+M3_L = 10.0                                           # M3 x 10 (plan): tab, ear 2 of the motor-u (thread), tip through the cap's STEEL hole
 HOLE_R = M3_D / 2 + F.STEEL.side                      # tab hole: shank + STEEL
 CB_R, CB_D = M3_HEAD_D / 2 + F.STEEL.side, 0.8 * K        # head counterbored 0.8 into the tab: the N10's underside (z 29.79) clears the head
 BZ = TABZ1 - CB_D                                     # head bearing face (tab left 0.4 under it)
@@ -128,10 +128,8 @@ def holder():
     b -= Pos(-HX + W, YFI, CZ) * Box(2 * (HX - W), 2 * (HY - W), ZT - CZ + 1, align=MIN)            # open top
     for x in XS:                                                                                      # cradles
         b -= Pos(x, YFI, CZ) * Rot(-90, 0, 0) * Cylinder(PD / 2, YBI - YFI, align=(Align.CENTER, Align.CENTER, Align.MIN))
-    # post and post cap down to the spine wall tops, tongues into slot 4 (cap crank 4)
+    # post down to the journal-cap's top (plan F: no tongue over crank 4, the cap holds it)
     b += Pos(-D["wx1"], CY - 3, ZHP) * Box(2 * D["wx1"], PY1 - (CY - 3), Z0 - ZHP + 0.01, align=MIN)
-    for xa in (D["wx0"], -D["wx1"]):
-        b += Pos(xa, OY4 - TG, ZTG) * Box(D["wx1"] - D["wx0"], 2 * TG, ZHP - ZTG + 0.01, align=MIN)
     # front tab on drive ear 2, M2 hole (STEEL), lead-in chamfer is the hole's countersink-free top (head seats flat)
     b += Pos(-TABHW, HSYY - TABHW, ZTB) * Box(2 * TABHW, YFI - (HSYY - TABHW), W, align=MIN)
     b -= Pos(0, HSYY, ZTB - 1) * Cylinder(HOLE_R, W + 2, align=(Align.CENTER, Align.CENTER, Align.MIN))
@@ -257,4 +255,4 @@ def write_all(names=None, fine=False):
 if __name__ == "__main__":
     a = common.part_args(__doc__, {**PARTS, **HARDWARE})
     write_all(a.part, a.fine)
-    print(f"snap lip strain {EPS_SNAP * 100:.2f} %, post foot z {ZHP:.2f}, tab z {ZTB:.2f}, M2 y {HSYY:.2f}, notch to y {max(E2y1, B2y1) + NOTCH:.2f}")
+    print(f"snap lip strain {EPS_SNAP * 100:.2f} %, post foot z {ZHP:.2f}, tab z {ZTB:.2f}, M3 y {HSYY:.2f}, notch to y {max(E2y1, B2y1) + NOTCH:.2f}")

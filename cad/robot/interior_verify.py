@@ -34,4 +34,4 @@ def poses_interior(t):
 
 
 ASSEMBLY.sort(key=lambda e: (e[2] if len(e) > 2 else {}).get("step", 99))   # plan.json step numbers (stable within a step)
-LEGS_AFTER_STEP = 9                                  # plan step 9 (legs) goes between ASSEMBLY steps <= 9 and the holder (10)
+LEGS_AFTER_STEP = 12                                 # plan step 13 (legs) goes between ASSEMBLY steps <= 12 (spine set and keel screws) and the holder (14)

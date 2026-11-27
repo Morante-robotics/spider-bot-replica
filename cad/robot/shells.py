@@ -45,7 +45,8 @@ class _Layout:
             if k in self.FIXED: continue
             setattr(self, k, max(F.WALL_MIN, getattr(self, k)) if k in self.WALLS else getattr(self, k) * FE.K)
         for k in self.DELETED: delattr(self, k)
-        self.TAIL = self.W                 # end tube closed one wall past the pin's web side (the 0.7 tail shortening deleted)
+        self.TAIL_CUT = 1.5                # phase 3: the tube's mouth stops this much short of a wall's tail (tilt + axial drift put its rim 0.0-0.75 into the crank webs, n1 2026-11-27)
+        self.TAIL = self.W - self.TAIL_CUT  # tube face XC - TAIL (was XC - W)
         TH = F.GEAR_THRUST_CRANK.side; wb1 = self.GW / 2 + TH + self.W + TH + self.WEB_T
         self.LSL = (P["XC"] + self.PINX) - wb1 + 1.0
 CL = None
@@ -174,6 +175,18 @@ def _leg_right(i):
     tube = dcone(END_R, x1)                          # the flared tube up to the bore floor, then the end wall as a cylinder of the radius there (a longer cone grew into the next leg's tube: leg-1 x leg-2 gap 0.00)
     r1 = END_R + (x1 - xm) * math.tan(th)            # the end wall is a 45 deg chamfer from r1 down by SNAP_WALL: its rim stays off the base's wall at crank pose 19 (leg 0/4 gap 0.21 with a straight rim, 0.4 needed)
     tube = tube + Pos(x1, A0[1], A0[2]) * Rot(0, 90, 0) * Cone(r1, r1 - SNAP_WALL, SNAP_WALL, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    # phase 3 reliefs on the tube (n1 / leg_gaps 2026-11-27): the mouth's outer edge is chamfered (leg 1 x transfer touched it) and the
+    # lower half of the tube's outer cone is recessed from END_REL_X (the lowest point of the end met the base's bowl at crank pose 18,
+    # legs 0/4/3/7: gap 0.00-0.15, LEG_OPEN needs 0.40). Both only remove material on the side away from the arm / outside the tube.
+    rf = END_R + (xm - x0) * math.tan(th)
+    wedge = Pos(x0, A0[1], A0[2]) * Rot(0, 90, 0) * (Cylinder(rf + 1.5, FACE_CHAMFER + 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
+                                                      - Cone(rf - FACE_CHAMFER, rf + 1.0, FACE_CHAMFER + 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN)))
+    xr = x1 - END_REL_X; hr = xe - xr
+    r0 = END_R + (xr - xm) * math.tan(th) - END_REL_DR
+    rel = Pos(xr, A0[1], A0[2]) * Rot(0, 90, 0) * (Cylinder(r0 + 1.5, hr, align=(Align.CENTER, Align.CENTER, Align.MIN))
+                                                    - Cone(r0, r0 - END_REL_SLOPE * hr, hr, align=(Align.CENTER, Align.CENTER, Align.MIN)))
+    below = Pos(xr + hr / 2, A0[1], A0[2] - 3.0 - 10.0) * Box(hr + 2.0, 40.0, 20.0)         # z < axis - 3: the lowest bit of the tube, clear of the arm rod (its underside is at axis - 2.4 there)
+    tube = tube - wedge - (rel & below)
     bore = Pos(-0.01, 0, 0) * dcone(PINR + F.TURN.side + BORE_DRIFT[i], x1)
     bore = bore + Pos(0.02, 0, 0) * dcone(PINR + F.TURN.side + BORE_DRIFT[i], x1)
     from build123d import Cone
@@ -210,7 +223,7 @@ def _along(sh, p0, u):
 def leg(Lg):
     i = Lg % 4
     key = ("leg9", i, SNAP_END, SNAP_WALL, SNAP_NECK_R, SNAP_BW, SNAP_SLIT, FLARE_DEG[i], BORE_DRIFT[i], CL.PINX, S, HUBCUT, TAIL, END_R, PB, JOINT_R, JOINT_BLEND_DR, JOINT_BLEND_L, stamp("cad/legs/build.py", "cad/motion.py"), FE.D23, FE.D23C,
-           srch(_leg_right, _along))
+           FACE_CHAMFER, END_REL_X, END_REL_DR, END_REL_SLOPE, srch(_leg_right, _along))
     sh = cached(f"leg{i}", key, lambda: _leg_right(i))
     return sh if Lg < 4 else mirror_x(sh)
 
@@ -231,6 +244,11 @@ def leg_mesh(Lg, samples=False):
     if samples: return d["s"] * mx
     return trimesh.Trimesh(d["v"] * mx, d["f"][:, ::-1] if Lg >= 4 else d["f"], process=False)
 FLARE_DEG = [round(pin_swing(i) + 1.0, 1) for i in range(4)]
+FACE_CHAMFER = 0.6       # tube mouth outer edge 45 deg chamfer
+END_REL_X = 1.5          # the recess starts this far before the bore floor ...
+END_REL_DR = 0.5         # ... this deep ...
+END_REL_SLOPE = 1.0      # ... and grows by this per mm towards the closed end
+BORE_DRIFT_MARGIN = 0.05   # was 0.01: the pin's tilt left crank 3 x legs 2/6 at 0.19 < 0.2 (phase 3)
 def bore_drift(i):
     """worst offset (mm, across the pin axis x) between the pin centre A_k and the bore axis the rigid leg carries over the 24
     poses: leg_frame keeps the pivot P fixed while |P - A| changes by SL, so the neutral A0 lands off the pin (smoke 2026-11-23:
@@ -238,7 +256,7 @@ def bore_drift(i):
     P_, A0 = motion.neutral_leg(i, P, n=13)[:2]; A0 = np.asarray(A0, float); w = 0.0
     for k in range(24):
         d = (leg_frame(i, k) @ np.r_[A0, 1.0])[:3] - A_ALL[i, k]; w = max(w, float(np.hypot(d[1], d[2])))
-    return round(w + 0.01, 2)
+    return round(w + BORE_DRIFT_MARGIN, 2)
 BORE_DRIFT = [bore_drift(i) for i in range(4)]
 
 _LV = {}

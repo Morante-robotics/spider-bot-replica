@@ -2,81 +2,92 @@
 
 Generated from `plan.json` by `tools/rounds.py validate`: edit the JSON, never this page.
 
-**S 0.70 spider: base (ground), body snapped on (2 front fingers + rear tab), spine with open-top journal slots, 4 printed cranks capped by the drive unit (1-3) and the holder post (4), 3 idlers and transfer, N10 drive unit, 2S3P AG13 holder, 8 legs on crank pins; cranks 2/3 2.6 further apart (cad/robot/fitcheck/check.py: 0 failing of 319 with the real cad/legs parts, LEG_PATH 0.5).**
+**Spider-Bot S 1.0, phase 3 simplify: N10 -> pinion 14 T -> transfer 17/13 T -> idler 2 -> 4 cranks (10 T, m 1.0) via 3 idlers; drive unit split into 3 flat screwed parts (journal-cap, motor-u, transfer-cheek), no sleeves, M3 only; grams = solid volume x 1.24 (100 % infill), from the S 1.0 STLs and boxes**
 
-Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric legs (8), eyes, base and body placed with cad/motion.py, and the drive fitted inside them: N10 gear motor, gear train to the crankshafts, 6 x AG13 wired 2S3P with contacts, slide switch, two 5 mm LED eye bores. The scale S is 0.70 (Morante, 2026-11-21: «Prueba 0.70»): every length in cad/motion.py P0 (approved at N0 at 0.60) times S/0.60, so the look is N0's; a larger S (0.75, 0.8) is an alternative put to Morante, not a limit. · pass: full cad_verify PASS with every part inside (no collision over the 24 poses, each part's assembly path) at the chosen S, and the judge >= 0.60 against jenscolt's model (his photos and his assembled meshes in the same views as the robot)
+Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric legs (8), eyes, base and body placed with cad/motion.py, and the drive fitted inside them: N10 gear motor, gear train to the crankshafts, 6 x AG13 wired 2S3P with contacts, slide switch, two 5 mm LED eye bores. The scale S is 1.0 (Morante, 2026-11-26: «S 1.0 máximo»): every length in cad/motion.py P0 (approved at N0 at 0.60) times S/0.60, so the look is N0's; printable minimums wall 2.0, gear module 1.0, M3. · pass: full cad_verify PASS with every part inside (no collision over the 24 poses, each part's assembly path) at the chosen S, and the judge >= 0.60 against jenscolt's model (his photos and his assembled meshes in the same views as the robot)
 
 ## Part list
 
 | Part | Role | Why separate | g | Print orientation |
 |---|---|---|---|---|
-| base | ground: bowl with 8 open-top leg windows sized from the real cad/legs neck sweep (NR 5.4, about Ø10.8), front snap ribs, back-sheet pocket, 1.2 pads where loaded (100 % of each window ring), front-window reliefs | the ground shell, prints in one piece | 14 | foot down |
-| body | dome with the eye block (0.85 leg-arm pocket on its lower front corners), front snap fingers (0.8 x 5, L 8), rear snap tab, front panel closing the mouth at the front face (1.2 thick, x ±18, hides the snap fingers; no front sensor placed), inner pocket over the cell pack's lift path | lifts off for service | 16 | rim up (roof on the bed), fingers vertical |
-| spine | two gear walls with open-top journal slots (TURN), idler-axle holes, keel seat; wall tops raised 0.8 under the holder post where idler 3's tip passes | carries the whole train as one unit | 3 | keel down, walls upright, slots up |
-| crankshafts | 4 printed cranks with gears, webs and Ø3 pins | each turns in the spine | 3 | axis vertical, one piece; support marks sanded (sandpaper) |
-| idlers | 3 idlers and the transfer compound, each GW - 0.4 wide, turning (TURN, Ø3.7 bore) on printed spacer sleeves Ø3.2 x 3.5 (M2-tapped bore Ø1.6, wall 0.8) clamped wall to wall by the M2 axle, so tightening does not pinch the walls | each turns on its axle | 1 | face down |
-| drive-unit | N10 clamp, transfer cheek, 2 blocks + ears; wall-top cheeks whose tongues cap cranks 1-3; two lugs on its -x plate clamped by idler axles 1 and 2 (STEEL holes, 1.2 wall); ear 2 lowered to 1.0 tall (the holder tab and its M2 head sit under the N10 and the lower clamp) | motor comes out without the train | 2 | ear face down |
-| pinion | 16 T m 0.6 pinion pressed on the N10's D-shaft (DSHAFT), meshes the transfer big gear | bought motor shaft; reprints alone | 0.2 | face down |
-| legs | 8 legs, end tube on the pin, ball in the window | each rides its own pin | 8 | flat on its side |
-| cell-holder | 3 x 2 AG13, spring, nickel strip, wire slot; the post (x ±4, y ±3 about the cells' centre) down to the wall tops, post-cap tongues cap crank 4; front tab (5.2 x 1.2) on drive ear 2 (lowered, under the N10 and its clamp) with the holder M2 (hole STEEL, head on the tab) down into drive block 2 / ear 2; front-bottom notch at drive block 2; 0.8 leg-arm pocket on its top edge | screwed to drive block 2, cells swap | 2 | floor down |
-| cell-lid | closes the cells | opens for cell swap | 1 | flat |
-| n10-motor | drive |  |  |  |
-| m2-screws | M2 socket cap ISO 4762 (1.5 mm hex key), self-tapping in PLA (pilot Ø1.6, assumed, proven on coupon c2, the holder's too): 3 idler axles (1 and 2 through the drive unit's lugs), 2 keel, 1 holder |  |  |  |
-| ag13-cells | power 2S3P |  |  |  |
-| ss12d00-switch | power switch |  |  |  |
-| leds | two 5 mm LEDs + resistors |  |  |  |
-| jst-xh | 3-pin connector body/base |  |  |  |
+| base | ground: bowl with 8 open-top leg windows, keel bosses, front snap ribs, back-sheet pocket (phase 2, unchanged) | the ground shell | 17.3 | foot down |
+| body | shell snapped on the base, eye bores, switch window (unchanged) | the visible shell, lifts off for service | 128.1 | roof on the bed |
+| legs | 8 legs from cad/legs on the crank pins (unchanged) | each leg swings on its own pin | 233.6 | the plater's (cad/legs) |
+| spine | two 2.0 walls with 4 open-top journal slots, keel; idler holes: -x wall M3 pilot, +x wall STEEL (no thread, walls not squeezed) | ground of the gear train, screwed to the base keel | 4.1 | keel down, slots up |
+| crankshafts | 4 cranks, 10 T m 1.0, journals Ø4.3, Ø3 pins (unchanged) | one per crank pair | 3.6 | the current orientation (phase 3 local work: support 137 mm² each) |
+| idlers | 3 idlers 10 T, bore Ø3.3 on their M3 shank (B: no sleeves) | each turns on its own axle | 0.6 | face down |
+| transfer | 13/17 T compound on a Ø3 steel pin (B: no sleeve), big gear outside the +x wall | turns between motor-u web and transfer-cheek | 1.7 | big gear face down |
+| pinion | 14 T on the N10 D-shaft (DSHAFT) | pressed on the bought motor | 0.7 | face down |
+| journal-cap | A/F: flat 2.0 plate over the wall tops above the idler tips, rails on the wall tops, 8 tongues in slots 1-4, transfer notch, lug on idler axle 3 | one flat cap for the 4 journals (F: also crank 4) | 2.9 | top face on the bed, no support |
+| motor-u | A: -x web (lugs on idler axles 1, 2, ledge over the cap, transfer pin's -x end) + the N10 U along x (open +z) + ear 2 for the holder screw | carries the motor and the transfer's -x end; flat yz profile | 2.1 | -x face on the bed, U rises along +x, no support |
+| transfer-cheek | A: +x cheek for the transfer pin + strap over the N10 U, 1 M3x10 into the -y ear | closes the U after the motor goes in | 0.9 | +x face on the bed, strap rises along -x, no support |
+| cell-holder | 2S3P AG13 holder; F: no tongue over crank 4, post on the cap top, tab M3 into motor-u ear 2 | comes out without freeing crank 4 | 7.6 | floor down |
+| cell-lid | snap lid (unchanged) | opens for the cells | 2.0 | plate down |
+| n10-motor | N10 3 V gear motor (to buy; not measured) |  |  |  |
+| m3-screws | ISO 4762 M3 self-tapping into Ø2.5 pilots: 2 x M3x6 (keel), 2 x M3x10 (strap 1, holder 1); ISO 7380 button head (Ø5.7 x 1.65, 2 mm hex key): 3 x M3x10 (idler axles 1-3) and 1 x M3x16 (transfer axle, listed as transfer-pin) |  |  |  |
+| transfer-pin | M3 x 16 button head (ISO 7380, Morante 2026-11-27), the transfer's axle (screw, not a dowel); head on the motor-u web's -x face, thread in the web's Ø2.5 pilot, STEEL through the boss and the transfer; entered from -x |  |  |  |
+| ag13-cells | 6 x AG13, springs and nickel strip |  |  |  |
+| ss12d00-switch | slide switch |  |  |  |
+| leds | 2 x 5 mm LED + resistors |  |  |  |
+| jst-xh | 3-pin JST-XH pair |  |  |  |
 
 ## Joint table
 
 | Joint | Parts | Type | Held | Fit | In from | Apart by |
 |---|---|---|---|---|---|---|
-| crank-in-spine | crankshafts ↔ spine | turn | +x gear face vs wall (THRUST) · -x web vs wall (THRUST) · +y slot face · -y slot face · +z cap tongue (drive unit 1-3, holder post 4) · -z slot bottom | fits.TURN | +z | lift the holder and the drive unit, lift each crank out of its slots |
-| gear-mesh | idlers ↔ crankshafts | gear | +x wall · -x axle head · +y axle · -y axle · +z axle · -z axle | fits.GEAR_TIP | +z (idler drops in, then its M2 axle along +x) | pull the M2 axle along -x, lift the idler |
-| leg-on-pin | legs ↔ crankshafts | turn | +x crank web · -x window · +y base window · -y body rim · +z window · -z window floor | fits.TURN | -z through its open-top window, then along the pin (x) | lift the body, slide the leg off its pin along x, lift it out |
-| leg-path | legs ↔ base | clearance | +x window · -x window · +y window · -y body rim · +z window · -z window | fits.LEG_PATH | as leg-on-pin | as leg-on-pin |
-| spine-on-keel | spine ↔ base | screw | +x keel · -x keel · +y keel · -y 2 M2 · +z keel · -z bowl floor | fits.STEEL | +z | undo 2 M2 from below |
-| drive-on-spine | drive-unit ↔ spine | screw | +x lug face on the -x wall, axle heads · -x lugs clamped by idler axles 1 and 2 · +y tongues in slots 1-3 · -y tongues in slots 1-3 · +z idler axles 1 and 2 through the lugs · -z cheeks on the wall tops | fits.STEEL | +z (on the bench, before the idler axles) | undo idler axles 1 and 2 along -x (spine set out of the base), lift the drive unit |
-| holder-on-drive-block | cell-holder ↔ drive-unit | screw | +x tab on drive ear 2, post tongues in slot 4 · -x tab on drive ear 2, post tongues in slot 4 · +y tongues in slot 4, M2 in the block · -y tongues in slot 4, M2 in the block · +z M2 (head on the tab) into drive block 2 / ear 2 · -z tab on the ear top, post on the wall tops | fits.STEEL | +z | slide the N10 out (-x), undo the M2 (from above), lift the holder |
-| lid-on-holder | cell-lid ↔ cell-holder | snap | +x rim · -x rim · +y rim · -y snap · +z rim · -z holder wall | fits.PRESS | +z | lift by its tab |
-| body-front-snaps | body ↔ base | snap | +x rim · -x front wall · +y rim · -y 2 hooks under ribs · +z rim · -z base ledge | fits.PRESS | +z | pull the body up (45 deg return faces) |
-| body-rear-tab | body ↔ base | snap | +x tab · -x tab · +y tab · -y snap rib · +z back sheet · -z ledge | fits.PRESS | +z | pull up with the front |
-| motor-in-clamp | n10-motor ↔ drive-unit | press | +x clamp · -x clamp · +y clamp · -y clamp · +z clamp · -z clamp | fits.MOTOR_SEAT | -x | slide out along -x |
-| pinion-on-shaft | pinion ↔ n10-motor | press | +x press · -x press · +y D-shaft · -y D-shaft · +z D-shaft · -z D-shaft | fits.DSHAFT | -x | pull it off the shaft |
-| spacer-on-axle | idlers ↔ spine | screw | +x wall · -x wall · +y M2 axle · -y M2 axle · +z M2 axle · -z M2 axle | fits.STEEL | +z (sleeve in the idler, then the M2 along +x) | pull the M2 along -x |
+| spine-on-keel | spine ↔ base | screwed | +x keel in the boss pocket · -x keel in the boss pocket · +y 2 M3x6 · -y 2 M3x6 · +z 2 M3x6 heads in the base bosses · -z keel on the boss tops | fits.STEEL | +z | 2 M3x6 out from below |
+| crank-in-spine | crankshafts ↔ spine | turn | +x gear face vs wall (GEAR_THRUST_CRANK) · -x web vs wall · +y slot face · -y slot face · +z journal-cap tongues (slots 1-4, F) · -z slot bottom | fits.TURN | +z | lift the cap, lift each crank |
+| idler-on-shank | idlers ↔ spine | turn | +x +x wall (GEAR_THRUST_IDLER 0.45) · -x -x wall · +y M3 shank · -y M3 shank · +z M3 shank · -z M3 shank | fits.STEEL | +z, then the screw along +x | screw out along -x, idler lifts |
+| cap-on-spine | journal-cap ↔ spine | slide | +x tongues in the slot walls · -x lug 3 on the -x wall · +y tongues in slots 1-4 · -y tongues in slots 1-4 · +z idler-3 M3x10 button head on lug 3; motor-u ledge · -z rails on the wall tops | fits.TONGUE_SHORT | +z | axle 3 and motor-u off, lift |
+| motor-u-on-spine | motor-u ↔ spine | screwed | +x web on the -x wall face · -x idler axle 1, 2 heads · +y M3 shanks 1, 2 · -y M3 shanks 1, 2 · +z M3 shanks 1, 2 · -z ledge on the cap | fits.STEEL | +z | 1 M3x10 out, lift |
+| transfer-on-pin | transfer ↔ transfer-pin | turn | +x transfer-cheek (GEAR_AXIAL 0.8) · -x cap notch face (GEAR_AXIAL 0.8) · +y pin · -y pin · +z pin · -z pin | fits.STEEL | +z, pin along -x | M3x16 out |
+| pin-in-cheeks | transfer-pin ↔ motor-u | slide | +x transfer-cheek face · -x M3x16 thread in its Ø2.5 pilot or its head · +y web hole · -y web hole · +z web hole · -z web hole | fits.STEEL | -x | cheek off, pull along +x |
+| cheek-on-u | transfer-cheek ↔ motor-u | screwed | +x pin end in its hole · -x strap on the U ears · +y 1 M3x10 · -y 1 M3x10 · +z 1 M3x10 head · -z U ear tops | fits.STEEL | -z | 1 M3x10 out, lift |
+| motor-in-u | n10-motor ↔ motor-u | clamp | +x gearbox face on the U end stop · -x strap press · +y U wall · -y U wall · +z strap · -z U floor | fits.MOTOR_SEAT | +z | strap off, lift |
+| pinion-on-shaft | pinion ↔ n10-motor | press | +x shaft shoulder · -x press · +y D flat · -y D flat · +z D flat · -z D flat | fits.DSHAFT | -x | pull with pliers |
+| holder-on-cap | cell-holder ↔ journal-cap | screwed | +x tab M3x10 · -x tab M3x10 · +y post on the cap · -y tab M3x10 · +z M3x10 head · -z post on the cap top, tab on ear 2 | fits.STEEL | +z | 1 M3x10 out, lift (crank 4 stays capped) |
+| lid-on-holder | cell-lid ↔ cell-holder | snap | +x key · -x key · +y lips · -y lips · +z bumps in grooves · -z wall tops | fits.LOCATOR | +z | pull the back tab |
+| legs-on-pins | legs ↔ crankshafts | turn | +x snap bead in the groove · -x web · +y pin · -y pin · +z pin, body rim · -z pin | fits.TURN | +z then -x along the pin | pull off along the pin |
+| body-on-base | body ↔ base | snap | +x rim · -x rim · +y rear tab · -y front snaps · +z front snaps · -z ledge | fits.PRESS | +z | lift the front, unhook |
 
 ## Assembly sequence
 
 | Step | Part | From | Hand or tool | Already in | How you know |
 |---|---|---|---|---|---|
-| 1 | base | None | hand |  | foot flat |
+| 1 | base |  | hand | nothing | foot flat |
 | 2 | spine | +z | hand | nothing (on the bench) | upright, slots up |
-| 3 | crankshafts | +z | hand | spine | journals down in their 8 slots at the phase marks (pose KC) |
-| 4 | idlers | +z | hand | crankshafts | each meshes both cranks |
-| 5 | drive-unit | +z | hand | idlers | on the bench: tongues in slots 1-3, lugs flat on the -x wall over idler holes 1 and 2 |
-| 6 | m2-screws | -x | 1.5 mm hex key | drive-unit | 3 idler axles in along +x (1 and 2 through the drive unit's lugs), train turns by hand |
-| 7 | spine | +z | hand | base | spine set (with the drive unit) on the keel |
-| 8 | m2-screws | -z | 1.5 mm hex key | spine | lay the base on its flank for the keel M2; crank 4 held in its slots by a rubber band over the walls until the holder caps it; 2 keel M2 tight |
-| 9 | legs | +z | hand | spine | dropped through its window, slid onto its pin along x, ball in its seat |
-| 10 | cell-holder | +z | 1.5 mm hex key | legs | before the motor (its tab and M2 head sit under the N10): post-cap tongues in crank 4's slots, tab on drive ear 2 (lowered to 1.0), M2 through the tab into block 2 tight, driven while the clamp is empty |
-| 11 | pinion | -x | hand | cell-holder | on the bench: pressed on the N10 shaft to its stop, flat to the D |
-| 12 | n10-motor | -x | hand | pinion | slid in along +x with its pinion over the holder tab, pinion meshes, flush; comes out along -x with the holder in place |
-| 13 | ag13-cells | +z | hand | n10-motor | + toward the strip, each cell pressed against its spring as it goes down |
-| 14 | cell-lid | +z | hand | ag13-cells | snaps shut |
-| 15 | jst-xh | +z | hand | cell-lid | latched |
-| 16 | leds | +y | hand | body | domes in the eye bores |
-| 17 | ss12d00-switch | -y | hand | body | lever out the back |
-| 18 | body | +z | hand | everything | body-on mark: crank pose 12 (best of 24 for the lift-off; the rim notch over the leg arms, 0.22 deep, is cut for it); two front clicks, rear tab seated, legs turn |
+| 3 | crankshafts | +z | hand | spine | journals in their 8 slots at the phase marks |
+| 4 | idlers | +z | hand | crankshafts | each meshes both cranks, held by hand at its hole |
+| 5 | journal-cap | +z | hand | idlers | rails flat on the wall tops, 8 tongues in slots 1-4 |
+| 6 | m3-screws | -x | 2 mm hex key | journal-cap | idler axle 3 (M3x10 button head, ISO 7380) through lug 3 and idler 3: cap held |
+| 7 | transfer | +z | hand | m3-screws | small gear in the cap notch meshing idler 2 (before the motor-u: its U floor is over the transfer) |
+| 8 | motor-u | +z | hand | transfer | ledge on the cap, web lugs over idler holes 1, 2, boss beside the transfer |
+| 9 | m3-screws | -x | 2 mm hex key | motor-u | idler axles 1, 2 (M3x10 button head, ISO 7380): each idler turns free |
+| 10 | transfer-pin | -x | 2 mm hex key | m3-screws | M3x16 button head (ISO 7380) from -x through the web, the boss and the transfer: it turns free |
+| 11 | spine | +z | hand | base | spine set on the keel bosses |
+| 12 | m3-screws | -z | 2.5 mm hex key | spine | 2 keel M3x6 from below, base on its flank |
+| 13 | legs | +z | hand | spine | dropped through its window, slid onto its pin, bead clicks |
+| 14 | cell-holder | +z | 2.5 mm hex key | legs | post on the cap, tab on ear 2, M3x10 through the U floor's key hole; no rubber band |
+| 15 | pinion | -x | hand | n10-motor on the bench | pressed to its stop, flat to the D |
+| 16 | n10-motor | +z | hand | cell-holder | drops into the U, pinion meshes the big transfer gear |
+| 17 | transfer-cheek | -z | hand | n10-motor | over the pin end, strap on the motor |
+| 18 | m3-screws | -z | 2.5 mm hex key | transfer-cheek | 1 strap M3x10: motor clamped, train turns by hand |
+| 19 | ag13-cells | +z | hand | transfer-cheek | + toward the strip |
+| 20 | cell-lid | +z | hand | ag13-cells | snaps shut |
+| 21 | jst-xh | +z | hand | cell-lid | latched |
+| 22 | leds | +y | hand | body | domes in the eye bores |
+| 23 | ss12d00-switch | -y | hand | body | lever out the back |
+| 24 | body | +z | hand | everything | body-on mark at crank pose 12; two front clicks |
 
 ## Alternatives
 
-- **crank 2/3 split**: ±1.3 about the midpoint / crank 2 +0.5, crank 3 +3.1 rearward (C +1.8) / crank 3 +2.6 only → **crank 2 +0.5, crank 3 +3.1 rearward (C +1.8)**, ±1.3 leaves leg ends 0/1 at −1.40; C +1.8 is the least shift with every leg pair ≥ 0.8; pivots P do not move, only the inner arms skew; chosen at LEG_PATH 0.8, now 0.5 (measured fork window), about 0.3 spare
-- **body front hold**: 2 M2 from below at ±44° / 2 snap fingers at x ±6 under base ribs / 1 central snap → **2 snap fingers at x ±6 under base ribs**, screws boxed in by eye block and legs (Morante); two fingers stop roll, front wall straight there
-- **front window relief**: pocket + outward bulge, 45° chamfer under it / through-notch (window grows) / larger S → **pocket + outward bulge, 45° chamfer under it; through only where the bulge would come within LEG_PATH of a leg**, spec rule: reshape locally, outward on the base first; S not wanted
-- **crank retention**: two separate walls clamped by the idler axles + keel / open-top journal slots capped by drive-unit tongues (1-3) and the holder post (4) / spine split at the crank axis, screwed top half → **open-top journal slots capped by drive-unit tongues (1-3) and the holder post (4)**, a one-piece crank's webs stop a wall sliding on along x; the caps reuse the drive unit and holder (no new part)
-- **front snap finger**: T 1.0, L 7.0, travel 0.6 (1.8 %) / T 0.8, L 8.0, travel 0.5, overlap 0.4 (0.9 %) → **T 0.8, L 8.0, travel 0.5, overlap 0.4 (0.9 %)**, ≤ 1.1 % across layers; fits.PRESS kept as assumed
-- **cell holder vs drive block 2**: notch at PY 14.0 (front wall left 0.42) / PY +0.4 with a 0.38 notch and a body inner pocket / PY +0.8, no notch → **PY +0.4 with a 0.38 notch and a body inner pocket**, wall ≥ 0.8 by the spring seat; the body wall is 3.2, the pocket is inside it
-- **leg arm vs eye block and cell holder**: local pocket PKR 0.85 from the arms' 24-pose sweep / move the eye block forward / larger S → **local pocket PKR 0.85 from the arms' 24-pose sweep**, spec rule m13: reshape the colliding part locally; the pockets are inside, under 0.9 deep, not visible
+- **drive: transfer vs Direct 1 (comparison, probe p3plan/n1var.py, 24 poses)**: A+B+F with transfer / Direct 1: 10 T on idler 1 at 110°, face-mounted N10 → **A+B+F with transfer**, Direct 1 needs a ≥2.0 face plate + GEAR_AXIAL 0.8 between pinion and gearbox, pushing the N10 to x 4.9..25.9: N10↔body −0.79, plate↔body −0.50, N10↔leg-1 −0.12 (overlaps); A keeps the phase-2 envelope (cap↔transfer 0.24, a notch size)
+- **comparison: printed parts / screws / steps**: A: 25 parts, 8 M3 (2 lengths) + 1 pin, 24 steps / Direct 1: 23 parts, 9 M3 + 2 M1.6 face screws (3 kinds), 22 steps → **A**, Direct 1 saves 2 parts and 2 steps but adds a screw kind on an unmeasured face
+- **comparison: supported area**: A: drive 0 mm² (3 flat parts) vs 524 + 151 + sleeves now / Direct 1: 0 mm² on the drive → **A**, equal; cranks 137 mm² each remain in both
+- **comparison: risks**: A: transfer centre distances through 3 screwed parts (STEEL 0.15 a side vs 0.27 before binding) / Direct 1: N10 face holes/spacing and shaft length assumed (2 x M1.6 at 9 mm, shaft ≥ 6.5 from the face), not bought, N1 fails by 0.8 → **A**, A's risk is a coupon; Direct 1's is a body change, which is frozen
+- **idler and transfer axles (B)**: M3 shanks / Ø3 steel pins → **M3 shanks for the idlers and an M3x16 for the transfer**, fits.STEEL is measured for screw shanks as axles; each idler screw also holds the cap or the motor-u, threaded only in the -x wall so the walls are not squeezed; transfer span 18.7 needs 16 mm: M3x16, nothing to buy (Morante 2026-11-26: «Ok», 3 screw lengths)
+- **motor U strap (A)**: strap on the transfer-cheek / separate strap part / strap on the motor-u → **strap on the transfer-cheek**, Morante's A; one part closes the U and caps the transfer pin
+- **crank 4 cap (F)**: journal-cap tongues / holder tongues + rubber band → **journal-cap tongues**, Morante's F: the holder comes out without freeing crank 4
 
 ## Acceptance
 
@@ -90,7 +101,7 @@ Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric 
 | m6 | Morante can change the cells; the switch is reached from outside | verify | integrity | must |
 | m7 | two 5 mm LED bores in the eyes, wired by Morante (no eyes board) | verify | integrity | must |
 | m8 | the views command renders the robot and jenscolt's assembled meshes in the same views and framing, written as images/reference.png next to the photos | visual |  | must |
-| m9 | fasteners: start with M2 self-tapping screws or snap fits; M3 where it solves a problem | verify | retention | must |
+| m9 | fasteners: M3 everywhere (holes fits.STEEL on Ø3.3), or snap fits (datasheet robot «Phase 1 result», Morante 2026-11-26) | verify | joints | must |
 | m10 | margins, walls and clearances: the standard values of cad/fits.py; changed only where they cause a problem, and put to Morante | verify | joints | must |
 | m11 | print support as little as possible; up to 20-30 % on a part is accepted when a valid solution needs it | verify | print | must |
 | m12 | screwdriver access: where it blocks a solution, it is put to Morante before the solution is dropped | verify | access | must |
@@ -99,19 +110,25 @@ Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric 
 | m15 | cell contacts: conical springs + nickel strip (to buy) | verify | integrity | must |
 | m16 | eye LEDs: red or yellow from the Arduino kit, with their resistors placed and counted | verify | integrity | must |
 | m17 | wiring through one 3-pin JST-XH (to buy); hook-up wire from the Arduino kit | verify | integrity | must |
-| m18 | crank 4 and the rear legs clear the base's back sheet through a local pocket in it, 1.6 mm outward, x ±11, z 7-17, hidden behind the body's rear tab (notched to match); the back scoop itself is not moved (Morante, 2026-11-21: «Tu recomendación») | verify | motion | must |
-| m19 | cranks 2 and 3 (and their mirror) 2.6 mm further apart along Y than motion.py's uniform DY, standard fits.LEG_PATH on every leg pair (no waiver); the middle legs open ~1.3 mm each, shown to Morante next to jenscolt before motion.py changes (Morante, 2026-11-21: «Ok», S 0.70 signed probe: leg ends 2/3 −2.55) | verify | motion | must |
+| m18 | body held at the front by snap fits (the front screws are boxed in by the eye block and the legs); screws only where they have driver access (Morante, 2026-11-21: «Ok») | verify | motion | must |
+| m19 | cranks 2 and 3 (and their mirror) 2.6 mm further apart along Y than motion.py's uniform DY, standard fits.LEG_PATH on every leg pair (no waiver); the middle… | verify | motion | must |
 | m20 | front leg windows of the base: a local relief where the leg arm passes (S 0.70 probe −0.76 at ±20.6, −16.9, 16.3) (Morante, 2026-11-21: «Ok») | verify | motion | must |
 | m21 | leg-arm end tube tail shortened to ~0.7 mm where it meets its own crank web (Morante, 2026-11-21: «Ok») | verify | motion | must |
-| m22 | body held at the front by snap fits (the front screws are boxed in by the eye block and the legs); screws only where they have driver access (Morante, 2026-11-21: «Ok») | verify | retention | must |
+| m22 | body held at the front by snap fits (the front screws are boxed in by the eye block and the legs); screws only where they have driver access (Morante,… | verify | retention | must |
 | n1 | a probe that leaves parts out reported as a fit | verify | integrity | must |
 | n2 | jenscolt's inner posts in the body or base | verify | integrity | must |
 | p1 | full cad_verify PASS with every part inside (no collision over the 24 poses, each part's assembly path) at the chosen S, and the judge >= 0.60 against jenscolt's model (his photos and his assembled meshes in the same views as the robot) | morante |  | must |
 | q1 | front snaps click on and pull off by hand; legs walk a full turn | print |  | must |
-| c1 | snap coupon, runs before the body and the base are printed (PRESS assumed): front-wall strip with rib + rim strip with fingers, rear-tab rib, real print orientations; clicks on, pulls off by hand | print |  | must |
-| c2 | gear and slot coupon m 0.6 (c2 + c3 merged): wall-pair stub with open-top slots, cap tongue, a drive-unit lug, a crank and an idler (GW - 0.4 wide) on its spacer sleeve and a real M2 self-tapping axle (pilot Ø1.6, assumed); turns by hand, no skip, drops in, turns free, cap holds, lug clamped, tightening does not pinch; plus the holder tab (1.2 thick, hole STEEL) on a drive-ear stub over a block stub, real M2 into pilot Ø1.6 (assumed): holds, head clear | print |  | must |
-| c4 | leg coupon: leg end bore on a printed Ø3 pin + window strip; slides on, ball seats, swings free; the pin is printed in the crank's real orientation (axis vertical) | print |  | must |
+| c1 | snap coupon, runs before the body and the base are printed (PRESS assumed): front-wall strip with rib + rim strip with fingers, rear-tab rib, real print… | print |  | must |
+| c4 | leg coupon: leg end bore on a printed Ø3 pin + window strip; slides on, ball seats, swings free; the pin is printed in the crank's real orientation (axis… | print |  | must |
+| c2 | gear and slot coupon m 1.0: wall-pair stub with open-top slots, cap tongues, an idler on its M3 shank (threads only in the -x wall): drops in, turns by hand | print |  | must |
+| c5 | motor-u coupon: N10 in the U under the strap (MOTOR_SEAT 0.2), pinion meshes the transfer on its pin, turns by hand | print |  | must |
+| s1 | A: journal-cap, motor-u and transfer-cheek print with no support (3 flat parts) | verify | print | must |
+| s2 | B: no printed sleeves; idlers on M3 shanks, transfer on a Ø3 pin | verify | joints | must |
+| s3 | F: crank 4 capped by the journal cap; the holder lifts out with crank 4 held | verify | retention | must |
+| s4 | hardware labelled M3 (not M2), at most 2 screw lengths (M3x6, M3x10) | visual |  | must |
+| s5 | N1: every pair at the 24 poses with no overlap (fitcheck/n1.py), drive pairs at their fits | verify | motion | must |
 
 ## Diagram
 
-<img src="base > keel M2 > spine set (spine, cranks in open slots, idlers, drive-unit caps 1-3, 3 M2 axles: 1 and 2 through its lugs) > legs (window, pin) > cell-holder (post on the wall tops, tongues cap 4, tab M2 into drive block 2) > N10 + pinion > cells > lid; body snaps" alt="Plan diagram">
+<img src="base > keel 2 M3x6 > spine set [spine, cranks, idlers, journal-cap (slots 1-4) + axle 3, motor-u + axles 1-2, transfer + pin] > legs > cell-holder (M3x10 into ear 2) > N10 + pinion > transfer-cheek (2 M3x10 strap) > cells > lid > body" alt="Plan diagram">

@@ -63,10 +63,47 @@ throw 3.3 mm, so lifting the whole weight needs ≈ 0.09 kg·cm: the motor bough
 torque never measured; seller's datasheet before buying). Body build 41–47 s cold (over 40 s). Count for phase 3: 27
 printed parts, 14 hardware entries, 37 assembly steps. Sections: `cad/robot/images/phase2/` (not committed).
 
-**Next session (Morante opens it): phase 3, step 1**, by the coordinator with no agent: a count sheet (printed parts,
-screws, assembly steps, supported parts, from `verify.py` PARTS/ASSEMBLY) and the candidate simplifications, each with
-its gain (A and B already approved, plus what the count shows). Morante picks; then the local work (the ≤ 0.4 mm
-overlaps, leg↔shell gaps, front-window relief, marks, spine spot), N2 `cad_verify`, coupons, print.
+**Next session (Morante opens it, 2026-11-27): question the leg ↔ crank joint first.** Branch `phase3-s1`
+(work in progress, committed so the tree survives). Morante wants to question the last fixer's leg change before
+anything else; nothing below is approved yet.
+
+*What the leg fixer did (shells.py, drive.py):* `TAIL_CUT` 1.5 (tube face XC − 0.5, was XC − 2.0) and `PIN_TRIM`
+0.5 (pin tip 13.79): the leg now holds its pin over **4.29 mm instead of 6.29** (Ø4.3 pin, ≈ 100 mm leg arm);
+`FACE_CHAMFER` 0.6 on the tube mouth; `END_REL_*` recess 0.5 deep on the lowest 1.5 mm of the tube end (base gap at
+crank pose 18); `BORE_DRIFT_MARGIN` 0.01 → 0.05. Result: no crank × leg or axle-head × leg overlap (closest 0.20 and
+0.40), base × legs 0/3/4/7 0.50–0.60 (LEG_OPEN 0.40 met), `--quick` 39 → 20 FAIL (34 s).
+*The objection (coordinator, measured):* the tube wall is `END_R` − bore = **1.72–1.86** on all four legs (never got
+phase 1's +0.3 in place) and **1.22–1.36** at the recess: below the 2.0 minimum, on the joint that carries the leg.
+Check 13 did not flag either: a gap in the check (its per-part surface share lets a small thin zone pass), to fix.
+*Options put to Morante:* (1, recommended) move each leg 1.5–2 mm outward along a longer pin (XC and PINX + 1.5–2,
+TAIL back to W): grip back to ≈ 6.3, room to thicken the tube to 2.0 with no recess; ≈ 229 mm across (was 225), the
+cutters re-derive the base/body windows; a layout change, everything re-checked; `cad-fixer` ≈ 100k. (2) accept
+4.3 mm grip and 1.2–1.9 walls and let the print test it.
+
+*Still open after the leg decision (most numbers move with it):* body × leg-4 0.01, leg-1 0.13, leg-0 0.17 (need
+0.2); leg-1 × transfer 0.13 (bigger `FACE_CHAMFER` ≈ 0.9–1.0); leg-0 assembly «blocked on move 2 at 1.36 mm»;
+retention legs 0/7 (> 1.65) and 5 (> 1.25); crank marks not cut (engraved numbers ≈ 3 mm, the new mark type); spine
+0.86 at the keel; transfer-cheek sliver 0.12 at the strap tip (y −0.2, z 54.7); cell-holder × nickel-strip 6.6 mm³;
+cell-lid and nickel-strip retention; switch path 0.25 and its tool; the body roof tool hits the pinion; body build
+42 s. Then the full `cad_verify`, coupons (c5: transfer centre distance through 3 screwed parts), plates, kit.
+*Done in this session (2026-11-26/27), on the branch:* plan.json rewritten for S 1.0 (A + B + F, validate PASS, 24
+steps); drive unit split into journal-cap 2.7 g, motor-u 3.4 g, transfer-cheek 1.3 g, flat, no support; sleeves
+gone; idlers and transfer on M3 shanks; **ISO 7380 M3 button heads** on axles 1–3 and the transfer axle M3×16
+(Morante: no thin rims, buy them); 1 strap screw; screws 2 × M3×6, 5 × M3×10, 1 × M3×16; transfer before motor-u;
+spine set lowered 1 mm forward then slid back (crank-4 vs the base's rear lip). hardware.md still lists M2: the
+documenter updates it with the button heads at the step's close.
+
+**Phase 3 step 1 result (2026-11-26).** Count at S 1.0: 27 printed parts (10 gears in 9), 14 hardware entries (7
+screws in 4 lengths, M3 in the geometry but still labelled «M2» in `drive_verify.py` / `power_verify.py` and the kit),
+37 assembly entries (17 plan steps, 11 on the bench), 18 of 27 parts supported (drive unit 524 mm², cranks 137 mm²
+each ≈ 140 % of their weight, transfer 151, spine 226, holder 461; legs' orientation the plater's). Morante picked
+**A + B + F**: **F** = A's flat journal cap also caps crank 4, the cell holder loses its tongue over journal 4 (no
+rubber band at step 7; the holder comes out without freeing crank 4). Applied without asking: M2 labels → M3, at most
+2 screw lengths. **Direct drive (no transfer)** scanned (pinion 10–30 T on any idler or crank, every 5°, motor ±x, 24
+poses, 0.25 mm grid): the bare N10 clears ≤ 0.75 mm everywhere, a 2 mm clamp fits nowhere. Best: **Direct 1**, 10 T
+on idler 1 at 110° (motor centre y −22.8, z 32.0, motor on +x, same speed as now): bare motor 0.47 to the body, 0.62
+to leg-1, 0.84 to the spine; it only works with the motor held by its gearbox face. Morante: «Lanza con la variante
+directa incluida»: the PLAN compares A + B + F with the transfer against Direct 1 with a face mount.
 
 **Phase 3, simplify: what can go, and how?**
 1. Count parts, screws, assembly steps, supported parts.
