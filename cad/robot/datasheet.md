@@ -81,9 +81,9 @@ A build or check over 60 s is a bug (`tools/timebudget.py`, `CAD_BUDGET` default
 ## 7. Open
 
 - Grams: the check prints volumes only; `plan.json` grams are from volumes × 1.24 and nothing was weighed.
-- Still saying M2: `kits/01-batch-1-test-leg/notes.json` (batch 1, M2 and sleeves); `cad/robot/README.md` (70 %, sleeves,
+- Still saying M2: `cad/robot/README.md` (70 %, sleeves,
   «M2 screws»); `plan.json` and its joint text (keel «M3×6», code is ×5); comments and names in `shells.py`, `drive.py`,
-  `power.py`, `figures_batch1.py`; `design-plan.md` is the 0.70 design's. `hardware.md`, `drive_verify.py` and
+  `power.py`. `hardware.md`, `drive_verify.py` and
   `power_verify.py` are M3 (`hardware.md` as edited in the working tree, not yet committed).
 - `cad/README.md` «Time budget» says 40 s; the rule and `timebudget.py` are 60 s.
 - Optimizer proposals awaiting Morante: the fork failure in `--quick`, a stale-STL guard, one motion import.

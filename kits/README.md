@@ -6,7 +6,7 @@ the page Morante has open on his phone at the bench.
 
 | Kit | Step | Open |
 |---|---|---|
-| [01-batch-1-test-leg](01-batch-1-test-leg/) | Batch 1: the blue and yellow plates and leg-3, to test the leg snap and the M2 pilots; then the whole robot's assembly | [kit](https://morante-robotics.github.io/spider-bot-replica/kits/01-batch-1-test-leg/kit.html) |
+| [01-batch-1-test-leg](https://github.com/Morante-robotics/spider-bot-replica/tree/batch-1-kit-2026-11-24/kits/01-batch-1-test-leg) | Batch 1 (scale 0.70, M2): the blue and yellow plates and leg-3, to test the leg snap and the M2 pilots; then the whole robot's assembly. The batch failed; the kit is archived at tag `batch-1-kit-2026-11-24` | archived |
 
 Each folder holds `notes.json` (the text, written by hand), `kit.html` and its pictures (made by the tool). To remake
 one after a design change:

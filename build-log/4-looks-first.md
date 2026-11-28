@@ -371,9 +371,9 @@ and the spine (30 %).
 - **Batch 2** (≈ 5 h): the rest of the red plate, after leg 3 snaps well.
 - **Kits in the repo.** Morante liked the workshop kit enough to keep it: «quiero que a partir de ahora los kits
   formen parte del repo». From now on every kit is made in English in [`kits/`](../kits/README.md), one folder per
-  step, served by GitHub Pages. This step's kit: [`kits/01-batch-1-test-leg`](../kits/01-batch-1-test-leg/)
-  ([open it](https://morante-robotics.github.io/spider-bot-replica/kits/01-batch-1-test-leg/kit.html)): the two
-  batches, 37 assembly steps with a picture each, what to measure and what to film.
+  step, served by GitHub Pages. This step's kit: [`kits/01-batch-1-test-leg`](https://github.com/Morante-robotics/spider-bot-replica/tree/batch-1-kit-2026-11-24/kits/01-batch-1-test-leg)
+  (archived at tag `batch-1-kit-2026-11-24` after the batch failed): the two batches, 37 assembly steps with a
+  picture each, what to measure and what to film.
 
 ### Batch 1 result: the mechanism is not printable at this size
 
@@ -389,7 +389,7 @@ and the spine (30 %).
 Batch 1 was the first print of the whole-robot design, and the test of fits that the ready-to-print check had marked
 «assumed»: the D-shaft bore, the gear tip room, the leg path, the motor seat and the press fits. The plan was to
 print it as the coupon for all of them at once. It did, and the answer is in this entry. The kit that guided the
-assembly is [`kits/01-batch-1-test-leg`](../kits/01-batch-1-test-leg/).
+assembly is [`kits/01-batch-1-test-leg`](https://github.com/Morante-robotics/spider-bot-replica/tree/batch-1-kit-2026-11-24/kits/01-batch-1-test-leg) (archived).
 
 #### What broke while printing
 
