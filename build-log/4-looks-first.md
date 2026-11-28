@@ -622,7 +622,7 @@ the bore drift added outside and the M3 heads. The one real contact left was the
 
 - Options seen: (A) as it was, the snap that broke; (B) a tube centred on the pin point plus a Ø2 × 8 steel cross pin
   in a groove of the printed pin (groove neck Ø2.9: coupon risk); (C) a steel Ø3 pin, slimmer tube, but no retention
-  without opening the tube end. Two earlier attempts at fixing A (branch `phase3-leg-joint-wip`) made it worse
+  without opening the tube end. Two earlier attempts at fixing A (archived at tag [`leg-joint-A-attempts-2026-11-27`](https://github.com/Morante-robotics/spider-bot-replica/tree/leg-joint-A-attempts-2026-11-27)) made it worse
   (27 FAIL against 20).
 - Morante, 2026-11-27: «Deje este tema para resolverlo más adelante y vamos a seguir abordando otras cosas que haya
   pendiente». It was parked, then reopened by him, who **picked option D**: the leg rides with its pin point on the
