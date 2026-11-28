@@ -24,7 +24,7 @@ Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric 
 | cell-holder | 2S3P AG13 holder; F: no tongue over crank 4, post on the cap top, tab M3 into motor-u ear 2 | comes out without freeing crank 4 | 7.6 | floor down |
 | cell-lid | snap lid (unchanged) | opens for the cells | 2.0 | plate down |
 | n10-motor | N10 3 V gear motor (to buy; not measured) |  |  |  |
-| m3-screws | ISO 4762 M3 self-tapping into Ø2.5 pilots: 2 x M3x6 (keel), 2 x M3x10 (strap 1, holder 1); ISO 7380 button head (Ø5.7 x 1.65, 2 mm hex key): 3 x M3x10 (idler axles 1-3) and 1 x M3x16 (transfer axle, listed as transfer-pin) |  |  |  |
+| m3-screws | ISO 4762 M3 self-tapping into Ø2.5 pilots: 2 x M3x5 (keel), 2 x M3x10 (strap 1, holder 1); ISO 7380 button head (Ø5.7 x 1.65, 2 mm hex key): 3 x M3x10 (idler axles 1-3) and 1 x M3x16 (transfer axle, listed as transfer-pin) |  |  |  |
 | transfer-pin | M3 x 16 button head (ISO 7380, Morante 2026-11-27), the transfer's axle (screw, not a dowel); head on the motor-u web's -x face, thread in the web's Ø2.5 pilot, STEEL through the boss and the transfer; entered from -x |  |  |  |
 | ag13-cells | 6 x AG13, springs and nickel strip |  |  |  |
 | ss12d00-switch | slide switch |  |  |  |
@@ -35,7 +35,7 @@ Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric 
 
 | Joint | Parts | Type | Held | Fit | In from | Apart by |
 |---|---|---|---|---|---|---|
-| spine-on-keel | spine ↔ base | screwed | +x keel in the boss pocket · -x keel in the boss pocket · +y 2 M3x6 · -y 2 M3x6 · +z 2 M3x6 heads in the base bosses · -z keel on the boss tops | fits.STEEL | +z | 2 M3x6 out from below |
+| spine-on-keel | spine ↔ base | screwed | +x keel in the boss pocket · -x keel in the boss pocket · +y 2 M3x5 · -y 2 M3x5 · +z 2 M3x5 heads in the base bosses · -z keel on the boss tops | fits.STEEL | +z | 2 M3x5 out from below |
 | crank-in-spine | crankshafts ↔ spine | turn | +x gear face vs wall (GEAR_THRUST_CRANK) · -x web vs wall · +y slot face · -y slot face · +z journal-cap tongues (slots 1-4, F) · -z slot bottom | fits.TURN | +z | lift the cap, lift each crank |
 | idler-on-shank | idlers ↔ spine | turn | +x +x wall (GEAR_THRUST_IDLER 0.45) · -x -x wall · +y M3 shank · -y M3 shank · +z M3 shank · -z M3 shank | fits.STEEL | +z, then the screw along +x | screw out along -x, idler lifts |
 | cap-on-spine | journal-cap ↔ spine | slide | +x tongues in the slot walls · -x lug 3 on the -x wall · +y tongues in slots 1-4 · -y tongues in slots 1-4 · +z idler-3 M3x10 button head on lug 3; motor-u ledge · -z rails on the wall tops | fits.TONGUE_SHORT | +z | axle 3 and motor-u off, lift |
@@ -65,7 +65,7 @@ Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric 
 | 9 | m3-screws | -x | 2 mm hex key | motor-u | idler axles 1, 2 (M3x10 button head, ISO 7380): each idler turns free |
 | 10 | transfer-pin | -x | 2 mm hex key | m3-screws | M3x16 button head (ISO 7380) from -x through the web, the boss and the transfer: it turns free |
 | 11 | spine | +z | hand | base | spine set on the keel bosses |
-| 12 | m3-screws | -z | 2.5 mm hex key | spine | 2 keel M3x6 from below, base on its flank |
+| 12 | m3-screws | -z | 2.5 mm hex key | spine | 2 keel M3x5 from below, base on its flank |
 | 13 | legs | +z | hand | spine | dropped through its window, slid onto its pin, bead clicks |
 | 14 | cell-holder | +z | 2.5 mm hex key | legs | post on the cap, tab on ear 2, M3x10 through the U floor's key hole; no rubber band |
 | 15 | pinion | -x | hand | n10-motor on the bench | pressed to its stop, flat to the D |
@@ -126,9 +126,9 @@ Level N2 · purpose: The whole looks Spider-Bot as one assembly: the parametric 
 | s1 | A: journal-cap, motor-u and transfer-cheek print with no support (3 flat parts) | verify | print | must |
 | s2 | B: no printed sleeves; idlers on M3 shanks, transfer on a Ø3 pin | verify | joints | must |
 | s3 | F: crank 4 capped by the journal cap; the holder lifts out with crank 4 held | verify | retention | must |
-| s4 | hardware labelled M3 (not M2), at most 2 screw lengths (M3x6, M3x10) | visual |  | must |
+| s4 | hardware labelled M3 (not M2), at most 2 screw lengths (M3x5, M3x10) | visual |  | must |
 | s5 | N1: every pair at the 24 poses with no overlap (fitcheck/n1.py), drive pairs at their fits | verify | motion | must |
 
 ## Diagram
 
-<img src="base > keel 2 M3x6 > spine set [spine, cranks, idlers, journal-cap (slots 1-4) + axle 3, motor-u + axles 1-2, transfer + pin] > legs > cell-holder (M3x10 into ear 2) > N10 + pinion > transfer-cheek (2 M3x10 strap) > cells > lid > body" alt="Plan diagram">
+<img src="base > keel 2 M3x5 > spine set [spine, cranks, idlers, journal-cap (slots 1-4) + axle 3, motor-u + axles 1-2, transfer + pin] > legs > cell-holder (M3x10 into ear 2) > N10 + pinion > transfer-cheek (2 M3x10 strap) > cells > lid > body" alt="Plan diagram">

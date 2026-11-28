@@ -1,16 +1,16 @@
-cad_verify: PASS (0 failures, 91 warnings)
+cad_verify: PASS (0 failures, 92 warnings)
 
 == 1 integrity (printed parts)
-  WARN  base: closed solid, 14589 mm³, 96.7 × 86.4 × 31.2 mm; 2.3% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[-42.3, -3.9, 14.2], [-36.4, -34.6, 24.5], [30.4, 28.1, 13.3]])
-  WARN  body: closed solid, 102907 mm³, 95.7 × 111.9 × 67.6 mm; 2.9% of the surface is thinner than 0.8 mm (thinnest 0.02 mm, e.g. at [[15.7, -54.7, 59.6], [-9.7, -51.1, 48.0], [11.2, -54.7, 52.0]])
-  WARN  leg-0: closed solid, 23506 mm³, 73.7 × 65.2 × 100.1 mm; 1.1% of the surface is thinner than 0.8 mm (thinnest 0.03 mm, e.g. at [[80.3, -65.5, 33.6], [48.1, -55.2, 74.9], [51.8, -64.8, 63.0]])
-  WARN  leg-1: closed solid, 23519 mm³, 101.5 × 35.1 × 100.1 mm; 1.5% of the surface is thinner than 0.8 mm (thinnest 0.02 mm, e.g. at [[71.3, -14.1, 73.9], [88.2, -12.1, 49.2], [71.8, -13.5, 79.8]])
-  WARN  leg-2: closed solid, 23547 mm³, 101.9 × 39.2 × 100.1 mm; 1.4% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[75.6, 16.4, 50.3], [84.0, 12.3, 59.0], [75.0, 14.3, 66.6]])
-  WARN  leg-3: closed solid, 23128 mm³, 74.0 × 66.2 × 100.1 mm; 1.5% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[48.0, 57.9, 75.5], [47.1, 55.3, 78.2], [51.7, 57.8, 48.3]])
-  WARN  leg-4: closed solid, 23507 mm³, 73.7 × 65.2 × 100.1 mm; 1.5% of the surface is thinner than 0.8 mm (thinnest 0.05 mm, e.g. at [[-53.9, -68.6, 55.5], [-11.0, -32.3, 21.8], [-9.6, -30.1, 15.4]])
-  WARN  leg-5: closed solid, 23518 mm³, 101.5 × 35.1 × 100.1 mm; 1.4% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[-82.8, -12.0, 60.6], [-25.8, -13.0, 23.0], [-81.1, -12.2, 65.0]])
-  WARN  leg-6: closed solid, 23547 mm³, 101.9 × 39.2 × 100.1 mm; 1.6% of the surface is thinner than 0.8 mm (thinnest 0.02 mm, e.g. at [[-76.4, 30.6, 63.0], [-73.4, 24.2, 52.0], [-74.6, 29.3, 65.1]])
-  WARN  leg-7: closed solid, 23128 mm³, 74.0 × 66.2 × 100.1 mm; 1.1% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[-53.0, 68.1, 55.9], [-28.9, 30.2, 18.7], [-47.6, 54.5, 74.2]])
+  WARN  base: closed solid, 14589 mm³, 96.7 × 86.4 × 31.2 mm; 2.5% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[31.9, 36.7, 25.6], [-39.1, -19.6, 14.5], [-45.0, 1.2, 15.4]])
+  WARN  body: closed solid, 103938 mm³, 95.7 × 111.9 × 67.6 mm; 2.2% of the surface is thinner than 0.8 mm (thinnest 0.02 mm, e.g. at [[-12.3, -53.2, 61.9], [-10.1, 36.6, 16.9], [20.5, -53.2, 54.5]])
+  WARN  leg-0: closed solid, 23507 mm³, 73.7 × 65.2 × 100.1 mm; 1.4% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[52.1, -65.6, 61.3], [53.2, -67.7, 57.5], [9.6, -30.0, 15.0]])
+  WARN  leg-1: closed solid, 23518 mm³, 101.5 × 35.1 × 100.1 mm; 1.4% of the surface is thinner than 0.8 mm (thinnest 0.03 mm, e.g. at [[94.1, -13.1, 40.1], [75.2, -15.1, 63.7], [93.2, -36.9, 36.1]])
+  WARN  leg-2: closed solid, 23547 mm³, 101.9 × 39.2 × 100.1 mm; 1.7% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[10.4, 1.9, 19.1], [71.2, 26.6, 74.7], [70.7, 23.8, 69.6]])
+  WARN  leg-3: closed solid, 23128 mm³, 74.0 × 66.2 × 100.1 mm; 1.3% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[74.6, 58.4, 42.4], [52.6, 67.2, 57.6], [78.8, 62.5, 35.7]])
+  WARN  leg-4: closed solid, 23507 mm³, 73.7 × 65.2 × 100.1 mm; 1.2% of the surface is thinner than 0.8 mm (thinnest 0.00 mm, e.g. at [[-56.7, -72.4, 47.3], [-51.1, -58.6, 49.4], [-54.6, -69.8, 53.1]])
+  WARN  leg-5: closed solid, 23518 mm³, 101.5 × 35.1 × 100.1 mm; 1.5% of the surface is thinner than 0.8 mm (thinnest 0.04 mm, e.g. at [[-74.6, -15.3, 64.6], [-26.9, -12.1, 25.2], [-9.6, -13.8, 14.9]])
+  WARN  leg-6: closed solid, 23547 mm³, 101.9 × 39.2 × 100.1 mm; 1.3% of the surface is thinner than 0.8 mm (thinnest 0.02 mm, e.g. at [[-72.3, 13.0, 76.8], [-72.2, 13.9, 73.1], [-69.2, 25.0, 77.4]])
+  WARN  leg-7: closed solid, 23128 mm³, 74.0 × 66.2 × 100.1 mm; 1.1% of the surface is thinner than 0.8 mm (thinnest 0.01 mm, e.g. at [[-78.1, 61.7, 34.9], [-48.7, 55.4, 70.8], [-63.6, 51.2, 65.1]])
   ok    spine: closed solid, 3274 mm³, 8.8 × 61.9 × 21.1 mm; walls ≥ 0.8 mm
   ok    crank-1: closed solid, 733 mm³, 11.5 × 12.5 × 27.6 mm; walls ≥ 0.8 mm
   ok    crank-2: closed solid, 735 mm³, 12.0 × 12.5 × 27.6 mm; walls ≥ 0.8 mm
@@ -30,7 +30,7 @@ cad_verify: PASS (0 failures, 91 warnings)
 == 2 motion: overlaps and gaps at every step   3 gears: backlash
   ok    no undeclared overlaps over 24 steps
         1943 pair positions computed, 3645 repeats reused
-        swept envelopes (still part × moving part): 68 pairs clear at every step in one query each, 0 closer (gaps step by step, no overlap); scanned step by step: 0 overlapping or touching, 46 close last time, 0 close at their first step; 276 never near, 1 declared contacts skipped; 68 envelope results from the cache
+        swept envelopes (still part × moving part): 68 pairs clear at every step in one query each, 2 closer (gaps step by step, no overlap); scanned step by step: 0 overlapping or touching, 44 close last time, 0 close at their first step; 276 never near, 1 declared contacts skipped; 70 envelope results from the cache
         axle-3 × idler-3: gap 0.15 mm (closest at 21)
         transfer × transfer-pin: gap 0.15 mm (closest at 13)
         axle-1 × idler-1: gap 0.15 mm (closest at 23)
@@ -67,24 +67,24 @@ cad_verify: PASS (0 failures, 91 warnings)
         pinion × transfer-cheek: gap 0.45 mm (closest at 8)
         base × leg-3: gap 0.49 mm (closest at 0)
         base × leg-7: gap 0.49 mm (closest at 12)
-        body × leg-4: gap 0.60 mm (closest at 6)
-        body × leg-0: gap 0.61 mm (closest at 10)
         leds × transfer-cheek: gap 0.61 mm (closest at 0)
+        body × leg-4: gap 0.62 mm (closest at 14)
+        body × leg-0: gap 0.64 mm (closest at 9)
         leg-1 × transfer: gap 0.64 mm (closest at 19)
-        body × leg-7: gap 0.65 mm (closest at 9)
+        body × leg-7: gap 0.66 mm (closest at 9)
         transfer-cheek × transfer-pin: gap 0.67 mm (closest at 0)
+        body × leg-3: gap 0.74 mm (closest at 7)
         transfer × transfer-cheek: gap 0.80 mm (closest at 0)
         motor-u × pinion: gap 0.80 mm (closest at 0)
+        body × leg-1: gap 0.81 mm (closest at 20)
         base × leg-2: gap 0.81 mm (closest at 18)
         base × leg-1: gap 0.82 mm (closest at 7)
         base × leg-4: gap 0.83 mm (closest at 7)
         base × leg-5: gap 0.84 mm (closest at 20)
-        body × leg-3: gap 0.85 mm (closest at 7)
         base × leg-0: gap 0.86 mm (closest at 19)
         base × leg-6: gap 0.86 mm (closest at 5)
-        body × leg-5: gap 0.90 mm (closest at 20)
-        body × leg-1: gap 0.96 mm (closest at 5)
-        body × leg-6: gap 0.97 mm (closest at 11)
+        body × leg-5: gap 0.96 mm (closest at 20)
+        body × leg-6: gap 0.97 mm (closest at 10)
         journal-cap × transfer-pin: gap 0.98 mm (closest at 0)
         axle-1 × crank-1: gap 0.99 mm (closest at 22)
         axle-1 × crank-2: gap 0.99 mm (closest at 2)
@@ -237,10 +237,10 @@ cad_verify: PASS (0 failures, 91 warnings)
   WARN  base: upright feature thinner than Ø4 (0.1 mm² section) from z 17.2 to 23.6 at [45.1, -16.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
   WARN  base: upright feature thinner than Ø4 (0.1 mm² section) from z 24.0 to 26.4 at [-30.3, 35.3] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
   WARN  base: 6604 mm² of overhang needing support, 103 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [-12.1, 32.6, 23.7] in print orientation): open it, split the part, or give the reason in the design review
-  WARN  body: upright feature thinner than Ø4 (0.0 mm² section) from z -23.3 to -20.5 at [-12.2, 45.0] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  body: upright feature thinner than Ø4 (0.0 mm² section) from z -23.3 to -20.5 at [12.2, 45.0] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
   WARN  body: upright feature thinner than Ø4 (0.6 mm² section) from z -28.9 to -25.3 at [25.2, 17.6] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
-  WARN  body: 9317 mm² of overhang needing support, 2339 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [0.3, 22.8, -67.0] in print orientation): open it, split the part, or give the reason in the design review
+  WARN  body: upright feature thinner than Ø4 (0.7 mm² section) from z -28.9 to -25.3 at [-25.2, 17.7] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  body: upright feature thinner than Ø4 (8.2 mm² section) from z -34.9 to -13.7 at [-8.6, 37.8] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
+  WARN  body: 9321 mm² of overhang needing support, 2339 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [0.3, 22.8, -67.0] in print orientation): open it, split the part, or give the reason in the design review
   WARN  leg-0: 394 mm² of overhang needing support, 72 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [58.3, -58.1, 68.0] in print orientation): open it, split the part, or give the reason in the design review
   WARN  leg-1: upright feature thinner than Ø4 (1.8 mm² section) from z 22.8 to 25.2 at [26.1, -11.9] in print orientation: it breaks along the layers; make it Ø4 or more, lay it down, or use a steel pin
   WARN  leg-1: 387 mm² of overhang needing support, 67 mm² of it over the part itself (support standing in a pocket or under a bridge, or printed over air with «On build plate only»; largest near [80.0, -20.6, 68.1] in print orientation): open it, split the part, or give the reason in the design review
@@ -416,113 +416,116 @@ cad_verify: PASS (0 failures, 91 warnings)
   ok    idler-3: no mark feature (any tooth: the cranks' phases are printed in their gears, the idler meshes as it drops in at pose 0)
   ok    transfer: no mark feature (any tooth (meshes idler 2 and the pinion as it goes in))
   ok    pinion: no mark feature (any tooth)
-  WARN  spine: 64.7% of its surface reads 0.01 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
-  WARN  spine: 0.7% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.32, e.g. at [0.1, 7.1, 5.5] (≤ 1%: edges or a few samples; look at it)
-  WARN  crank-1: 12.9% of its surface reads 0.00 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
-  WARN  crank-1: 0.4% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.29, e.g. at [6.2, -26.7, 14.3] (≤ 1%: edges or a few samples; look at it)
-  WARN  crank-2: 13.5% of its surface reads 0.00 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
-  WARN  crank-2: 0.7% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.24, e.g. at [6.5, -12.1, 14.3] (≤ 1%: edges or a few samples; look at it)
-  WARN  crank-3: 13.3% of its surface reads 0.00 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
-  WARN  crank-3: 0.7% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.39, e.g. at [6.6, 6.4, 14.1] (≤ 1%: edges or a few samples; look at it)
-  WARN  crank-4: 13.7% of its surface reads 0.00 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
-  WARN  crank-4: 0.2% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.42, e.g. at [6.2, 25.4, 14.1] (≤ 1%: edges or a few samples; look at it)
+  WARN  spine: 63.6% of its surface reads 0.00 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
+  WARN  spine: 0.6% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.32, e.g. at [0.0, 7.1, 8.1] (≤ 1%: edges or a few samples; look at it)
+  WARN  crank-1: 13.3% of its surface reads 0.00 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
+  WARN  crank-1: 0.5% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.36, e.g. at [6.5, -27.1, 19.8] (≤ 1%: edges or a few samples; look at it)
+  WARN  crank-2: 12.4% of its surface reads 0.00 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
+  WARN  crank-2: 0.4% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.33, e.g. at [6.1, -11.7, 14.2] (≤ 1%: edges or a few samples; look at it)
+  WARN  crank-3: 13.9% of its surface reads 0.02 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
+  WARN  crank-3: 0.7% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.39, e.g. at [6.5, 6.5, 19.9] (≤ 1%: edges or a few samples; look at it)
+  WARN  crank-4: 14.2% of its surface reads 0.03 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
+  WARN  crank-4: 0.6% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.42, e.g. at [6.5, 25.4, 19.9] (≤ 1%: edges or a few samples; look at it)
   ok    idler-1: walls ≥ 2.0 mm outside teeth and marks (thinnest 2.06)
   ok    idler-2: walls ≥ 2.0 mm outside teeth and marks (thinnest 2.06)
   ok    idler-3: walls ≥ 2.0 mm outside teeth and marks (thinnest 2.06)
-  WARN  transfer: 13.9% of its surface reads 0.01 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
+  WARN  transfer: 14.5% of its surface reads 0.01 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
   ok    transfer: walls ≥ 2.0 mm outside teeth and marks (thinnest 1.99)
-  WARN  journal-cap: 58.1% of its surface reads 0.04 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
-  WARN  journal-cap: 0.8% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.37, e.g. at [-6.3, 18.0, 19.2] (≤ 1%: edges or a few samples; look at it)
-  WARN  motor-u: 47.3% of its surface reads 0.02 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
-  WARN  motor-u: 0.4% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.24, e.g. at [-2.9, -5.9, 32.1] (≤ 1%: edges or a few samples; look at it)
-  WARN  transfer-cheek: 76.4% of its surface reads 0.00 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
-  WARN  transfer-cheek: 0.7% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.61, e.g. at [-1.0, -13.6, 54.8] (≤ 1%: edges or a few samples; look at it)
+  WARN  journal-cap: 57.6% of its surface reads 0.04 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
+  WARN  journal-cap: 0.9% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.17, e.g. at [-5.6, 15.8, 17.4] (≤ 1%: edges or a few samples; look at it)
+  WARN  motor-u: 44.9% of its surface reads 0.01 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
+  WARN  motor-u: 0.2% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.24, e.g. at [-3.2, -5.6, 32.1] (≤ 1%: edges or a few samples; look at it)
+  WARN  transfer-cheek: 77.2% of its surface reads 0.00 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
+  WARN  transfer-cheek: 0.6% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 1.61, e.g. at [-1.1, -13.6, 54.1] (≤ 1%: edges or a few samples; look at it)
   ok    pinion: walls ≥ 2.0 mm outside teeth and marks (thinnest 4.22)
         leg-0: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-0: 94.8% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+        leg-0: 95.5% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-0: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-0: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-0: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-0: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-0: 2.3% of its surface excepted from the wall minimum: tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the exact BREP (legs 0 and 3, x A0 + 1.4 .. 2.6, every 30 deg sector but the slit's): min 1.98 (>= WALL_MIN - 0.05)
-        leg-0: 0.4% of its surface excepted from the wall minimum: the slit's outer chamfers (45 deg, SLIT_CHAMFER): inward rays leave through the slit's side face at 1.4-1.9 mm; the wall across is WALL_MIN (exact BREP sections at x A0 + 1.4 .. 2.6, legs 0 and 3: wall min 1.98 all round but the slit)
-        leg-0: 0.5% of its surface excepted from the wall minimum: the snap bead: a deliberate ring SNAP_BW wide on the bore, flexing over the pin tip (fits.PRESS, coupon c1)
-  WARN  leg-0: 23.8% of its surface reads 0.02 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
+        leg-0: 1.9% of its surface excepted from the wall minimum: tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the exact BREP (legs 0 and 3, x A0 + 1.4 .. 2.6, every 30 deg sector but the slit's): min 1.98 (>= WALL_MIN - 0.05)
+        leg-0: 0.3% of its surface excepted from the wall minimum: the slit's outer chamfers (45 deg, SLIT_CHAMFER): inward rays leave through the slit's side face at 1.4-1.9 mm; the wall across is WALL_MIN (exact BREP sections at x A0 + 1.4 .. 2.6, legs 0 and 3: wall min 1.98 all round but the slit)
+        leg-0: 0.3% of its surface excepted from the wall minimum: the snap bead: a deliberate ring SNAP_BW wide on the bore, flexing over the pin tip (fits.PRESS, coupon c1)
+  WARN  leg-0: 24.1% of its surface reads 0.02 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
   ok    leg-0: walls ≥ 2.0 mm outside teeth and marks (thinnest 1.98)
         leg-1: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-1: 95.5% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+        leg-1: 95.6% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-1: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-1: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-1: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-1: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-1: 2.0% of its surface excepted from the wall minimum: tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the exact BREP (legs 0 and 3, x A0 + 1.4 .. 2.6, every 30 deg sector but the slit's): min 1.98 (>= WALL_MIN - 0.05)
+        leg-1: 2.1% of its surface excepted from the wall minimum: tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the exact BREP (legs 0 and 3, x A0 + 1.4 .. 2.6, every 30 deg sector but the slit's): min 1.98 (>= WALL_MIN - 0.05)
         leg-1: 0.4% of its surface excepted from the wall minimum: the slit's outer chamfers (45 deg, SLIT_CHAMFER): inward rays leave through the slit's side face at 1.4-1.9 mm; the wall across is WALL_MIN (exact BREP sections at x A0 + 1.4 .. 2.6, legs 0 and 3: wall min 1.98 all round but the slit)
         leg-1: 0.5% of its surface excepted from the wall minimum: the snap bead: a deliberate ring SNAP_BW wide on the bore, flexing over the pin tip (fits.PRESS, coupon c1)
-  WARN  leg-1: 23.4% of its surface reads 0.03 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
+  WARN  leg-1: 15.3% of its surface reads 0.03 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
   ok    leg-1: walls ≥ 2.0 mm outside teeth and marks (thinnest 1.97)
         leg-2: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-2: 95.6% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+        leg-2: 95.5% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-2: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-2: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-2: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-2: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-2: 1.9% of its surface excepted from the wall minimum: tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the exact BREP (legs 0 and 3, x A0 + 1.4 .. 2.6, every 30 deg sector but the slit's): min 1.98 (>= WALL_MIN - 0.05)
-        leg-2: 0.4% of its surface excepted from the wall minimum: the slit's outer chamfers (45 deg, SLIT_CHAMFER): inward rays leave through the slit's side face at 1.4-1.9 mm; the wall across is WALL_MIN (exact BREP sections at x A0 + 1.4 .. 2.6, legs 0 and 3: wall min 1.98 all round but the slit)
-        leg-2: 0.3% of its surface excepted from the wall minimum: the snap bead: a deliberate ring SNAP_BW wide on the bore, flexing over the pin tip (fits.PRESS, coupon c1)
-  WARN  leg-2: 16.0% of its surface reads 0.05 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
+        leg-2: 2.1% of its surface excepted from the wall minimum: tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the exact BREP (legs 0 and 3, x A0 + 1.4 .. 2.6, every 30 deg sector but the slit's): min 1.98 (>= WALL_MIN - 0.05)
+        leg-2: 0.3% of its surface excepted from the wall minimum: the slit's outer chamfers (45 deg, SLIT_CHAMFER): inward rays leave through the slit's side face at 1.4-1.9 mm; the wall across is WALL_MIN (exact BREP sections at x A0 + 1.4 .. 2.6, legs 0 and 3: wall min 1.98 all round but the slit)
+        leg-2: 0.4% of its surface excepted from the wall minimum: the snap bead: a deliberate ring SNAP_BW wide on the bore, flexing over the pin tip (fits.PRESS, coupon c1)
+  WARN  leg-2: 17.9% of its surface reads 0.05 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
   ok    leg-2: walls ≥ 2.0 mm outside teeth and marks (thinnest 1.95)
         leg-3: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-3: 95.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+        leg-3: 94.5% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-3: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-3: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-3: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-3: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-3: 2.0% of its surface excepted from the wall minimum: tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the exact BREP (legs 0 and 3, x A0 + 1.4 .. 2.6, every 30 deg sector but the slit's): min 1.98 (>= WALL_MIN - 0.05)
-        leg-3: 0.4% of its surface excepted from the wall minimum: the slit's outer chamfers (45 deg, SLIT_CHAMFER): inward rays leave through the slit's side face at 1.4-1.9 mm; the wall across is WALL_MIN (exact BREP sections at x A0 + 1.4 .. 2.6, legs 0 and 3: wall min 1.98 all round but the slit)
-        leg-3: 0.3% of its surface excepted from the wall minimum: the snap bead: a deliberate ring SNAP_BW wide on the bore, flexing over the pin tip (fits.PRESS, coupon c1)
-  WARN  leg-3: 22.2% of its surface reads 0.04 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
-  ok    leg-3: walls ≥ 2.0 mm outside teeth and marks (thinnest 1.96)
-        leg-4: 95.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+        leg-3: 2.3% of its surface excepted from the wall minimum: tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the exact BREP (legs 0 and 3, x A0 + 1.4 .. 2.6, every 30 deg sector but the slit's): min 1.98 (>= WALL_MIN - 0.05)
+        leg-3: 0.5% of its surface excepted from the wall minimum: the slit's outer chamfers (45 deg, SLIT_CHAMFER): inward rays leave through the slit's side face at 1.4-1.9 mm; the wall across is WALL_MIN (exact BREP sections at x A0 + 1.4 .. 2.6, legs 0 and 3: wall min 1.98 all round but the slit)
+        leg-3: 0.4% of its surface excepted from the wall minimum: the snap bead: a deliberate ring SNAP_BW wide on the bore, flexing over the pin tip (fits.PRESS, coupon c1)
+  WARN  leg-3: 19.8% of its surface reads 0.03 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
+  ok    leg-3: walls ≥ 2.0 mm outside teeth and marks (thinnest 1.97)
+        leg-4: 94.8% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-4: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-4: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-4: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-4: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-4: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-4: 2.4% of its surface excepted from the wall minimum: tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the exact BREP (legs 0 and 3, x A0 + 1.4 .. 2.6, every 30 deg sector but the slit's): min 1.98 (>= WALL_MIN - 0.05)
-        leg-4: 0.5% of its surface excepted from the wall minimum: the slit's outer chamfers (45 deg, SLIT_CHAMFER): inward rays leave through the slit's side face at 1.4-1.9 mm; the wall across is WALL_MIN (exact BREP sections at x A0 + 1.4 .. 2.6, legs 0 and 3: wall min 1.98 all round but the slit)
-        leg-4: 0.5% of its surface excepted from the wall minimum: the snap bead: a deliberate ring SNAP_BW wide on the bore, flexing over the pin tip (fits.PRESS, coupon c1)
-  WARN  leg-4: 25.2% of its surface reads 0.03 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
-  ok    leg-4: walls ≥ 2.0 mm outside teeth and marks (thinnest 1.97)
-        leg-5: 95.6% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+        leg-4: 0.4% of its surface excepted from the wall minimum: the slit's outer chamfers (45 deg, SLIT_CHAMFER): inward rays leave through the slit's side face at 1.4-1.9 mm; the wall across is WALL_MIN (exact BREP sections at x A0 + 1.4 .. 2.6, legs 0 and 3: wall min 1.98 all round but the slit)
+        leg-4: 0.4% of its surface excepted from the wall minimum: the snap bead: a deliberate ring SNAP_BW wide on the bore, flexing over the pin tip (fits.PRESS, coupon c1)
+  WARN  leg-4: 23.1% of its surface reads 0.02 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
+  ok    leg-4: walls ≥ 2.0 mm outside teeth and marks (thinnest 1.98)
+        leg-5: 95.5% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-5: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-5: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-5: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-5: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-5: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-5: 2.2% of its surface excepted from the wall minimum: tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the exact BREP (legs 0 and 3, x A0 + 1.4 .. 2.6, every 30 deg sector but the slit's): min 1.98 (>= WALL_MIN - 0.05)
-        leg-5: 0.5% of its surface excepted from the wall minimum: the slit's outer chamfers (45 deg, SLIT_CHAMFER): inward rays leave through the slit's side face at 1.4-1.9 mm; the wall across is WALL_MIN (exact BREP sections at x A0 + 1.4 .. 2.6, legs 0 and 3: wall min 1.98 all round but the slit)
-        leg-5: 0.5% of its surface excepted from the wall minimum: the snap bead: a deliberate ring SNAP_BW wide on the bore, flexing over the pin tip (fits.PRESS, coupon c1)
-  WARN  leg-5: 22.9% of its surface reads 0.03 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
+        leg-5: 2.0% of its surface excepted from the wall minimum: tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the exact BREP (legs 0 and 3, x A0 + 1.4 .. 2.6, every 30 deg sector but the slit's): min 1.98 (>= WALL_MIN - 0.05)
+        leg-5: 0.4% of its surface excepted from the wall minimum: the slit's outer chamfers (45 deg, SLIT_CHAMFER): inward rays leave through the slit's side face at 1.4-1.9 mm; the wall across is WALL_MIN (exact BREP sections at x A0 + 1.4 .. 2.6, legs 0 and 3: wall min 1.98 all round but the slit)
+        leg-5: 0.3% of its surface excepted from the wall minimum: the snap bead: a deliberate ring SNAP_BW wide on the bore, flexing over the pin tip (fits.PRESS, coupon c1)
+  WARN  leg-5: 22.6% of its surface reads 0.03 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
   ok    leg-5: walls ≥ 2.0 mm outside teeth and marks (thinnest 1.97)
-        leg-6: 95.5% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
+        leg-6: 95.3% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-6: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-6: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-6: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-6: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-6: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-6: 2.1% of its surface excepted from the wall minimum: tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the exact BREP (legs 0 and 3, x A0 + 1.4 .. 2.6, every 30 deg sector but the slit's): min 1.98 (>= WALL_MIN - 0.05)
-        leg-6: 0.4% of its surface excepted from the wall minimum: the slit's outer chamfers (45 deg, SLIT_CHAMFER): inward rays leave through the slit's side face at 1.4-1.9 mm; the wall across is WALL_MIN (exact BREP sections at x A0 + 1.4 .. 2.6, legs 0 and 3: wall min 1.98 all round but the slit)
-        leg-6: 0.6% of its surface excepted from the wall minimum: the snap bead: a deliberate ring SNAP_BW wide on the bore, flexing over the pin tip (fits.PRESS, coupon c1)
-  WARN  leg-6: 18.4% of its surface reads 0.04 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
-  ok    leg-6: walls ≥ 2.0 mm outside teeth and marks (thinnest 1.96)
+        leg-6: 2.3% of its surface excepted from the wall minimum: tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the exact BREP (legs 0 and 3, x A0 + 1.4 .. 2.6, every 30 deg sector but the slit's): min 1.98 (>= WALL_MIN - 0.05)
+        leg-6: 0.3% of its surface excepted from the wall minimum: the slit's outer chamfers (45 deg, SLIT_CHAMFER): inward rays leave through the slit's side face at 1.4-1.9 mm; the wall across is WALL_MIN (exact BREP sections at x A0 + 1.4 .. 2.6, legs 0 and 3: wall min 1.98 all round but the slit)
+        leg-6: 0.5% of its surface excepted from the wall minimum: the snap bead: a deliberate ring SNAP_BW wide on the bore, flexing over the pin tip (fits.PRESS, coupon c1)
+  WARN  leg-6: 20.0% of its surface reads 0.03 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
+  ok    leg-6: walls ≥ 2.0 mm outside teeth and marks (thinnest 1.97)
         leg-7: 94.8% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-7: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-7: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-7: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-7: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
         leg-7: 0.0% of its surface excepted from the wall minimum: leg looks outside the joint (jenscolt's shape, printed at 0.70): only the end tube is asked
-        leg-7: 2.2% of its surface excepted from the wall minimum: tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the exact BREP (legs 0 and 3, x A0 + 1.4 .. 2.6, every 30 deg sector but the slit's): min 1.98 (>= WALL_MIN - 0.05)
+        leg-7: 2.3% of its surface excepted from the wall minimum: tube mouth: the outer chamfer edge (rim 1.43 over 0.5 mm) and the neck blend's 0.27 step: sharp edges the inward ray reads as thin; bore-to-outer wall measured on the exact BREP (legs 0 and 3, x A0 + 1.4 .. 2.6, every 30 deg sector but the slit's): min 1.98 (>= WALL_MIN - 0.05)
         leg-7: 0.5% of its surface excepted from the wall minimum: the slit's outer chamfers (45 deg, SLIT_CHAMFER): inward rays leave through the slit's side face at 1.4-1.9 mm; the wall across is WALL_MIN (exact BREP sections at x A0 + 1.4 .. 2.6, legs 0 and 3: wall min 1.98 all round but the slit)
-        leg-7: 0.4% of its surface excepted from the wall minimum: the snap bead: a deliberate ring SNAP_BW wide on the bore, flexing over the pin tip (fits.PRESS, coupon c1)
-  WARN  leg-7: 21.8% of its surface reads 0.03 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
-  ok    leg-7: walls ≥ 2.0 mm outside teeth and marks (thinnest 1.97)
+        leg-7: 0.5% of its surface excepted from the wall minimum: the snap bead: a deliberate ring SNAP_BW wide on the bore, flexing over the pin tip (fits.PRESS, coupon c1)
+  WARN  leg-7: 15.5% of its surface reads 0.03 mm or less under 2.0 mm (within the mesh's chord deviation 0.05: coarse, not counted)
+  WARN  leg-7: 0.9% of its surface (outside teeth and marks) thinner than 2.0 mm, thinnest 0.18, e.g. at [-14.5, 22.3, 16.5] (≤ 1%: edges or a few samples; look at it)
+
+== 14 closed: windows that must be shut
+  ok    body + base: Morante 2026-11-24: the mouth closed at the front: 4429 rays, deepest first hit 13.8 mm behind the outermost (limit 16); 225 rays through seams under 0.4 mm

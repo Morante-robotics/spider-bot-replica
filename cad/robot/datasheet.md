@@ -4,6 +4,37 @@ The robot as it stands (branch `phase3-s1`): status, where each topic lives, the
 the file named next to it. How it got here: [Top-down redesign, phases 1–3](../../build-log/4-looks-first.md#top-down-redesign-phase-1-size-s-10) and
 [the leg ↔ crank joint](../../build-log/4-looks-first.md#top-down-redesign-phase-3-simplify-and-the-leg-joint). What is left: [Open items](../../build-log.md#open-items).
 
+## 0. Where we stopped (2026-11-28, start here)
+
+Pipeline step 10–11 (plates and pre-print review). Done on 2026-11-28 (commit `f523368` and the working tree after it):
+
+- Mouth closed again: at S 1.0 `front_panel()`'s clip box was still the S 0.70 one and the panel came out empty; the
+  box now follows the skin. New `cad_verify` check **14 closed** (`CLOSED` in `verify.py`: body + base over the mouth;
+  seams under `COARSE` are not holes): FAILs on the open body, PASS now.
+- Full check after it: **PASS, 0 FAIL, 92 WARN**, only with `--jobs 1` (the default second process does not finish:
+  «retention, print … did not finish»).
+- Coupons (`cad/coupons/`, 12): c1/c7 lying like the legs, c9 0.40/0.50/0.60, c11 body–base snap, c12 lid lips (its
+  bump was extruded the wrong way, fixed in `_prism_x`). A c13 for the body–base rim was built and dropped: the joint
+  is the snap (c11) with the rim resting on the ledge, so c13 only repeated c8.
+- Plates (`print/README.md`): coupons; red body, red legs 0–3, red legs 4–7; yellow inner; **yellow motor** (pinion,
+  motor-u, transfer-cheek: printed only after the N10 arrives and c2/c10 are measured); blue base. The 0.70 red plate
+  is gone.
+- Pre-print review: **CHANGES**. Done: keel screw M3×5 in `plan.json`, c9 steps, yellow split. Left, both need a
+  design change:
+  1. **Spine**: 3 upright stubs ≈ 2.0 × 2.2 mm, 10.8 mm tall (verify «upright feature thinner than Ø4», z 15–25.8 at
+     [±3.4, 28.4], [−3.4, −31.3]) break along the layers. Lying on a side (`@0,±90,0`) puts 42 % support on the
+     journal slots' inner walls, so the orientation stays slots-up and the stubs must grow (Ø4-equivalent) or go.
+  2. **Base** (`@−90,0,0`, 30 % support): the support touches the front snap ribs, the rim/ledge the body rests on and
+     the back-sheet cup; the other orientations put it in the keel boss pockets.
+
+  Next: one measure-only probe for both (what each stub holds and how far it can grow over the 24 poses; which rib face
+  is the hook's catch face; ledge = resting contact?), ranked options with renders, Morante picks once, one fixer,
+  rebuild, full check (`--jobs 1`), re-slice yellow inner and base. A first probe was stopped before it returned.
+- Workshop kit `kits/02-s1-coupons-and-plates/`: written, not sent to Morante. Before sending: Spanish words
+  (probetas, pata, pasador: not «cupones», «pierna», «pin»), 12 coupons without c13, c9 steps, the yellow split, the
+  spine and base changes, the screws the coupons need (from the order), total 11 h 19 for the robot plates.
+- Not written yet: the build-log entry for 2026-11-28 (mouth, check 14, coupons, plates, review).
+
 ## 1. Scale and minimums
 
 Scale **S 1.0** (`spec.json` `S_start`; Morante: «S 1.0 máximo»): jenscolt's size (225 mm across the legs, not in code). Below 1.0 the
@@ -57,13 +88,13 @@ falling (k 23, 22, …; the cranks turn −15° a pose, `crank_angle`), so the m
 
 ## 5. Check
 
-Last full `cad_verify` (`verify-result.txt`): **PASS, 0 FAIL, 91 WARN** (listed there).
+Last full `cad_verify` (`verify-result.txt`, 2026-11-28, `--jobs 1`): **PASS, 0 FAIL, 92 WARN** (listed there).
 Run from `cad/robot/` with `../../.venv/bin/python`:
 
 | Command | What | Time last recorded |
 |---|---|---|
 | `build.py` | every part into `out/` (watchdog `CAD_BUDGET`) | 41–47 s cold (2026-11-26, before D) |
-| `../../tools/cad_verify.py verify.py --out verify-result.txt --render images/verify` | full | 95 s (2026-11-27) |
+| `../../tools/cad_verify.py verify.py --out verify-result.txt --render images/verify` | full; add `--jobs 1` (the second process does not finish) | ≈ 4 min with `--jobs 1` (2026-11-28) |
 | same with `--smoke [--only <part>]` | rest pose only | seconds (not timed) |
 | same with `--quick --jobs 1` | no wall check, retention at the first step | not timed |
 | `fitcheck/n1.py` | whole robot, 24 poses at 1 mm (41 parts) | 18 s (2026-11-26) |
@@ -82,9 +113,9 @@ A build or check over 60 s is a bug (`tools/timebudget.py`, `CAD_BUDGET` default
 
 - Grams: the check prints volumes only; `plan.json` grams are from volumes × 1.24 and nothing was weighed.
 - Still saying M2: `cad/robot/README.md` (70 %, sleeves,
-  «M2 screws»); `plan.json` and its joint text (keel «M3×6», code is ×5); comments and names in `shells.py`, `drive.py`,
+  «M2 screws»); comments and names in `shells.py`, `drive.py`,
   `power.py`. `hardware.md`, `drive_verify.py` and
   `power_verify.py` are M3 (`hardware.md` as edited in the working tree, not yet committed).
 - `cad/README.md` «Time budget» says 40 s; the rule and `timebudget.py` are 60 s.
 - Optimizer proposals awaiting Morante: the fork failure in `--quick`, a stale-STL guard, one motion import.
-- Not on a coupon: `PRESS` snap, `GEAR_TIP`, motor D-shaft and seat (`DSHAFT`, `MOTOR_SEAT`); the motor is not bought.
+- On coupons, not printed yet: `PRESS` (c1, c11, c12), `GEAR_TIP` (c3), `DSHAFT` and `MOTOR_SEAT` (c10, c2: need the motor, not bought).

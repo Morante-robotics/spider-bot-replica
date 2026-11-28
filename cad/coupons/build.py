@@ -285,7 +285,7 @@ def c8_neighbour():
 
 
 # ---------------------------------------------------------------- c9: open-top window
-WIN_STEPS = [0.30, F.LEG_OPEN.side, F.LEG_PATH.side]
+WIN_STEPS = [F.LEG_PATH.side - 0.10, F.LEG_PATH.side, F.LEG_PATH.side + 0.10]   # the robot's value (0.5) in the middle: a «0.5 rubs» result has a step above it
 BAR_W = 2 * W                                                          # stand-in for the leg's neck: a 4 mm strip
 
 

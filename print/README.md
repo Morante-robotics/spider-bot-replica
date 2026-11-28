@@ -14,7 +14,8 @@ settings; the orientation of each part was chosen by slicing the candidates and 
 | [`robot-red-body.3mf`](robot-red-body.3mf) | body, roof on the bed (`@180,0,0`), with the front panel | 3 h 20 min | 78.2 g | 6.7 g (9 %) |
 | [`robot-red-legs-0-3.3mf`](robot-red-legs-0-3.3mf) | legs 0, 1 (`@90,0,0`), 2, 3 (`@-90,0,0`), lying on their side | 2 h 39 min | 48.4 g | 8.5 g (21 %) |
 | [`robot-red-legs-4-7.3mf`](robot-red-legs-4-7.3mf) | legs 4-7, same orientations | 2 h 39 min | 48.5 g | 8.6 g (21 %) |
-| [`robot-yellow-inner.3mf`](robot-yellow-inner.3mf) | spine, cranks 1-4 (`@90,0,0`), idlers, transfer, pinion, journal cap, motor U, transfer cheek, cell holder, lid | 1 h 31 min | 26.0 g | 2.3 g (10 %) |
+| [`robot-yellow-inner.3mf`](robot-yellow-inner.3mf) | spine (as modelled, slots up), cranks 1-4 (`@90,0,0`), idlers 1-3 and transfer (`@0,90,0`), journal cap, cell holder, lid (`@180,0,0`) | 1 h 18 min | 21.6 g | 2.6 g (13 %) |
+| [`robot-yellow-motor.3mf`](robot-yellow-motor.3mf) | motor U (`@0,-90,0`), pinion (`@0,90,0`), transfer cheek (`@180,0,0`); print after the N10 arrives and coupons c2 / c10 are measured | 17 min | 4.8 g | 0 g (0 %) |
 | [`robot-blue-base.3mf`](robot-blue-base.3mf) | base (`@-90,0,0`, on its side) | 1 h 10 min | 23.3 g | 5.3 g (30 %) |
 
 The leg's end tube and the crank pin print with their axis horizontal (the leg and the crank lie on their side).
@@ -23,7 +24,7 @@ The leg's end tube and the crank pin print with their axis horizontal (the leg a
 
 | Plate | Parts | Time | PLA | Support |
 |---|---|---|---|---|
-| [`coupons.3mf`](coupons.3mf) | the 12 fit coupons of [`cad/coupons`](../cad/coupons/) as modelled (no rotation, arranged by the tool): c1 / c7 tubes lie horizontal, c11 / c12 flat | 1 h 12 min | 26.6 g | 0.07 g (c5 only) |
+| [`coupons.3mf`](coupons.3mf) | the 12 fit coupons (c1-c12, c9 re-modelled) of [`cad/coupons`](../cad/coupons/) as modelled (no rotation, arranged by the tool): c1 / c7 tubes lie horizontal, c11 / c12 flat | 1 h 12 min | 26.6 g | 0.07 g (c5 only) |
 
 Remake: `uv run python tools/bambu_plate.py print/coupons.3mf cad/coupons/out/c*-*.stl --standard`
 
