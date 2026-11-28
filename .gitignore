@@ -44,3 +44,5 @@ cad/robot/fitcheck/out/
 # Whole robot: shells' STL/STEP, stage caches and the assembled reference (private) are rebuilt by build.py
 cad/robot/out/
 out/build-times.csv
+# Coupons: generated; the plate print/coupons.3mf carries the meshes
+cad/coupons/out/

@@ -3,37 +3,29 @@
 Bambu Studio projects (.3mf), ready to print on the Bambu Lab P2S (0.4 mm nozzle, Textured PEI plate, Bambu PLA
 Basic, 0.20 mm Standard). Open one in Bambu Studio, check it and send it: **Slice plate** → **Print plate**.
 
-## Robot plates (one per colour)
+## Robot plates (S 1.0, one per colour)
 
-The whole robot ([`cad/robot`](../cad/robot/), round r00) split by filament colour: red body and legs, yellow inner
-mechanisms, blue base.
+The robot of [`cad/robot`](../cad/robot/) (S 1.0, branch `phase3-s1`) by filament colour: red body and legs, yellow inner
+mechanisms, blue base. Every part is a separate object. Support is tree(auto), on the build plate only, standard
+settings; the orientation of each part was chosen by slicing the candidates and keeping the least support.
 
-<table>
-<tr>
-<td width="33%"><img src="images/robot-red.png" alt="Red plate: body and eight legs"></td>
-<td width="33%"><img src="images/robot-yellow-inner.png" alt="Yellow plate: the inner parts"></td>
-<td width="33%"><img src="images/robot-blue-base.png" alt="Blue plate: the base"></td>
-</tr>
-</table>
+| Plate | Parts (orientation `@rx,ry,rz`) | Time | PLA | Support |
+|---|---|---|---|---|
+| [`robot-red-body.3mf`](robot-red-body.3mf) | body, roof on the bed (`@180,0,0`), with the front panel | 3 h 20 min | 78.2 g | 6.7 g (9 %) |
+| [`robot-red-legs-0-3.3mf`](robot-red-legs-0-3.3mf) | legs 0, 1 (`@90,0,0`), 2, 3 (`@-90,0,0`), lying on their side | 2 h 39 min | 48.4 g | 8.5 g (21 %) |
+| [`robot-red-legs-4-7.3mf`](robot-red-legs-4-7.3mf) | legs 4-7, same orientations | 2 h 39 min | 48.5 g | 8.6 g (21 %) |
+| [`robot-yellow-inner.3mf`](robot-yellow-inner.3mf) | spine, cranks 1-4 (`@90,0,0`), idlers, transfer, pinion, journal cap, motor U, transfer cheek, cell holder, lid | 1 h 31 min | 26.0 g | 2.3 g (10 %) |
+| [`robot-blue-base.3mf`](robot-blue-base.3mf) | base (`@-90,0,0`, on its side) | 1 h 10 min | 23.3 g | 5.3 g (30 %) |
 
-*The three plates, labelled by part and drawn in green; the colours are chosen in Bambu Studio.*
+The leg's end tube and the crank pin print with their axis horizontal (the leg and the crank lie on their side).
 
-| Plate | Parts | Time | PLA |
-|---|---|---|---|
-| [`robot-red.3mf`](robot-red.3mf) | The body and legs 0–7 (legs 4–7 mirrored) | 5 h 11 min | 86.3 g |
-| [`robot-yellow-inner.3mf`](robot-yellow-inner.3mf) | Spine, cranks 1–4, idlers 1–3 and their sleeves, transfer gear and its sleeve, drive unit, pinion, cell holder and lid | 1 h 14 min | 14.5 g |
-| [`robot-blue-base.3mf`](robot-blue-base.3mf) | The base, foot down | 52 min | 8.0 g |
+## Coupon plate
 
-Every part is a separate object: in Bambu Studio delete the ones you do not want before slicing.
+| Plate | Parts | Time | PLA | Support |
+|---|---|---|---|---|
+| [`coupons.3mf`](coupons.3mf) | the 12 fit coupons of [`cad/coupons`](../cad/coupons/) as modelled (no rotation, arranged by the tool): c1 / c7 tubes lie horizontal, c11 / c12 flat | 1 h 12 min | 26.6 g | 0.07 g (c5 only) |
 
-**Print order.** Batch 1 (≈ 2 h 35 min) is the test: the blue and yellow plates whole and only leg 3 from the red
-one (named `leg-3-7.stl`), to check that the leg snaps onto its crank pin and that the M2 screws bite in their
-pilot holes. Batch 2 (≈ 5 h) is the rest of the red plate, once leg 3 snaps well. Why: [Print plates by
-colour](../build-log/4-looks-first.md#print-plates-by-colour).
-
-Support is tree(auto), on the build plate only. The marks are on faces that do not work and get sanded. The parts
-with the most support for their weight are the cranks (about 140 %), the base (outside the bowl), the drive unit,
-the transfer gear and the spine.
+Remake: `uv run python tools/bambu_plate.py print/coupons.3mf cad/coupons/out/c*-*.stl --standard`
 
 ## Standard settings
 

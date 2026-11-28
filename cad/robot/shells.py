@@ -411,7 +411,10 @@ def front_panel(b0):
     strip = extrude(Plane.XY.offset(zl) * Polygon(*(outer + inner), align=None), zh - zl)
     bt = lambda x: float(np.interp(abs(x), [a for a, _ in PANEL_BASE_TOP], [b for _, b in PANEL_BASE_TOP])) + PANEL_GAP
     top = [(x, ell(x - cx, PANEL_M)) for x in xs[::-1]]
-    reg = extrude(Plane.XZ.offset(15) * Polygon(*([(x, bt(x)) for x in xs] + top), align=None), 30)
+    # the region spans the strip's own y (it was a fixed y -15..-45 from S 0.70: at S 1.0 the skin is at -50..-55 and
+    # the panel came out empty, mouth open again; Morante saw it in the viewer 2026-11-28)
+    ry0, ry1 = float(yo.min()) - 1.0, float(yo.max()) + PANEL_T + 1.0
+    reg = extrude(Plane.XZ.offset(-ry1) * Polygon(*([(x, bt(x)) for x in xs] + top), align=None), ry1 - ry0)
     return strip & reg
 _T0 = [0.0]
 def tick(msg):
@@ -511,8 +514,8 @@ def body_static():
     keeper = [Pos(-xk - W_KEEP, yk, zt) * Box(2 * (xk + W_KEEP), yr - yk, W_KEEP, align=MIN)]       # top bar from the switch's front face back
     # (it overhung the front by W_KEEP: the fingertip that pushes the switch in touched it, verify 2026-11-23)
     keeper += [Pos(sx * (xk + W_KEEP / 2) - W_KEEP / 2, yk - W_KEEP, zb) * Box(W_KEEP, yr - yk + W_KEEP, zt - zb, align=MIN) for sx in (-1, 1)]
-    adds = cups + [finger_root(f) for _, f, _ in snap_geometry()] + keeper + [front_panel(b0)]
-    b = b0.fuse(*adds)
+    adds = cups + [finger_root(f) for _, f, _ in snap_geometry()] + keeper
+    b = b0.fuse(front_panel(b0), tol=0.005).fuse(*adds)          # the panel first, fuzzy 0.005: its face (0.15 off the skin) crosses the skin at the arch apex and left a 0.02 mm2 face the mesher could not triangulate
     tw, ty0, ty1, tz = BO.TAB; ty = (ty0 - ORIGIN[1]) * S; dp, hx, z0, z1 = PKT
     cuts = [Pos(0, ty - 1.0, z0 - 0.5) * Box(2 * hx + 1.0, dp + 1.0, z1 - z0 + 1.0, align=(Align.CENTER, Align.MIN, Align.MIN)), pocket_keepout()]
     for sx in (-1, 1):

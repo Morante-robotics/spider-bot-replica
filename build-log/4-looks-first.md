@@ -338,8 +338,8 @@ Support is tree(auto), on the build plate only.
 
 <table>
 <tr>
-<td width="33%"><img src="../print/images/robot-red.png" alt="Red plate: body and eight legs"></td>
-<td width="33%"><img src="../print/images/robot-yellow-inner.png" alt="Yellow plate: 17 inner parts"></td>
+<td width="33%"><img src="https://raw.githubusercontent.com/Morante-robotics/spider-bot-replica/7ed087a/print/images/robot-red.png" alt="Red plate: body and eight legs"></td>
+<td width="33%"><img src="https://raw.githubusercontent.com/Morante-robotics/spider-bot-replica/7ed087a/print/images/robot-yellow-inner.png" alt="Yellow plate: 17 inner parts"></td>
 <td width="33%"><img src="../print/images/robot-blue-base.png" alt="Blue plate: the base"></td>
 </tr>
 <tr>
@@ -353,9 +353,9 @@ Support is tree(auto), on the build plate only.
 
 | Plate | Parts | Time | PLA | Support |
 |---|---|---|---|---|
-| [`robot-red.3mf`](../print/robot-red.3mf) | body and legs 0–7 (legs 4–7 mirrored) | 5 h 25 min | 86.81 g | 13.35 g (18 %) |
-| [`robot-yellow-inner.3mf`](../print/robot-yellow-inner.3mf) | spine, cranks 1–4, idlers 1–3, sleeves 1–3, transfer gear and sleeve, drive unit, pinion, cell holder, cell lid | 1 h 16 min | 14.27 g | 4.17 g (41 %) |
-| [`robot-blue-base.3mf`](../print/robot-blue-base.3mf) | base, foot down | 52 min | 8.02 g | 4.24 g (112 %, outside the bowl) |
+| [`robot-red.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/7ed087a/print/robot-red.3mf) | body and legs 0–7 (legs 4–7 mirrored) | 5 h 25 min | 86.81 g | 13.35 g (18 %) |
+| [`robot-yellow-inner.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/7ed087a/print/robot-yellow-inner.3mf) | spine, cranks 1–4, idlers 1–3, sleeves 1–3, transfer gear and sleeve, drive unit, pinion, cell holder, cell lid | 1 h 16 min | 14.27 g | 4.17 g (41 %) |
+| [`robot-blue-base.3mf`](https://github.com/Morante-robotics/spider-bot-replica/blob/7ed087a/print/robot-blue-base.3mf) | base, foot down | 52 min | 8.02 g | 4.24 g (112 %, outside the bowl) |
 
 Leg 3 alone is 26 min 33 s and 6.48 g; Bambu Studio names it `leg-3-7.stl` (a suffix from the tool). Support over
 30 % of the part's weight is on the base, the cranks (about 140 %), the drive unit (66 %), the transfer gear (46 %)

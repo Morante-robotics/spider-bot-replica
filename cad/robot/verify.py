@@ -157,3 +157,9 @@ def _leg_except():
     return out
 MINIMUMS = dict(MINIMUMS or {"module": 1.0, "mark": 3.0}, parts=list((MINIMUMS or {}).get("parts", [])) + LEGS, wall=fits.WALL_MIN,
                 **{"except": list((MINIMUMS or {}).get("except", [])) + _leg_except()})
+
+# the mouth is closed at the front by the panel (shells.front_panel): rays +y over the panel's x, from the base's front-wall top to the arch top
+_PZ0 = min(b for _, b in SH.PANEL_BASE_TOP) - 2.0                # 2 mm into the base's front wall: the panel's seam to the base is checked too
+_PZ1 = SH.RIMR + SH.BO.CHIN[1] * SH.S
+CLOSED = [{"part": ["body", "base"], "dir": [0, 1, 0], "window": (-SH.PANEL_XW, SH.PANEL_XW, _PZ0, _PZ1), "max_depth": 16.0, "max_step": 2.0,   # the skin falls 14.6 mm back by |x| 25.7 (rounded front); an open mouth steps 10+ mm and misses
+           "why": "Morante 2026-11-24: the mouth closed at the front"}]

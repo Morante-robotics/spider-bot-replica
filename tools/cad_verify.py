@@ -37,6 +37,10 @@ one is at every step of the motion, and what is allowed. The tool then runs eigh
  13. minimums     on the MINIMUMS parts, what a 0.4 nozzle prints (Batch 1, 2026-11-24): every gear's module read
                   from its mesh ≥ module, walls (ray thickness outside teeth and marks) ≥ wall, every mark cutter cut
                   from its part with each body ≥ mark long
+ 14. closed       every window in CLOSED is shut: rays cast along its direction over the window (0.5 mm grid, the part
+                  at rest) must all hit the part, and the first hit must lie within max_depth of the part's outermost
+                  hit in that window (Morante 2026-11-24: the mouth closed at the front; a panel came out empty and
+                  nothing said so)
 
 Two classes of tolerance (Morante, 2026-11-23: «ignorar cualquier cosa por debajo de 0.4 mm dada la boquilla»):
   * fits: pairs where a part moves (over MOTION), GEARS, JOINTS, PAIR_GAP pairs, retention, seats, assembly paths:
@@ -103,6 +107,10 @@ Spec file (all names optional except PARTS and poses):
     COARSE = 0.4                              # mm: tolerance of the coarse class (see «Two classes» above)
     MINIMUMS = {"parts": ["shaft", "idler"], "module": 1.0, "wall": 2.0, "mark": 3.0, "wall_frac": 0.01,
                 "except": [{"part": "idler", "box": ((x0, y0, z0), (x1, y1, z1)), "why": "snap finger: flexes"}]}
+    CLOSED = [{"part": "body", "dir": [0, 1, 0], "window": (x0, x1, z0, z1), "max_depth": 4.2, "max_step": 2.0,
+               "why": "mouth closed"}]              # max_step optional: for a skin that curves away deeper than any hole's edge
+                                              # window: the two axes across `dir`, in order (x, z for dir y; x, y for
+                                              # dir z; y, z for dir x), each as (min, max)
     GEAR_GEOM = [{"part": "shaft", "origin": [0, 0, 0], "axis": [1, 0, 0], "width": 3.0, "teeth": 12}]
                                               # origin: on the gear's axis at its mid-face, the part's STL frame
     MARK_GEOM = {"shaft": "out/shaft-marks.stl", "idler": None}   # the engraving's cutter (mesh or STL path), or
@@ -1446,6 +1454,89 @@ def _mark_mesh(v):
     return trimesh.load(os.path.join(os.path.dirname(SPEC_PATH or "."), v), force="mesh")
 
 
+def check_closed(spec, meshes, rep, only=None):
+    """CLOSED: a window the part (or the parts listed, together) must shut. Rays along `dir` over the window on a 0.5 mm grid, from outside the
+    part (the part at MOTION[0]); a ray that misses it, or whose first hit is deeper than `max_depth` behind the
+    outermost hit of the window (something behind an open hole, not the surface), is a FAIL. A curved skin falls away
+    from its outermost point by more than a hole's depth near the window's edge; the optional `max_step` then
+    catches the hole instead: a first hit more than max_step deeper or shallower than a neighbouring ray's (0.5 mm
+    away) is an edge of a hole. Reports the count and the worst point."""
+    cl = getattr(spec, "CLOSED", [])
+    if not cl:
+        return
+    rep.head("14 closed: windows that must be shut")
+    motion = list(getattr(spec, "MOTION", [0]))
+    pose = spec.poses(motion[0]) if hasattr(spec, "poses") else {}
+    for e in cl:
+        pns = [e["part"]] if isinstance(e["part"], str) else list(e["part"])   # one part, or several that shut it together
+        if any(n not in spec.PARTS for n in pns) or not involves(only, *pns):
+            continue
+        pn = " + ".join(pns)
+        ms = [meshes[n].copy() for n in pns]
+        for n, mm in zip(pns, ms):
+            mm.apply_transform(np.asarray(pose.get(n, np.eye(4)), float))
+        m = trimesh.util.concatenate(ms)
+        d = np.asarray(e["dir"], float); d /= np.linalg.norm(d)
+        ax = int(np.argmax(np.abs(d))); sg = 1.0 if d[ax] > 0 else -1.0
+        oth = [i for i in range(3) if i != ax]            # window axes, in index order (x, y, z minus the ray's)
+        a0, a1, b0, b1 = e["window"]
+        ga, gb = np.meshgrid(np.arange(a0, a1 + 1e-9, 0.5), np.arange(b0, b1 + 1e-9, 0.5), indexing="ij")
+        ga, gb = ga.ravel(), gb.ravel()
+        org = np.zeros((len(ga), 3)); org[:, oth[0]] = ga; org[:, oth[1]] = gb
+        org[:, ax] = m.bounds[0 if sg > 0 else 1][ax] - sg * 5.0
+        locs, ri, _ = m.ray.intersects_location(org, np.tile(d, (len(ga), 1)), multiple_hits=True)
+        first = np.full(len(ga), np.nan)                  # distance along dir to the first hit
+        for p, r in zip(locs, ri):
+            t = (p[ax] - org[r, ax]) * sg
+            if np.isnan(first[r]) or t < first[r]:
+                first[r] = t
+        miss = np.isnan(first)
+        if miss.all():
+            rep.fail(f"{pn}: {e['why']}: every ray of the window misses the part"); continue
+        t0 = np.nanmin(first); depth = first - t0
+        bad = miss | (np.nan_to_num(depth, nan=1e9) > e["max_depth"])
+        if e.get("max_step") is not None:
+            g = first.reshape(len(np.unique(ga)), -1)
+            st = np.zeros(g.shape, bool)
+            for ax_ in (0, 1):
+                dd = np.abs(np.diff(g, axis=ax_)) > e["max_step"]
+                hi = [slice(None)] * 2; lo = [slice(None)] * 2; hi[ax_] = slice(1, None); lo[ax_] = slice(0, -1)
+                st[tuple(hi)] |= dd; st[tuple(lo)] |= dd
+            bad |= st.ravel()
+        # a seam narrower than COARSE (a 0.2 mm gap between two parts) lets single rays through: a bad ray is in a gap
+        # under the nozzle, not a hole, when along one window axis the surface is found on both sides of it (0.05 mm
+        # steps) less than COARSE apart
+        def _ok(o):
+            l, r_, _ = m.ray.intersects_location(o, np.tile(d, (len(o), 1)), multiple_hits=False)
+            t = np.full(len(o), np.nan); t[r_] = (l[:, ax] - o[r_, ax]) * sg
+            return ~np.isnan(t) & (np.nan_to_num(t - t0, nan=1e9) <= e["max_depth"])
+        ib = np.flatnonzero(bad)
+        if len(ib):
+            seam = np.zeros(len(ib), bool); hs = np.arange(0.05, COARSE + 1e-9, 0.05)
+            for k in oth:
+                dist = {}
+                for sgn in (-1, 1):
+                    dk = np.full(len(ib), np.inf)
+                    for h in hs:
+                        o = org[ib].copy(); o[:, k] += sgn * h
+                        dk = np.where(np.isinf(dk) & _ok(o), h, dk)
+                    dist[sgn] = dk
+                seam |= dist[-1] + dist[1] < COARSE + 1e-9
+            bad[ib[seam]] = False
+            miss = miss & bad
+        nseam = int(len(ib) - bad[ib].sum()) if len(ib) else 0
+        if nseam:
+            depth = depth.copy(); depth[ib[~bad[ib]]] = np.nan          # rays in a sub-nozzle seam: not the surface
+        w = int(np.argmax(np.where(miss, 1e9, np.where(bad, depth, -1))))
+        wp = (round(float(ga[w]), 1), round(float(gb[w]), 1))
+        if bad.any():
+            rep.fail(f"{pn}: {e['why']}: {int(bad.sum())} of {len(ga)} rays miss the part or first hit it more than "
+                     f"{e['max_depth']:g} mm behind the outermost hit; worst at {wp} ({'no hit' if miss[w] else f'{depth[w]:.1f} mm'})")
+        else:
+            sm = f"; {nseam} rays through seams under {COARSE:g} mm" if nseam else ""
+            rep.ok(f"{pn}: {e['why']}: {len(ga)} rays, deepest first hit {np.nanmax(depth):.1f} mm behind the outermost (limit {e['max_depth']:g}){sm}")
+
+
 def check_minimums(spec, meshes, rep, only=None):
     """MINIMUMS: the smallest features a 0.4 mm nozzle prints well, on the parts listed (Batch 1, 2026-11-24: module
     0.6 teeth came out wrong, 1.2 walls snapped when touched, Ø0.7 dots could not be seen). Three readings, all from
@@ -1741,7 +1832,8 @@ def run_checks(spec, meshes, rep, args, only):
                 ("seats", lambda r: check_seats(spec, meshes, r, only)),
                 ("keep-in", lambda r: check_keep_in(spec, meshes, r, only)),
                 ("marks", lambda r: check_marks(spec, r, only)),
-                ("minimums", lambda r: check_minimums(spec, meshes, r, only))]
+                ("minimums", lambda r: check_minimums(spec, meshes, r, only)),
+                ("closed", lambda r: check_closed(spec, meshes, r, only))]
     sections = [(lb, fn) for lb, fn in sections if fn is not None]
 
     def run(names):
